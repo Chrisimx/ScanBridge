@@ -17,6 +17,7 @@ materialIcons = "1.7.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core" , version.ref = "materialIcons"}
 esclkt = { module = "io.github.chrisimx:esclkt", version.ref = "esclkt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

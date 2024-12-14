@@ -22,6 +22,7 @@ package io.github.chrisimx.scanbridge
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.nsd.NsdManager
 import android.os.Bundle
 import android.util.Log
@@ -133,6 +134,11 @@ class MainActivity : ComponentActivity() {
         scannerDiscoveryPair?.first?.stopServiceDiscovery(scannerDiscoveryPair?.second)
         super.onDestroy()
     }
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Changing the theme doesn't recreate the activity, so set the E2E values again
+        enableEdgeToEdge()
+    }
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -145,7 +151,8 @@ fun ScannerDiscoveryTopBar() {
 fun ScanBrowser(innerPadding: PaddingValues, statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>) {
     if (statefulScannerMap.isNotEmpty()) {
         LazyColumn (
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -162,7 +169,10 @@ fun ScanBrowser(innerPadding: PaddingValues, statefulScannerMap: SnapshotStateMa
             }
         }
     } else {
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 40.dp),
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .padding(horizontal = 40.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
