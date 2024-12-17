@@ -9,11 +9,11 @@ espressoCore = "3.6.1"
 kotlinReflect = "1.9.24"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
-composeBom = "2024.11.00"
+composeBom = "2024.12.01"
 okhttp = "4.12.0"
 zoomable = "0.14.0"
-material3 = "1.4.0-alpha04"
-materialIcons = "1.7.5"
+material3 = "1.4.0-alpha05"
+materialIcons = "1.7.6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
