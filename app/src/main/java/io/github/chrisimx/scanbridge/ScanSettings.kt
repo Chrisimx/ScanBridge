@@ -222,7 +222,10 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsViewModel: ScanSettingsViewMo
                     },
                     selected = scanSettingsUIState.scanSettingsState.xResolution == discreteResolution.xResolution && scanSettingsUIState.scanSettingsState.yResolution == discreteResolution.yResolution
                 ) {
-                    Text("${discreteResolution.xResolution}x${discreteResolution.yResolution}")
+                    if (discreteResolution.xResolution == discreteResolution.yResolution)
+                        Text("${discreteResolution.xResolution}")
+                    else
+                        Text("${discreteResolution.xResolution}x${discreteResolution.yResolution}")
                 }
             }
         }
