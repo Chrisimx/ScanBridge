@@ -117,10 +117,10 @@ class MainActivity : ComponentActivity() {
         }
 
         thread {
-            val service = getSystemService(this, NsdManager::class.java);
+            val service = getSystemService(this, NsdManager::class.java)
             if (service == null) {
                 Log.e("ScannerDiscovery", "Couldn't get NsdManager service")
-                return@thread;
+                return@thread
             }
             val listener = ScannerDiscovery(service, statefulScannerMap)
             service.discoverServices("_uscan._tcp", NsdManager.PROTOCOL_DNS_SD,listener )
