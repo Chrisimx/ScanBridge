@@ -20,6 +20,7 @@
 package io.github.chrisimx.scanbridge
 
 import android.content.Context
+import android.icu.text.DecimalFormat
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -32,11 +33,15 @@ import io.github.chrisimx.esclkt.ColorMode
 import io.github.chrisimx.esclkt.ContentType
 import io.github.chrisimx.esclkt.FeedDirection
 import io.github.chrisimx.esclkt.InputSource
+import io.github.chrisimx.esclkt.InputSourceCaps
 import io.github.chrisimx.esclkt.JobState
+import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.ScanIntentData
+import io.github.chrisimx.esclkt.ScanRegion
+import io.github.chrisimx.esclkt.ScanRegions
+import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
-import java.math.BigDecimal
-import kotlin.math.roundToInt
+import io.github.chrisimx.esclkt.millimeters
 
 fun JobState?.toJobStateString(context: Context): String {
     return when (this) {
@@ -48,24 +53,8 @@ fun JobState?.toJobStateString(context: Context): String {
         null -> context.getString(R.string.job_state_cannot_be_retrieved)
     }
 }
-fun Double.mmToThreeHundredthsOfInch(): UInt {
-    return (this / (25.4) / (1.0/300.0)).roundToInt().toUInt()
-}
-fun Double.threeHundredthsOfInchToMM(): Double {
-    return (this * (1.0/300.0) * (25.4))
-}
-fun UInt.mmToThreeHundredthsOfInch(): UInt {
-    return (this.toDouble() / (25.4) / (1.0/300.0)).roundToInt().toUInt()
-}
-fun UInt.threeHundredthsOfInchToMM(): Double {
-    return (this.toDouble() * (1.0/300.0) * (25.4))
-}
-fun BigDecimal.mmToThreeHundredthsOfInch(): UInt {
-    return this.divide(BigDecimal("25.4")).multiply(BigDecimal(300)).toInt().toUInt()
-}
-fun BigDecimal.threeHundredthsOfInchToMM(): BigDecimal {
-    return this.divide(BigDecimal(300)).multiply(BigDecimal("25.4"))
-}
+
+fun String.toDoubleLocalized(): Double = DecimalFormat.getInstance().parse(this).toDouble()
 
 data class MutableScanRegionState(
     // These are to be given in millimeters!
@@ -82,6 +71,9 @@ data class MutableScanRegionState(
     fun toImmutable(): ImmutableScanRegionState {
         return ImmutableScanRegionState(heightState, widthState, xOffsetState, yOffsetState)
     }
+    fun toESCLScanRegion(selectedInputSourceCaps: InputSourceCaps): ScanRegion {
+        return toImmutable().toESCLScanRegion(selectedInputSourceCaps)
+    }
 }
 
 data class ImmutableScanRegionState(
@@ -95,6 +87,24 @@ data class ImmutableScanRegionState(
     val width by widthState
     val xOffset by xOffsetState
     val yOffset by yOffsetState
+
+    fun toESCLScanRegion(selectedInputSourceCaps: InputSourceCaps): ScanRegion {
+        val height: LengthUnit = when (height) {
+            "max" -> selectedInputSourceCaps.maxHeight
+            else -> height.toDoubleLocalized().millimeters()
+        }
+        val width: LengthUnit = when (width) {
+            "max" -> selectedInputSourceCaps.maxWidth
+            else -> width.toDoubleLocalized().millimeters()
+        }
+
+        return ScanRegion(
+            height.toThreeHundredthsOfInch(),
+            width.toThreeHundredthsOfInch(),
+            xOffset.toDoubleLocalized().millimeters().toThreeHundredthsOfInch(),
+            yOffset.toDoubleLocalized().millimeters().toThreeHundredthsOfInch()
+        )
+    }
 }
 
 fun ScannerCapabilities.getInputSourceOptions(): List<Pair<String, InputSource>> {
@@ -203,6 +213,9 @@ data class MutableESCLScanSettingsState(
             blankPageDetectionAndRemovalState
         )
     }
+    fun toESCLKtScanSettings(selectedInputSourceCaps: InputSourceCaps): ScanSettings {
+        return toImmutable().toESCLKtScanSettings(selectedInputSourceCaps)
+    }
 }
 
 data class ImmutableESCLScanSettingsState(
@@ -264,4 +277,42 @@ data class ImmutableESCLScanSettingsState(
     val blankPageDetection by blankPageDetectionState
     val feedDirection by feedDirectionState
     val blankPageDetectionAndRemoval by blankPageDetectionAndRemovalState
+
+    fun toESCLKtScanSettings(selectedInputSourceCaps: InputSourceCaps): ScanSettings {
+        val scanRegionsESCL = if (scanRegions != null) {
+            listOf(scanRegions!!.toESCLScanRegion(selectedInputSourceCaps))
+        } else {
+            emptyList()
+        }
+        return ScanSettings(
+            version = version,
+            intent = intent,
+            scanRegions = ScanRegions(scanRegionsESCL),
+            documentFormatExt = documentFormatExt,
+            contentType = contentType,
+            inputSource = inputSource,
+            xResolution = xResolution,
+            yResolution = yResolution,
+            colorMode = colorMode,
+            colorSpace = colorSpace,
+            mediaType = mediaType,
+            ccdChannel = ccdChannel,
+            binaryRendering = binaryRendering,
+            duplex = duplex,
+            numberOfPages = numberOfPages,
+            brightness = brightness,
+            compressionFactor = compressionFactor,
+            contrast = contrast,
+            gamma = gamma,
+            highlight = highlight,
+            noiseRemoval = noiseRemoval,
+            shadow = shadow,
+            sharpen = sharpen,
+            threshold = threshold,
+            contextID = contextID,
+            blankPageDetection = blankPageDetection,
+            feedDirection = feedDirection,
+            blankPageDetectionAndRemoval = blankPageDetectionAndRemoval
+        )
+    }
 }
