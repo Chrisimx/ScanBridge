@@ -1,6 +1,6 @@
 [versions]
 agp = "8.7.3"
-esclkt = "1.1.0"
+esclkt = "1.2.0"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
