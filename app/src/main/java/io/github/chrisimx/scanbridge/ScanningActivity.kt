@@ -57,7 +57,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -66,6 +65,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -98,21 +98,28 @@ import kotlin.uuid.Uuid
 data class ScanningActivityData(
     val scanSettingsVM: ScanSettingsViewModel,
     val capabilities: ScannerCapabilities,
-    val scanSettingsMenuOpen: MutableState<Boolean> = mutableStateOf(false)
+    val scanSettingsMenuOpen: MutableState<Boolean> = mutableStateOf(false),
+    val scanJobRunning: MutableState<Boolean> = mutableStateOf(false),
+    val stateCurrentScans: SnapshotStateList<String> = mutableStateListOf()
 ) {
     fun toImmutable() = ImmutableScanningActivityData(
         scanSettingsVM,
         capabilities,
-        scanSettingsMenuOpen
+        scanSettingsMenuOpen,
+        scanJobRunning,
+        stateCurrentScans
     )
 }
 
 data class ImmutableScanningActivityData(
     val scanSettingsVM: ScanSettingsViewModel,
     val capabilities: ScannerCapabilities,
-    private val scanSettingsMenuOpenState: State<Boolean>
+    private val scanSettingsMenuOpenState: State<Boolean>,
+    private val scanJobRunningState: State<Boolean>,
+    val currentScansState: SnapshotStateList<String>,
 ) {
     val scanSettingsMenuOpen by scanSettingsMenuOpenState
+    val scanJobRunning by scanJobRunningState
 }
 
 class ScanningViewModel(
@@ -127,6 +134,14 @@ class ScanningViewModel(
     fun setScanSettingsMenuOpen(value: Boolean) {
         _scanningActivityData.scanSettingsMenuOpen.value = value
     }
+
+    fun setScanJobRunning(value: Boolean) {
+        _scanningActivityData.scanJobRunning.value = value
+    }
+
+    fun addScan(path: String) {
+        _scanningActivityData.stateCurrentScans.add(path)
+    }
 }
 
 
@@ -137,9 +152,6 @@ class ScanningActivity : ComponentActivity() {
     lateinit var scannerCapabilities: ScannerCapabilities
 
     lateinit var esclRequestClient: ESCLRequestClient
-    val stateCurrentScans = mutableStateListOf<String>()
-
-    var scanJobRunning = mutableStateOf(false)
 
     private val TAG: String = this.javaClass.simpleName
 
@@ -181,20 +193,21 @@ class ScanningActivity : ComponentActivity() {
     fun doScan(
         scope: CoroutineScope,
         snackbarHostState: SnackbarHostState,
-        scanSettings: ScanSettings
+        scanSettings: ScanSettings,
+        viewModel: ScanningViewModel,
     ) {
         thread {
-            if (scanJobRunning.value) {
+            if (viewModel.scanningActivityData.scanJobRunning) {
                 snackBarError("Job still running", scope, snackbarHostState, false)
                 return@thread
             }
 
-            scanJobRunning.value = true
+            viewModel.setScanJobRunning(true)
             val job =
                 esclRequestClient.createJob(scanSettings)
             Log.d(TAG, "Sent scan request to scanner. Result: $job")
             if (job !is ESCLRequestClient.ScannerCreateJobResult.Success) {
-                scanJobRunning.value = false
+                viewModel.setScanJobRunning(false)
                 snackBarError(job.toString(), scope, snackbarHostState)
                 return@thread
             }
@@ -204,13 +217,13 @@ class ScanningActivity : ComponentActivity() {
                 val status = job.scanJob.getJobStatus()
                 val jobStateString = status?.jobState.toJobStateString(this)
                 if (nextPage is ESCLRequestClient.ScannerNextPageResult.NoFurtherPages) {
-                    scanJobRunning.value = false
+                    viewModel.setScanJobRunning(false)
                     scope.launch {
                         snackbarHostState.showSnackbar("No further pages. $jobStateString")
                     }
                     return@thread
                 } else if (nextPage !is ESCLRequestClient.ScannerNextPageResult.Success) {
-                    scanJobRunning.value = false
+                    viewModel.setScanJobRunning(false)
                     return@thread
                 }
                 nextPage.page.use {
@@ -227,7 +240,7 @@ class ScanningActivity : ComponentActivity() {
                         filePath.toFile().delete()
                         return@thread
                     }
-                    stateCurrentScans.add(filePath.toString())
+                    viewModel.addScan(filePath.toString())
                 }
             }
         }
@@ -322,11 +335,6 @@ class ScanningActivity : ComponentActivity() {
                             Snackbar(data, containerColor = if (data.visuals.message.contains("Error")) MaterialTheme.colorScheme.error else SnackbarDefaults.color)
                         }},
                         topBar = {
-                            TopAppBar({
-                                if (scanJobRunning.value) {
-                                    CircularProgressIndicator()
-                                }
-                            })
 
                         },
                         bottomBar = {
@@ -347,7 +355,8 @@ class ScanningActivity : ComponentActivity() {
                                             snackbarHostState,
                                             scanningViewModel.scanningActivityData.scanSettingsVM.scanSettingsComposableData.scanSettingsState.toESCLKtScanSettings(
                                                 scanningViewModel.scanningActivityData.scanSettingsVM.scanSettingsComposableData.selectedInputSourceCapabilities
-                                            )
+                                            ),
+                                            scanningViewModel
                                         )
                                     },
                                         icon = { Icon(
@@ -368,7 +377,7 @@ class ScanningActivity : ComponentActivity() {
                                 .padding(innerPadding)
                                 .fillMaxHeight()
                                 .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                            items(stateCurrentScans) { scan ->
+                            items(scanningViewModel.scanningActivityData.currentScansState) { scan ->
                                 val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
                                 Image(modifier = Modifier
                                     .zoomable(zoomState)
@@ -377,7 +386,7 @@ class ScanningActivity : ComponentActivity() {
                                 )
                                 HorizontalDivider()
                             }
-                            if (scanJobRunning.value) {
+                            if (scanningViewModel.scanningActivityData.scanJobRunning) {
                                 item {
                                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                                         CircularProgressIndicator(
@@ -387,7 +396,7 @@ class ScanningActivity : ComponentActivity() {
                                     }
                                 }
                             }
-                            if (stateCurrentScans.isEmpty()) {
+                            if (scanningViewModel.scanningActivityData.currentScansState.isEmpty()) {
                                 item {
                                     Text("No scans yet")
                                 }
