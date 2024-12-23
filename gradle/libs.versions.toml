@@ -1,5 +1,6 @@
 [versions]
 agp = "8.7.3"
+coilCompose = "3.0.4"
 esclkt = "1.2.0"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -19,6 +20,7 @@ materialIcons = "1.7.6"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core" , version.ref = "materialIcons"}
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 esclkt = { module = "io.github.chrisimx:esclkt", version.ref = "esclkt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

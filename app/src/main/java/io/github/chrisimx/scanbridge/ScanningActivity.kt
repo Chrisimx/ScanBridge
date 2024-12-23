@@ -27,7 +27,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -77,6 +76,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.AsyncImage
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
@@ -379,10 +379,13 @@ class ScanningActivity : ComponentActivity() {
                                 .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                             items(scanningViewModel.scanningActivityData.currentScansState) { scan ->
                                 val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
-                                Image(modifier = Modifier
-                                    .zoomable(zoomState)
-                                    .padding(vertical = 5.dp), bitmap = BitmapFactory.decodeFile(scan).asImageBitmap(),
-                                    contentDescription = stringResource(R.string.desc_scanned_page)
+                                AsyncImage(
+                                    model = scan,
+                                    contentDescription = stringResource(R.string.desc_scanned_page),
+                                    modifier = Modifier
+                                        .zoomable(zoomState)
+                                        .padding(vertical = 5.dp),
+
                                 )
                                 HorizontalDivider()
                             }
