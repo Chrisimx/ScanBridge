@@ -28,23 +28,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -372,37 +369,28 @@ class ScanningActivity : ComponentActivity() {
 
                         },
                     ) { innerPadding ->
-                        LazyColumn(
-                            Modifier
-                                .padding(innerPadding)
-                                .fillMaxHeight()
-                                .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                            items(scanningViewModel.scanningActivityData.currentScansState) { scan ->
-                                val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
+                        val pagerState = rememberPagerState(pageCount = {
+                            scanningViewModel.scanningActivityData.currentScansState.size
+                        }
+                        )
+
+                        HorizontalPager(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding),
+                            state = pagerState
+                        ) { page ->
+                            val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
+
+                            Column {
                                 AsyncImage(
-                                    model = scan,
+                                    model = scanningViewModel.scanningActivityData.currentScansState[page],
                                     contentDescription = stringResource(R.string.desc_scanned_page),
                                     modifier = Modifier
                                         .zoomable(zoomState)
                                         .padding(vertical = 5.dp),
 
-                                )
-                                HorizontalDivider()
-                            }
-                            if (scanningViewModel.scanningActivityData.scanJobRunning) {
-                                item {
-                                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                                        CircularProgressIndicator(
-                                            Modifier
-                                                .fillMaxWidth(0.3f)
-                                                .padding(30.dp))
-                                    }
-                                }
-                            }
-                            if (scanningViewModel.scanningActivityData.currentScansState.isEmpty()) {
-                                item {
-                                    Text("No scans yet")
-                                }
+                                    )
                             }
                         }
 
