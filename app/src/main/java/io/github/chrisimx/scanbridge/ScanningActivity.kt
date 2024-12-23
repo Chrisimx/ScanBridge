@@ -439,8 +439,3 @@ fun LoadingScreen(innerPadding: PaddingValues) {
     }
 
 }
-
-@Composable
-fun ScanningInterface(innerPadding: PaddingValues) {
-
-}
