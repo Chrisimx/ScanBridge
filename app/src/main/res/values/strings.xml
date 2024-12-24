@@ -25,4 +25,5 @@
     <string name="export">Export</string>
     <string name="retrieving_page">Retrieving page</string>
     <string name="exporting">Exporting...</string>
+    <string name="no_scans_yet">No pages were scanned yet. Click the scan button :)</string>
 </resources>

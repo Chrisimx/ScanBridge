@@ -508,6 +508,16 @@ class ScanningActivity : ComponentActivity() {
                                     Text(scanningViewModel.scanningActivityData.currentScansState[pagerState.currentPage].second.inputSource.toString())
                                 }
                             }
+                        } else if (!scanningViewModel.scanningActivityData.scanJobRunning) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(stringResource(R.string.no_scans_yet))
+                            }
                         }
 
                         HorizontalPager(
@@ -541,65 +551,68 @@ class ScanningActivity : ComponentActivity() {
                             }
                         }
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding), contentAlignment = Alignment.BottomCenter
-                        ) {
+                        if (pagerState.currentPage < scanningViewModel.scanningActivityData.currentScansState.size) {
                             Box(
                                 modifier = Modifier
-                                    .padding(10.dp)
-                                    .clip(
-                                        RoundedCornerShape(16.dp)
-                                    )
-                                    .background(MaterialTheme.colorScheme.inverseOnSurface),
+                                    .fillMaxSize()
+                                    .padding(innerPadding),
+                                contentAlignment = Alignment.BottomCenter
                             ) {
-                                Row {
-                                    IconButton(onClick = {
-                                        if (scanningViewModel.scanningActivityData.currentScansState.size <= pagerState.currentPage) {
-                                            return@IconButton
-                                        }
-                                        Files.delete(Path(scanningViewModel.scanningActivityData.currentScansState[pagerState.currentPage].first))
-                                        scanningViewModel.removeScanAtIndex(pagerState.currentPage)
-                                    }) {
-                                        Icon(
-                                            Icons.Outlined.Delete,
-                                            contentDescription = stringResource(
-                                                R.string.delete_current_page
+                                Box(
+                                    modifier = Modifier
+                                        .padding(10.dp)
+                                        .clip(
+                                            RoundedCornerShape(16.dp)
+                                        )
+                                        .background(MaterialTheme.colorScheme.inverseOnSurface),
+                                ) {
+                                    Row {
+                                        IconButton(onClick = {
+                                            if (scanningViewModel.scanningActivityData.currentScansState.size <= pagerState.currentPage) {
+                                                return@IconButton
+                                            }
+                                            Files.delete(Path(scanningViewModel.scanningActivityData.currentScansState[pagerState.currentPage].first))
+                                            scanningViewModel.removeScanAtIndex(pagerState.currentPage)
+                                        }) {
+                                            Icon(
+                                                Icons.Outlined.Delete,
+                                                contentDescription = stringResource(
+                                                    R.string.delete_current_page
+                                                )
                                             )
-                                        )
-                                    }
-                                    IconButton(onClick = {
-                                        scanningViewModel.swapTwoPages(
-                                            pagerState.currentPage,
-                                            pagerState.currentPage - 1
-                                        )
-                                        scrollScope.launch {
-                                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
                                         }
-                                    }) {
-                                        Icon(
-                                            Icons.AutoMirrored.Outlined.ArrowBack,
-                                            contentDescription = stringResource(
-                                                R.string.swap_with_previous_page
+                                        IconButton(onClick = {
+                                            scanningViewModel.swapTwoPages(
+                                                pagerState.currentPage,
+                                                pagerState.currentPage - 1
                                             )
-                                        )
-                                    }
-                                    IconButton(onClick = {
-                                        scanningViewModel.swapTwoPages(
-                                            pagerState.currentPage,
-                                            pagerState.currentPage + 1
-                                        )
-                                        scrollScope.launch {
-                                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                            scrollScope.launch {
+                                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                            }
+                                        }) {
+                                            Icon(
+                                                Icons.AutoMirrored.Outlined.ArrowBack,
+                                                contentDescription = stringResource(
+                                                    R.string.swap_with_previous_page
+                                                )
+                                            )
                                         }
-                                    }) {
-                                        Icon(
-                                            Icons.AutoMirrored.Outlined.ArrowForward,
-                                            contentDescription = stringResource(
-                                                R.string.swap_with_next_page
+                                        IconButton(onClick = {
+                                            scanningViewModel.swapTwoPages(
+                                                pagerState.currentPage,
+                                                pagerState.currentPage + 1
                                             )
-                                        )
+                                            scrollScope.launch {
+                                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                            }
+                                        }) {
+                                            Icon(
+                                                Icons.AutoMirrored.Outlined.ArrowForward,
+                                                contentDescription = stringResource(
+                                                    R.string.swap_with_next_page
+                                                )
+                                            )
+                                        }
                                     }
                                 }
                             }
