@@ -18,4 +18,10 @@
     <string name="job_still_pending">The job is still pending</string>
     <string name="job_pages_still_processed">The pages are still processed</string>
     <string name="job_state_cannot_be_retrieved">The job state can\'t be retrieved</string>
+    <string name="delete_current_page">Delete current page</string>
+    <string name="swap_with_previous_page">Swap with previous</string>
+    <string name="swap_with_next_page">Swap with next</string>
+    <string name="page_x_of_y">Page %1$s of %2$s</string>
+    <string name="export">Export</string>
+    <string name="retrieving_page">Retrieving page</string>
 </resources>
