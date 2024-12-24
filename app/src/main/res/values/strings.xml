@@ -24,4 +24,5 @@
     <string name="page_x_of_y">Page %1$s of %2$s</string>
     <string name="export">Export</string>
     <string name="retrieving_page">Retrieving page</string>
+    <string name="exporting">Exporting...</string>
 </resources>

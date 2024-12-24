@@ -23,6 +23,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.Rect
 import android.graphics.pdf.PdfDocument
 import android.os.Bundle
 import android.util.Log
@@ -37,6 +38,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -49,6 +51,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -82,6 +85,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -112,6 +116,7 @@ data class ScanningActivityData(
     val capabilities: ScannerCapabilities,
     val scanSettingsMenuOpen: MutableState<Boolean> = mutableStateOf(false),
     val scanJobRunning: MutableState<Boolean> = mutableStateOf(false),
+    val stateExportRunning: MutableState<Boolean> = mutableStateOf(false),
     val stateCurrentScans: SnapshotStateList<Pair<String, ScanSettings>> = mutableStateListOf()
 ) {
     fun toImmutable() = ImmutableScanningActivityData(
@@ -119,6 +124,7 @@ data class ScanningActivityData(
         capabilities,
         scanSettingsMenuOpen,
         scanJobRunning,
+        stateExportRunning,
         stateCurrentScans
     )
 }
@@ -128,10 +134,12 @@ data class ImmutableScanningActivityData(
     val capabilities: ScannerCapabilities,
     private val scanSettingsMenuOpenState: State<Boolean>,
     private val scanJobRunningState: State<Boolean>,
+    private val exportRunningState: State<Boolean>,
     val currentScansState: SnapshotStateList<Pair<String, ScanSettings>>,
 ) {
     val scanSettingsMenuOpen by scanSettingsMenuOpenState
     val scanJobRunning by scanJobRunningState
+    val exportRunning by exportRunningState
 }
 
 class ScanningViewModel(
@@ -172,6 +180,10 @@ class ScanningViewModel(
             return
         }
         _scanningActivityData.stateCurrentScans.removeAt(index)
+    }
+
+    fun setExportRunning(running: Boolean) {
+        _scanningActivityData.stateExportRunning.value = running
     }
 }
 
@@ -381,6 +393,7 @@ class ScanningActivity : ComponentActivity() {
                                     }
                                     IconButton(onClick = {
                                         thread {
+                                            scanningViewModel.setExportRunning(true)
                                             PdfDocument().apply {
                                                 for (scan in scanningViewModel.scanningActivityData.currentScansState) {
                                                     val bitmap =
@@ -401,7 +414,7 @@ class ScanningActivity : ComponentActivity() {
                                                     page.canvas.drawBitmap(
                                                         bitmap,
                                                         null,
-                                                        android.graphics.Rect(
+                                                        Rect(
                                                             0,
                                                             0,
                                                             width72thInches.toInt(),
@@ -422,6 +435,7 @@ class ScanningActivity : ComponentActivity() {
                                                     }.pdf"
                                                 )
                                                 writeTo(pdfFile.outputStream())
+                                                scanningViewModel.setExportRunning(false)
                                                 val share = Intent(Intent.ACTION_SEND)
                                                 share.type = "application/pdf"
                                                 share.putExtra(
@@ -597,6 +611,29 @@ class ScanningActivity : ComponentActivity() {
                                     Modifier,
                                     scanningViewModel.scanningActivityData.scanSettingsVM
                                 )
+                            }
+                        }
+
+                        if (scanningViewModel.scanningActivityData.exportRunning) {
+                            Dialog(
+                                onDismissRequest = { },
+                            ) {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                        .padding(16.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                ) {
+                                    Column(
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalArrangement = Arrangement.Center,
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        CircularProgressIndicator()
+                                        Text(stringResource(R.string.exporting))
+                                    }
+                                }
                             }
                         }
                     }
