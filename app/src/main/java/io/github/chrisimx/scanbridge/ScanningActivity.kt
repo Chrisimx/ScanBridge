@@ -30,6 +30,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -88,7 +89,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.ViewModelProvider
 import coil3.compose.AsyncImage
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.ScanSettings
@@ -187,14 +188,72 @@ class ScanningViewModel(
     }
 }
 
+class ScanningViewModelFactory(
+    private val activity: ComponentActivity,
+    private val esclClient: ESCLRequestClient
+) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
+        activity.runOnUiThread({
+            activity.setContent {
+                ScanBridgeTheme {
+                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        LoadingScreen(
+                            innerPadding,
+                            text = stringResource(R.string.trying_to_retrieve_scannercapabilities)
+                        )
+                    }
+                }
+            }
+        })
+
+
+        val retrievedScannerCapabilities = esclClient.getScannerCapabilities()
+        Log.d("ScanningViewModelFactory", "$retrievedScannerCapabilities")
+
+        if (retrievedScannerCapabilities !is ESCLRequestClient.ScannerCapabilitiesResult.Success) {
+            activity.runOnUiThread({
+                activity.setContent {
+                    ErrorDialog(stringResource(
+                        R.string.scannercapabilities_retrieve_error,
+                        retrievedScannerCapabilities
+                    ), { activity.finish() })
+                }
+            })
+
+            throw Exception("Couldn't retrieve scanner capabilities: $retrievedScannerCapabilities")
+        }
+
+        val scannerCapabilities = retrievedScannerCapabilities.scannerCapabilities
+
+        val scanSettingsViewModel = ScanSettingsViewModel(
+            MutableESCLScanSettingsState(
+                versionState = mutableStateOf(scannerCapabilities.interfaceVersion),
+                scanRegionsState = mutableStateOf(
+                    MutableScanRegionState(
+                        heightState = mutableStateOf("0"),
+                        widthState = mutableStateOf("0"),
+                        xOffsetState = mutableStateOf("0"),
+                        yOffsetState = mutableStateOf("0")
+                    )
+                ),
+            ), scannerCapabilities
+        )
+        ScanningViewModel(scanSettingsViewModel, scannerCapabilities)
+
+        return ScanningViewModel(scanSettingsViewModel, scannerCapabilities) as T
+    }
+}
 
 class ScanningActivity : ComponentActivity() {
 
     lateinit var scannerName: String
     lateinit var scannerAddress: HttpUrl
-    lateinit var scannerCapabilities: ScannerCapabilities
 
     lateinit var esclRequestClient: ESCLRequestClient
+
+    lateinit var scanningViewModel: ScanningViewModel
 
     private val TAG: String = this.javaClass.simpleName
 
@@ -331,49 +390,15 @@ class ScanningActivity : ComponentActivity() {
 
         esclRequestClient = ESCLRequestClient(scannerAddress, OkHttpClient.Builder().build())
 
-        setContent {
-            ScanBridgeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LoadingScreen(
-                        innerPadding,
-                        text = stringResource(R.string.trying_to_retrieve_scannercapabilities)
-                    )
-                }
-            }
-        }
 
         thread {
-            val retrievedScannerCapabilities = esclRequestClient.getScannerCapabilities()
-            Log.d(TAG, "$retrievedScannerCapabilities")
+            this.scanningViewModel = viewModels<ScanningViewModel> {
+                ScanningViewModelFactory(this, esclRequestClient)
+            }.value
 
-            if (retrievedScannerCapabilities !is ESCLRequestClient.ScannerCapabilitiesResult.Success) {
-                setContent {
-                    ErrorDialog(stringResource(
-                        R.string.scannercapabilities_retrieve_error,
-                        retrievedScannerCapabilities
-                    ), { this.finish() })
-                }
-                return@thread
-            }
-            this.scannerCapabilities = retrievedScannerCapabilities.scannerCapabilities
             setContent {
-                val scanningViewModel = viewModel {
-                    val scanSettingsViewModel = ScanSettingsViewModel(
-                        MutableESCLScanSettingsState(
-                            versionState = mutableStateOf(scannerCapabilities.interfaceVersion),
-                            scanRegionsState = mutableStateOf(
-                                MutableScanRegionState(
-                                    heightState = mutableStateOf("0"),
-                                    widthState = mutableStateOf("0"),
-                                    xOffsetState = mutableStateOf("0"),
-                                    yOffsetState = mutableStateOf("0")
-                                )
-                            ),
-                        ), scannerCapabilities
-                    )
-                    ScanningViewModel(scanSettingsViewModel, scannerCapabilities)
-                }
-                val snackbarHostState = remember { SnackbarHostState() }
+
+            val snackbarHostState = remember { SnackbarHostState() }
                 val scope = rememberCoroutineScope()
 
                 ScanBridgeTheme {
