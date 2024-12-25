@@ -334,10 +334,14 @@ class ScanningActivity : ComponentActivity() {
         setContent {
             ScanBridgeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LoadingScreen(innerPadding)
+                    LoadingScreen(
+                        innerPadding,
+                        text = stringResource(R.string.trying_to_retrieve_scannercapabilities)
+                    )
                 }
             }
         }
+
         thread {
             val retrievedScannerCapabilities = esclRequestClient.getScannerCapabilities()
             Log.d(TAG, "$retrievedScannerCapabilities")
@@ -658,7 +662,7 @@ class ScanningActivity : ComponentActivity() {
 
 
 @Composable
-fun LoadingScreen(innerPadding: PaddingValues) {
+fun LoadingScreen(innerPadding: PaddingValues, text: String) {
     Column(modifier = Modifier
         .padding(innerPadding)
         .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -666,7 +670,7 @@ fun LoadingScreen(innerPadding: PaddingValues) {
         Text(modifier = Modifier
             .fillMaxWidth()
             .padding(30.dp),
-            text = stringResource(R.string.trying_to_retrieve_scannercapabilities),
+            text = text,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Medium,
             lineHeight = 32.sp,
