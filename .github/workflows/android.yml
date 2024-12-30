@@ -21,21 +21,33 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Create signed apk and release bundle
+      - name: Create unsigned apk and release bundle
         uses: ./.github/actions/build
         with:
           releaseBuild: 'true'
           buildApk: 'true'
-          buildBundle: 'true'
-      - name: Upload APK
+          buildBundle: 'false'
+      - name: Upload unsigned APK
         uses: actions/upload-artifact@v4.5.0
         with:
           name: unsigned-release-apk
           path: app/build/outputs/apk/release/app-release-unsigned.apk
           if-no-files-found: error
-      - name: Upload bundle
-        uses: actions/upload-artifact@v4.5.0
+      - uses: noriban/sign-android-release@v5
+        name: Sign app APK
+        if: ${{ github.event_name != 'pull_request' }}
+        # ID used to access action output
+        id: sign_app
         with:
-          name: unsigned-release-bundle
-          path: app/build/outputs/bundle/release/app-release.aab
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.CI_KEYSTORE_BASE64 }}
+          alias: ${{ secrets.CI_ALIAS }}
+          keyStorePassword: ${{ secrets.CI_KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.CI_KEY_PASSWORD }}
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4.5.0
+        if: ${{ github.event_name != 'pull_request' }}
+        with:
+          name: signed-release-apk
+          path: ${{steps.sign_app.outputs.signedReleaseFile}}
           if-no-files-found: error
