@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.zoomable)
     implementation(libs.kotlin.reflect)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.navigation.compose)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
