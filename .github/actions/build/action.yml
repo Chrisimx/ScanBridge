@@ -1,0 +1,47 @@
+name: Build ScanBridge apk
+
+inputs:
+  releaseBuild:
+    description: 'Whether to build release build (else debug is built)'
+    required: true
+  buildApk:
+    description: 'Whether to build an APK'
+    required: true
+  buildBundle:
+    description: 'Whether to build a bundle (AAB)'
+    required: true
+  shell:
+    default: bash
+    required: false
+    description: 'The shell to use for running commands'
+
+runs:
+  using: composite
+  steps:
+    - name: Grant execute permission for gradlew
+      shell: ${{inputs.shell}}
+      run: chmod +x gradlew
+
+    - name: Build APK
+      shell: ${{inputs.shell}}
+      if: ${{ inputs.buildApk == 'true' }}
+      run: |
+        if [ "${{ inputs.releaseBuild }}" == "true" ]; then
+          echo "Building release APK..."
+          ./gradlew assembleRelease
+        else
+          echo "Building debug APK..."
+          ./gradlew assembleDebug
+        fi
+
+    - name: Build Bundle (AAB)
+      shell: ${{inputs.shell}}
+      if: ${{ inputs.buildBundle == 'true' }}
+      run: |
+        if [ "${{ inputs.releaseBuild }}" == "true" ]; then
+          echo "Building release AAB..."
+          ./gradlew bundleRelease
+        else
+          echo "Building debug AAB..."
+          ./gradlew bundleDebug
+        fi
