@@ -20,10 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     name: 'Prepare jobs'
     outputs:
-      artifact_version_suffix: ${{ steps.parse.outputs.artifact_version_suffix }}
-      should_run: ${{ steps.parse.outputs.should_run }}
-      release_name: ${{ steps.parse.outputs.release-name }}
-      tag: ${{ steps.parse.outputs.tag }}
+      artifact_version_suffix: ${{ steps.determine-information.outputs.artifact_version_suffix }}
+      should_run: ${{ steps.determine-information.outputs.should_run }}
+      release_name: ${{ steps.determine-information.outputs.release-name }}
+      tag: ${{ steps.determine-information.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
       - name: 'Determine release information'
@@ -68,11 +68,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: prepare
     name: 'Build & sign apk'
+    if: ${{ needs.prepare.outputs.should_run == 'true' }}
     permissions:
       contents: read
     steps:
+      - uses: actions/checkout@v4
       - name: Create unsigned apk
-        if: ${{ needs.prepare.outputs.should_run == 'true' }}
         uses: ./.github/actions/build
         with:
           releaseBuild: 'true'
@@ -90,17 +91,17 @@ jobs:
           keyStorePassword: ${{ secrets.RELEASE_KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.RELEASE_KEY_PASSWORD }}
       - name: Rename signed APK
-        run: mv ${{steps.sign_app.outputs.signedReleaseFile}} app/build/outputs/apk/release/ScanBridge-${{ needs.prepare.outputs.artifact_version_suffix }}.apk
+        run: mv ${{steps.sign_app.outputs.signedReleaseFile}} app/build/outputs/apk/release/ScanBridge${{ needs.prepare.outputs.artifact_version_suffix }}.apk
       - name: Upload signed APK
         uses: actions/upload-artifact@v4.5.0
         with:
           name: signed-release-apk
-          path: app/build/outputs/apk/release/ScanBridge-${{ needs.prepare.outputs.artifact_version_suffix }}.apk
+          path: app/build/outputs/apk/release/ScanBridge${{ needs.prepare.outputs.artifact_version_suffix }}.apk
           if-no-files-found: error
 
   publish-result:
     name: Publish
-    needs: [ run-ci, prepare ]
+    needs: [ build, prepare ]
     if: ${{ needs.prepare.outputs.should_run == 'true' }}
     runs-on: ubuntu-latest
     permissions:
