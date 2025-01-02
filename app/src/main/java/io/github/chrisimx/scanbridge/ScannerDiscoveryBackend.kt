@@ -1,5 +1,5 @@
 /*
- *     Copyright (C) 2024 Christian Nagel and contributors
+ *     Copyright (C) 2024-2025 Christian Nagel and contributors
  *
  *     This file is part of ScanBridge.
  *
@@ -28,7 +28,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import okhttp3.HttpUrl
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ForkJoinPool
-
 
 data class DiscoveredScanner(val name: String, val addresses: List<String>)
 
@@ -73,7 +72,7 @@ class ScannerDiscovery(
                         .addPathSegment(rs)
                         .scheme("http")
                         .build()
-                    Log.d("ESCL", "Built URL: $url")
+                    Log.d(TAG, "Built URL: $url")
                     urls.add(url.toString())
                 }
 

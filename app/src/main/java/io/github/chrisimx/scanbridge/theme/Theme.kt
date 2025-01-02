@@ -1,5 +1,5 @@
 /*
- *     Copyright (C) 2024 Christian Nagel and contributors
+ *     Copyright (C) 2024-2025 Christian Nagel and contributors
  *
  *     This file is part of ScanBridge.
  *

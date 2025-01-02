@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge
+package io.github.chrisimx.scanbridge.data.model
 
 import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.Millimeters

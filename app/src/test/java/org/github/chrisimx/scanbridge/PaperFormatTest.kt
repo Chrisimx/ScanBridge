@@ -19,7 +19,7 @@
 
 package org.github.chrisimx.scanbridge
 
-import io.github.chrisimx.scanbridge.loadDefaultFormats
+import io.github.chrisimx.scanbridge.data.model.loadDefaultFormats
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 

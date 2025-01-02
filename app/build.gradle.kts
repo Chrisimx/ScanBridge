@@ -1,8 +1,26 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
+
+
+fun getGitCommitHash(): String {
+    return try {
+        val stdout = ByteArrayOutputStream()
+        exec {
+            commandLine("git", "rev-parse", "--short", "HEAD")
+            standardOutput = stdout
+        }
+        stdout.toString().trim()
+    } catch (e: Exception) {
+        "unknown" // Fallback, falls der Befehl fehlschlägt
+    }
+}
+
 
 android {
     namespace = "io.github.chrisimx.scanbridge"
@@ -25,6 +43,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "GIT_COMMIT_HASH", "\"${getGitCommitHash()}\"")
+        }
+        debug {
+            buildConfigField("String", "GIT_COMMIT_HASH", "\"${getGitCommitHash()}\"")
         }
     }
     compileOptions {
@@ -36,8 +58,11 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
+
 }
+
 
 dependencies {
     implementation(libs.okhttp)
@@ -46,6 +71,7 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.coil.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

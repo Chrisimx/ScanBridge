@@ -1,26 +1,5 @@
-/*
- *     Copyright (C) 2024 Christian Nagel and contributors
- *
- *     This file is part of ScanBridge.
- *
- *     ScanBridge is free software: you can redistribute it and/or modify it under the terms of
- *     the GNU General Public License as published by the Free Software Foundation, either
- *     version 3 of the License, or (at your option) any later version.
- *
- *     ScanBridge is distributed in the hope that it will be useful, but WITHOUT ANY
- *     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- *     FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License along with eSCLKt.
- *     If not, see <https://www.gnu.org/licenses/>.
- *
- *     SPDX-License-Identifier: GPL-3.0-or-later
- */
+package io.github.chrisimx.scanbridge.data.model
 
-package io.github.chrisimx.scanbridge
-
-import android.content.Context
-import android.icu.text.DecimalFormat
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -34,89 +13,9 @@ import io.github.chrisimx.esclkt.ContentType
 import io.github.chrisimx.esclkt.FeedDirection
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.InputSourceCaps
-import io.github.chrisimx.esclkt.JobState
-import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.ScanIntentData
-import io.github.chrisimx.esclkt.ScanRegion
 import io.github.chrisimx.esclkt.ScanRegions
 import io.github.chrisimx.esclkt.ScanSettings
-import io.github.chrisimx.esclkt.ScannerCapabilities
-import io.github.chrisimx.esclkt.millimeters
-
-fun JobState?.toJobStateString(context: Context): String {
-    return when (this) {
-        JobState.Canceled -> context.getString(R.string.job_canceled)
-        JobState.Aborted -> context.getString(R.string.job_aborted_because_error)
-        JobState.Completed -> context.getString(R.string.job_completed_successfully)
-        JobState.Pending -> context.getString(R.string.job_still_pending)
-        JobState.Processing -> context.getString(R.string.job_pages_still_processed)
-        null -> context.getString(R.string.job_state_cannot_be_retrieved)
-    }
-}
-
-fun String.toDoubleLocalized(): Double = DecimalFormat.getInstance().parse(this).toDouble()
-
-data class MutableScanRegionState(
-    // These are to be given in millimeters!
-    private val heightState: MutableState<String>,
-    private val widthState: MutableState<String>,
-    private val xOffsetState: MutableState<String>,
-    private val yOffsetState: MutableState<String>,
-    ) {
-    var height by heightState
-    var width by widthState
-    var xOffset by xOffsetState
-    var yOffset by yOffsetState
-
-    fun toImmutable(): ImmutableScanRegionState {
-        return ImmutableScanRegionState(heightState, widthState, xOffsetState, yOffsetState)
-    }
-    fun toESCLScanRegion(selectedInputSourceCaps: InputSourceCaps): ScanRegion {
-        return toImmutable().toESCLScanRegion(selectedInputSourceCaps)
-    }
-}
-
-data class ImmutableScanRegionState(
-    // These are to be given in millimeters!
-    private val heightState: State<String>,
-    private val widthState: State<String>,
-    private val xOffsetState: State<String>,
-    private val yOffsetState: State<String>,
-) {
-    val height by heightState
-    val width by widthState
-    val xOffset by xOffsetState
-    val yOffset by yOffsetState
-
-    fun toESCLScanRegion(selectedInputSourceCaps: InputSourceCaps): ScanRegion {
-        val height: LengthUnit = when (height) {
-            "max" -> selectedInputSourceCaps.maxHeight
-            else -> height.toDoubleLocalized().millimeters()
-        }
-        val width: LengthUnit = when (width) {
-            "max" -> selectedInputSourceCaps.maxWidth
-            else -> width.toDoubleLocalized().millimeters()
-        }
-
-        return ScanRegion(
-            height.toThreeHundredthsOfInch(),
-            width.toThreeHundredthsOfInch(),
-            xOffset.toDoubleLocalized().millimeters().toThreeHundredthsOfInch(),
-            yOffset.toDoubleLocalized().millimeters().toThreeHundredthsOfInch()
-        )
-    }
-}
-
-fun ScannerCapabilities.getInputSourceOptions(): List<Pair<String, InputSource>> {
-    val tmpInputSourceOptions = mutableListOf<Pair<String, InputSource>>()
-    if (this.platen != null) {
-        tmpInputSourceOptions.add(Pair("Platen", InputSource.Platen))
-    }
-    if (this.adf != null) {
-        tmpInputSourceOptions.add(Pair("ADF", InputSource.Feeder))
-    }
-    return tmpInputSourceOptions
-}
 
 data class MutableESCLScanSettingsState(
     private var versionState: MutableState<String>,
