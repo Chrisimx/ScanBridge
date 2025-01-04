@@ -101,7 +101,7 @@ class ScannerDiscovery(
     override fun onServiceLost(service: NsdServiceInfo) {
         // When the network service is no longer available.
         // Internal bookkeeping code goes here.
-        Log.e(TAG, "service ${service.hashCode()} lost: $service")
+        Log.i(TAG, "service ${service.hashCode()} lost: $service")
     }
 
     override fun onDiscoveryStopped(serviceType: String) {
