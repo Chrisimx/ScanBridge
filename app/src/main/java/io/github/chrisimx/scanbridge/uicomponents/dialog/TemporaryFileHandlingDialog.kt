@@ -83,7 +83,7 @@ fun TemporaryFileHandlingDialog(
                 Column(
                     modifier = Modifier
                         .verticalScroll(scrollState)
-                        .weight(1f)
+                        .weight(1f, false)
                 ) {
                     Text(
                         text = content,
