@@ -19,12 +19,14 @@
 
 package io.github.chrisimx.scanbridge.theme
 
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 // Set of Material typography styles to start with
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = Poppins,
@@ -33,7 +35,6 @@ val Typography = Typography(
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
     ),
-    /* Other default text styles to override*/
     titleLarge = TextStyle(
         fontFamily = Poppins,
         fontWeight = FontWeight.Normal,
@@ -41,12 +42,30 @@ val Typography = Typography(
         lineHeight = 28.sp,
         letterSpacing = 0.sp
     ),
-    displaySmall = TextStyle(
+    labelSmall = TextStyle(
         fontFamily = Poppins,
         fontWeight = FontWeight.Normal,
-        fontSize = 33.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.sp
     ),
-
+    bodyMedium = TextStyle(
+        fontFamily = Poppins,
+        fontWeight = FontWeight.Normal,
+        letterSpacing = 0.sp
+    ),
+    bodyMediumEmphasized = TextStyle(
+        fontFamily = Poppins,
+        fontWeight = FontWeight.ExtraBold,
+        letterSpacing = 0.sp
+    ),
+    bodySmall = TextStyle(
+        fontFamily = Poppins,
+        fontWeight = FontWeight.Normal,
+        letterSpacing = 0.sp
+    ),
+    bodySmallEmphasized = TextStyle(
+        fontFamily = Poppins,
+        fontWeight = FontWeight.ExtraBold,
+        letterSpacing = 0.sp
+    ),
 )
