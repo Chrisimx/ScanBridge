@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -98,7 +99,7 @@ fun StartupScreen(navController: NavController) {
                                 contentDescription = item
                             )
                         },
-                        label = { Text(item) },
+                        label = { Text(item, style = MaterialTheme.typography.labelSmall) },
                         selected = selectedItem.intValue == index,
                         onClick = { selectedItem.intValue = index }
                     )
