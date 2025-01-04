@@ -71,8 +71,8 @@ fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = 
                     .fillMaxWidth()
                     .padding(20.dp),
                 textAlign = TextAlign.Center,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 20.sp,
+                fontWeight = FontWeight.Light,
+                fontSize = 18.sp,
             )
 
             if (copyButton) {
