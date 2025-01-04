@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,13 +26,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.github.chrisimx.scanbridge.theme.Poppins
+import io.github.chrisimx.scanbridge.theme.gradientBrush
 
 @Composable
 fun VersionComposable() {
+    val context = LocalContext.current
+
     Image(
         modifier = Modifier
             .size(200.dp)
@@ -44,19 +49,23 @@ fun VersionComposable() {
     Text(
         stringResource(R.string.app_name),
         modifier = Modifier.padding(PaddingValues(4.dp)),
-        style = MaterialTheme.typography.titleLarge,
+        fontFamily = Poppins,
+        fontSize = 24.sp,
         fontWeight = FontWeight.ExtraBold,
+        style = TextStyle(brush = gradientBrush)
     )
+
     Text(
         "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH})",
-        fontStyle = FontStyle.Normal
+        fontStyle = FontStyle.Normal,
+        fontFamily = Poppins,
     )
 
     if (BuildConfig.DEBUG) {
         Text(
             stringResource(R.string.debug_build),
             fontStyle = FontStyle.Italic,
-            fontFamily = FontFamily.Monospace
+            fontFamily = Poppins
         )
     }
 }
@@ -89,33 +98,52 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
 
         HorizontalDivider(modifier = Modifier.padding(14.dp))
 
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .toggleable(
-                    value = automaticCleanup,
-                    onValueChange = {
-                        sharedPreferences
-                            .edit()
-                            .putBoolean("auto_cleanup", it)
-                            .apply()
-                        automaticCleanup = it
-                    },
-                    role = Role.Checkbox
+
+        ElevatedCard(modifier = Modifier.padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    stringResource(R.string.settings),
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    fontFamily = Poppins,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 20.sp,
+                    style = TextStyle(brush = gradientBrush),
                 )
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = automaticCleanup,
-                onCheckedChange = null
-            )
-            Text(
-                text = stringResource(R.string.auto_cleanup),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(start = 16.dp)
-            )
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .toggleable(
+                            value = automaticCleanup,
+                            onValueChange = {
+                                sharedPreferences
+                                    .edit()
+                                    .putBoolean("auto_cleanup", it)
+                                    .apply()
+                                automaticCleanup = it
+                            },
+                            role = Role.Checkbox
+                        )
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = automaticCleanup,
+                        onCheckedChange = null
+                    )
+
+                    Text(
+                        text = stringResource(R.string.auto_cleanup),
+                        fontFamily = Poppins,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
+            }
         }
     }
 }
