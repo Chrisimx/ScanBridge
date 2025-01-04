@@ -63,7 +63,7 @@ fun StartupScreen(navController: NavController) {
         listOf(Icons.Outlined.Home, Icons.Outlined.Settings)
     val context = LocalContext.current
     val header =
-        if (selectedItem.intValue == 0) stringResource(R.string.network_attached_scanners) else stringResource(
+        if (selectedItem.intValue == 0) stringResource(R.string.header_scannerbrowser) else stringResource(
             R.string.settings
         )
 

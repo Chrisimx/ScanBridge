@@ -28,7 +28,7 @@
     <string name="no_scans_yet">No pages were scanned yet. Click the scan button :)</string>
     <string name="platen">Platen</string>
     <string name="adf">ADF</string>
-    <string name="network_attached_scanners">Network-attached scanners</string>
+    <string name="header_scannerbrowser">Discovered scanners</string>
     <string name="discovery">Discovery</string>
     <string name="copy_current_scanner_options_in_esclkt_format">Copy current scanner options in eSCLKt format</string>
     <string name="scan_settings">Scan settings</string>
