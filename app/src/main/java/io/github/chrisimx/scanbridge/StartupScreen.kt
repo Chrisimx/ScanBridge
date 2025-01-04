@@ -99,7 +99,7 @@ fun StartupScreen(navController: NavController) {
                                 contentDescription = item
                             )
                         },
-                        label = { Text(item, style = MaterialTheme.typography.labelSmall) },
+                        label = { Text(item, style = MaterialTheme.typography.labelMedium) },
                         selected = selectedItem.intValue == index,
                         onClick = { selectedItem.intValue = index }
                     )
