@@ -2,18 +2,29 @@ package io.github.chrisimx.scanbridge
 
 import android.content.Context.MODE_PRIVATE
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,11 +37,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import io.github.chrisimx.scanbridge.theme.Poppins
 import io.github.chrisimx.scanbridge.theme.Teal1
 import io.github.chrisimx.scanbridge.theme.gradientBrush
@@ -53,7 +64,9 @@ fun VersionComposable() {
         fontFamily = Poppins,
         fontSize = 24.sp,
         fontWeight = FontWeight.ExtraBold,
-        style = TextStyle(brush = gradientBrush)
+        style = MaterialTheme.typography.labelLarge.copy(
+            brush = gradientBrush
+        )
     )
 
     Text(
@@ -71,6 +84,7 @@ fun VersionComposable() {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun AppSettingsScreen(innerPadding: PaddingValues) {
     val context = LocalContext.current
@@ -88,10 +102,13 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
         )
     }
 
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .padding(innerPadding)
-            .fillMaxSize(),
+            .fillMaxSize()
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -99,6 +116,9 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
 
         HorizontalDivider(modifier = Modifier.padding(14.dp))
 
+        var information: String? by remember {
+            mutableStateOf(null)
+        }
 
         ElevatedCard(modifier = Modifier.padding(16.dp)) {
             Column(
@@ -118,7 +138,6 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
                         .toggleable(
                             value = automaticCleanup,
                             onValueChange = {
@@ -131,18 +150,51 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                             role = Role.Checkbox
                         )
                         .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
                         checked = automaticCleanup,
+                        modifier = Modifier.weight(0.1f),
                         onCheckedChange = null
                     )
-
                     Text(
                         text = stringResource(R.string.auto_cleanup),
-                        fontFamily = Poppins,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .weight(0.6f),
+                        style = MaterialTheme.typography.bodyMedium
                     )
+                    val context = LocalContext.current
+                    Box(modifier = Modifier.weight(0.1f)) {
+                        IconButton(onClick = {
+                            information = context.getString(
+                                R.string.auto_cleanup_explanation,
+                                context.getString(R.string.app_name)
+                            )
+                        }) {
+                            Icon(
+                                Icons.Outlined.Info,
+                                contentDescription = stringResource(R.string.auto_cleanup_info_desc)
+                            )
+                        }
+                    }
+
+                }
+            }
+        }
+
+        if (information != null) {
+            Dialog(onDismissRequest = { information = null }) {
+                Card {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            information!!,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
             }
         }
