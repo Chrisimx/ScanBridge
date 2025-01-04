@@ -71,7 +71,7 @@ fun InputSource.toReadableString(context: Context): String {
     return when (this) {
         InputSource.Platen -> context.getString(R.string.platen)
         InputSource.Feeder -> context.getString(R.string.adf)
-        InputSource.Camera -> context.getString(R.string.adf)
+        InputSource.Camera -> context.getString(R.string.camera)
     }
 }
 
@@ -82,8 +82,8 @@ fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): MutableESCLScan
         .settingProfiles.first()
         .supportedResolutions.maxBy { it.xResolution }
     val maxScanRegion = MutableScanRegionState(
-        heightState = mutableStateOf(inputCaps.maxHeight.toMillimeters().value.toStringLocalized()),
-        widthState = mutableStateOf(inputCaps.maxWidth.toMillimeters().value.toStringLocalized()),
+        heightState = mutableStateOf("max"),
+        widthState = mutableStateOf("max"),
     )
 
     return MutableESCLScanSettingsState(

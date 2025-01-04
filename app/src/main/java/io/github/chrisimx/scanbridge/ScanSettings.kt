@@ -32,10 +32,13 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.InputChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -69,14 +72,17 @@ fun ScanSettingsUI(
     context: Context,
     scanSettingsViewModel: ScanSettingsComposableViewModel = viewModel()
 ) {
-    val scanSettingsUIState = scanSettingsViewModel.scanSettingsComposableData!!
+    val scanSettingsUIState = scanSettingsViewModel.scanSettingsComposableData
 
     assert(scanSettingsUIState.inputSourceOptions.isNotEmpty()) // The settings are useless if this is the case
+
+    val scrollState = rememberScrollState()
 
     Column(
         modifier
             .fillMaxWidth()
-            .padding(10.dp),
+            .padding(10.dp)
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(stringResource(R.string.input_source))
@@ -129,7 +135,11 @@ fun ScanSettingsUI(
                 }
             }
         }
-        Card(modifier = Modifier.fillMaxWidth()) {
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 15.dp),
+        ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text("Intent:", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
 
@@ -162,7 +172,11 @@ fun ScanSettingsUI(
             }
 
         }
-        Card(modifier = Modifier.fillMaxWidth()) {
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 15.dp, bottom = 15.dp)
+        ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text(
                     "Scan Region:",
@@ -212,7 +226,9 @@ fun ScanSettingsUI(
                         ValidatedDimensionsTextEdit(
                             scanSettingsUIState.widthTextFieldString,
                             context,
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 10.dp),
                             stringResource(R.string.width_in_mm),
                             { newText: String ->
                                 scanSettingsViewModel.setWidthTextFieldContent(
@@ -231,7 +247,9 @@ fun ScanSettingsUI(
                         ValidatedDimensionsTextEdit(
                             scanSettingsUIState.heightTextFieldString,
                             context,
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 10.dp),
                             stringResource(R.string.height_in_mm),
                             { scanSettingsViewModel.setHeightTextFieldContent(it) },
                             {
@@ -261,7 +279,10 @@ fun ScanSettingsUI(
                 )
             )
         }) {
-            Text(stringResource(R.string.copy_current_scanner_options_in_esclkt_format))
+            Text(
+                stringResource(R.string.copy_current_scanner_options_in_esclkt_format),
+                style = MaterialTheme.typography.labelMedium
+            )
         }
     }
 }

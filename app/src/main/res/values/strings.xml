@@ -59,4 +59,5 @@
     <string name="crash_log_file_exists">Crash log file exists</string>
     <string name="crash_log_was_found">A crash log was found. This is the exception which led to the crash. Please attach this to your bug report:</string>
     <string name="confirm_crash_log_deletion">OK, delete it</string>
+    <string name="camera">Camera</string>
 </resources>

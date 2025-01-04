@@ -20,18 +20,19 @@
 package io.github.chrisimx.scanbridge.uicomponents
 
 import android.content.Context
-import android.icu.text.DecimalFormat
 import android.icu.text.DecimalFormatSymbols
 import android.util.Log
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import io.github.chrisimx.scanbridge.R
+import io.github.chrisimx.scanbridge.util.toDoubleLocalized
 
 enum class ErrorState {
     NOT_WITHIN_ALLOWED_RANGE,
@@ -64,7 +65,7 @@ fun ValidatedDimensionsTextEdit(
     val decimalNumberRegex =
         "^[+]?\\d*(${Regex.escape(decimalSeparator.toString())})?\\d+\$".toRegex()
 
-    TextField(
+    OutlinedTextField(
         modifier = modifier,
         value = localContent,
         onValueChange = { newValue: String ->
@@ -72,19 +73,19 @@ fun ValidatedDimensionsTextEdit(
 
             val isValidNumber = newValue.matches(decimalNumberRegex)
             if (isValidNumber) {
-                val newNumber = DecimalFormat.getInstance().parse(newValue).toDouble()
+                val newNumber = newValue.toDoubleLocalized()
                 if (newNumber > max || newNumber < min) {
                     errorState.value = ErrorState.NOT_WITHIN_ALLOWED_RANGE
-                    return@TextField
+                    return@OutlinedTextField
                 }
                 errorState.value = ErrorState.NO_ERROR
                 updateDimensionState(newValue)
 
-                return@TextField
+                return@OutlinedTextField
             } else {
                 errorState.value = ErrorState.NOT_VALID_NUMBER
                 Log.d("ScanSettings", "Invalid Number")
-                return@TextField
+                return@OutlinedTextField
             }
 
         },
@@ -92,14 +93,15 @@ fun ValidatedDimensionsTextEdit(
             if (errorState.value != ErrorState.NO_ERROR) Text(
                 errorState.value.toHumanString(
                     context
-                )
+                ),
+                style = MaterialTheme.typography.labelSmall
             )
         },
         isError = errorState.value != ErrorState.NO_ERROR,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Decimal
         ),
-        label = @Composable { Text(label) },
+        label = @Composable { Text(label, style = MaterialTheme.typography.labelMedium) },
         singleLine = true
     )
 
