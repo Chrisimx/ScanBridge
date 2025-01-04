@@ -60,4 +60,8 @@
     <string name="crash_log_was_found">A crash log was found. This is the exception which led to the crash. Please attach this to your bug report:</string>
     <string name="confirm_crash_log_deletion">OK, delete it</string>
     <string name="camera">Camera</string>
+    <string name="temporary_files_found">Temporary files found</string>
+    <string name="temporary_files_dialog_content">Temporary files (scans and/or exports) were found in the app storage. These are files which remain in the app storage if the app is closed from the overview or killed by Android while being in a scanning session. The main reason for this dialog is that asking for confirmation of deletion was impossible when the app was closed in this way.\n\nWhat do you want to do with the following scan and export files?:\n%1$s</string>
+    <string name="delete">Delete</string>
+    <string name="do_nothing">Do nothing</string>
 </resources>

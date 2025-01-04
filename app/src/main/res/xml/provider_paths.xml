@@ -3,4 +3,7 @@
     <files-path
         name="exports"
         path="exports/" />
+    <files-path
+        name="exportTempFiles"
+        path="exportTempFiles/" />
 </paths>

@@ -35,8 +35,10 @@ class MainActivity : ComponentActivity() {
         if (this.getSharedPreferences("scanbridge", MODE_PRIVATE)
                 .getBoolean("auto_cleanup", false)
         ) {
-            cleanUpFiles()
+            cleanUpScansAndExportFiles()
         }
+
+        cleanUpCacheFiles()
 
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this))
 
@@ -45,8 +47,21 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun cleanUpFiles() {
-        Log.d("MainActivity", "Cleaning up files")
+    private fun cleanUpCacheFiles() {
+        Log.d("MainActivity", "Cleaning up cache files (used to provide data for sharing)")
+        val tempFileDir = File(filesDir, "exportTempFiles")
+        if (!tempFileDir.exists()) return
+        if (!tempFileDir.isDirectory) {
+            Log.e("MainActivity", "Temp file directory is not a directory!")
+            return
+        }
+        File(filesDir, "exportTempFiles").listFiles()?.forEach { file ->
+            file.delete()
+        }
+    }
+
+    private fun cleanUpScansAndExportFiles() {
+        Log.d("MainActivity", "Cleaning up scans and exports")
         filesDir.listFiles()?.forEach { file ->
             if (file.name.startsWith("scan")) {
                 file.delete()

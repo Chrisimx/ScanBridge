@@ -17,28 +17,25 @@
  *     SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package io.github.chrisimx.scanbridge
+package io.github.chrisimx.scanbridge.util
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.compose.rememberNavController
-import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
-import io.github.chrisimx.scanbridge.uicomponents.CrashFileHandler
-import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
-import io.github.chrisimx.scanbridge.util.doTempFilesExist
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
-@Composable
-fun ScanBridgeApp() {
-    ScanBridgeTheme {
-        val navController = rememberNavController()
-        val context = LocalContext.current
+fun zipFiles(files: List<File>, zipFile: File) {
+    ZipOutputStream(FileOutputStream(zipFile)).use { zos ->
+        files.forEach { file ->
+            FileInputStream(file).use { fis ->
+                val entry = ZipEntry(file.name)
+                zos.putNextEntry(entry)
 
-        ScanBridgeNavHost(navController)
+                fis.copyTo(zos, bufferSize = 1024)
 
-        if (doTempFilesExist(context.filesDir)) {
-            TemporaryFileHandler()
+                zos.closeEntry()
+            }
         }
-
-        CrashFileHandler()
     }
 }
