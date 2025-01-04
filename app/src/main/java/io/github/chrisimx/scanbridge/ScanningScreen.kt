@@ -169,8 +169,8 @@ fun doScan(
                 return@thread
             }
             nextPage.page.use {
-                val uuid = "scan-" + Uuid.random().toString()
-                val filePath = File(context.filesDir, uuid).toPath()
+                val scanPageFile = "scan-" + Uuid.random().toString() + ".jpg"
+                val filePath = File(context.filesDir, scanPageFile).toPath()
 
                 Log.d(TAG, "File created: $filePath")
 
