@@ -22,7 +22,7 @@ package io.github.chrisimx.scanbridge
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.rememberNavController
 import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
-
+import io.github.chrisimx.scanbridge.uicomponents.CrashFileHandler
 
 @Composable
 fun ScanBridgeApp() {
@@ -30,5 +30,7 @@ fun ScanBridgeApp() {
         val navController = rememberNavController()
 
         ScanBridgeNavHost(navController)
+
+        CrashFileHandler()
     }
 }

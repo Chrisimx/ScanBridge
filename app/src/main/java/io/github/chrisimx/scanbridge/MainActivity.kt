@@ -38,6 +38,8 @@ class MainActivity : ComponentActivity() {
             cleanUpFiles()
         }
 
+        Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this))
+
         setContent {
             ScanBridgeApp()
         }
