@@ -19,12 +19,11 @@
 
 package io.github.chrisimx.scanbridge.data.ui
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
-import io.github.chrisimx.scanbridge.data.model.MutableESCLScanSettingsState
+import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 
@@ -58,7 +57,7 @@ class ScanningScreenViewModel(
         _scanningScreenData.capabilities.value = caps
         _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
             ScanSettingsComposableData(
-                MutableESCLScanSettingsState(mutableStateOf(caps.interfaceVersion)),
+                caps.calculateDefaultESCLScanSettingsState(),
                 caps,
             )
         )

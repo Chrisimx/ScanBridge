@@ -21,10 +21,14 @@ package io.github.chrisimx.scanbridge.util
 
 import android.content.Context
 import android.icu.text.DecimalFormat
+import androidx.compose.runtime.mutableStateOf
 import io.github.chrisimx.esclkt.InputSource
+import io.github.chrisimx.esclkt.InputSourceCaps
 import io.github.chrisimx.esclkt.JobState
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.scanbridge.R
+import io.github.chrisimx.scanbridge.data.model.MutableESCLScanSettingsState
+import io.github.chrisimx.scanbridge.data.model.MutableScanRegionState
 
 fun JobState?.toJobStateString(context: Context): String {
     return when (this) {
@@ -39,6 +43,8 @@ fun JobState?.toJobStateString(context: Context): String {
 
 fun String.toDoubleLocalized(): Double = DecimalFormat.getInstance().parse(this).toDouble()
 
+fun Double.toStringLocalized(): String = DecimalFormat.getInstance().format(this)
+
 fun ScannerCapabilities.getInputSourceOptions(): List<InputSource> {
     val tmpInputSourceOptions = mutableListOf<InputSource>()
     if (this.platen != null) {
@@ -50,10 +56,42 @@ fun ScannerCapabilities.getInputSourceOptions(): List<InputSource> {
     return tmpInputSourceOptions
 }
 
+fun ScannerCapabilities.getInputSourceCaps(
+    inputSource: InputSource,
+    duplex: Boolean = false
+): InputSourceCaps {
+    return when (inputSource) {
+        InputSource.Platen -> this.platen!!.inputSourceCaps
+        InputSource.Feeder -> if (duplex) this.adf!!.duplexCaps!! else this.adf!!.simplexCaps
+        InputSource.Camera -> TODO()
+    }
+}
+
 fun InputSource.toReadableString(context: Context): String {
     return when (this) {
         InputSource.Platen -> context.getString(R.string.platen)
         InputSource.Feeder -> context.getString(R.string.adf)
-        InputSource.Camera -> TODO()
+        InputSource.Camera -> context.getString(R.string.adf)
     }
+}
+
+fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): MutableESCLScanSettingsState {
+    val inputSource = this.getInputSourceOptions().firstOrNull() ?: InputSource.Platen
+    val inputCaps = this.getInputSourceCaps(inputSource)
+    val maxResolution = inputCaps
+        .settingProfiles.first()
+        .supportedResolutions.maxBy { it.xResolution }
+    val maxScanRegion = MutableScanRegionState(
+        heightState = mutableStateOf(inputCaps.maxHeight.toMillimeters().value.toStringLocalized()),
+        widthState = mutableStateOf(inputCaps.maxWidth.toMillimeters().value.toStringLocalized()),
+    )
+
+    return MutableESCLScanSettingsState(
+        versionState = mutableStateOf(this.interfaceVersion),
+        inputSourceState = mutableStateOf(inputSource),
+        scanRegionsState = mutableStateOf(maxScanRegion),
+        xResolutionState = mutableStateOf(maxResolution.xResolution),
+        yResolutionState = mutableStateOf(maxResolution.yResolution),
+        documentFormatExtState = mutableStateOf("image/jpeg"),
+    )
 }

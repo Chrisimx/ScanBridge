@@ -3,6 +3,7 @@ package io.github.chrisimx.scanbridge.data.model
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import io.github.chrisimx.esclkt.InputSourceCaps
 import io.github.chrisimx.esclkt.LengthUnit
@@ -45,8 +46,8 @@ data class MutableScanRegionState(
     // These are to be given in millimeters!
     private val heightState: MutableState<String>,
     private val widthState: MutableState<String>,
-    private val xOffsetState: MutableState<String>,
-    private val yOffsetState: MutableState<String>,
+    private val xOffsetState: MutableState<String> = mutableStateOf("0"),
+    private val yOffsetState: MutableState<String> = mutableStateOf("0"),
 ) {
     var height by heightState
     var width by widthState
