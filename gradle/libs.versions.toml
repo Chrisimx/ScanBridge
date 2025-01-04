@@ -1,6 +1,7 @@
 [versions]
 agp = "8.7.3"
 coilCompose = "3.0.4"
+constraintlayoutCompose = "1.1.0"
 esclkt = "1.2.0"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -19,6 +20,7 @@ materialIcons = "1.7.6"
 navigationCompose = "2.8.5"
 
 [libraries]
+androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core" , version.ref = "materialIcons"}

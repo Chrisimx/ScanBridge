@@ -20,13 +20,12 @@
 package io.github.chrisimx.scanbridge
 
 import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -61,6 +60,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import io.github.chrisimx.scanbridge.theme.Poppins
 import io.github.chrisimx.scanbridge.theme.Teal1
 import io.github.chrisimx.scanbridge.theme.gradientBrush
@@ -100,6 +101,78 @@ fun VersionComposable() {
             fontStyle = FontStyle.Italic,
             fontFamily = Poppins
         )
+    }
+}
+
+@Composable
+fun AutoDeleteTempFiles(
+    sharedPreferences: SharedPreferences,
+    automaticCleanup: Boolean,
+    onInformationRequested: (String) -> Unit,
+    setAutomaticCleanup: (Boolean) -> Unit
+) {
+    ConstraintLayout(
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
+            .toggleable(
+                value = automaticCleanup,
+                onValueChange = {
+                    sharedPreferences
+                        .edit()
+                        .putBoolean("auto_cleanup", it)
+                        .apply()
+                    setAutomaticCleanup(it)
+                },
+                role = Role.Checkbox
+            )
+    ) {
+        val (checkbox, content, informationButton) = createRefs()
+
+        Checkbox(
+            checked = automaticCleanup,
+            onCheckedChange = null,
+            modifier = Modifier
+                .constrainAs(checkbox) {
+                    start.linkTo(parent.start)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                }
+        )
+        Text(
+            text = stringResource(R.string.auto_cleanup),
+            modifier = Modifier
+                .constrainAs(content) {
+                    start.linkTo(checkbox.end, 12.dp)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    end.linkTo(informationButton.start, 12.dp)
+                    width = Dimension.fillToConstraints
+                },
+            style = MaterialTheme.typography.bodyMedium
+        )
+        val context = LocalContext.current
+        Box(modifier = Modifier
+            .constrainAs(informationButton) {
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                end.linkTo(parent.end)
+            }) {
+            IconButton(onClick = {
+                onInformationRequested(
+                    context.getString(
+                        R.string.auto_cleanup_explanation,
+                        context.getString(R.string.app_name)
+                    )
+                )
+            }) {
+                Icon(
+                    Icons.Outlined.Info,
+                    contentDescription = stringResource(R.string.auto_cleanup_info_desc)
+                )
+            }
+        }
+
     }
 }
 
@@ -154,52 +227,13 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                     fontSize = 20.sp,
                     color = Teal1
                 )
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .toggleable(
-                            value = automaticCleanup,
-                            onValueChange = {
-                                sharedPreferences
-                                    .edit()
-                                    .putBoolean("auto_cleanup", it)
-                                    .apply()
-                                automaticCleanup = it
-                            },
-                            role = Role.Checkbox
-                        )
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = automaticCleanup,
-                        modifier = Modifier.weight(0.1f),
-                        onCheckedChange = null
-                    )
-                    Text(
-                        text = stringResource(R.string.auto_cleanup),
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .weight(0.6f),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    val context = LocalContext.current
-                    Box(modifier = Modifier.weight(0.1f)) {
-                        IconButton(onClick = {
-                            information = context.getString(
-                                R.string.auto_cleanup_explanation,
-                                context.getString(R.string.app_name)
-                            )
-                        }) {
-                            Icon(
-                                Icons.Outlined.Info,
-                                contentDescription = stringResource(R.string.auto_cleanup_info_desc)
-                            )
-                        }
-                    }
 
-                }
+                AutoDeleteTempFiles(
+                    sharedPreferences,
+                    automaticCleanup,
+                    { information = it },
+                    { automaticCleanup = it }
+                )
             }
         }
 
