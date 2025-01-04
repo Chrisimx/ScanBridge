@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.chrisimx.scanbridge.theme.Poppins
+import io.github.chrisimx.scanbridge.theme.Teal1
 import io.github.chrisimx.scanbridge.theme.gradientBrush
 
 @Composable
@@ -112,7 +113,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                     fontFamily = Poppins,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 20.sp,
-                    style = TextStyle(brush = gradientBrush),
+                    color = Teal1
                 )
                 Row(
                     Modifier
