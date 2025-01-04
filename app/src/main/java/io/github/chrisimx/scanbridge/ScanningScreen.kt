@@ -19,6 +19,7 @@
 
 package io.github.chrisimx.scanbridge
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -26,6 +27,10 @@ import android.graphics.Rect
 import android.graphics.pdf.PdfDocument
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -305,6 +310,7 @@ fun ScanningScreenBottomBar(
     )
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanningScreen(
@@ -334,36 +340,44 @@ fun ScanningScreen(
         }
     }
 
-    if (!isLoaded && !isError) {
-        LaunchedEffect(Unit) {
-            thread {
-                retrieveScannerCapabilities(
-                    scannerAddress,
-                    scanningViewModel,
-                    context,
-                    scope,
-                    snackbarHostState
+    if (!isLoaded) {
+        Scaffold { innerPadding ->
+            if (!isLoaded && !isError) {
+                LaunchedEffect(Unit) {
+                    thread {
+                        retrieveScannerCapabilities(
+                            scannerAddress,
+                            scanningViewModel,
+                            context,
+                            scope,
+                            snackbarHostState
+                        )
+                    }
+                }
+
+                LoadingScreen(
+                    loadingText = R.string.trying_to_retrieve_scannercapabilities
+                )
+            }
+
+            AnimatedVisibility(
+                isError,
+                enter = fadeIn(animationSpec = tween(1000)),
+                exit = fadeOut(animationSpec = tween(1000)),
+            ) {
+                FullScreenError(
+                    R.drawable.twotone_wifi_find_24,
+                    stringResource(
+                        R.string.scannercapabilities_retrieve_error,
+                        scanningViewModel.scanningScreenData.errorString!!
+                    ),
+                    copyButton = true
                 )
             }
         }
 
-        LoadingScreen(
-            loadingText = R.string.trying_to_retrieve_scannercapabilities
-        )
+        return
     }
-
-    if (isError) {
-        FullScreenError(
-            R.drawable.rounded_scanner_24,
-            stringResource(
-                R.string.scannercapabilities_retrieve_error,
-                scanningViewModel.scanningScreenData.errorString!!
-            ),
-            copyButton = true
-        )
-    }
-
-    if (!isLoaded) return
 
     BackHandler {
         scanningViewModel.setConfirmDialogShown(true)
@@ -457,7 +471,10 @@ fun ScanContent(
             }
         }
     } else if (!scanningViewModel.scanningScreenData.scanJobRunning) {
-        FullScreenError(R.drawable.rounded_scanner_24, stringResource(R.string.no_scans_yet))
+        FullScreenError(
+            R.drawable.rounded_document_scanner_24,
+            stringResource(R.string.no_scans_yet)
+        )
     }
 
     HorizontalPager(

@@ -62,8 +62,16 @@ fun FoundScannerItem(name: String, address: String, navController: NavController
                 contentDescription = stringResource(id = R.string.print_symbol_desc)
             )
             Column {
-                Text(name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(address)
+                Text(
+                    name,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Text(
+                    address,
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         }
     }

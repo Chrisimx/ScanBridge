@@ -20,6 +20,7 @@
 package io.github.chrisimx.scanbridge
 
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -107,12 +108,16 @@ fun StartupScreen(navController: NavController) {
             }
         }) { innerPadding ->
 
-        when (selectedItem.intValue) {
-            0 -> ScannerBrowser(innerPadding, navController, statefulScannerMap)
-            1 -> {
-                AppSettingsScreen(innerPadding)
+        AnimatedContent(
+            targetState = selectedItem.intValue,
+            label = "StartupScreen bottom navigation"
+        ) {
+            when (it) {
+                0 -> ScannerBrowser(innerPadding, navController, statefulScannerMap)
+                1 -> {
+                    AppSettingsScreen(innerPadding)
+                }
             }
         }
-
     }
 }

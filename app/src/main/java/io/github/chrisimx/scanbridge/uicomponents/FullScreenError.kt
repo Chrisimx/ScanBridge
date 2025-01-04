@@ -28,10 +28,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -49,41 +48,38 @@ import io.github.chrisimx.scanbridge.R
 fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = false) {
     val context = LocalContext.current
 
-    Scaffold { innerPadding ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 40.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            painter = painterResource(errorIcon),
+            contentDescription = stringResource(R.string.warning_desc),
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            errorMessage,
             modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(innerPadding)
-                .padding(horizontal = 40.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                painter = painterResource(errorIcon),
-                contentDescription = stringResource(R.string.warning_desc),
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.error
-            )
-            Text(
-                errorMessage,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Light,
-                fontSize = 18.sp,
-            )
+                .fillMaxWidth()
+                .padding(20.dp),
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Light,
+            fontSize = 18.sp,
+        )
 
-            if (copyButton) {
-                Button(onClick = {
-                    val clipboardManager = context.getSystemService(ClipboardManager::class.java)
-                    val clipData =
-                        ClipData.newPlainText(context.getString(R.string.error), errorMessage)
-                    clipboardManager.setPrimaryClip(clipData)
-                }) {
-                    Text(stringResource(R.string.copy))
-                }
+        if (copyButton) {
+            OutlinedButton(onClick = {
+                val clipboardManager = context.getSystemService(ClipboardManager::class.java)
+                val clipData =
+                    ClipData.newPlainText(context.getString(R.string.error), errorMessage)
+                clipboardManager.setPrimaryClip(clipData)
+            }) {
+                Text(stringResource(R.string.copy))
             }
         }
     }
