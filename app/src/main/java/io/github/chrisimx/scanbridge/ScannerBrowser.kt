@@ -22,6 +22,7 @@ package io.github.chrisimx.scanbridge
 import android.content.Context
 import android.net.nsd.NsdManager
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.navigation.NavController
@@ -87,11 +87,14 @@ fun ScannerBrowser(
     navController: NavController,
     statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>
 ) {
-    val context = LocalContext.current
-
-    if (statefulScannerMap.isNotEmpty()) {
-        ScannerList(innerPadding, navController, statefulScannerMap)
-    } else {
-        FullScreenError(R.drawable.twotone_wifi_find_24, stringResource(R.string.no_scanners_found))
+    AnimatedContent(targetState = statefulScannerMap.isNotEmpty(), label = "ScannerList") {
+        if (it) {
+            ScannerList(innerPadding, navController, statefulScannerMap)
+        } else {
+            FullScreenError(
+                R.drawable.twotone_wifi_find_24,
+                stringResource(R.string.no_scanners_found)
+            )
+        }
     }
 }
