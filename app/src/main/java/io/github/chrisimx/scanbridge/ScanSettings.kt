@@ -24,6 +24,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -221,7 +222,7 @@ fun ScanSettingsUI(
                         label = { Text(stringResource(R.string.custom)) }
                     )
                 }
-                if (scanSettingsUIState.customMenuEnabled) {
+                AnimatedVisibility(scanSettingsUIState.customMenuEnabled) {
                     Row(horizontalArrangement = Arrangement.SpaceEvenly) {
                         ValidatedDimensionsTextEdit(
                             scanSettingsUIState.widthTextFieldString,
