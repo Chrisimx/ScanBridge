@@ -95,6 +95,7 @@ import io.github.chrisimx.scanbridge.uicomponents.dialog.ConfirmCloseDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
 import io.github.chrisimx.scanbridge.util.snackBarError
 import io.github.chrisimx.scanbridge.util.toJobStateString
+import io.github.chrisimx.scanbridge.util.zipFiles
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.ZoomSpec
@@ -130,62 +131,91 @@ fun retrieveScannerCapabilities(
 }
 
 fun doExport(scanningViewModel: ScanningScreenViewModel, context: Context) {
+    if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
+        return
+    }
+
     scanningViewModel.setExportRunning(true)
 
     val parentDir = File(context.filesDir, "exports")
     if (!parentDir.exists()) {
         parentDir.mkdir()
     }
-    val pdfFile = File(
-        parentDir, "pdfexport-${
-            LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH_mm_ss_SSS"))
-        }.pdf"
-    )
-    var i = 0
-    PdfWriter(pdfFile).use { writer ->
-        PdfDocument(writer).use { pdf ->
-            Document(pdf).use { document ->
-                for (scan in scanningViewModel.scanningScreenData.currentScansState) {
-                    val scanRegion =
-                        scan.second.scanRegions?.regions?.first() ?: ScanRegion(
-                            297.millimeters().toThreeHundredthsOfInch(),
-                            210.millimeters().toThreeHundredthsOfInch(),
-                            0.threeHundredthsOfInch(),
-                            0.threeHundredthsOfInch()
+
+    val nameRoot = "pdfexport-${
+        LocalDateTime.now()
+            .format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH_mm_ss_SSS"))
+    }"
+
+    var pageCounter = 0
+
+    val chunks = scanningViewModel.scanningScreenData.currentScansState.chunked(50)
+
+    chunks.forEachIndexed { index, chunk ->
+        val pdfFile = File(
+            parentDir, "$nameRoot-${index}.pdf"
+        )
+        PdfWriter(pdfFile).use { writer ->
+            PdfDocument(writer).use { pdf ->
+                Document(pdf).use { document ->
+                    chunk.forEachIndexed { i, scan ->
+                        val scanRegion =
+                            scan.second.scanRegions?.regions?.first() ?: ScanRegion(
+                                297.millimeters().toThreeHundredthsOfInch(),
+                                210.millimeters().toThreeHundredthsOfInch(),
+                                0.threeHundredthsOfInch(),
+                                0.threeHundredthsOfInch()
+                            )
+                        val width72thInches =
+                            scanRegion.width.toInches().value * 72.0
+                        val height72thInches =
+                            scanRegion.height.toInches().value * 72.0
+                        pdf.addNewPage(
+                            PageSize(
+                                width72thInches.toFloat(),
+                                height72thInches.toFloat()
+                            )
                         )
-                    val width72thInches =
-                        scanRegion.width.toInches().value * 72.0
-                    val height72thInches =
-                        scanRegion.height.toInches().value * 72.0
-                    pdf.addNewPage(PageSize(width72thInches.toFloat(), height72thInches.toFloat()))
 
-                    val imageElem = Image(ImageDataFactory.create(scan.first))
-                    imageElem.setFixedPosition(i + 1, 0f, 0f)
-                    imageElem.setHeight(height72thInches.toFloat())
-                    imageElem.setWidth(width72thInches.toFloat())
+                        val imageElem = Image(ImageDataFactory.create(scan.first))
+                        imageElem.setFixedPosition(i + 1, 0f, 0f)
+                        imageElem.setHeight(height72thInches.toFloat())
+                        imageElem.setWidth(width72thInches.toFloat())
 
-                    document.add(imageElem)
+                        document.add(imageElem)
 
-                    if ((i + 1) % 50 == 0) {
-                        document.flush()
+                        pageCounter++
+                        Log.d(TAG, "Added page $pageCounter to PDF")
                     }
-
-                    i++
-                    Log.d(TAG, "Added page $i to PDF")
                 }
             }
         }
     }
+
+    val tempPdfFiles = chunks.mapIndexed { index, _ ->
+        File(parentDir, "$nameRoot-${index}.pdf")
+    }
+
+    tempPdfFiles.forEach { scanningViewModel.addTempFile(it) }
+
+    var outputFile: File
+    if (tempPdfFiles.size > 1) {
+        outputFile = File(parentDir, "$nameRoot.zip")
+        zipFiles(tempPdfFiles, outputFile)
+        scanningViewModel.addTempFile(outputFile)
+    } else {
+        outputFile = tempPdfFiles[0]
+    }
+
     scanningViewModel.setExportRunning(false)
     val share = Intent(Intent.ACTION_SEND)
-    share.type = "application/pdf"
+    share.type = if (tempPdfFiles.size > 1) "application/zip" else "application/pdf"
     share.putExtra(
         Intent.EXTRA_STREAM,
         FileProvider.getUriForFile(
             context,
             "${context.packageName}.fileprovider",
-            pdfFile
+            outputFile
         )
     )
     context.startActivity(share)
@@ -440,6 +470,8 @@ fun ScanningScreen(
                     scanningViewModel.scanningScreenData.currentScansState.forEach {
                         Files.delete(Path(it.first))
                     }
+                    scanningViewModel.scanningScreenData.createdTempFiles.forEach(File::delete)
+
                     scanningViewModel.scanningScreenData.currentScansState.clear()
                     scanningViewModel.setConfirmDialogShown(false)
                     navController.popBackStack()

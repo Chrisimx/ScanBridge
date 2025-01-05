@@ -29,6 +29,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
+import java.io.File
 
 data class ScanningScreenData(
     val esclClient: ESCLRequestClient,
@@ -40,6 +41,7 @@ data class ScanningScreenData(
     val scanJobRunning: MutableState<Boolean> = mutableStateOf(false),
     val stateExportRunning: MutableState<Boolean> = mutableStateOf(false),
     val stateCurrentScans: SnapshotStateList<Pair<String, ScanSettings>> = mutableStateListOf(),
+    val createdTempFiles: MutableList<File> = mutableListOf(),
     val pagerState: PagerState = PagerState {
         stateCurrentScans.size + if (scanJobRunning.value) 1 else 0
     },
@@ -53,6 +55,7 @@ data class ScanningScreenData(
         scanSettingsMenuOpen,
         scanJobRunning,
         stateExportRunning,
+        createdTempFiles,
         pagerState,
         stateCurrentScans
     )
@@ -67,6 +70,7 @@ data class ImmutableScanningScreenData(
     private val scanSettingsMenuOpenState: State<Boolean>,
     private val scanJobRunningState: State<Boolean>,
     private val exportRunningState: State<Boolean>,
+    val createdTempFiles: List<File>,
     val pagerState: PagerState,
     val currentScansState: SnapshotStateList<Pair<String, ScanSettings>>,
 ) {

@@ -28,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
+import java.io.File
 
 class ScanningScreenViewModel(
     address: HttpUrl,
@@ -40,9 +41,17 @@ class ScanningScreenViewModel(
         get() = _scanningScreenData.toImmutable()
 
 
+    fun addTempFile(file: File) {
+        _scanningScreenData.createdTempFiles.add(file)
+    }
+
+    fun removeTempFile(index: Int) {
+        _scanningScreenData.createdTempFiles.removeAt(index)
+    }
+
     fun scrollToPage(pageNr: Int, scope: CoroutineScope) {
         scope.launch {
-            scanningScreenData.pagerState.animateScrollToPage(
+            _scanningScreenData.pagerState.animateScrollToPage(
                 scanningScreenData.currentScansState.size
             )
         }
