@@ -342,7 +342,7 @@ fun ScanningScreen(
 
     if (!isLoaded) {
         Scaffold { innerPadding ->
-            if (!isLoaded && !isError) {
+            if (!isError) {
                 LaunchedEffect(Unit) {
                     thread {
                         retrieveScannerCapabilities(
@@ -405,7 +405,7 @@ fun ScanningScreen(
     ) { innerPadding ->
 
         if (scanningViewModel.scanningScreenData.capabilities != null) {
-            ScanContent(innerPadding, scanningViewModel, scope)
+            ScanContent(innerPadding, scannerName, scanningViewModel, scope)
         }
 
         if (scanningViewModel.scanningScreenData.scanSettingsMenuOpen) {
@@ -441,6 +441,7 @@ fun ScanningScreen(
 @Composable
 fun ScanContent(
     innerPadding: PaddingValues,
+    scannerName: String,
     scanningViewModel: ScanningScreenViewModel,
     coroutineScope: CoroutineScope
 ) {
@@ -458,6 +459,7 @@ fun ScanContent(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(scannerName)
             Text(
                 stringResource(
                     R.string.page_x_of_y,
