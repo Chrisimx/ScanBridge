@@ -24,6 +24,8 @@ import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 
@@ -36,6 +38,15 @@ class ScanningScreenViewModel(
         )
     val scanningScreenData: ImmutableScanningScreenData
         get() = _scanningScreenData.toImmutable()
+
+
+    fun scrollToPage(pageNr: Int, scope: CoroutineScope) {
+        scope.launch {
+            scanningScreenData.pagerState.animateScrollToPage(
+                scanningScreenData.currentScansState.size
+            )
+        }
+    }
 
     fun setScanSettingsMenuOpen(value: Boolean) {
         _scanningScreenData.scanSettingsMenuOpen.value = value

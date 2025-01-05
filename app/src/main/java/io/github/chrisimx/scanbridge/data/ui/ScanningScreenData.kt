@@ -19,6 +19,7 @@
 
 package io.github.chrisimx.scanbridge.data.ui
 
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -38,7 +39,10 @@ data class ScanningScreenData(
     val scanSettingsMenuOpen: MutableState<Boolean> = mutableStateOf(false),
     val scanJobRunning: MutableState<Boolean> = mutableStateOf(false),
     val stateExportRunning: MutableState<Boolean> = mutableStateOf(false),
-    val stateCurrentScans: SnapshotStateList<Pair<String, ScanSettings>> = mutableStateListOf()
+    val stateCurrentScans: SnapshotStateList<Pair<String, ScanSettings>> = mutableStateListOf(),
+    val pagerState: PagerState = PagerState {
+        stateCurrentScans.size + if (scanJobRunning.value) 1 else 0
+    },
 ) {
     fun toImmutable() = ImmutableScanningScreenData(
         esclClient,
@@ -49,6 +53,7 @@ data class ScanningScreenData(
         scanSettingsMenuOpen,
         scanJobRunning,
         stateExportRunning,
+        pagerState,
         stateCurrentScans
     )
 }
@@ -62,6 +67,7 @@ data class ImmutableScanningScreenData(
     private val scanSettingsMenuOpenState: State<Boolean>,
     private val scanJobRunningState: State<Boolean>,
     private val exportRunningState: State<Boolean>,
+    val pagerState: PagerState,
     val currentScansState: SnapshotStateList<Pair<String, ScanSettings>>,
 ) {
     val confirmDialogShown by confirmDialogShownState

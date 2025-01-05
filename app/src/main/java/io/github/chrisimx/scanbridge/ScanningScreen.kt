@@ -40,7 +40,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -149,6 +148,10 @@ fun doScan(
         }
 
         viewModel.setScanJobRunning(true)
+        viewModel.scrollToPage(
+            scope = scope,
+            pageNr = viewModel.scanningScreenData.currentScansState.size
+        )
 
         val job =
             esclRequestClient.createJob(scanSettings)
@@ -285,16 +288,18 @@ fun ScanningScreenBottomBar(
                 onClick = {
                     val scanSettingsData =
                         scanningViewModel.scanningScreenData.scanSettingsVM!!.scanSettingsComposableData
-                    doScan(
-                        scanningViewModel.scanningScreenData.esclClient,
-                        context,
-                        scope,
-                        snackbarHostState,
-                        scanSettingsData.scanSettingsState.toESCLKtScanSettings(
-                            scanSettingsData.selectedInputSourceCapabilities
-                        ),
-                        scanningViewModel
-                    )
+                    thread {
+                        doScan(
+                            scanningViewModel.scanningScreenData.esclClient,
+                            context,
+                            scope,
+                            snackbarHostState,
+                            scanSettingsData.scanSettingsState.toESCLKtScanSettings(
+                                scanSettingsData.selectedInputSourceCapabilities
+                            ),
+                            scanningViewModel
+                        )
+                    }
                 },
                 icon = {
                     Icon(
@@ -445,11 +450,7 @@ fun ScanContent(
     scanningViewModel: ScanningScreenViewModel,
     coroutineScope: CoroutineScope
 ) {
-    val pagerState = rememberPagerState(
-        pageCount = {
-            scanningViewModel.scanningScreenData.currentScansState.size + if (scanningViewModel.scanningScreenData.scanJobRunning) 1 else 0
-        }
-    )
+    val pagerState = scanningViewModel.scanningScreenData.pagerState
 
     if (!scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
         Column(
