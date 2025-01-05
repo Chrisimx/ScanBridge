@@ -73,4 +73,9 @@
     <string name="invalid_url">Invalid URL</string>
     <string name="error_state_please_enter_an_url">Please enter an URL</string>
     <string name="custom_scanner">Custom scanner</string>
+    <string name="export_pdf">Export as PDF</string>
+    <string name="export_as_archive">Export as archive of JPEGs</string>
+    <string name="no_further_pages">No further pages. %1$s</string>
+    <string name="error_while_copying_received_image_to_file">Error while copying received image to file: %1$s</string>
+    <string name="couldn_t_decode_received_image">Couldn\'t decode received image. %1$s</string>
 </resources>

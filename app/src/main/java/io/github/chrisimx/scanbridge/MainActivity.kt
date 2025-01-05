@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         File(filesDir, "exports").listFiles()?.forEach { file ->
-            if (file.name.startsWith("pdfexport")) {
+            if (file.name.startsWith("pdfexport") || file.name.startsWith("zipexport")) {
                 file.delete()
             }
         }

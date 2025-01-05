@@ -29,16 +29,34 @@ import io.github.chrisimx.scanbridge.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-fun snackBarError(
+fun snackbarErrorRetrievingPage(
     error: String,
     scope: CoroutineScope,
     context: Context,
     snackbarHostState: SnackbarHostState,
     action: Boolean = true
 ) {
+    snackBarError(
+        context.getString(R.string.error_while_retrieving_page, error),
+        scope,
+        context,
+        snackbarHostState,
+        action,
+        error
+    )
+}
+
+fun snackBarError(
+    error: String,
+    scope: CoroutineScope,
+    context: Context,
+    snackbarHostState: SnackbarHostState,
+    action: Boolean = true,
+    copyData: String? = null,
+) {
     scope.launch {
         val result = snackbarHostState.showSnackbar(
-            context.getString(R.string.error_while_retrieving_page, error),
+            error,
             if (action) context.getString(R.string.copy) else null,
             true
         )
@@ -49,7 +67,7 @@ fun snackBarError(
                 systemClipboard.setPrimaryClip(
                     ClipData.newPlainText(
                         context.getString(R.string.error),
-                        error
+                        copyData ?: error
                     )
                 )
             }

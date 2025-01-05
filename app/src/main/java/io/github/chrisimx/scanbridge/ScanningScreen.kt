@@ -27,6 +27,7 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -46,7 +47,6 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,12 +65,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -86,17 +90,20 @@ import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Image
 import io.github.chrisimx.esclkt.ESCLRequestClient
+import io.github.chrisimx.esclkt.JobState
 import io.github.chrisimx.esclkt.ScanRegion
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
+import io.github.chrisimx.scanbridge.uicomponents.ExportSettingsPopup
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen
 import io.github.chrisimx.scanbridge.uicomponents.dialog.ConfirmCloseDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
 import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.snackBarError
+import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.toJobStateString
 import io.github.chrisimx.scanbridge.util.zipFiles
 import kotlinx.coroutines.CoroutineScope
@@ -180,8 +187,68 @@ fun rotate(
     scanningViewModel.setLoadingText(null)
 }
 
-fun doExport(scanningViewModel: ScanningScreenViewModel, context: Context) {
+fun doZipExport(
+    scanningViewModel: ScanningScreenViewModel,
+    context: Context,
+    onError: (String) -> Unit
+) {
     if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
+        onError(context.getString(R.string.no_scans_yet))
+        return
+    }
+    if (scanningViewModel.scanningScreenData.scanJobRunning) {
+        onError(context.getString(R.string.job_still_running))
+        return
+    }
+
+    scanningViewModel.setLoadingText(R.string.exporting)
+
+    val parentDir = File(context.filesDir, "exports")
+    if (!parentDir.exists()) {
+        parentDir.mkdir()
+    }
+
+    val name = "zipexport-${
+        LocalDateTime.now()
+            .format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH_mm_ss_SSS"))
+    }.zip"
+
+    val zipOutputFile = File(parentDir, name)
+
+    var counter = 0
+    val digitsNeeded = scanningViewModel.scanningScreenData.currentScansState.size.toString().length
+    zipFiles(
+        scanningViewModel.scanningScreenData.currentScansState.map { File(it.first) },
+        zipOutputFile,
+        { counter++; "scan-${counter.toString().padStart(digitsNeeded, '0')}.jpg" }
+    )
+
+    scanningViewModel.setLoadingText(null)
+
+    val share = Intent(Intent.ACTION_SEND)
+    share.type = "application/zip"
+    share.putExtra(
+        Intent.EXTRA_STREAM,
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            zipOutputFile
+        )
+    )
+    context.startActivity(share)
+}
+
+fun doPdfExport(
+    scanningViewModel: ScanningScreenViewModel,
+    context: Context,
+    onError: (String) -> Unit
+) {
+    if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
+        onError(context.getString(R.string.no_scans_yet))
+        return
+    }
+    if (scanningViewModel.scanningScreenData.scanJobRunning) {
+        onError(context.getString(R.string.job_still_running))
         return
     }
 
@@ -254,8 +321,9 @@ fun doExport(scanningViewModel: ScanningScreenViewModel, context: Context) {
         }
     }
 
+    val digitsNeeded = chunks.size.toString().length
     val tempPdfFiles = chunks.mapIndexed { index, _ ->
-        File(parentDir, "$nameRoot-${index}.pdf")
+        File(parentDir, "$nameRoot-${index.toString().padStart(digitsNeeded, '0')}.pdf")
     }
 
     tempPdfFiles.forEach { scanningViewModel.addTempFile(it) }
@@ -294,7 +362,7 @@ fun doScan(
 ) {
     thread {
         if (viewModel.scanningScreenData.scanJobRunning) {
-            snackBarError(
+            snackbarErrorRetrievingPage(
                 context.getString(R.string.job_still_running),
                 scope,
                 context,
@@ -315,7 +383,7 @@ fun doScan(
         Log.d(TAG, "Sent scan request to scanner. Result: $job")
         if (job !is ESCLRequestClient.ScannerCreateJobResult.Success) {
             viewModel.setScanJobRunning(false)
-            snackBarError(job.toString(), scope, context, snackbarHostState)
+            snackbarErrorRetrievingPage(job.toString(), scope, context, snackbarHostState)
             return@thread
         }
 
@@ -325,8 +393,20 @@ fun doScan(
             val jobStateString = status?.jobState.toJobStateString(context)
             if (nextPage is ESCLRequestClient.ScannerNextPageResult.NoFurtherPages) {
                 viewModel.setScanJobRunning(false)
-                scope.launch {
-                    snackbarHostState.showSnackbar("No further pages. $jobStateString")
+                viewModel.scrollToPage(
+                    scope = scope,
+                    pageNr = viewModel.scanningScreenData.currentScansState.size
+                )
+                if (status?.jobState != JobState.Completed) {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            context.getString(
+                                R.string.no_further_pages,
+                                jobStateString
+                            ),
+                            withDismissAction = true
+                        )
+                    }
                 }
                 return@thread
             } else if (nextPage !is ESCLRequestClient.ScannerNextPageResult.Success) {
@@ -339,12 +419,28 @@ fun doScan(
 
                 Log.d(TAG, "File created: $filePath")
 
-                Files.copy(it.data.body!!.byteStream(), filePath)
+                try {
+                    Files.copy(it.data.body!!.byteStream(), filePath)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error while copying received image to file", e)
+                    viewModel.setScanJobRunning(false)
+                    snackbarErrorRetrievingPage(
+                        context.getString(
+                            R.string.error_while_copying_received_image_to_file,
+                            e.message
+                        ),
+                        scope,
+                        context,
+                        snackbarHostState
+                    )
+                    return@thread
+                }
+
                 val imageBitmap = BitmapFactory.decodeFile(filePath.toString())?.asImageBitmap()
                 if (imageBitmap == null) {
                     Log.e(TAG, "Couldn't decode received image")
-                    snackBarError(
-                        "Couldn't decode received image. $jobStateString",
+                    snackbarErrorRetrievingPage(
+                        context.getString(R.string.couldn_t_decode_received_image, jobStateString),
                         scope,
                         context,
                         snackbarHostState
@@ -362,7 +458,8 @@ fun doScan(
 fun ScanningScreenBottomBar(
     scanningViewModel: ScanningScreenViewModel,
     scope: CoroutineScope,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    onExportPositionChange: (Pair<Int, Int>) -> Unit
 ) {
     val context = LocalContext.current
     BottomAppBar(
@@ -375,10 +472,17 @@ fun ScanningScreenBottomBar(
                 Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
             }
             IconButton(onClick = {
-                thread {
-                    doExport(scanningViewModel, context)
+                scanningViewModel.setShowExportOptionsPopup(true)
+            },
+                modifier = Modifier.onGloballyPositioned {
+                    onExportPositionChange(
+                        Pair(
+                            it.positionInWindow().x.toInt(),
+                            it.positionInWindow().y.toInt()
+                        )
+                    )
                 }
-            }) {
+            ) {
                 Icon(
                     Icons.Filled.Share,
                     contentDescription = stringResource(R.string.export)
@@ -502,7 +606,13 @@ fun ScanningScreen(
             ScanningScreenBottomBar(
                 scanningViewModel = scanningViewModel,
                 scope = scope,
-                snackbarHostState = snackbarHostState
+                snackbarHostState = snackbarHostState,
+                onExportPositionChange = {
+                    scanningViewModel.setExportPopupPosition(
+                        it.first,
+                        it.second
+                    )
+                }
             )
         },
     ) { innerPadding ->
@@ -517,6 +627,66 @@ fun ScanningScreen(
                     Modifier,
                     context,
                     scanningViewModel.scanningScreenData.scanSettingsVM!!
+                )
+            }
+        }
+        val exportOptionsPopupPosition =
+            scanningViewModel.scanningScreenData.exportOptionsPopupPosition
+        var exportOptionsWidth by remember { mutableIntStateOf(0) }
+        val alpha by animateFloatAsState(
+            targetValue = if (scanningViewModel.scanningScreenData.showExportOptions) 1f else 0f,
+            label = "alphaAnimationExportOptions",
+            animationSpec = tween(300)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            if (alpha > 0) {
+                ExportSettingsPopup(
+                    exportOptionsPopupPosition,
+                    exportOptionsWidth,
+                    alpha,
+                    onDismiss = { scanningViewModel.setShowExportOptionsPopup(false) },
+                    updateWidth = { exportOptionsWidth = it },
+                    onExportPdf = {
+                        scanningViewModel.setShowExportOptionsPopup(false)
+                        thread {
+                            doPdfExport(
+                                scanningViewModel,
+                                context,
+                                { error ->
+                                    snackBarError(
+                                        error,
+                                        scope,
+                                        context,
+                                        snackbarHostState,
+                                        false
+                                    )
+                                }
+                            )
+                        }
+                    },
+                    onExportArchive = {
+                        scanningViewModel.setShowExportOptionsPopup(false)
+                        thread {
+                            doZipExport(
+                                scanningViewModel,
+                                context,
+                                { error ->
+                                    snackBarError(
+                                        error,
+                                        scope,
+                                        context,
+                                        snackbarHostState,
+                                        false
+                                    )
+                                }
+                            )
+                        }
+                    }
                 )
             }
         }
@@ -680,7 +850,7 @@ fun ScanContent(
                         }
                     }) {
                         Icon(
-                            Icons.Outlined.Refresh,
+                            painterResource(R.drawable.baseline_rotate_right_24),
                             contentDescription = stringResource(
                                 R.string.rotate_left
                             )

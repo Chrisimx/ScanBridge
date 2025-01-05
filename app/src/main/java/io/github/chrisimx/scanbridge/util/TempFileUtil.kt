@@ -15,6 +15,7 @@ fun doTempFilesExist(rootDir: File): Boolean {
     }
 
     val pdfExportTempFileExists =
-        exportDir.listFiles()?.any { it.name.startsWith("pdfexport") } == true
+        exportDir.listFiles()
+            ?.any { it.name.startsWith("pdfexport") || it.name.startsWith("zipexport") } == true
     return scanTempFileExists || pdfExportTempFileExists
 }

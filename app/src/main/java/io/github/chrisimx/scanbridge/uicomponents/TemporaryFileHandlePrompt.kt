@@ -87,7 +87,8 @@ fun TemporaryFileHandler() {
 
         val exportDir = File(context.filesDir, "exports")
 
-        val exports = exportDir.listFiles()?.filter { it.name.startsWith("pdfexport") }
+        val exports = exportDir.listFiles()
+            ?.filter { it.name.startsWith("pdfexport") || it.name.startsWith("zipexport") }
         if (exports != null) {
             tempFileList.addAll(exports)
         }
@@ -100,18 +101,31 @@ fun TemporaryFileHandler() {
             }
         }
 
+        var deleteTempFilesRunning = false
+        var exportTempFilesRunning = false
+
         TemporaryFileHandlingDialog(
             onDismiss = { tempFileList.clear() },
             onDelete = {
-                tempFileList.forEach { it.delete() }
-                tempFileList.clear()
+                if (deleteTempFilesRunning) return@TemporaryFileHandlingDialog
+
+                thread {
+                    deleteTempFilesRunning = true
+                    tempFileList.forEach { it.delete() }
+                    tempFileList.clear()
+                    deleteTempFilesRunning = false
+                }
             },
             onExport = {
+                if (exportTempFilesRunning) return@TemporaryFileHandlingDialog
+
                 thread {
+                    exportTempFilesRunning = true
                     val result = exportFilesAsZip(tempFileList, context)
                     if (result.isPresent) {
                         zipExports.add(result.get())
                     }
+                    exportTempFilesRunning = false
                 }
             },
             tempFileList = tempFileList

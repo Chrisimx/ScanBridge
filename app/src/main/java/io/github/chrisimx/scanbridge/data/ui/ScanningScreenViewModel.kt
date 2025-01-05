@@ -45,6 +45,14 @@ class ScanningScreenViewModel(
         _scanningScreenData.createdTempFiles.add(file)
     }
 
+    fun setShowExportOptionsPopup(show: Boolean) {
+        _scanningScreenData.showExportOptions.value = show
+    }
+
+    fun setExportPopupPosition(x: Int, y: Int) {
+        _scanningScreenData.exportOptionsPopupPosition.value = Pair(x, y)
+    }
+
     fun removeTempFile(index: Int) {
         _scanningScreenData.createdTempFiles.removeAt(index)
     }

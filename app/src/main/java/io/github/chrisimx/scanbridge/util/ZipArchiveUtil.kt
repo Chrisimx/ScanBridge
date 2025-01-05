@@ -25,11 +25,15 @@ import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-fun zipFiles(files: List<File>, zipFile: File) {
+fun zipFiles(
+    files: List<File>,
+    zipFile: File,
+    fileName: (File) -> String = { it.name }
+) {
     ZipOutputStream(FileOutputStream(zipFile)).use { zos ->
         files.forEach { file ->
             FileInputStream(file).use { fis ->
-                val entry = ZipEntry(file.name)
+                val entry = ZipEntry(fileName(file))
                 zos.putNextEntry(entry)
 
                 fis.copyTo(zos, bufferSize = 1024)
