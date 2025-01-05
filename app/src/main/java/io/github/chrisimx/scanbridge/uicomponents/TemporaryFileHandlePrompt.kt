@@ -36,6 +36,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Optional
 import kotlin.collections.mutableListOf
+import kotlin.concurrent.thread
 
 fun exportFilesAsZip(files: List<File>, context: Context): Optional<File> {
     val exportDir = File(context.filesDir, "exportTempFiles")
@@ -106,9 +107,11 @@ fun TemporaryFileHandler() {
                 tempFileList.clear()
             },
             onExport = {
-                val result = exportFilesAsZip(tempFileList, context)
-                if (result.isPresent) {
-                    zipExports.add(result.get())
+                thread {
+                    val result = exportFilesAsZip(tempFileList, context)
+                    if (result.isPresent) {
+                        zipExports.add(result.get())
+                    }
                 }
             },
             tempFileList = tempFileList

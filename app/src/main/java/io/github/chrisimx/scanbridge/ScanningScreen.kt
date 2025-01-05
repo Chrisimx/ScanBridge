@@ -22,6 +22,7 @@ package io.github.chrisimx.scanbridge
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -45,6 +46,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -93,6 +95,7 @@ import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen
 import io.github.chrisimx.scanbridge.uicomponents.dialog.ConfirmCloseDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
+import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.snackBarError
 import io.github.chrisimx.scanbridge.util.toJobStateString
 import io.github.chrisimx.scanbridge.util.zipFiles
@@ -130,12 +133,59 @@ fun retrieveScannerCapabilities(
     scanningViewModel.setScannerCapabilities(scannerCapabilitiesResult.scannerCapabilities)
 }
 
+
+fun String.extractBaseFilename(): String? {
+    val regex = Regex("^scan-[a-f0-9-]+")
+    return regex.find(this)?.value
+}
+
+fun rotate(
+    context: Context,
+    scanningViewModel: ScanningScreenViewModel,
+) {
+    if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
+        return
+    }
+    scanningViewModel.setLoadingText(R.string.rotating_page)
+
+    val currentScans = scanningViewModel.scanningScreenData.currentScansState
+    val currentPagePath =
+        currentScans[scanningViewModel.scanningScreenData.pagerState.currentPage].first
+    val currentPageFile = File(currentPagePath)
+
+    Log.d(TAG, "Decoding $currentPagePath")
+    val originalBitmap = BitmapFactory.decodeFile(currentPagePath)
+    Log.d(TAG, "Rotating $currentPagePath")
+    val rotatedBitmap = originalBitmap.rotateBy90()
+    originalBitmap.recycle()
+
+    val baseFileName = currentPageFile.name.extractBaseFilename()
+
+    val newFile = File(context.filesDir, "$baseFileName edit-${System.currentTimeMillis()}.jpg")
+
+    Log.d(TAG, "Saving rotated $currentPagePath")
+    newFile.outputStream().use {
+        rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+    }
+
+    Log.d(TAG, "Finished saving rotated $currentPagePath")
+
+    val index = scanningViewModel.scanningScreenData.pagerState.currentPage
+    val scanSettings = currentScans[index].second
+    Log.d(TAG, "Updating UI state after rotation")
+    scanningViewModel.removeScanAtIndex(index)
+    scanningViewModel.addTempFile(currentPageFile)
+    scanningViewModel.addScanAtIndex(newFile.absolutePath, scanSettings, index)
+
+    scanningViewModel.setLoadingText(null)
+}
+
 fun doExport(scanningViewModel: ScanningScreenViewModel, context: Context) {
     if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
         return
     }
 
-    scanningViewModel.setExportRunning(true)
+    scanningViewModel.setLoadingText(R.string.exporting)
 
     val parentDir = File(context.filesDir, "exports")
     if (!parentDir.exists()) {
@@ -166,10 +216,22 @@ fun doExport(scanningViewModel: ScanningScreenViewModel, context: Context) {
                                 0.threeHundredthsOfInch(),
                                 0.threeHundredthsOfInch()
                             )
-                        val width72thInches =
+
+                        val imageData = ImageDataFactory.create(scan.first)
+                        val scanRegionOrientation = scanRegion.height.value > scanRegion.width.value
+                        val actualImageOrientation = imageData.height > imageData.width
+
+                        var width72thInches =
                             scanRegion.width.toInches().value * 72.0
-                        val height72thInches =
+                        var height72thInches =
                             scanRegion.height.toInches().value * 72.0
+
+                        if (actualImageOrientation != scanRegionOrientation) {
+                            val tmp = width72thInches
+                            width72thInches = height72thInches
+                            height72thInches = tmp
+                        }
+
                         pdf.addNewPage(
                             PageSize(
                                 width72thInches.toFloat(),
@@ -177,7 +239,7 @@ fun doExport(scanningViewModel: ScanningScreenViewModel, context: Context) {
                             )
                         )
 
-                        val imageElem = Image(ImageDataFactory.create(scan.first))
+                        val imageElem = Image(imageData)
                         imageElem.setFixedPosition(i + 1, 0f, 0f)
                         imageElem.setHeight(height72thInches.toFloat())
                         imageElem.setWidth(width72thInches.toFloat())
@@ -207,7 +269,7 @@ fun doExport(scanningViewModel: ScanningScreenViewModel, context: Context) {
         outputFile = tempPdfFiles[0]
     }
 
-    scanningViewModel.setExportRunning(false)
+    scanningViewModel.setLoadingText(null)
     val share = Intent(Intent.ACTION_SEND)
     share.type = if (tempPdfFiles.size > 1) "application/zip" else "application/pdf"
     share.putExtra(
@@ -459,8 +521,8 @@ fun ScanningScreen(
             }
         }
 
-        if (scanningViewModel.scanningScreenData.exportRunning) {
-            LoadingDialog(text = R.string.exporting)
+        if (scanningViewModel.scanningScreenData.progressStringResource != null) {
+            LoadingDialog(text = scanningViewModel.scanningScreenData.progressStringResource!!)
         }
 
         if (scanningViewModel.scanningScreenData.confirmDialogShown) {
@@ -608,6 +670,19 @@ fun ScanContent(
                             Icons.AutoMirrored.Outlined.ArrowForward,
                             contentDescription = stringResource(
                                 R.string.swap_with_next_page
+                            )
+                        )
+                    }
+                    val context = LocalContext.current
+                    IconButton(onClick = {
+                        thread {
+                            rotate(context, scanningViewModel)
+                        }
+                    }) {
+                        Icon(
+                            Icons.Outlined.Refresh,
+                            contentDescription = stringResource(
+                                R.string.rotate_left
                             )
                         )
                     }

@@ -49,6 +49,10 @@ class ScanningScreenViewModel(
         _scanningScreenData.createdTempFiles.removeAt(index)
     }
 
+    fun setLoadingText(stringRes: Int?) {
+        _scanningScreenData.stateProgressStringRes.value = stringRes
+    }
+
     fun scrollToPage(pageNr: Int, scope: CoroutineScope) {
         scope.launch {
             _scanningScreenData.pagerState.animateScrollToPage(
@@ -86,6 +90,9 @@ class ScanningScreenViewModel(
     fun addScan(path: String, settings: ScanSettings) {
         _scanningScreenData.stateCurrentScans.add(Pair(path, settings))
     }
+    fun addScanAtIndex(path: String, settings: ScanSettings, index: Int) {
+        _scanningScreenData.stateCurrentScans.add(index, Pair(path, settings))
+    }
 
     fun swapTwoPages(index1: Int, index2: Int) {
         if (index1 < 0 || index1 >= _scanningScreenData.stateCurrentScans.size
@@ -104,9 +111,5 @@ class ScanningScreenViewModel(
             return
         }
         _scanningScreenData.stateCurrentScans.removeAt(index)
-    }
-
-    fun setExportRunning(running: Boolean) {
-        _scanningScreenData.stateExportRunning.value = running
     }
 }
