@@ -23,8 +23,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.graphics.Rect
-import android.graphics.pdf.PdfDocument
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -79,8 +77,17 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
+import com.itextpdf.io.image.ImageDataFactory
+import com.itextpdf.kernel.geom.PageSize
+import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.layout.Document
+import com.itextpdf.layout.element.Image
 import io.github.chrisimx.esclkt.ESCLRequestClient
+import io.github.chrisimx.esclkt.ScanRegion
 import io.github.chrisimx.esclkt.ScanSettings
+import io.github.chrisimx.esclkt.millimeters
+import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen
@@ -106,11 +113,7 @@ import kotlin.uuid.Uuid
 private val TAG = "ScanningScreen"
 
 fun retrieveScannerCapabilities(
-    scannerAddress: HttpUrl,
     scanningViewModel: ScanningScreenViewModel,
-    context: Context,
-    scope: CoroutineScope,
-    snackbarHostState: SnackbarHostState
 ) {
 
     val esclClient = scanningViewModel.scanningScreenData.esclClient
@@ -124,6 +127,68 @@ fun retrieveScannerCapabilities(
     }
 
     scanningViewModel.setScannerCapabilities(scannerCapabilitiesResult.scannerCapabilities)
+}
+
+fun doExport(scanningViewModel: ScanningScreenViewModel, context: Context) {
+    scanningViewModel.setExportRunning(true)
+
+    val parentDir = File(context.filesDir, "exports")
+    if (!parentDir.exists()) {
+        parentDir.mkdir()
+    }
+    val pdfFile = File(
+        parentDir, "pdfexport-${
+            LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH_mm_ss_SSS"))
+        }.pdf"
+    )
+    var i = 0
+    PdfWriter(pdfFile).use { writer ->
+        PdfDocument(writer).use { pdf ->
+            Document(pdf).use { document ->
+                for (scan in scanningViewModel.scanningScreenData.currentScansState) {
+                    val scanRegion =
+                        scan.second.scanRegions?.regions?.first() ?: ScanRegion(
+                            297.millimeters().toThreeHundredthsOfInch(),
+                            210.millimeters().toThreeHundredthsOfInch(),
+                            0.threeHundredthsOfInch(),
+                            0.threeHundredthsOfInch()
+                        )
+                    val width72thInches =
+                        scanRegion.width.toInches().value * 72.0
+                    val height72thInches =
+                        scanRegion.height.toInches().value * 72.0
+                    pdf.addNewPage(PageSize(width72thInches.toFloat(), height72thInches.toFloat()))
+
+                    val imageElem = Image(ImageDataFactory.create(scan.first))
+                    imageElem.setFixedPosition(i + 1, 0f, 0f)
+                    imageElem.setHeight(height72thInches.toFloat())
+                    imageElem.setWidth(width72thInches.toFloat())
+
+                    document.add(imageElem)
+
+                    if ((i + 1) % 50 == 0) {
+                        document.flush()
+                    }
+
+                    i++
+                    Log.d(TAG, "Added page $i to PDF")
+                }
+            }
+        }
+    }
+    scanningViewModel.setExportRunning(false)
+    val share = Intent(Intent.ACTION_SEND)
+    share.type = "application/pdf"
+    share.putExtra(
+        Intent.EXTRA_STREAM,
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            pdfFile
+        )
+    )
+    context.startActivity(share)
 }
 
 @OptIn(ExperimentalUuidApi::class)
@@ -219,62 +284,7 @@ fun ScanningScreenBottomBar(
             }
             IconButton(onClick = {
                 thread {
-                    scanningViewModel.setExportRunning(true)
-                    PdfDocument().apply {
-                        for (scan in scanningViewModel.scanningScreenData.currentScansState) {
-                            val bitmap =
-                                BitmapFactory.decodeFile(scan.first)
-                            val scanRegion =
-                                scan.second.scanRegions!!.regions.first()
-                            val width72thInches =
-                                scanRegion.width.toInches().value * 72.0
-                            val height72thInches =
-                                scanRegion.height.toInches().value * 72.0
-                            val pageInfo = PdfDocument.PageInfo.Builder(
-                                width72thInches.toInt(),
-                                height72thInches.toInt(),
-                                1
-                            ).create()
-                            val page = startPage(pageInfo)
-
-                            page.canvas.drawBitmap(
-                                bitmap,
-                                null,
-                                Rect(
-                                    0,
-                                    0,
-                                    width72thInches.toInt(),
-                                    height72thInches.toInt()
-                                ),
-                                null
-                            )
-                            this.finishPage(page)
-                        }
-
-                        val parentDir = File(context.filesDir, "exports")
-                        if (!parentDir.exists()) {
-                            parentDir.mkdir()
-                        }
-                        val pdfFile = File(
-                            parentDir, "pdfexport-${
-                                LocalDateTime.now()
-                                    .format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH_mm_ss_SSS"))
-                            }.pdf"
-                        )
-                        writeTo(pdfFile.outputStream())
-                        scanningViewModel.setExportRunning(false)
-                        val share = Intent(Intent.ACTION_SEND)
-                        share.type = "application/pdf"
-                        share.putExtra(
-                            Intent.EXTRA_STREAM,
-                            FileProvider.getUriForFile(
-                                context,
-                                "${context.packageName}.fileprovider",
-                                pdfFile
-                            )
-                        )
-                        context.startActivity(share)
-                    }
+                    doExport(scanningViewModel, context)
                 }
             }) {
                 Icon(
@@ -351,11 +361,7 @@ fun ScanningScreen(
                 LaunchedEffect(Unit) {
                     thread {
                         retrieveScannerCapabilities(
-                            scannerAddress,
                             scanningViewModel,
-                            context,
-                            scope,
-                            snackbarHostState
                         )
                     }
                 }

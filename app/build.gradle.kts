@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.itext7.core)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
