@@ -66,4 +66,11 @@
     <string name="do_nothing">Do nothing</string>
     <string name="rotate_left">Rotate left</string>
     <string name="rotating_page">Rotating…</string>
+    <string name="custom_scanner_desc">Access custom scanner</string>
+    <string name="connect">Connect</string>
+    <string name="url_escl_resource">URL (eSCL resource)</string>
+    <string name="custom_scanner_dialog_title">Connect to a custom scanner</string>
+    <string name="invalid_url">Invalid URL</string>
+    <string name="error_state_please_enter_an_url">Please enter an URL</string>
+    <string name="custom_scanner">Custom scanner</string>
 </resources>

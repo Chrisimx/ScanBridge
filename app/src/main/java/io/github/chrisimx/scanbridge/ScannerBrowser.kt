@@ -32,11 +32,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.uicomponents.FoundScannerItem
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
+import io.github.chrisimx.scanbridge.uicomponents.dialog.CustomScannerDialog
 import java.util.Optional
 
 private val TAG = "ScannerBrowser"
@@ -85,6 +87,8 @@ fun ScannerList(
 fun ScannerBrowser(
     innerPadding: PaddingValues,
     navController: NavController,
+    showCustomDialog: Boolean,
+    setShowCustomDialog: (Boolean) -> Unit,
     statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>
 ) {
     AnimatedContent(targetState = statefulScannerMap.isNotEmpty(), label = "ScannerList") {
@@ -96,5 +100,21 @@ fun ScannerBrowser(
                 stringResource(R.string.no_scanners_found)
             )
         }
+    }
+
+    if (showCustomDialog) {
+        val context = LocalContext.current
+        CustomScannerDialog(
+            onDismiss = { setShowCustomDialog(false) },
+            onConnectClicked = { url ->
+                setShowCustomDialog(false)
+                navController.navigate(
+                    ScannerRoute(
+                        context.getString(R.string.custom_scanner),
+                        url.toString()
+                    )
+                )
+            }
+        )
     }
 }
