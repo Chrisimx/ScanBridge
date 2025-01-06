@@ -43,8 +43,8 @@ android {
         applicationId = "io.github.chrisimx.scanbridge"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1_000 // format is MAJ_MIN_PAT with always 3 digits
-        versionName = "0.1.0"
+        versionCode = 1_000_000 // format is MAJ_MIN_PAT with always 3 digits
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
