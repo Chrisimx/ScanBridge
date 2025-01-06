@@ -1,4 +1,4 @@
-import java.io.ByteArrayOutputStream
+import java.lang.ProcessBuilder
 
 plugins {
     alias(libs.plugins.android.application)
@@ -10,14 +10,22 @@ plugins {
 
 fun getGitCommitHash(): String {
     return try {
-        val stdout = ByteArrayOutputStream()
-        exec {
-            commandLine("git", "rev-parse", "--short", "HEAD")
-            standardOutput = stdout
+        val command = "git rev-parse --short HEAD"
+        val process = ProcessBuilder()
+            .command(command.split(" "))
+            .directory(rootProject.projectDir)
+            .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .start()
+        val wait = process.waitFor(60, TimeUnit.SECONDS)
+        if (!wait) {
+            return "unknown"
         }
-        stdout.toString().trim()
-    } catch (e: Exception) {
-        "unknown" // Fallback, falls der Befehl fehlschlägt
+
+        val result = process.inputStream.bufferedReader().readText()
+
+        result.toString().trim()
+    } catch (_: Exception) {
+        "unknown" // Fallback
     }
 }
 
