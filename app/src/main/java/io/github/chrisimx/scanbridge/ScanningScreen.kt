@@ -114,6 +114,7 @@ import me.saket.telephoto.zoomable.zoomable
 import okhttp3.HttpUrl
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.concurrent.thread
@@ -414,8 +415,19 @@ fun doScan(
                 return@thread
             }
             nextPage.page.use {
-                val scanPageFile = "scan-" + Uuid.random().toString() + ".jpg"
-                val filePath = File(context.filesDir, scanPageFile).toPath()
+                var filePath: Path
+                while (true) {
+                    val scanPageFile = "scan-" + Uuid.random().toString() + ".jpg"
+                    val file = File(context.filesDir, scanPageFile)
+                    file.exists().let {
+                        if (!it) {
+                            filePath = file.toPath()
+                            break
+                        }
+                    }
+
+                }
+
 
                 Log.d(TAG, "File created: $filePath")
 
