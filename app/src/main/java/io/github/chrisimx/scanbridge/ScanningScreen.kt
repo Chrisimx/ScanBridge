@@ -105,6 +105,7 @@ import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.snackBarError
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.toJobStateString
+import io.github.chrisimx.scanbridge.util.toReadableString
 import io.github.chrisimx.scanbridge.util.zipFiles
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -733,6 +734,7 @@ fun ScanContent(
     coroutineScope: CoroutineScope
 ) {
     val pagerState = scanningViewModel.scanningScreenData.pagerState
+    val context = LocalContext.current
 
     if (!scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
         Column(
@@ -752,7 +754,11 @@ fun ScanContent(
             )
 
             if (scanningViewModel.scanningScreenData.currentScansState.size > pagerState.currentPage) {
-                Text(scanningViewModel.scanningScreenData.currentScansState[pagerState.currentPage].second.inputSource.toString())
+                Text(
+                    scanningViewModel.scanningScreenData.currentScansState[pagerState.currentPage].second.inputSource?.toReadableString(
+                        context
+                    ).toString()
+                )
             }
         }
     } else if (!scanningViewModel.scanningScreenData.scanJobRunning) {
@@ -855,7 +861,6 @@ fun ScanContent(
                             )
                         )
                     }
-                    val context = LocalContext.current
                     IconButton(onClick = {
                         thread {
                             rotate(context, scanningViewModel)
