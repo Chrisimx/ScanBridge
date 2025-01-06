@@ -142,9 +142,8 @@ jobs:
         run: |
           {
             echo 'body<<EOF'
-            echo "This is a new minor version of Xournal++ with bug fixes and improvements from the community."
-            sed -n '/^xournalpp ([0-9.-]*).*/,/^ -- .*/{ /^xournalpp .*/! { /^ -- .*/ q;p } }' debian/changelog
-            echo "See https://github.com/xournalpp/xournalpp/blob/${{ needs.prepare.outputs.tag }}/CHANGELOG.md for a more detailled list of changes."
+            echo "This is a new minor version of ScanBridge with bug fixes and improvements from the community."
+            echo "See https://github.com/Chrisimx/ScanBridge/blob/${{ needs.prepare.outputs.tag }}/CHANGELOG.md for a more detailled list of changes."
             echo EOF
           } >> "$GITHUB_ENV"
       - uses: ncipollo/release-action@v1
