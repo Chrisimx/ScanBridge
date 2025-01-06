@@ -76,6 +76,6 @@
     <string name="no_further_pages">Keine weiteren Seiten. %1$s</string>
     <string name="error_while_copying_received_image_to_file">Fehler beim Herunterladen des empfangenen Bilds als Datei: %1$s</string>
     <string name="couldn_t_decode_received_image">Empfangenes Bild konnte nicht dekodiert werden. %1$s</string>
-    <string name="intent">Scanabsicht:</string>
+    <string name="intent">Scanpreset:</string>
     <string name="scan_region">Scanbereich:</string>
 </resources>
