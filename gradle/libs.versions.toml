@@ -19,6 +19,7 @@ zoomable = "0.14.0"
 material3 = "1.4.0-alpha05"
 materialIcons = "1.7.6"
 navigationCompose = "2.8.5"
+versionsPlugin = "0.51.0"
 
 [libraries]
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
@@ -52,4 +53,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-
+versions = { id = "com.github.ben-manes.versions", version.ref = "versionsPlugin" }
