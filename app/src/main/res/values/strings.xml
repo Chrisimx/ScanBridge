@@ -1,13 +1,11 @@
 <resources>
-    <string name="app_name">ScanBridge</string>
+    <string name="app_name" translatable="false">ScanBridge</string>
     <string name="print_symbol_desc">Printer icon</string>
     <string name="settings">Settings</string>
     <string name="no_scanners_found">No scanners found. Are you connected to a local network?</string>
     <string name="warning_desc">Warning icon</string>
-    <string name="title_activity_scanning">ScanningActivity</string>
     <string name="error_title">Error</string>
-    <string name="scannercapabilities_retrieve_error">An error occured while trying to retrieve ScannerCapabilities:\n\n%1$s</string>
-    <string name="activity_extras_missing">The activity %1$s was called with missing extras.\n\nThe extras have the following values:\n%2$s</string>
+    <string name="scannercapabilities_retrieve_error">An error occurred while trying to retrieve scanner capabilities:\n\n%1$s</string>
     <string name="okay_text">Okay</string>
     <string name="trying_to_retrieve_scannercapabilities">Trying to retrieve ScannerCapabilities</string>
     <string name="scan">Scan</string>
@@ -24,13 +22,13 @@
     <string name="page_x_of_y">Page %1$s of %2$s</string>
     <string name="export">Export</string>
     <string name="retrieving_page">Retrieving page</string>
-    <string name="exporting">Exporting...</string>
+    <string name="exporting">Exporting…</string>
     <string name="no_scans_yet">No pages were scanned yet. Click the scan button :)</string>
     <string name="platen">Platen</string>
     <string name="adf">ADF</string>
     <string name="header_scannerbrowser">Discovered scanners</string>
     <string name="discovery">Discovery</string>
-    <string name="copy_current_scanner_options_in_esclkt_format">Copy current scanner options in eSCLKt format</string>
+    <string name="copy_current_scanner_options_in_esclkt_format">Copy current scan options in eSCLKt format</string>
     <string name="scan_settings">Scan settings</string>
     <string name="error_state_not_in_allowed_range">Not in allowed range</string>
     <string name="error_state_not_a_valid_number">Not a valid number</string>
@@ -38,7 +36,7 @@
     <string name="input_source">Input source:</string>
     <string name="resolution_dpi">Used Resolution (dpi):</string>
     <string name="setting_duplex">Duplex</string>
-    <string name="intent_none">None</string>
+    <string name="intent_none">Default</string>
     <string name="width_in_mm">Width (in mm)</string>
     <string name="height_in_mm">Height (in mm)</string>
     <string name="maximum_size">Maximum size</string>
@@ -64,7 +62,7 @@
     <string name="temporary_files_dialog_content">Temporary files (scans and/or exports) were found in the app storage. These are files which remain in the app storage if the app is closed from the overview or killed by Android while being in a scanning session. The main reason for this dialog is that asking for confirmation of deletion was impossible when the app was closed in this way.\n\nWhat do you want to do with the following scan and export files?:\n%1$s</string>
     <string name="delete">Delete</string>
     <string name="do_nothing">Do nothing</string>
-    <string name="rotate_left">Rotate left</string>
+    <string name="rotate_right">Rotate right</string>
     <string name="rotating_page">Rotating…</string>
     <string name="custom_scanner_desc">Access custom scanner</string>
     <string name="connect">Connect</string>
@@ -78,4 +76,6 @@
     <string name="no_further_pages">No further pages. %1$s</string>
     <string name="error_while_copying_received_image_to_file">Error while copying received image to file: %1$s</string>
     <string name="couldn_t_decode_received_image">Couldn\'t decode received image. %1$s</string>
+    <string name="intent">Intent:</string>
+    <string name="scan_region">Scan Region:</string>
 </resources>

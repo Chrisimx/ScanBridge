@@ -134,7 +134,7 @@ fun retrieveScannerCapabilities(
 
     if (scannerCapabilitiesResult !is ESCLRequestClient.ScannerCapabilitiesResult.Success) {
         Log.e(TAG, "Error while retrieving ScannerCapabilities: $scannerCapabilitiesResult")
-        scanningViewModel.setError("Error: $scannerCapabilitiesResult")
+        scanningViewModel.setError("$scannerCapabilitiesResult")
         return
     }
 
@@ -864,7 +864,7 @@ fun ScanContent(
                         Icon(
                             painterResource(R.drawable.baseline_rotate_right_24),
                             contentDescription = stringResource(
-                                R.string.rotate_left
+                                R.string.rotate_right
                             )
                         )
                     }

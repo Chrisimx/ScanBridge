@@ -87,7 +87,7 @@ fun ScanSettingsUI(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(stringResource(R.string.input_source))
-        Row(
+        FlowRow(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
@@ -142,7 +142,11 @@ fun ScanSettingsUI(
                 .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 15.dp),
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text("Intent:", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                Text(
+                    stringResource(R.string.intent),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
 
                 FlowRow(
                     Modifier.fillMaxWidth(),
@@ -180,7 +184,7 @@ fun ScanSettingsUI(
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text(
-                    "Scan Region:",
+                    stringResource(R.string.scan_region),
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
                 )
