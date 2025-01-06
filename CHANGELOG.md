@@ -17,6 +17,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Handle temporary files properly
 - Localization for English and German
 
-[unreleased]: https://github.com/olivierlacan/keep-a-changelog/compare/v1.0.0...HEAD
+[unreleased]: https://github.com/Chrisimx/ScanBridge/compare/v1.0.0...HEAD
 
-[1.0.0]: https://github.com/olivierlacan/keep-a-changelog/releases/tag/v1.0.0
+[1.0.0]: https://github.com/Chrisimx/ScanBridge/commits/v1.0.0/
