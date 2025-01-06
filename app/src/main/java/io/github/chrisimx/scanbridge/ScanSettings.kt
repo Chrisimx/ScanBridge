@@ -263,8 +263,8 @@ fun ScanSettingsUI(
                                     it
                                 )
                             },
-                            min = scanSettingsUIState.selectedInputSourceCapabilities.minWidth.toMillimeters().value,
-                            max = scanSettingsUIState.selectedInputSourceCapabilities.maxWidth.toMillimeters().value
+                            min = scanSettingsUIState.selectedInputSourceCapabilities.minHeight.toMillimeters().value,
+                            max = scanSettingsUIState.selectedInputSourceCapabilities.maxHeight.toMillimeters().value
                         )
                     }
                 }
