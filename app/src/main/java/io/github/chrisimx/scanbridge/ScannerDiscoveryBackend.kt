@@ -67,12 +67,22 @@ class ScannerDiscovery(
                 val urls = mutableListOf<String>()
 
                 for (address in p0.hostAddresses) {
-                    val url = HttpUrl.Builder()
-                        .host(address.hostAddress!!)
-                        .addPathSegment(rs)
-                        .scheme("http")
-                        .build()
-                    Log.d(TAG, "Built URL: $url")
+                    val sanitizedURL = address.hostAddress!!.substringBefore('%')
+                    val url = try {
+                        HttpUrl.Builder()
+                            .host(sanitizedURL)
+                            .addPathSegment(rs)
+                            .scheme("http")
+                            .build()
+                    } catch (e: Exception) {
+                        Log.e(
+                            TAG,
+                            "Couldn't built address from: ${address.hostAddress} Exception: $e"
+                        )
+                        continue
+                    }
+
+                    Log.d(TAG, "Built URL: $url with address: ${address.hostAddress}")
                     urls.add(url.toString())
                 }
 
