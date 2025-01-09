@@ -12,4 +12,4 @@ AirScan/eSCL is a widely supported protocol that allows you to connect to networ
 </ul>
 </p>
 
-<p>ScanBridge is free and open-source, with no ads or tracking. It is designed to be privacy-friendly and does not require any permissions, except the Internet permission to access thenetwork scanner, which is already automatically granted by Android. No data/telemetry is collected.</p>
+<p>ScanBridge is free and open-source, with no ads or tracking. It is designed to be privacy-friendly and does not require any permissions, except the Internet permission to access the network scanner, which is already automatically granted by Android. No data/telemetry is collected.</p>
