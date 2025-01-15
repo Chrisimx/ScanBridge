@@ -1,0 +1,6 @@
+This is a new version of ScanBridge with a couple of minor bug fixes:
+
+* Fix stretching of scans in the PDF export if aspect ration doesn't match the expected one
+* Fix crash when a scanner advertises an invalid address, ignore such scanners. If the address has a IPv6 scope ID strip it before using the address
+
+Full commit log: https://github.com/Chrisimx/ScanBridge/compare/v1.0.0...v1.0.1
