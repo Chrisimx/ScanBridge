@@ -301,6 +301,9 @@ fun doPdfExport(
                             height72thInches = tmp
                         }
 
+                        val aspectRatio = imageData.width / imageData.height
+                        height72thInches = width72thInches / aspectRatio
+
                         pdf.addNewPage(
                             PageSize(
                                 width72thInches.toFloat(),
