@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- Fix stretching of pages in the PDF export if aspect ration doesn't much the expected one (#33)
+- Fix stretching of pages in the PDF export if aspect ration doesn't match the expected one (#33)
 - Fix crash when a scanner advertises an invalid address, ignore such scanners. If the address has
   a IPv6 scope ID strip it (46d5847a)
 - Fix typo in english app description (fe98fa44)
