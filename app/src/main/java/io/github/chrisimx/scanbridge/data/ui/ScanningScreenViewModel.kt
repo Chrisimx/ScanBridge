@@ -77,6 +77,10 @@ class ScanningScreenViewModel(
         _scanningScreenData.confirmDialogShown.value = value
     }
 
+    fun setDeletePageDialogShown(value: Boolean) {
+        _scanningScreenData.confirmPageDeleteDialogShown.value = value
+    }
+
     fun setScanJobRunning(value: Boolean) {
         _scanningScreenData.scanJobRunning.value = value
     }

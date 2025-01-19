@@ -100,6 +100,7 @@ import io.github.chrisimx.scanbridge.uicomponents.ExportSettingsPopup
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen
 import io.github.chrisimx.scanbridge.uicomponents.dialog.ConfirmCloseDialog
+import io.github.chrisimx.scanbridge.uicomponents.dialog.DeletionDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
 import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.snackBarError
@@ -415,6 +416,13 @@ fun doScan(
                 }
                 return@thread
             } else if (nextPage !is ESCLRequestClient.ScannerNextPageResult.Success) {
+                Log.e(TAG, "Error while retrieving next page: $nextPage")
+                snackbarErrorRetrievingPage(
+                    nextPage.toString(),
+                    scope,
+                    context,
+                    snackbarHostState
+                )
                 viewModel.setScanJobRunning(false)
                 return@thread
             }
@@ -707,6 +715,18 @@ fun ScanningScreen(
             }
         }
 
+        if (scanningViewModel.scanningScreenData.confirmPageDeleteDialogShown) {
+            DeletionDialog(
+                onDismiss = { scanningViewModel.setDeletePageDialogShown(false) },
+                onConfirmed = {
+                    val index = scanningViewModel.scanningScreenData.pagerState.currentPage
+                    Files.delete(Path(scanningViewModel.scanningScreenData.currentScansState[index].first))
+                    scanningViewModel.removeScanAtIndex(index)
+                    scanningViewModel.setDeletePageDialogShown(false)
+                }
+            )
+        }
+
         if (scanningViewModel.scanningScreenData.progressStringResource != null) {
             LoadingDialog(text = scanningViewModel.scanningScreenData.progressStringResource!!)
         }
@@ -763,43 +783,43 @@ fun ScanContent(
                     ).toString()
                 )
             }
+
+            HorizontalPager(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                state = pagerState
+            ) { page ->
+                if (page == scanningViewModel.scanningScreenData.currentScansState.size) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Text(stringResource(R.string.retrieving_page))
+                    }
+                    return@HorizontalPager
+                } else {
+                    val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
+
+                    AsyncImage(
+                        model = scanningViewModel.scanningScreenData.currentScansState[page].first,
+                        contentDescription = stringResource(R.string.desc_scanned_page),
+                        modifier = Modifier
+                            .zoomable(zoomState)
+                            .padding(vertical = 5.dp),
+                    )
+                }
+            }
         }
     } else if (!scanningViewModel.scanningScreenData.scanJobRunning) {
         FullScreenError(
             R.drawable.rounded_document_scanner_24,
             stringResource(R.string.no_scans_yet)
         )
-    }
-
-    HorizontalPager(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding),
-        state = pagerState
-    ) { page ->
-        if (page == scanningViewModel.scanningScreenData.currentScansState.size) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator()
-                Text(stringResource(R.string.retrieving_page))
-            }
-            return@HorizontalPager
-        } else {
-            val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
-
-            AsyncImage(
-                model = scanningViewModel.scanningScreenData.currentScansState[page].first,
-                contentDescription = stringResource(R.string.desc_scanned_page),
-                modifier = Modifier
-                    .zoomable(zoomState)
-                    .padding(vertical = 5.dp),
-            )
-        }
     }
 
     if (pagerState.currentPage < scanningViewModel.scanningScreenData.currentScansState.size) {
@@ -822,8 +842,7 @@ fun ScanContent(
                         if (scanningViewModel.scanningScreenData.currentScansState.size <= pagerState.currentPage) {
                             return@IconButton
                         }
-                        Files.delete(Path(scanningViewModel.scanningScreenData.currentScansState[pagerState.currentPage].first))
-                        scanningViewModel.removeScanAtIndex(pagerState.currentPage)
+                        scanningViewModel.setDeletePageDialogShown(true)
                     }) {
                         Icon(
                             Icons.Outlined.Delete,

@@ -78,4 +78,5 @@
     <string name="couldn_t_decode_received_image">Empfangenes Bild konnte nicht dekodiert werden. %1$s</string>
     <string name="intent">Scanpreset:</string>
     <string name="scan_region">Scanbereich:</string>
+    <string name="page_deletion_confirmation">Willst du wirklich die derzeitig ausgewählte Seite löschen? Dieser Vorgang ist unwiderruflich.</string>
 </resources>

@@ -78,4 +78,5 @@
     <string name="couldn_t_decode_received_image">Couldn\'t decode received image. %1$s</string>
     <string name="intent">Intent:</string>
     <string name="scan_region">Scan Region:</string>
+    <string name="page_deletion_confirmation">Do you really want to delete the current page? This action can not be undone.</string>
 </resources>

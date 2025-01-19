@@ -34,6 +34,7 @@ import java.io.File
 data class ScanningScreenData(
     val esclClient: ESCLRequestClient,
     val confirmDialogShown: MutableState<Boolean> = mutableStateOf(false),
+    val confirmPageDeleteDialogShown: MutableState<Boolean> = mutableStateOf(false),
     val errorString: MutableState<String?> = mutableStateOf(null),
     val scanSettingsVM: MutableState<ScanSettingsComposableViewModel?> = mutableStateOf(null),
     val capabilities: MutableState<ScannerCapabilities?> = mutableStateOf(null),
@@ -51,6 +52,7 @@ data class ScanningScreenData(
     fun toImmutable() = ImmutableScanningScreenData(
         esclClient,
         confirmDialogShown,
+        confirmPageDeleteDialogShown,
         errorString,
         scanSettingsVM,
         capabilities,
@@ -68,6 +70,7 @@ data class ScanningScreenData(
 data class ImmutableScanningScreenData(
     val esclClient: ESCLRequestClient,
     private val confirmDialogShownState: State<Boolean>,
+    private val confirmPageDeleteDialogShownState: State<Boolean>,
     private val errorStringState: State<String?>,
     private val scanSettingsVMState: State<ScanSettingsComposableViewModel?>,
     private val capabilitiesState: State<ScannerCapabilities?>,
@@ -81,6 +84,7 @@ data class ImmutableScanningScreenData(
     val currentScansState: SnapshotStateList<Pair<String, ScanSettings>>,
 ) {
     val confirmDialogShown by confirmDialogShownState
+    val confirmPageDeleteDialogShown by confirmPageDeleteDialogShownState
     val scanSettingsVM by scanSettingsVMState
     val scanSettingsMenuOpen by scanSettingsMenuOpenState
     val scanJobRunning by scanJobRunningState
