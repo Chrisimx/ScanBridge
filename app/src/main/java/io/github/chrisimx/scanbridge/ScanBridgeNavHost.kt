@@ -20,6 +20,8 @@
 package io.github.chrisimx.scanbridge
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,7 +37,11 @@ data class ScannerRoute(val scannerName: String, val scannerURL: String)
 
 @Composable
 fun ScanBridgeNavHost(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = StartUpScreenRoute) {
+    NavHost(
+        modifier = Modifier.testTag("root_node"),
+        navController = navController,
+        startDestination = StartUpScreenRoute
+    ) {
         composable<StartUpScreenRoute> { StartupScreen(navController) }
         composable<ScannerRoute> { backStackEntry ->
             val scannerRoute: ScannerRoute = backStackEntry.toRoute()

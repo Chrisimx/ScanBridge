@@ -1,21 +1,26 @@
 package io.github.chrisimx.scanbridge
 
 import android.content.ContentValues
-import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
 import org.junit.Test
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class ScanBridgeTest {
     @get:Rule
@@ -44,11 +49,14 @@ class ScanBridgeTest {
         }
     }
 
-    private fun saveScreenshot(context: Context) {
-        composeTestRule.onRoot().captureToImage()
+    private fun saveScreenshot(name: String) {
+        val date = LocalDateTime.now()
+            .format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH_mm_ss_SSS"))
+        composeTestRule.onNodeWithTag("root_node")
+            .captureToImage()
             .asAndroidBitmap()
             .let { bitmap ->
-                saveBitmapToExternalStorage(bitmap, "screenshot.png")
+                saveBitmapToExternalStorage(bitmap, "${name}-screenshot${date}}.png")
             }
     }
 
@@ -64,13 +72,42 @@ class ScanBridgeTest {
 
     @Test
     fun discoveryScreenshot() {
-        saveScreenshot(composeTestRule.activity)
+        saveScreenshot("discovery")
     }
 
     @Test
     fun settingsScreenshot() {
         composeTestRule.onNodeWithText("Settings").performClick()
 
-        saveScreenshot(composeTestRule.activity)
+        saveScreenshot("settings")
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun scanningInterface() {
+        composeTestRule.onNodeWithTag("custom_scanner_fab").performClick()
+
+        composeTestRule.onNodeWithTag("url_input")
+            .performTextInput("http://192.168.178.72:8080/eSCL")
+        composeTestRule.onNodeWithText("Connect").performClick()
+
+        composeTestRule.waitUntilExactlyOneExists(hasText("No pages", substring = true), 1000)
+        saveScreenshot("scanning_interface")
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun scan() {
+        composeTestRule.onNodeWithTag("custom_scanner_fab").performClick()
+
+        composeTestRule.onNodeWithTag("url_input")
+            .performTextInput("http://192.168.178.72:8080/eSCL")
+        composeTestRule.onNodeWithText("Connect").performClick()
+
+        composeTestRule.waitUntilExactlyOneExists(hasText("No pages", substring = true), 1000)
+        composeTestRule.onNodeWithText("Scan", useUnmergedTree = true).performClick()
+
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("scan_page"), 1000)
+        saveScreenshot("scan")
     }
 }

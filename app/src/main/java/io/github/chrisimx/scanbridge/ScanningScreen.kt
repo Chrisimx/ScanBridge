@@ -76,6 +76,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -810,7 +811,8 @@ fun ScanContent(
                         contentDescription = stringResource(R.string.desc_scanned_page),
                         modifier = Modifier
                             .zoomable(zoomState)
-                            .padding(vertical = 5.dp),
+                            .padding(vertical = 5.dp)
+                            .testTag("scan_page"),
                     )
                 }
             }

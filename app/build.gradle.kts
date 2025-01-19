@@ -107,3 +107,56 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+
+afterEvaluate {
+    tasks.register<Exec>("buildRustApp") {
+        group = "rust"
+        description = "Build the eSCL dummy server"
+
+        workingDir = file("../escl-mock-server/")
+        commandLine = listOf("cargo", "build", "--release")
+        outputs.file("../escl-mock-server/target/release/escl-mock-server")
+    }
+
+    tasks.register("startRustServer") {
+        group = "rust"
+        description = "Start the Rust server in the background"
+        dependsOn("buildRustApp")
+
+        doLast {
+            val processBuilder = ProcessBuilder(
+                "escl-mock-server/target/release/escl-mock-server", "-a", "0.0.0.0"
+            ).apply {
+                redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                redirectError(ProcessBuilder.Redirect.INHERIT)
+            }
+
+            val process = processBuilder.start()
+            println("Started Rust server with PID ${process.pid()}")
+            Runtime.getRuntime().addShutdownHook(Thread {
+                println("Stopped Rust server")
+                process.destroy()
+            })
+        }
+    }
+
+    tasks.register("stopRustServer") {
+        doLast {
+            val processBuilder = ProcessBuilder(
+                "pkill", "-f", "escl-mock-server"
+            ).apply {
+                redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                redirectError(ProcessBuilder.Redirect.INHERIT)
+            }
+
+            processBuilder.start()
+
+            println("Stopped Rust server")
+        }
+    }
+
+    tasks.named("connectedDebugAndroidTest") {
+        dependsOn("buildRustApp", "startRustServer")
+        finalizedBy("stopRustServer")
+    }
+}

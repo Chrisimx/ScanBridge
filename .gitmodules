@@ -1,0 +1,3 @@
+[submodule "escl-mock-server"]
+	path = escl-mock-server
+	url = https://github.com/Chrisimx/escl-mock-server.git
