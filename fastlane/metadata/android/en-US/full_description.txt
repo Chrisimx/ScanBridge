@@ -1,15 +1,9 @@
 <p><b>ScanBridge</b> is a Material You app featuring scanning of documents, photos, and more over the AirScan/eSCL protocol.
 AirScan/eSCL is a widely supported protocol that allows you to connect to network-enabled scanners over your network and scan your documents without the need for any additional software or drivers.</p>
-
-<p>Features:
-<ul>
-    <li>Discover scanners supporting eSCL in your network</li>
+<p><b>Features:</b> <ul> <li>Discover scanners supporting eSCL in your network</li>
     <li>Scan multiple pages and arrange them however you like</li>
     <li>Use your scanner to the maximum of its capabilities by adjusting settings like input source, resolution, duplex scan, scanning dimensions, and more</li>
     <li>Save your scans as PDF or images & directly share them with other apps</li>
     <li>Nice-looking Material You design</li>
-    <li>Easy-to-use interface</li>
-</ul>
-</p>
-
-<p>ScanBridge is free and open-source, with no ads or tracking. It is designed to be privacy-friendly and does not require any permissions, except the Internet permission to access the network scanner, which is already automatically granted by Android. No data/telemetry is collected.</p>
+    <li>Easy-to-use interface</li></ul></p>
+<p><b>ScanBridge</b> is free and open-source, with no ads or tracking. It is designed to be privacy-friendly and does not require any permissions, except the Internet permission to access the network scanner, which is already automatically granted by Android. No data/telemetry is collected.</p>

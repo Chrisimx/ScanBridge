@@ -1,14 +1,9 @@
 <p><b>ScanBridge</b> ist eine App im Material-You-Design, die das Scannen von Dokumenten, Fotos und mehr über das AirScan/eSCL-Protokoll ermöglicht.
 AirScan/eSCL ist ein weit verbreitetes Protokoll, mit dem du dich über dein Netzwerk mit netzwerkfähigen Scannern verbinden und Dokumente scannen kannst – ganz ohne zusätzliche Software oder Treiber.</p>
-<p>
-Funktionen:
-<ul>
-    <li><b>Automatische Erkennung von Scannern:</b> Finde eSCL-kompatible Scanner in deinem Netzwerk.</li>
+<p><b>Funktionen:</b> <ul> <li><b>Automatische Erkennung von Scannern:</b> Finde eSCL-kompatible Scanner in deinem Netzwerk.</li>
     <li><b>Mehrseitige Scans:</b> Scanne mehrere Seiten und ordne sie beliebig an.</li>
     <li><b>Einstellungsvielfalt:</b> Nutze die Möglichkeiten deines Scanners optimal, indem du Einstellungen wie Eingabequelle, Auflösung, Duplex-Scan, Scan-Bereich, Farbmodus und mehr anpasst.</li>
     <li><b>Exportieren & Teile:</b> Speichere deine Scans als PDF oder Bilddateien und teile sie direkt mit anderen Apps.</li>
     <li><b>Modernes Design:</b> Ansprechendes Material-You-Design.</li>
-    <li><b>Benutzerfreundlichkeit:</b> Intuitive und leicht bedienbare Oberfläche.</li>
-</ul>
-
+    <li><b>Benutzerfreundlichkeit:</b> Intuitive und leicht bedienbare Oberfläche.</li></ul></p>
 <p><b>ScanBridge</b> ist kostenlos, quelloffen und enthält weder Werbung noch Tracking. Die App wurde mit einer Hochachtung auf Datenschutz entwickelt und benötigt keine Berechtigungen – außer der Internet-Berechtigung, um auf den Netzwerkscanner zugreifen zu können. Diese wird von Android automatisch erteilt. Es werden keine Daten oder Telemetrie gesammelt.</p>
