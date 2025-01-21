@@ -1,4 +1,12 @@
 import java.lang.ProcessBuilder
+import java.util.Properties
+
+val testConfig = Properties()
+val testConfigFile = rootProject.file("testConfig.properties")
+if (testConfigFile.exists()) {
+    testConfigFile.inputStream().use { testConfig.load(it) }
+}
+
 
 plugins {
     alias(libs.plugins.android.application)
@@ -6,7 +14,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
 }
-
 
 fun getGitCommitHash(): String {
     return try {
@@ -47,6 +54,8 @@ android {
         versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments["escl_server_url"] =
+            testConfig.getOrDefault("escl_server_url", "http://192.168.178.72:8080") as String
     }
 
     buildTypes {

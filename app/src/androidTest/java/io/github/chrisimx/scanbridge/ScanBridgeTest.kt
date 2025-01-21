@@ -100,8 +100,9 @@ class ScanBridgeTest {
     fun scan() {
         composeTestRule.onNodeWithTag("custom_scanner_fab").performClick()
 
-        composeTestRule.onNodeWithTag("url_input")
-            .performTextInput("http://192.168.178.72:8080/eSCL")
+        val url = InstrumentationRegistry.getArguments()
+            .getString("escl_server_url") ?: "http://192.168.178.72:8080/eSCL"
+        composeTestRule.onNodeWithTag("url_input").performTextInput(url)
         composeTestRule.onNodeWithText("Connect").performClick()
 
         composeTestRule.waitUntilExactlyOneExists(hasText("No pages", substring = true), 1000)

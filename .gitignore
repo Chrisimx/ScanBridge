@@ -8,4 +8,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+testConfig.properties
 .kotlin
