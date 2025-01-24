@@ -151,9 +151,21 @@ class ScanBridgeTest {
         composeTestRule.onNodeWithTag("url_input").performTextInput(url)
         composeTestRule.onNodeWithText("Connect").performClick()
 
-        composeTestRule.waitUntilExactlyOneExists(hasText("No pages", substring = true), 1000)
+        Thread.sleep(1000)
+        composeTestRule.onNode(hasText("No pages", substring = true)).assertIsDisplayed()
         composeTestRule.onNodeWithText("Scan", useUnmergedTree = true).performClick()
 
-        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("scan_page"), 1000)
+        Thread.sleep(1000)
+        composeTestRule.onNode(hasTestTag("scan_page")).assertIsDisplayed()
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testRootURLFix() {
+        val server = startServer("-s", "")
+
+        testConnectToScanner("http://127.0.0.1:8080")
+
+        server.destroy()
     }
 }
