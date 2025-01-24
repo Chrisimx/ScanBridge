@@ -1,4 +1,7 @@
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.lang.ProcessBuilder
+import java.security.MessageDigest
 import java.util.Properties
 
 val testConfig = Properties()
@@ -55,7 +58,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments["escl_server_url"] =
-            testConfig.getOrDefault("escl_server_url", "http://192.168.178.72:8080") as String
+            testConfig.getOrDefault("escl_server_url", "http://127.0.0.1:8080") as String
     }
 
     buildTypes {
@@ -69,6 +72,17 @@ android {
         }
         debug {
             buildConfigField("String", "GIT_COMMIT_HASH", "\"${getGitCommitHash()}\"")
+
+            sourceSets {
+                getByName("androidTest") {
+                    jniLibs.srcDirs("src/androidTest/native-libs")
+                    packaging {
+                        jniLibs {
+                            useLegacyPackaging = true
+                        }
+                    }
+                }
+            }
         }
     }
     compileOptions {
@@ -117,55 +131,110 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 }
 
+fun calculateChecksum(file: File): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    file.inputStream().use { input ->
+        val buffer = ByteArray(8192)
+        var bytesRead: Int
+        while (input.read(buffer).also { bytesRead = it } != -1) {
+            digest.update(buffer, 0, bytesRead)
+        }
+    }
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
+
+fun verifyChecksum(file: File, expectedChecksum: String): Boolean {
+    val actualChecksum = calculateChecksum(file)
+    return actualChecksum == expectedChecksum
+}
+
+val checksums = mapOf(
+    "x86_64" to "a7c6cf413b8963017212a3c59530ac7d0a48379c7d3dd7128babf2937f6c0a97",
+    "armeabi-v7a" to "8de29fd1aff02d24c1adff34a0f83e686fae6024cfdb25b5d6647eb0916399d5",
+    "arm64-v8a" to "10e843da28ff9b1089a9130ee60ba45d57b6c3bc218e5fa044c8e6d86b88991b"
+)
+
+fun downloadESCLMockServer(archName: String, archPath: String, client: OkHttpClient) {
+    val request = Request.Builder()
+        .url("https://chrisimx.github.io/escl-mock-server/$archPath/escl-mock-server").get().build()
+    client.newCall(request).execute().use { response ->
+        File("./cache/escl-mock-server/$archName").mkdirs()
+
+        val f = File("./cache/escl-mock-server/$archName/escl-mock-server")
+
+        f.createNewFile()
+
+        f.outputStream().use {
+            val stream = response.body!!.byteStream()
+            stream.copyTo(it)
+        }
+
+        if (!verifyChecksum(f, checksums[archName]!!)) {
+            throw IllegalStateException("Checksum verification failed for $archName")
+        }
+    }
+}
+
+tasks.register("downloadEsclMockServer") {
+    description = "Build the eSCL dummy server"
+
+    outputs.dirs("../cache/escl-mock-server")
+
+    doLast {
+        val client = OkHttpClient()
+
+        downloadESCLMockServer("x86_64", "android-x86-64", client)
+        downloadESCLMockServer("armeabi-v7a", "android-armv7", client)
+        downloadESCLMockServer("arm64-v8a", "android-arm64-v8a", client)
+    }
+}
+
+val architectures = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+
+architectures.forEach { arch ->
+    tasks.register<Copy>("copyEsclMockServer$arch") {
+        description =
+            "Copy the eSCL dummy server to the androidTest native-libs folder for the $arch ABI"
+
+        dependsOn("downloadEsclMockServer") // Ensure the files are downloaded before copying
+
+        duplicatesStrategy = DuplicatesStrategy.FAIL
+
+        from("../cache/escl-mock-server/$arch/escl-mock-server") {
+            rename { "lib_escl_mock.so" }
+        }
+
+        into("src/androidTest/native-libs/$arch/")
+
+        outputs.files(
+            file("src/androidTest/native-libs/$arch/lib_escl_mock.so")
+        )
+    }
+
+}
+
+val taskNamesCopyESCL = architectures.map { "copyEsclMockServer$it" }
+
+tasks.register("copyEsclMockServerAll") {
+    description =
+        "Copy the eSCL dummy server for all ABIs/archs to the androidTest native-libs folder"
+
+    dependsOn(taskNamesCopyESCL)
+}
+
 afterEvaluate {
-    tasks.register<Exec>("buildRustApp") {
-        group = "rust"
-        description = "Build the eSCL dummy server"
-
-        workingDir = file("../escl-mock-server/")
-        commandLine = listOf("cargo", "build", "--release")
-        outputs.file("../escl-mock-server/target/release/escl-mock-server")
-    }
-
-    tasks.register("startRustServer") {
-        group = "rust"
-        description = "Start the Rust server in the background"
-        dependsOn("buildRustApp")
-
-        doLast {
-            val processBuilder = ProcessBuilder(
-                "escl-mock-server/target/release/escl-mock-server", "-a", "0.0.0.0"
-            ).apply {
-                redirectOutput(ProcessBuilder.Redirect.INHERIT)
-                redirectError(ProcessBuilder.Redirect.INHERIT)
-            }
-
-            val process = processBuilder.start()
-            println("Started Rust server with PID ${process.pid()}")
-            Runtime.getRuntime().addShutdownHook(Thread {
-                println("Stopped Rust server")
-                process.destroy()
-            })
-        }
-    }
-
-    tasks.register("stopRustServer") {
-        doLast {
-            val processBuilder = ProcessBuilder(
-                "pkill", "-f", "escl-mock-server"
-            ).apply {
-                redirectOutput(ProcessBuilder.Redirect.INHERIT)
-                redirectError(ProcessBuilder.Redirect.INHERIT)
-            }
-
-            processBuilder.start()
-
-            println("Stopped Rust server")
-        }
-    }
 
     tasks.named("connectedDebugAndroidTest") {
-        dependsOn("buildRustApp", "startRustServer")
-        finalizedBy("stopRustServer")
+        dependsOn("copyEsclMockServerAll")
+    }
+
+    tasks.named("mergeDebugAndroidTestJniLibFolders") {
+        dependsOn("copyEsclMockServerAll")
+    }
+
+    tasks.named("clean") {
+        doLast {
+            delete(file("src/androidTest/native-libs"), file("../cache"))
+        }
     }
 }

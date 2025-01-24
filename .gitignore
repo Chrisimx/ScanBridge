@@ -10,3 +10,5 @@
 local.properties
 testConfig.properties
 .kotlin
+cache
+app/src/androidTest/native-libs

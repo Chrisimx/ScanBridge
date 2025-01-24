@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
@@ -19,6 +20,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
 import org.junit.Test
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStreamReader
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -60,6 +64,32 @@ class ScanBridgeTest {
             }
     }
 
+    fun startServer(vararg args: String): Process {
+        val context = InstrumentationRegistry.getInstrumentation().context
+
+        val mockServer = File(context.applicationInfo.nativeLibraryDir, "lib_escl_mock.so")
+
+        Log.d("ScanBridgeTest", "ESCL mock server: ${mockServer.absolutePath}")
+
+        val process = ProcessBuilder()
+            .command(mockServer.absolutePath, *args)
+            .start()
+
+        Thread {
+            try {
+                BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+                    var line: String?
+                    while (reader.readLine().also { line = it } != null) {
+                        Log.d("ESCLMockServer", line!!) // Log each line from the process
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ESCLMockServer", "Error reading output", e)
+            }
+        }.start()
+
+        return process
+    }
 
     @Test
     fun discovery() {
@@ -85,23 +115,39 @@ class ScanBridgeTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun scanningInterface() {
+        val server = startServer()
+
         composeTestRule.onNodeWithTag("custom_scanner_fab").performClick()
 
         composeTestRule.onNodeWithTag("url_input")
-            .performTextInput("http://192.168.178.72:8080/eSCL")
+            .performTextInput("http://127.0.0.1:8080/eSCL")
         composeTestRule.onNodeWithText("Connect").performClick()
 
         composeTestRule.waitUntilExactlyOneExists(hasText("No pages", substring = true), 1000)
         saveScreenshot("scanning_interface")
+
+        server.destroy()
     }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun scan() {
-        composeTestRule.onNodeWithTag("custom_scanner_fab").performClick()
+        val server = startServer()
 
         val url = InstrumentationRegistry.getArguments()
-            .getString("escl_server_url") ?: "http://192.168.178.72:8080/eSCL"
+            .getString("escl_server_url") ?: "http://127.0.0.1:8080/eSCL"
+
+        testConnectToScanner(url)
+        saveScreenshot("scan")
+
+        server.destroy()
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    fun testConnectToScanner(url: String) {
+        composeTestRule.onNodeWithTag("custom_scanner_fab").performClick()
+
+        Log.d("ScanBridgeTest", "Trying URL: $url")
         composeTestRule.onNodeWithTag("url_input").performTextInput(url)
         composeTestRule.onNodeWithText("Connect").performClick()
 
@@ -109,6 +155,5 @@ class ScanBridgeTest {
         composeTestRule.onNodeWithText("Scan", useUnmergedTree = true).performClick()
 
         composeTestRule.waitUntilAtLeastOneExists(hasTestTag("scan_page"), 1000)
-        saveScreenshot("scan")
     }
 }
