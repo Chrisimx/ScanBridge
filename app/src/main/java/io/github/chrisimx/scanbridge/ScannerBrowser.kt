@@ -111,7 +111,7 @@ fun ScannerBrowser(
                 navController.navigate(
                     ScannerRoute(
                         context.getString(R.string.custom_scanner),
-                        url.toString()
+                        if (url.toString().endsWith("/")) url.toString() else "$url/"
                     )
                 )
             }
