@@ -76,7 +76,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -785,43 +784,43 @@ fun ScanContent(
                 )
             }
 
-            HorizontalPager(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                state = pagerState
-            ) { page ->
-                if (page == scanningViewModel.scanningScreenData.currentScansState.size) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
-                        Text(stringResource(R.string.retrieving_page))
-                    }
-                    return@HorizontalPager
-                } else {
-                    val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
-
-                    AsyncImage(
-                        model = scanningViewModel.scanningScreenData.currentScansState[page].first,
-                        contentDescription = stringResource(R.string.desc_scanned_page),
-                        modifier = Modifier
-                            .zoomable(zoomState)
-                            .padding(vertical = 5.dp)
-                            .testTag("scan_page"),
-                    )
-                }
-            }
         }
     } else if (!scanningViewModel.scanningScreenData.scanJobRunning) {
         FullScreenError(
             R.drawable.rounded_document_scanner_24,
             stringResource(R.string.no_scans_yet)
         )
+    }
+
+    HorizontalPager(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+        state = pagerState
+    ) { page ->
+        if (page >= scanningViewModel.scanningScreenData.currentScansState.size) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator()
+                Text(stringResource(R.string.retrieving_page))
+            }
+            return@HorizontalPager
+        } else {
+            val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
+
+            AsyncImage(
+                model = scanningViewModel.scanningScreenData.currentScansState[page].first,
+                contentDescription = stringResource(R.string.desc_scanned_page),
+                modifier = Modifier
+                    .zoomable(zoomState)
+                    .padding(vertical = 5.dp),
+            )
+        }
     }
 
     if (pagerState.currentPage < scanningViewModel.scanningScreenData.currentScansState.size) {
