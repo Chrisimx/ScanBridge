@@ -62,7 +62,9 @@ class ScannerDiscovery(
 
             override fun onServiceUpdated(p0: NsdServiceInfo) {
                 Log.d(TAG, "Service (${this.hashCode()}) updated! $p0")
-                val rs = p0.attributes.get("rs")?.toString(StandardCharsets.UTF_8) ?: ""
+                var rs = p0.attributes["rs"]?.toString(StandardCharsets.UTF_8) ?: "/"
+
+                rs = if (rs.isEmpty()) "/" else "/$rs/"
 
                 val urls = mutableListOf<String>()
 
@@ -71,7 +73,7 @@ class ScannerDiscovery(
                     val url = try {
                         HttpUrl.Builder()
                             .host(sanitizedURL)
-                            .addPathSegment(rs)
+                            .encodedPath(rs)
                             .scheme("http")
                             .build()
                     } catch (e: Exception) {
