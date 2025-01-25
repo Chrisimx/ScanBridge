@@ -75,6 +75,12 @@ description of the problem and if possible, a crash log, android logcats or stac
 cases
 the ScannerCapabilities.xml of your scanner can also be useful
 
+## Other communication channels
+
+If you want to chat with me or other users, you can join the Matrix room
+[#scanbridge:fireamp.eu](https://matrix.to/#/#scanbridge:fireamp.eu) or DM me on Matrix
+(@chris.imx.dev:fireamp.eu).
+
 ## Contributions
 
 Contributions are welcome, and it would be amazing if you want to help. Refer to
