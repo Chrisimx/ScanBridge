@@ -47,7 +47,7 @@ data class ScanningScreenData(
     val createdTempFiles: MutableList<File> = mutableListOf(),
     val pagerState: PagerState = PagerState {
         stateCurrentScans.size + if (scanJobRunning.value) 1 else 0
-    },
+    }
 ) {
     fun toImmutable() = ImmutableScanningScreenData(
         esclClient,
@@ -81,7 +81,7 @@ data class ImmutableScanningScreenData(
     private val progressStringResState: State<Int?>,
     val createdTempFiles: List<File>,
     val pagerState: PagerState,
-    val currentScansState: SnapshotStateList<Pair<String, ScanSettings>>,
+    val currentScansState: SnapshotStateList<Pair<String, ScanSettings>>
 ) {
     val confirmDialogShown by confirmDialogShownState
     val confirmPageDeleteDialogShown by confirmPageDeleteDialogShownState

@@ -37,5 +37,5 @@ val Purple = Color(0xFF702CCC)
 val gradientBrush = Brush.linearGradient(
     colors = listOf(NiceBlue, Purple), // Colors of the gradient
     start = androidx.compose.ui.geometry.Offset.Zero, // Start position
-    end = androidx.compose.ui.geometry.Offset.Infinite// End position
+    end = androidx.compose.ui.geometry.Offset.Infinite // End position
 )

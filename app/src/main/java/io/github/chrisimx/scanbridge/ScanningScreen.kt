@@ -127,10 +127,7 @@ import okhttp3.HttpUrl
 
 private val TAG = "ScanningScreen"
 
-fun retrieveScannerCapabilities(
-    scanningViewModel: ScanningScreenViewModel,
-) {
-
+fun retrieveScannerCapabilities(scanningViewModel: ScanningScreenViewModel) {
     val esclClient = scanningViewModel.scanningScreenData.esclClient
 
     val scannerCapabilitiesResult = esclClient.getScannerCapabilities()
@@ -144,16 +141,12 @@ fun retrieveScannerCapabilities(
     scanningViewModel.setScannerCapabilities(scannerCapabilitiesResult.scannerCapabilities)
 }
 
-
 fun String.extractBaseFilename(): String? {
     val regex = Regex("^scan-[a-f0-9-]+")
     return regex.find(this)?.value
 }
 
-fun rotate(
-    context: Context,
-    scanningViewModel: ScanningScreenViewModel,
-) {
+fun rotate(context: Context, scanningViewModel: ScanningScreenViewModel) {
     if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
         return
     }
@@ -191,11 +184,7 @@ fun rotate(
     scanningViewModel.setLoadingText(null)
 }
 
-fun doZipExport(
-    scanningViewModel: ScanningScreenViewModel,
-    context: Context,
-    onError: (String) -> Unit
-) {
+fun doZipExport(scanningViewModel: ScanningScreenViewModel, context: Context, onError: (String) -> Unit) {
     if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
         onError(context.getString(R.string.no_scans_yet))
         return
@@ -224,7 +213,10 @@ fun doZipExport(
     zipFiles(
         scanningViewModel.scanningScreenData.currentScansState.map { File(it.first) },
         zipOutputFile,
-        { counter++; "scan-${counter.toString().padStart(digitsNeeded, '0')}.jpg" }
+        {
+            counter++
+            "scan-${counter.toString().padStart(digitsNeeded, '0')}.jpg"
+        }
     )
 
     scanningViewModel.setLoadingText(null)
@@ -242,11 +234,7 @@ fun doZipExport(
     context.startActivity(share)
 }
 
-fun doPdfExport(
-    scanningViewModel: ScanningScreenViewModel,
-    context: Context,
-    onError: (String) -> Unit
-) {
+fun doPdfExport(scanningViewModel: ScanningScreenViewModel, context: Context, onError: (String) -> Unit) {
     if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
         onError(context.getString(R.string.no_scans_yet))
         return
@@ -274,7 +262,8 @@ fun doPdfExport(
 
     chunks.forEachIndexed { index, chunk ->
         val pdfFile = File(
-            parentDir, "$nameRoot-${index}.pdf"
+            parentDir,
+            "$nameRoot-$index.pdf"
         )
         PdfWriter(pdfFile).use { writer ->
             PdfDocument(writer).use { pdf ->
@@ -365,7 +354,7 @@ fun doScan(
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
     scanSettings: ScanSettings,
-    viewModel: ScanningScreenViewModel,
+    viewModel: ScanningScreenViewModel
 ) {
     thread {
         if (viewModel.scanningScreenData.scanJobRunning) {
@@ -438,9 +427,7 @@ fun doScan(
                             break
                         }
                     }
-
                 }
-
 
                 Log.d(TAG, "File created: $filePath")
 
@@ -496,9 +483,10 @@ fun ScanningScreenBottomBar(
             }) {
                 Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
             }
-            IconButton(onClick = {
-                scanningViewModel.setShowExportOptionsPopup(true)
-            },
+            IconButton(
+                onClick = {
+                    scanningViewModel.setShowExportOptionsPopup(true)
+                },
                 modifier = Modifier.onGloballyPositioned {
                     onExportPositionChange(
                         Pair(
@@ -557,7 +545,7 @@ fun ScanningScreen(
         ScanningScreenViewModel(
             address = scannerAddress
         )
-    },
+    }
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -566,7 +554,7 @@ fun ScanningScreen(
     val isLoaded by remember {
         derivedStateOf {
             scanningViewModel.scanningScreenData.capabilities != null &&
-                    scanningViewModel.scanningScreenData.scanSettingsVM != null
+                scanningViewModel.scanningScreenData.scanSettingsVM != null
         }
     }
 
@@ -582,7 +570,7 @@ fun ScanningScreen(
                 LaunchedEffect(Unit) {
                     thread {
                         retrieveScannerCapabilities(
-                            scanningViewModel,
+                            scanningViewModel
                         )
                     }
                 }
@@ -595,7 +583,7 @@ fun ScanningScreen(
             AnimatedVisibility(
                 isError,
                 enter = fadeIn(animationSpec = tween(1000)),
-                exit = fadeOut(animationSpec = tween(1000)),
+                exit = fadeOut(animationSpec = tween(1000))
             ) {
                 FullScreenError(
                     R.drawable.twotone_wifi_find_24,
@@ -621,8 +609,11 @@ fun ScanningScreen(
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
                     data,
-                    containerColor = if (data.visuals.message.contains("Error")) MaterialTheme.colorScheme.error
-                    else SnackbarDefaults.color
+                    containerColor = if (data.visuals.message.contains("Error")) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        SnackbarDefaults.color
+                    }
                 )
             }
         },
@@ -639,7 +630,7 @@ fun ScanningScreen(
                     )
                 }
             )
-        },
+        }
     ) { innerPadding ->
 
         if (scanningViewModel.scanningScreenData.capabilities != null) {
@@ -760,69 +751,69 @@ fun ScanContent(
     val pagerState = scanningViewModel.scanningScreenData.pagerState
     val context = LocalContext.current
 
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (!scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
-                Text(scannerName)
-                Text(
-                    stringResource(
-                        R.string.page_x_of_y,
-                        pagerState.currentPage + 1,
-                        scanningViewModel.scanningScreenData.currentScansState.size + if (scanningViewModel.scanningScreenData.scanJobRunning) 1 else 0
-                    )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (!scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
+            Text(scannerName)
+            Text(
+                stringResource(
+                    R.string.page_x_of_y,
+                    pagerState.currentPage + 1,
+                    scanningViewModel.scanningScreenData.currentScansState.size +
+                        if (scanningViewModel.scanningScreenData.scanJobRunning) 1 else 0
                 )
+            )
 
-                if (scanningViewModel.scanningScreenData.currentScansState.size > pagerState.currentPage) {
-                    Text(
-                        scanningViewModel.scanningScreenData.currentScansState[pagerState.currentPage].second.inputSource?.toReadableString(
-                            context
-                        ).toString()
-                    )
-                }
+            if (scanningViewModel.scanningScreenData.currentScansState.size > pagerState.currentPage) {
+                Text(
+                    scanningViewModel.scanningScreenData.currentScansState[pagerState.currentPage].second.inputSource?.toReadableString(
+                        context
+                    ).toString()
+                )
             }
+        }
 
-            HorizontalPager(
-                modifier = Modifier
-                    .fillMaxSize(),
-                state = pagerState
-            ) { page ->
-                if (page >= scanningViewModel.scanningScreenData.currentScansState.size) {
-                    Column(
+        HorizontalPager(
+            modifier = Modifier
+                .fillMaxSize(),
+            state = pagerState
+        ) { page ->
+            if (page >= scanningViewModel.scanningScreenData.currentScansState.size) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Text(stringResource(R.string.retrieving_page))
+                }
+                return@HorizontalPager
+            } else {
+                val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
+
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AsyncImage(
+                        model = scanningViewModel.scanningScreenData.currentScansState[page].first,
+                        contentDescription = stringResource(R.string.desc_scanned_page),
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
-                        Text(stringResource(R.string.retrieving_page))
-                    }
-                    return@HorizontalPager
-                } else {
-                    val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
-
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        AsyncImage(
-                            model = scanningViewModel.scanningScreenData.currentScansState[page].first,
-                            contentDescription = stringResource(R.string.desc_scanned_page),
-                            modifier = Modifier
-                                .zoomable(zoomState)
-                                .padding(vertical = 5.dp)
-                                .testTag("scan_page")
-                        )
-                    }
+                            .zoomable(zoomState)
+                            .padding(vertical = 5.dp)
+                            .testTag("scan_page")
+                    )
                 }
             }
         }
+    }
 
     if (scanningViewModel.scanningScreenData.currentScansState.isEmpty() && !scanningViewModel.scanningScreenData.scanJobRunning) {
         FullScreenError(
@@ -844,7 +835,7 @@ fun ScanContent(
                     .clip(
                         RoundedCornerShape(16.dp)
                     )
-                    .background(MaterialTheme.colorScheme.inverseOnSurface),
+                    .background(MaterialTheme.colorScheme.inverseOnSurface)
             ) {
                 Row {
                     IconButton(onClick = {

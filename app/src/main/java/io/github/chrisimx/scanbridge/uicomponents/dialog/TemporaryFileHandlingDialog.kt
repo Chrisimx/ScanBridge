@@ -45,14 +45,8 @@ import java.io.File
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
 @Composable
-fun TemporaryFileHandlingDialog(
-    tempFileList: SnapshotStateList<File>,
-    onDismiss: () -> Unit,
-    onDelete: () -> Unit,
-    onExport: () -> Unit
-) {
+fun TemporaryFileHandlingDialog(tempFileList: SnapshotStateList<File>, onDismiss: () -> Unit, onDelete: () -> Unit, onExport: () -> Unit) {
     val context = LocalContext.current
-
 
     val header = context.getString(
         R.string.temporary_files_found
@@ -65,20 +59,16 @@ fun TemporaryFileHandlingDialog(
 
     val scrollState = rememberScrollState()
 
-
     Dialog(onDismissRequest = { onDismiss() }) {
-
         Card(
             modifier = Modifier
                 .fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(16.dp)
         ) {
             Column(
                 modifier = Modifier.padding(28.dp)
             ) {
-
                 Text(text = header, style = MaterialTheme.typography.headlineMediumEmphasized)
-
 
                 Column(
                     modifier = Modifier
@@ -87,7 +77,7 @@ fun TemporaryFileHandlingDialog(
                 ) {
                     Text(
                         text = content,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
 
@@ -111,6 +101,5 @@ fun TemporaryFileHandlingDialog(
                 }
             }
         }
-
     }
 }

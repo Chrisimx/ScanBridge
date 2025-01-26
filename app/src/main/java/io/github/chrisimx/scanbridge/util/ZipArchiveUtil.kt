@@ -25,11 +25,7 @@ import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-fun zipFiles(
-    files: List<File>,
-    zipFile: File,
-    fileName: (File) -> String = { it.name }
-) {
+fun zipFiles(files: List<File>, zipFile: File, fileName: (File) -> String = { it.name }) {
     ZipOutputStream(FileOutputStream(zipFile)).use { zos ->
         files.forEach { file ->
             FileInputStream(file).use { fis ->

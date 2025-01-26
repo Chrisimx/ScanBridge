@@ -1,15 +1,14 @@
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.lang.ProcessBuilder
 import java.security.MessageDigest
 import java.util.Properties
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 val testConfig = Properties()
 val testConfigFile = rootProject.file("testConfig.properties")
 if (testConfigFile.exists()) {
     testConfigFile.inputStream().use { testConfig.load(it) }
 }
-
 
 plugins {
     alias(libs.plugins.android.application)
@@ -96,9 +95,7 @@ android {
         compose = true
         buildConfig = true
     }
-
 }
-
 
 dependencies {
     implementation(libs.okhttp)
@@ -210,7 +207,6 @@ architectures.forEach { arch ->
             file("src/androidTest/native-libs/$arch/lib_escl_mock.so")
         )
     }
-
 }
 
 val taskNamesCopyESCL = architectures.map { "copyEsclMockServer$it" }

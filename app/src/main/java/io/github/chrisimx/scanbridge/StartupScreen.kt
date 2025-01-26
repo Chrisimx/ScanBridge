@@ -64,16 +64,20 @@ fun ScannerDiscoveryTopBar(header: String) {
 
 @Composable
 fun StartupScreen(navController: NavController) {
-    var selectedItem = rememberSaveable { mutableIntStateOf(0)}
+    var selectedItem = rememberSaveable { mutableIntStateOf(0) }
     val items = listOf(stringResource(R.string.discovery), stringResource(R.string.settings))
     val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Settings)
     val unselectedIcons =
         listOf(Icons.Outlined.Home, Icons.Outlined.Settings)
     val context = LocalContext.current
     val header =
-        if (selectedItem.intValue == 0) stringResource(R.string.header_scannerbrowser) else stringResource(
-            R.string.settings
-        )
+        if (selectedItem.intValue == 0) {
+            stringResource(R.string.header_scannerbrowser)
+        } else {
+            stringResource(
+                R.string.settings
+            )
+        }
 
     val statefulScannerMap = remember { mutableStateMapOf<String, DiscoveredScanner>() }
 
@@ -96,7 +100,8 @@ fun StartupScreen(navController: NavController) {
 
     var showCustomDialog by remember { mutableStateOf(false) }
 
-    Scaffold(modifier = Modifier.fillMaxSize(),
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = @Composable { ScannerDiscoveryTopBar(header) },
         bottomBar = @Composable {
             NavigationBar {
@@ -121,7 +126,7 @@ fun StartupScreen(navController: NavController) {
                     modifier = Modifier.testTag("custom_scanner_fab"),
                     onClick = {
                         showCustomDialog = true
-                    },
+                    }
                 ) {
                     Icon(
                         Icons.Filled.Create,

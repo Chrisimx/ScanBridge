@@ -60,19 +60,15 @@ import io.github.chrisimx.scanbridge.uicomponents.ValidatedDimensionsTextEdit
 import io.github.chrisimx.scanbridge.util.toReadableString
 
 @OptIn(
-    ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalLayoutApi::class,
     ExperimentalFoundationApi::class
 )
-
 private val TAG = "ScanSettings"
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ScanSettingsUI(
-    modifier: Modifier,
-    context: Context,
-    scanSettingsViewModel: ScanSettingsComposableViewModel = viewModel()
-) {
+fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: ScanSettingsComposableViewModel = viewModel()) {
     val scanSettingsUIState = scanSettingsViewModel.scanSettingsComposableData
 
     assert(scanSettingsUIState.inputSourceOptions.isNotEmpty()) // The settings are useless if this is the case
@@ -110,7 +106,7 @@ fun ScanSettingsUI(
             ToggleButton(
                 enabled = duplexAvailable,
                 checked = scanSettingsUIState.scanSettingsState.duplex == true,
-                onCheckedChange = { scanSettingsViewModel.setDuplex(it) },
+                onCheckedChange = { scanSettingsViewModel.setDuplex(it) }
             ) { Text(stringResource(R.string.setting_duplex)) }
         }
         Text(stringResource(R.string.resolution_dpi))
@@ -127,19 +123,22 @@ fun ScanSettingsUI(
                             discreteResolution.yResolution
                         )
                     },
-                    selected = scanSettingsUIState.scanSettingsState.xResolution == discreteResolution.xResolution && scanSettingsUIState.scanSettingsState.yResolution == discreteResolution.yResolution
+                    selected =
+                    scanSettingsUIState.scanSettingsState.xResolution == discreteResolution.xResolution &&
+                        scanSettingsUIState.scanSettingsState.yResolution == discreteResolution.yResolution
                 ) {
-                    if (discreteResolution.xResolution == discreteResolution.yResolution)
+                    if (discreteResolution.xResolution == discreteResolution.yResolution) {
                         Text("${discreteResolution.xResolution}")
-                    else
+                    } else {
                         Text("${discreteResolution.xResolution}x${discreteResolution.yResolution}")
+                    }
                 }
             }
         }
         OutlinedCard(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 15.dp),
+                .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 15.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text(
@@ -163,7 +162,7 @@ fun ScanSettingsUI(
                                 scanSettingsViewModel.setIntent(intentData)
                             },
                             label = { Text(name) },
-                            selected = scanSettingsUIState.scanSettingsState.intent == intentData,
+                            selected = scanSettingsUIState.scanSettingsState.intent == intentData
                         )
                     }
                     InputChip(
@@ -171,11 +170,10 @@ fun ScanSettingsUI(
                             scanSettingsViewModel.setIntent(null)
                         },
                         label = { Text(stringResource(R.string.intent_none)) },
-                        selected = scanSettingsUIState.scanSettingsState.intent == null,
+                        selected = scanSettingsUIState.scanSettingsState.intent == null
                     )
                 }
             }
-
         }
         OutlinedCard(
             modifier = Modifier
@@ -207,9 +205,12 @@ fun ScanSettingsUI(
                                 )
                             },
                             label = { Text(paperFormat.name) },
-                            selected = scanSettingsUIState.scanSettingsState.scanRegions?.width == paperFormat.width.toMillimeters().value.toString()
-                                    && scanSettingsUIState.scanSettingsState.scanRegions?.height == paperFormat.height.toMillimeters().value.toString()
-                                    && !scanSettingsUIState.customMenuEnabled,
+                            selected =
+                            scanSettingsUIState.scanSettingsState.scanRegions?.width ==
+                                paperFormat.width.toMillimeters().value.toString() &&
+                                scanSettingsUIState.scanSettingsState.scanRegions?.height ==
+                                paperFormat.height.toMillimeters().value.toString() &&
+                                !scanSettingsUIState.customMenuEnabled
                         )
                     }
                     InputChip(
@@ -218,7 +219,8 @@ fun ScanSettingsUI(
                             scanSettingsViewModel.setRegionDimension("max", "max")
                         },
                         label = { Text(stringResource(R.string.maximum_size)) },
-                        selected = scanSettingsUIState.scanSettingsState.scanRegions?.width == "max" && !scanSettingsUIState.customMenuEnabled,
+                        selected =
+                        scanSettingsUIState.scanSettingsState.scanRegions?.width == "max" && !scanSettingsUIState.customMenuEnabled
                     )
                     InputChip(
                         selected = scanSettingsUIState.customMenuEnabled,

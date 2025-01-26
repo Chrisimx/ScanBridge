@@ -55,6 +55,6 @@ fun ErrorDialog(errorContent: String, onDismiss: () -> Unit) {
             ) {
                 Text(stringResource(R.string.okay_text))
             }
-        },
+        }
     )
 }

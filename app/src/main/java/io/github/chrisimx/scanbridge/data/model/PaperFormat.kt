@@ -5,11 +5,7 @@ import io.github.chrisimx.esclkt.Millimeters
 import io.github.chrisimx.esclkt.millimeters
 
 // Paper format class
-data class PaperFormat(
-    val name: String,
-    val width: LengthUnit,
-    val height: LengthUnit
-)
+data class PaperFormat(val name: String, val width: LengthUnit, val height: LengthUnit)
 
 fun loadDefaultFormats(): List<PaperFormat> {
     val defaultPaperFormats: MutableList<PaperFormat> = mutableListOf()

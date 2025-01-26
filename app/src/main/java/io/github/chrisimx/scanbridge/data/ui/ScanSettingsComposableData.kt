@@ -35,10 +35,7 @@ import io.github.chrisimx.scanbridge.data.model.PaperFormat
 import io.github.chrisimx.scanbridge.data.model.loadDefaultFormats
 import io.github.chrisimx.scanbridge.util.getInputSourceOptions
 
-data class ScanSettingsComposableData(
-    val scanSettingsState: MutableESCLScanSettingsState,
-    val capabilities: ScannerCapabilities,
-) {
+data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSettingsState, val capabilities: ScannerCapabilities) {
     val inputSourceOptions: List<InputSource> =
         capabilities.getInputSourceOptions()
     val paperFormats: List<PaperFormat> = loadDefaultFormats()
@@ -72,21 +69,19 @@ data class ScanSettingsComposableData(
     }
     val supportedScanResolutions by supportedScanResolutionsState
 
-    fun toImmutable(): ImmutableScanSettingsComposableData {
-        return ImmutableScanSettingsComposableData(
-            scanSettingsState.toImmutable(),
-            capabilities,
-            inputSourceOptions,
-            paperFormats,
-            duplexAdfSupported,
-            widthTextFieldState,
-            heightTextFieldState,
-            customMenuEnabledState,
-            selectedInputSourceCapabilitiesState,
-            intentOptionsState,
-            supportedScanResolutionsState
-        )
-    }
+    fun toImmutable(): ImmutableScanSettingsComposableData = ImmutableScanSettingsComposableData(
+        scanSettingsState.toImmutable(),
+        capabilities,
+        inputSourceOptions,
+        paperFormats,
+        duplexAdfSupported,
+        widthTextFieldState,
+        heightTextFieldState,
+        customMenuEnabledState,
+        selectedInputSourceCapabilitiesState,
+        intentOptionsState,
+        supportedScanResolutionsState
+    )
 }
 
 data class ImmutableScanSettingsComposableData(

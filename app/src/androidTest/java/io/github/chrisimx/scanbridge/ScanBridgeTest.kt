@@ -60,7 +60,7 @@ class ScanBridgeTest {
             .captureToImage()
             .asAndroidBitmap()
             .let { bitmap ->
-                saveBitmapToExternalStorage(bitmap, "${name}-screenshot${date}}.png")
+                saveBitmapToExternalStorage(bitmap, "$name-screenshot$date}.png")
             }
     }
 

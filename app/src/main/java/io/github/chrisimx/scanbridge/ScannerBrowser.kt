@@ -70,7 +70,7 @@ fun ScannerList(
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        reverseLayout = true,
+        reverseLayout = true
     ) {
         statefulScannerMap.forEach {
             val discoveredScanner = it.value

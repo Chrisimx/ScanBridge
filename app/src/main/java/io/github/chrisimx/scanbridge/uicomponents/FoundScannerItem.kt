@@ -42,16 +42,19 @@ import io.github.chrisimx.scanbridge.ScannerRoute
 
 @Composable
 fun FoundScannerItem(name: String, address: String, navController: NavController) {
-    ElevatedCard(modifier = Modifier
-        .defaultMinSize(minHeight = 60.dp)
-        .padding(10.dp),
+    ElevatedCard(
+        modifier = Modifier
+            .defaultMinSize(minHeight = 60.dp)
+            .padding(10.dp),
         onClick = {
             navController.navigate(route = ScannerRoute(name, address))
-        }) {
+        }
+    ) {
         Row(
             modifier = Modifier
                 .defaultMinSize(minHeight = 80.dp)
-                .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 modifier = Modifier
@@ -66,7 +69,7 @@ fun FoundScannerItem(name: String, address: String, navController: NavController
                     name,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelLarge
                 )
                 Text(
                     address,

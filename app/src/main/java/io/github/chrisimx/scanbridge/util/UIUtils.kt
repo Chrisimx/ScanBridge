@@ -52,7 +52,7 @@ fun snackBarError(
     context: Context,
     snackbarHostState: SnackbarHostState,
     action: Boolean = true,
-    copyData: String? = null,
+    copyData: String? = null
 ) {
     scope.launch {
         val result = snackbarHostState.showSnackbar(

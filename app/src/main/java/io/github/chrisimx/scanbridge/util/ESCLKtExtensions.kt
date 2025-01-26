@@ -30,15 +30,13 @@ import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.data.model.MutableESCLScanSettingsState
 import io.github.chrisimx.scanbridge.data.model.MutableScanRegionState
 
-fun JobState?.toJobStateString(context: Context): String {
-    return when (this) {
-        JobState.Canceled -> context.getString(R.string.job_canceled)
-        JobState.Aborted -> context.getString(R.string.job_aborted_because_error)
-        JobState.Completed -> context.getString(R.string.job_completed_successfully)
-        JobState.Pending -> context.getString(R.string.job_still_pending)
-        JobState.Processing -> context.getString(R.string.job_pages_still_processed)
-        null -> context.getString(R.string.job_state_cannot_be_retrieved)
-    }
+fun JobState?.toJobStateString(context: Context): String = when (this) {
+    JobState.Canceled -> context.getString(R.string.job_canceled)
+    JobState.Aborted -> context.getString(R.string.job_aborted_because_error)
+    JobState.Completed -> context.getString(R.string.job_completed_successfully)
+    JobState.Pending -> context.getString(R.string.job_still_pending)
+    JobState.Processing -> context.getString(R.string.job_pages_still_processed)
+    null -> context.getString(R.string.job_state_cannot_be_retrieved)
 }
 
 fun String.toDoubleLocalized(): Double = DecimalFormat.getInstance().parse(this).toDouble()
@@ -56,23 +54,16 @@ fun ScannerCapabilities.getInputSourceOptions(): List<InputSource> {
     return tmpInputSourceOptions
 }
 
-fun ScannerCapabilities.getInputSourceCaps(
-    inputSource: InputSource,
-    duplex: Boolean = false
-): InputSourceCaps {
-    return when (inputSource) {
-        InputSource.Platen -> this.platen!!.inputSourceCaps
-        InputSource.Feeder -> if (duplex) this.adf!!.duplexCaps!! else this.adf!!.simplexCaps
-        InputSource.Camera -> TODO()
-    }
+fun ScannerCapabilities.getInputSourceCaps(inputSource: InputSource, duplex: Boolean = false): InputSourceCaps = when (inputSource) {
+    InputSource.Platen -> this.platen!!.inputSourceCaps
+    InputSource.Feeder -> if (duplex) this.adf!!.duplexCaps!! else this.adf!!.simplexCaps
+    InputSource.Camera -> TODO()
 }
 
-fun InputSource.toReadableString(context: Context): String {
-    return when (this) {
-        InputSource.Platen -> context.getString(R.string.platen)
-        InputSource.Feeder -> context.getString(R.string.adf)
-        InputSource.Camera -> context.getString(R.string.camera)
-    }
+fun InputSource.toReadableString(context: Context): String = when (this) {
+    InputSource.Platen -> context.getString(R.string.platen)
+    InputSource.Feeder -> context.getString(R.string.adf)
+    InputSource.Camera -> context.getString(R.string.camera)
 }
 
 fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): MutableESCLScanSettingsState {
@@ -83,7 +74,7 @@ fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): MutableESCLScan
         .supportedResolutions.maxBy { it.xResolution }
     val maxScanRegion = MutableScanRegionState(
         heightState = mutableStateOf("max"),
-        widthState = mutableStateOf("max"),
+        widthState = mutableStateOf("max")
     )
 
     return MutableESCLScanSettingsState(
@@ -92,6 +83,6 @@ fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): MutableESCLScan
         scanRegionsState = mutableStateOf(maxScanRegion),
         xResolutionState = mutableStateOf(maxResolution.xResolution),
         yResolutionState = mutableStateOf(maxResolution.yResolution),
-        documentFormatExtState = mutableStateOf("image/jpeg"),
+        documentFormatExtState = mutableStateOf("image/jpeg")
     )
 }

@@ -32,5 +32,5 @@ val Poppins = FontFamily(
     Font(R.font.poppins_extrabolditalic, weight = FontWeight.ExtraBold, style = FontStyle.Italic),
 
     Font(R.font.poppins_black, weight = FontWeight.Black),
-    Font(R.font.poppins_blackitalic, weight = FontWeight.Black, style = FontStyle.Italic),
+    Font(R.font.poppins_blackitalic, weight = FontWeight.Black, style = FontStyle.Italic)
 )

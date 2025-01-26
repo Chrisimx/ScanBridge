@@ -80,41 +80,38 @@ data class MutableESCLScanSettingsState(
     var feedDirection by feedDirectionState
     var blankPageDetectionAndRemoval by blankPageDetectionAndRemovalState
 
-    fun toImmutable(): ImmutableESCLScanSettingsState {
-        return ImmutableESCLScanSettingsState(
-            versionState,
-            intentState,
-            derivedStateOf { scanRegionsState.value?.toImmutable() },
-            documentFormatExtState,
-            contentTypeState,
-            inputSourceState,
-            xResolutionState,
-            yResolutionState,
-            colorModeState,
-            colorSpaceState,
-            mediaTypeState,
-            ccdChannelState,
-            binaryRenderingState,
-            duplexState,
-            numberOfPagesState,
-            brightnessState,
-            compressionFactorState,
-            contrastState,
-            gammaState,
-            highlightState,
-            noiseRemovalState,
-            shadowState,
-            sharpenState,
-            thresholdState,
-            contextIDState,
-            blankPageDetectionState,
-            feedDirectionState,
-            blankPageDetectionAndRemovalState
-        )
-    }
-    fun toESCLKtScanSettings(selectedInputSourceCaps: InputSourceCaps): ScanSettings {
-        return toImmutable().toESCLKtScanSettings(selectedInputSourceCaps)
-    }
+    fun toImmutable(): ImmutableESCLScanSettingsState = ImmutableESCLScanSettingsState(
+        versionState,
+        intentState,
+        derivedStateOf { scanRegionsState.value?.toImmutable() },
+        documentFormatExtState,
+        contentTypeState,
+        inputSourceState,
+        xResolutionState,
+        yResolutionState,
+        colorModeState,
+        colorSpaceState,
+        mediaTypeState,
+        ccdChannelState,
+        binaryRenderingState,
+        duplexState,
+        numberOfPagesState,
+        brightnessState,
+        compressionFactorState,
+        contrastState,
+        gammaState,
+        highlightState,
+        noiseRemovalState,
+        shadowState,
+        sharpenState,
+        thresholdState,
+        contextIDState,
+        blankPageDetectionState,
+        feedDirectionState,
+        blankPageDetectionAndRemovalState
+    )
+    fun toESCLKtScanSettings(selectedInputSourceCaps: InputSourceCaps): ScanSettings =
+        toImmutable().toESCLKtScanSettings(selectedInputSourceCaps)
 }
 
 data class ImmutableESCLScanSettingsState(

@@ -32,23 +32,20 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun CustomScannerDialog(
-    onDismiss: () -> Unit,
-    onConnectClicked: (HttpUrl) -> Unit
-) {
+fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (HttpUrl) -> Unit) {
     var errorState: String? by remember { mutableStateOf(null) }
     var text: String by remember { mutableStateOf("") }
 
     val context = LocalContext.current
 
     Dialog(
-        onDismissRequest = { onDismiss() },
+        onDismissRequest = { onDismiss() }
     ) {
         Card(
             modifier = Modifier
                 .wrapContentHeight()
                 .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(16.dp)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -77,7 +74,7 @@ fun CustomScannerDialog(
                                 style = MaterialTheme.typography.labelMedium
                             )
                         }
-                    },
+                    }
                 )
                 Button(
                     onClick = {
@@ -94,7 +91,7 @@ fun CustomScannerDialog(
                         }
                         onConnectClicked(url)
                     },
-                    modifier = Modifier.padding(top = 16.dp),
+                    modifier = Modifier.padding(top = 16.dp)
                 ) {
                     Text(stringResource(R.string.connect))
                 }

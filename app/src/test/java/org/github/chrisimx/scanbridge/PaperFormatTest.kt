@@ -28,17 +28,17 @@ class PaperFormatTest {
     @Test
     fun loadDefault() {
         val expectedSizes = listOf(
-            Pair(841, 1189),  // A0
-            Pair(594, 841),   // A1
-            Pair(420, 594),   // A2
-            Pair(297, 420),   // A3
-            Pair(210, 297),   // A4
-            Pair(148, 210),   // A5
-            Pair(105, 148),   // A6
-            Pair(74, 105),    // A7
-            Pair(52, 74),     // A8
-            Pair(37, 52),     // A9
-            Pair(26, 37)      // A10
+            Pair(841, 1189), // A0
+            Pair(594, 841), // A1
+            Pair(420, 594), // A2
+            Pair(297, 420), // A3
+            Pair(210, 297), // A4
+            Pair(148, 210), // A5
+            Pair(105, 148), // A6
+            Pair(74, 105), // A7
+            Pair(52, 74), // A8
+            Pair(37, 52), // A9
+            Pair(26, 37) // A10
         )
 
         val paperFormats = loadDefaultFormats()

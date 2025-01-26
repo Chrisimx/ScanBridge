@@ -39,14 +39,14 @@ import androidx.compose.ui.window.Dialog
 @Composable
 fun LoadingDialog(text: Int) {
     Dialog(
-        onDismissRequest = { },
+        onDismissRequest = { }
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
                 .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(16.dp)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),

@@ -16,7 +16,7 @@ data class ImmutableScanRegionState(
     private val heightState: State<String>,
     private val widthState: State<String>,
     private val xOffsetState: State<String>,
-    private val yOffsetState: State<String>,
+    private val yOffsetState: State<String>
 ) {
     val height by heightState
     val width by widthState
@@ -47,17 +47,13 @@ data class MutableScanRegionState(
     private val heightState: MutableState<String>,
     private val widthState: MutableState<String>,
     private val xOffsetState: MutableState<String> = mutableStateOf("0"),
-    private val yOffsetState: MutableState<String> = mutableStateOf("0"),
+    private val yOffsetState: MutableState<String> = mutableStateOf("0")
 ) {
     var height by heightState
     var width by widthState
     var xOffset by xOffsetState
     var yOffset by yOffsetState
 
-    fun toImmutable(): ImmutableScanRegionState {
-        return ImmutableScanRegionState(heightState, widthState, xOffsetState, yOffsetState)
-    }
-    fun toESCLScanRegion(selectedInputSourceCaps: InputSourceCaps): ScanRegion {
-        return toImmutable().toESCLScanRegion(selectedInputSourceCaps)
-    }
+    fun toImmutable(): ImmutableScanRegionState = ImmutableScanRegionState(heightState, widthState, xOffsetState, yOffsetState)
+    fun toESCLScanRegion(selectedInputSourceCaps: InputSourceCaps): ScanRegion = toImmutable().toESCLScanRegion(selectedInputSourceCaps)
 }

@@ -54,12 +54,16 @@ fun CrashFileHandler() {
                 crash = crashFile!!.readText()
             }
         }
-
     }
 
     if (crash != null) {
         CrashFileDialog(
             crash = crash!!,
-            onDismiss = { crashFile!!.delete(); crash = null; crashFile = null })
+            onDismiss = {
+                crashFile!!.delete()
+                crash = null
+                crashFile = null
+            }
+        )
     }
 }

@@ -40,12 +40,10 @@ enum class ErrorState {
     NO_ERROR
 }
 
-fun ErrorState.toHumanString(context: Context): String {
-    return when (this) {
-        ErrorState.NOT_WITHIN_ALLOWED_RANGE -> context.getString(R.string.error_state_not_in_allowed_range)
-        ErrorState.NOT_VALID_NUMBER -> context.getString(R.string.error_state_not_a_valid_number)
-        ErrorState.NO_ERROR -> context.getString(R.string.error_state_valid)
-    }
+fun ErrorState.toHumanString(context: Context): String = when (this) {
+    ErrorState.NOT_WITHIN_ALLOWED_RANGE -> context.getString(R.string.error_state_not_in_allowed_range)
+    ErrorState.NOT_VALID_NUMBER -> context.getString(R.string.error_state_not_a_valid_number)
+    ErrorState.NO_ERROR -> context.getString(R.string.error_state_valid)
 }
 
 @Composable
@@ -87,15 +85,16 @@ fun ValidatedDimensionsTextEdit(
                 Log.d("ScanSettings", "Invalid Number")
                 return@OutlinedTextField
             }
-
         },
         supportingText = {
-            if (errorState.value != ErrorState.NO_ERROR) Text(
-                errorState.value.toHumanString(
-                    context
-                ),
-                style = MaterialTheme.typography.labelSmall
-            )
+            if (errorState.value != ErrorState.NO_ERROR) {
+                Text(
+                    errorState.value.toHumanString(
+                        context
+                    ),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
         },
         isError = errorState.value != ErrorState.NO_ERROR,
         keyboardOptions = KeyboardOptions.Default.copy(
@@ -104,5 +103,4 @@ fun ValidatedDimensionsTextEdit(
         label = @Composable { Text(label, style = MaterialTheme.typography.labelMedium) },
         singleLine = true
     )
-
 }

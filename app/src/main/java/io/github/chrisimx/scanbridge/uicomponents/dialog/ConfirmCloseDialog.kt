@@ -33,10 +33,7 @@ import androidx.compose.ui.unit.dp
 import io.github.chrisimx.scanbridge.R
 
 @Composable
-fun ConfirmCloseDialog(
-    onDismiss: () -> Unit,
-    onConfirmed: () -> Unit
-) {
+fun ConfirmCloseDialog(onDismiss: () -> Unit, onConfirmed: () -> Unit) {
     AlertDialog(
         icon = {
             Icon(
@@ -71,6 +68,6 @@ fun ConfirmCloseDialog(
             ) {
                 Text(stringResource(R.string.leave_text))
             }
-        },
+        }
     )
 }

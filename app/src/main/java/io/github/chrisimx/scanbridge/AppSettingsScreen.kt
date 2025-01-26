@@ -92,7 +92,7 @@ fun VersionComposable() {
     Text(
         "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH})",
         fontStyle = FontStyle.Normal,
-        fontFamily = Poppins,
+        fontFamily = Poppins
     )
 
     if (BuildConfig.DEBUG) {
@@ -152,12 +152,14 @@ fun AutoDeleteTempFiles(
             style = MaterialTheme.typography.bodyMedium
         )
         val context = LocalContext.current
-        Box(modifier = Modifier
-            .constrainAs(informationButton) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-                end.linkTo(parent.end)
-            }) {
+        Box(
+            modifier = Modifier
+                .constrainAs(informationButton) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    end.linkTo(parent.end)
+                }
+        ) {
             IconButton(onClick = {
                 onInformationRequested(
                     context.getString(
@@ -172,7 +174,6 @@ fun AutoDeleteTempFiles(
                 )
             }
         }
-
     }
 }
 
@@ -203,7 +204,6 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         VersionComposable()
 
         HorizontalDivider(modifier = Modifier.padding(14.dp))

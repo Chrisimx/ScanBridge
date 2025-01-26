@@ -25,9 +25,7 @@ import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanIntentData
 import io.github.chrisimx.scanbridge.data.model.MutableScanRegionState
 
-class ScanSettingsComposableViewModel(
-    private val _scanSettingsComposableData: ScanSettingsComposableData
-) : ViewModel() {
+class ScanSettingsComposableViewModel(private val _scanSettingsComposableData: ScanSettingsComposableData) : ViewModel() {
 
     val scanSettingsComposableData: ImmutableScanSettingsComposableData
         get() = _scanSettingsComposableData.toImmutable()

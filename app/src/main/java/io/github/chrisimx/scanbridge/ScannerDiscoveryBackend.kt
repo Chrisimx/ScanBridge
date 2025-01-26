@@ -25,19 +25,18 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import okhttp3.HttpUrl
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ForkJoinPool
+import okhttp3.HttpUrl
+
+private const val TAG = "ScannerDiscovery"
 
 data class DiscoveredScanner(val name: String, val addresses: List<String>)
 
 // Instantiate a new DiscoveryListener
-class ScannerDiscovery(
-    val nsdManager: NsdManager,
-    val statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>
-) : NsdManager.DiscoveryListener {
+class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>) :
+    NsdManager.DiscoveryListener {
 
-    val TAG = "ScannerDiscovery"
     // Called as soon as service discovery begins.
     override fun onDiscoveryStarted(regType: String) {
         Log.d(TAG, "Service discovery started")
@@ -46,7 +45,10 @@ class ScannerDiscovery(
     @RequiresExtension(extension = Build.VERSION_CODES.TIRAMISU, version = 7)
     override fun onServiceFound(service: NsdServiceInfo) {
         // A service was found! Do something with it.
-        Log.d(TAG, "Service (${service.hashCode()}) discovery success ${service.hostAddresses} ${service.serviceType} ${service.serviceName} ${service.port} ${service.network}")
+        Log.d(
+            TAG,
+            "Service (${service.hashCode()}) discovery success ${service.hostAddresses} ${service.serviceType} ${service.serviceName} ${service.port} ${service.network}"
+        )
 
         val serviceIdentifier = "${service.serviceName}.${service.serviceType}"
         if (statefulScannerMap.contains(serviceIdentifier)) {
@@ -100,14 +102,13 @@ class ScannerDiscovery(
             override fun onServiceInfoCallbackUnregistered() {
                 Log.d(TAG, "ServiceInfoCallback (${this.hashCode()}) is getting unregistered!")
             }
-
         }
 
         if (service.serviceType != "_uscan._tcp.") {
             return
         }
 
-        nsdManager.registerServiceInfoCallback(service, ForkJoinPool(1), serviceInfoCallback )
+        nsdManager.registerServiceInfoCallback(service, ForkJoinPool(1), serviceInfoCallback)
     }
 
     override fun onServiceLost(service: NsdServiceInfo) {

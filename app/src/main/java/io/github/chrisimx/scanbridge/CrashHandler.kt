@@ -25,10 +25,10 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class CrashHandler(
-    val context: Context
-) : Thread.UncaughtExceptionHandler {
-    private val TAG = "CrashHandler"
+private const val TAG = "CrashHandler"
+
+class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {
+
     private val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
 
     override fun uncaughtException(t: Thread, e: Throwable) {
@@ -41,11 +41,11 @@ class CrashHandler(
         if (!crashDir.exists()) {
             if (!crashDir.mkdirs()) {
                 Log.e(TAG, "Couldn't create crash directory")
-                File(context.filesDir, "crash-${dateTime}.log").writeText(e.stackTraceToString())
+                File(context.filesDir, "crash-$dateTime.log").writeText(e.stackTraceToString())
                 return
             }
         }
-        File(crashDir, "crash-${dateTime}.log").writeText(e.stackTraceToString())
+        File(crashDir, "crash-$dateTime.log").writeText(e.stackTraceToString())
 
         defaultHandler?.uncaughtException(t, e)
     }
