@@ -759,7 +759,7 @@ fun ScanContent(
     val pagerState = scanningViewModel.scanningScreenData.pagerState
     val context = LocalContext.current
 
-    if (!scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -767,60 +767,66 @@ fun ScanContent(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(scannerName)
-            Text(
-                stringResource(
-                    R.string.page_x_of_y,
-                    pagerState.currentPage + 1,
-                    scanningViewModel.scanningScreenData.currentScansState.size + if (scanningViewModel.scanningScreenData.scanJobRunning) 1 else 0
-                )
-            )
-
-            if (scanningViewModel.scanningScreenData.currentScansState.size > pagerState.currentPage) {
+            if (!scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
+                Text(scannerName)
                 Text(
-                    scanningViewModel.scanningScreenData.currentScansState[pagerState.currentPage].second.inputSource?.toReadableString(
-                        context
-                    ).toString()
+                    stringResource(
+                        R.string.page_x_of_y,
+                        pagerState.currentPage + 1,
+                        scanningViewModel.scanningScreenData.currentScansState.size + if (scanningViewModel.scanningScreenData.scanJobRunning) 1 else 0
+                    )
                 )
+
+                if (scanningViewModel.scanningScreenData.currentScansState.size > pagerState.currentPage) {
+                    Text(
+                        scanningViewModel.scanningScreenData.currentScansState[pagerState.currentPage].second.inputSource?.toReadableString(
+                            context
+                        ).toString()
+                    )
+                }
             }
 
+            HorizontalPager(
+                modifier = Modifier
+                    .fillMaxSize(),
+                state = pagerState
+            ) { page ->
+                if (page >= scanningViewModel.scanningScreenData.currentScansState.size) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Text(stringResource(R.string.retrieving_page))
+                    }
+                    return@HorizontalPager
+                } else {
+                    val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
+
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AsyncImage(
+                            model = scanningViewModel.scanningScreenData.currentScansState[page].first,
+                            contentDescription = stringResource(R.string.desc_scanned_page),
+                            modifier = Modifier
+                                .zoomable(zoomState)
+                                .padding(vertical = 5.dp)
+                        )
+                    }
+                }
+            }
         }
-    } else if (!scanningViewModel.scanningScreenData.scanJobRunning) {
+
+    if (scanningViewModel.scanningScreenData.currentScansState.isEmpty() && !scanningViewModel.scanningScreenData.scanJobRunning) {
         FullScreenError(
             R.drawable.rounded_document_scanner_24,
             stringResource(R.string.no_scans_yet)
         )
-    }
-
-    HorizontalPager(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding),
-        state = pagerState
-    ) { page ->
-        if (page >= scanningViewModel.scanningScreenData.currentScansState.size) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator()
-                Text(stringResource(R.string.retrieving_page))
-            }
-            return@HorizontalPager
-        } else {
-            val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
-
-            AsyncImage(
-                model = scanningViewModel.scanningScreenData.currentScansState[page].first,
-                contentDescription = stringResource(R.string.desc_scanned_page),
-                modifier = Modifier
-                    .zoomable(zoomState)
-                    .padding(vertical = 5.dp),
-            )
-        }
     }
 
     if (pagerState.currentPage < scanningViewModel.scanningScreenData.currentScansState.size) {
