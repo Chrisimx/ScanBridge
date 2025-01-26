@@ -76,6 +76,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -108,12 +109,6 @@ import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.toJobStateString
 import io.github.chrisimx.scanbridge.util.toReadableString
 import io.github.chrisimx.scanbridge.util.zipFiles
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.rememberZoomableState
-import me.saket.telephoto.zoomable.zoomable
-import okhttp3.HttpUrl
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -123,6 +118,12 @@ import kotlin.concurrent.thread
 import kotlin.io.path.Path
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.zoomable
+import okhttp3.HttpUrl
 
 private val TAG = "ScanningScreen"
 
@@ -816,6 +817,7 @@ fun ScanContent(
                             modifier = Modifier
                                 .zoomable(zoomState)
                                 .padding(vertical = 5.dp)
+                                .testTag("scan_page")
                         )
                     }
                 }

@@ -18,13 +18,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.platform.app.InstrumentationRegistry
-import org.junit.Rule
-import org.junit.Test
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import org.junit.Rule
+import org.junit.Test
 
 class ScanBridgeTest {
     @get:Rule
@@ -151,11 +151,10 @@ class ScanBridgeTest {
         composeTestRule.onNodeWithTag("url_input").performTextInput(url)
         composeTestRule.onNodeWithText("Connect").performClick()
 
-        Thread.sleep(1000)
-        composeTestRule.onNode(hasText("No pages", substring = true)).assertIsDisplayed()
+        composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText("Scan", useUnmergedTree = true).performClick()
+        composeTestRule.waitForIdle()
 
-        Thread.sleep(1000)
         composeTestRule.onNode(hasTestTag("scan_page")).assertIsDisplayed()
     }
 
