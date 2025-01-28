@@ -21,7 +21,6 @@ package io.github.chrisimx.scanbridge.uicomponents
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -37,13 +36,14 @@ import java.time.format.DateTimeFormatter
 import java.util.Optional
 import kotlin.collections.mutableListOf
 import kotlin.concurrent.thread
+import timber.log.Timber
 
 fun exportFilesAsZip(files: List<File>, context: Context): Optional<File> {
     val exportDir = File(context.filesDir, "exportTempFiles")
 
     if (!exportDir.exists()) {
         if (!exportDir.mkdirs()) {
-            Log.e("TemporaryFileHandler", "Failed to create exports directory")
+            Timber.tag("TemporaryFileHandler").e("Failed to create exports directory")
             return Optional.empty<File>()
         }
     }

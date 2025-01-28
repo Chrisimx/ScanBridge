@@ -22,12 +22,12 @@ package io.github.chrisimx.scanbridge
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ForkJoinPool
 import okhttp3.HttpUrl
+import timber.log.Timber
 
 private const val TAG = "ScannerDiscovery"
 
@@ -39,31 +39,31 @@ class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: Snaps
 
     // Called as soon as service discovery begins.
     override fun onDiscoveryStarted(regType: String) {
-        Log.d(TAG, "Service discovery started")
+        Timber.i("Service discovery started")
     }
 
     @RequiresExtension(extension = Build.VERSION_CODES.TIRAMISU, version = 7)
     override fun onServiceFound(service: NsdServiceInfo) {
         // A service was found! Do something with it.
-        Log.d(
-            TAG,
-            "Service (${service.hashCode()}) discovery success ${service.hostAddresses} ${service.serviceType} ${service.serviceName} ${service.port} ${service.network}"
-        )
+        Timber
+            .d(
+                "Service (${service.hashCode()}) discovery success ${service.hostAddresses} ${service.serviceType} ${service.serviceName} ${service.port} ${service.network}"
+            )
 
         val serviceIdentifier = "${service.serviceName}.${service.serviceType}"
         if (statefulScannerMap.contains(serviceIdentifier)) {
-            Log.d(TAG, "Ignored service. Got it already")
+            Timber.d("Ignored service. Got it already")
             return
         }
 
         val serviceInfoCallback = object : NsdManager.ServiceInfoCallback {
 
             override fun onServiceInfoCallbackRegistrationFailed(p0: Int) {
-                Log.d(TAG, "ServiceInfoCallBack (${this.hashCode()}) Registration failed!!! $p0")
+                Timber.tag(TAG).d("ServiceInfoCallBack (${this.hashCode()}) Registration failed!!! $p0")
             }
 
             override fun onServiceUpdated(p0: NsdServiceInfo) {
-                Log.d(TAG, "Service (${this.hashCode()}) updated! $p0")
+                Timber.tag(TAG).d("Service (${this.hashCode()}) updated! $p0")
                 var rs = p0.attributes["rs"]?.toString(StandardCharsets.UTF_8) ?: "/"
 
                 rs = if (rs.isEmpty()) "/" else "/$rs/"
@@ -79,14 +79,11 @@ class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: Snaps
                             .scheme("http")
                             .build()
                     } catch (e: Exception) {
-                        Log.e(
-                            TAG,
-                            "Couldn't built address from: ${address.hostAddress} Exception: $e"
-                        )
+                        Timber.tag(TAG).e("Couldn't built address from: ${address.hostAddress} Exception: $e")
                         continue
                     }
 
-                    Log.d(TAG, "Built URL: $url with address: ${address.hostAddress}")
+                    Timber.tag(TAG).d("Built URL: $url with address: ${address.hostAddress}")
                     urls.add(url.toString())
                 }
 
@@ -96,11 +93,11 @@ class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: Snaps
             override fun onServiceLost() {
                 statefulScannerMap.remove(serviceIdentifier)
                 nsdManager.unregisterServiceInfoCallback(this)
-                Log.d(TAG, "Service was lost!")
+                Timber.tag(TAG).d("Service was lost!")
             }
 
             override fun onServiceInfoCallbackUnregistered() {
-                Log.d(TAG, "ServiceInfoCallback (${this.hashCode()}) is getting unregistered!")
+                Timber.tag(TAG).d("ServiceInfoCallback (${this.hashCode()}) is getting unregistered!")
             }
         }
 
@@ -114,20 +111,20 @@ class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: Snaps
     override fun onServiceLost(service: NsdServiceInfo) {
         // When the network service is no longer available.
         // Internal bookkeeping code goes here.
-        Log.i(TAG, "service ${service.hashCode()} lost: $service")
+        Timber.i("service ${service.hashCode()} lost: $service")
     }
 
     override fun onDiscoveryStopped(serviceType: String) {
-        Log.i(TAG, "Discovery stopped: $serviceType")
+        Timber.i("Discovery stopped: $serviceType")
     }
 
     override fun onStartDiscoveryFailed(serviceType: String, errorCode: Int) {
-        Log.e(TAG, "Discovery failed: Error code:$errorCode")
+        Timber.e("Discovery failed: Error code:$errorCode")
         nsdManager.stopServiceDiscovery(this)
     }
 
     override fun onStopDiscoveryFailed(serviceType: String, errorCode: Int) {
-        Log.e(TAG, "Discovery failed: Error code:$errorCode")
+        Timber.e("Discovery failed: Error code:$errorCode")
         nsdManager.stopServiceDiscovery(this)
     }
 }

@@ -19,8 +19,10 @@
 
 package io.github.chrisimx.scanbridge
 
+import android.content.Context.MODE_PRIVATE
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -28,6 +30,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import timber.log.Timber
 
 @Serializable
 object StartUpScreenRoute
@@ -37,6 +40,9 @@ data class ScannerRoute(val scannerName: String, val scannerURL: String)
 
 @Composable
 fun ScanBridgeNavHost(navController: NavHostController) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("scanbridge", MODE_PRIVATE)
+
     NavHost(
         modifier = Modifier.testTag("root_node"),
         navController = navController,
@@ -45,10 +51,14 @@ fun ScanBridgeNavHost(navController: NavHostController) {
         composable<StartUpScreenRoute> { StartupScreen(navController) }
         composable<ScannerRoute> { backStackEntry ->
             val scannerRoute: ScannerRoute = backStackEntry.toRoute()
+            val debug = sharedPreferences.getBoolean("write_debug", false)
+            Timber.tag("ScanBridgeNavHost")
+                .d("Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerURL}. Debug is $debug")
             ScanningScreen(
                 scannerRoute.scannerName,
                 scannerRoute.scannerURL.toHttpUrl(),
-                navController
+                navController,
+                debug
             )
         }
     }

@@ -23,7 +23,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +57,7 @@ import io.github.chrisimx.esclkt.ScanIntentData
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableViewModel
 import io.github.chrisimx.scanbridge.uicomponents.ValidatedDimensionsTextEdit
 import io.github.chrisimx.scanbridge.util.toReadableString
+import timber.log.Timber
 
 @OptIn(
     ExperimentalMaterial3ExpressiveApi::class,
@@ -199,10 +199,7 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                                     paperFormat.width.toMillimeters().value.toString(),
                                     paperFormat.height.toMillimeters().value.toString()
                                 )
-                                Log.d(
-                                    TAG,
-                                    "New region state: ${scanSettingsUIState.scanSettingsState.scanRegions}"
-                                )
+                                Timber.tag(TAG).d("New region state: ${scanSettingsUIState.scanSettingsState.scanRegions}")
                             },
                             label = { Text(paperFormat.name) },
                             selected =

@@ -24,7 +24,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -124,8 +123,9 @@ import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 import okhttp3.HttpUrl
+import timber.log.Timber
 
-private val TAG = "ScanningScreen"
+private const val TAG = "ScanningScreen"
 
 fun retrieveScannerCapabilities(scanningViewModel: ScanningScreenViewModel) {
     val esclClient = scanningViewModel.scanningScreenData.esclClient
@@ -133,7 +133,7 @@ fun retrieveScannerCapabilities(scanningViewModel: ScanningScreenViewModel) {
     val scannerCapabilitiesResult = esclClient.getScannerCapabilities()
 
     if (scannerCapabilitiesResult !is ESCLRequestClient.ScannerCapabilitiesResult.Success) {
-        Log.e(TAG, "Error while retrieving ScannerCapabilities: $scannerCapabilitiesResult")
+        Timber.tag(TAG).e("Error while retrieving ScannerCapabilities: $scannerCapabilitiesResult")
         scanningViewModel.setError("$scannerCapabilitiesResult")
         return
     }
@@ -157,9 +157,9 @@ fun rotate(context: Context, scanningViewModel: ScanningScreenViewModel) {
         currentScans[scanningViewModel.scanningScreenData.pagerState.currentPage].first
     val currentPageFile = File(currentPagePath)
 
-    Log.d(TAG, "Decoding $currentPagePath")
+    Timber.tag(TAG).d("Decoding $currentPagePath")
     val originalBitmap = BitmapFactory.decodeFile(currentPagePath)
-    Log.d(TAG, "Rotating $currentPagePath")
+    Timber.tag(TAG).d("Rotating $currentPagePath")
     val rotatedBitmap = originalBitmap.rotateBy90()
     originalBitmap.recycle()
 
@@ -167,16 +167,16 @@ fun rotate(context: Context, scanningViewModel: ScanningScreenViewModel) {
 
     val newFile = File(context.filesDir, "$baseFileName edit-${System.currentTimeMillis()}.jpg")
 
-    Log.d(TAG, "Saving rotated $currentPagePath")
+    Timber.tag(TAG).d("Saving rotated $currentPagePath")
     newFile.outputStream().use {
         rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
     }
 
-    Log.d(TAG, "Finished saving rotated $currentPagePath")
+    Timber.tag(TAG).d("Finished saving rotated $currentPagePath")
 
     val index = scanningViewModel.scanningScreenData.pagerState.currentPage
     val scanSettings = currentScans[index].second
-    Log.d(TAG, "Updating UI state after rotation")
+    Timber.tag(TAG).d("Updating UI state after rotation")
     scanningViewModel.removeScanAtIndex(index)
     scanningViewModel.addTempFile(currentPageFile)
     scanningViewModel.addScanAtIndex(newFile.absolutePath, scanSettings, index)
@@ -310,7 +310,7 @@ fun doPdfExport(scanningViewModel: ScanningScreenViewModel, context: Context, on
                         document.add(imageElem)
 
                         pageCounter++
-                        Log.d(TAG, "Added page $pageCounter to PDF")
+                        Timber.tag(TAG).d("Added page $pageCounter to PDF")
                     }
                 }
             }
@@ -358,6 +358,7 @@ fun doScan(
 ) {
     thread {
         if (viewModel.scanningScreenData.scanJobRunning) {
+            Timber.tag(TAG).e("Job still running")
             snackbarErrorRetrievingPage(
                 context.getString(R.string.job_still_running),
                 scope,
@@ -374,26 +375,34 @@ fun doScan(
             pageNr = viewModel.scanningScreenData.currentScansState.size
         )
 
+        Timber.tag(TAG).d("Creating scan job. eSCLKt scan settings: $scanSettings")
         val job =
             esclRequestClient.createJob(scanSettings)
-        Log.d(TAG, "Sent scan request to scanner. Result: $job")
+        Timber.tag(TAG).d("Creation request done. Result: $job")
         if (job !is ESCLRequestClient.ScannerCreateJobResult.Success) {
+            Timber.tag(TAG).e("Job creation failed. Result: $job")
             viewModel.setScanJobRunning(false)
             snackbarErrorRetrievingPage(job.toString(), scope, context, snackbarHostState)
             return@thread
         }
 
         while (true) {
+            Timber.tag(TAG).d("Retrieving next page")
             var nextPage = job.scanJob.retrieveNextPage()
+            Timber.tag(TAG).d("Next page result: $nextPage")
             val status = job.scanJob.getJobStatus()
+            Timber.tag(TAG).d("Retrieved job info: $status")
             val jobStateString = status?.jobState.toJobStateString(context)
+            Timber.tag(TAG).d("Job info as human readable: $jobStateString")
             if (nextPage is ESCLRequestClient.ScannerNextPageResult.NoFurtherPages) {
+                Timber.tag(TAG).d("Next page result is seen as no further pages. jobRunning = false")
                 viewModel.setScanJobRunning(false)
                 viewModel.scrollToPage(
                     scope = scope,
                     pageNr = viewModel.scanningScreenData.currentScansState.size
                 )
                 if (status?.jobState != JobState.Completed) {
+                    Timber.tag(TAG).w("Job info doesn't indicate completion: $jobStateString")
                     scope.launch {
                         snackbarHostState.showSnackbar(
                             context.getString(
@@ -406,7 +415,7 @@ fun doScan(
                 }
                 return@thread
             } else if (nextPage !is ESCLRequestClient.ScannerNextPageResult.Success) {
-                Log.e(TAG, "Error while retrieving next page: $nextPage")
+                Timber.tag(TAG).e("Error while retrieving next page: $nextPage")
                 snackbarErrorRetrievingPage(
                     nextPage.toString(),
                     scope,
@@ -417,6 +426,7 @@ fun doScan(
                 return@thread
             }
             nextPage.page.use {
+                Timber.tag(TAG).d("Received page. Copying to file")
                 var filePath: Path
                 while (true) {
                     val scanPageFile = "scan-" + Uuid.random().toString() + ".jpg"
@@ -429,12 +439,12 @@ fun doScan(
                     }
                 }
 
-                Log.d(TAG, "File created: $filePath")
+                Timber.tag(TAG).d("Scan page file created: $filePath")
 
                 try {
                     Files.copy(it.data.body!!.byteStream(), filePath)
                 } catch (e: Exception) {
-                    Log.e(TAG, "Error while copying received image to file", e)
+                    Timber.tag(TAG).e(e, "Error while copying received image to file. Aborting!")
                     viewModel.setScanJobRunning(false)
                     snackbarErrorRetrievingPage(
                         context.getString(
@@ -450,7 +460,7 @@ fun doScan(
 
                 val imageBitmap = BitmapFactory.decodeFile(filePath.toString())?.asImageBitmap()
                 if (imageBitmap == null) {
-                    Log.e(TAG, "Couldn't decode received image")
+                    Timber.tag(TAG).e("Couldn't decode received image as Bitmap. Aborting!")
                     snackbarErrorRetrievingPage(
                         context.getString(R.string.couldn_t_decode_received_image, jobStateString),
                         scope,
@@ -541,9 +551,11 @@ fun ScanningScreen(
     scannerName: String,
     scannerAddress: HttpUrl,
     navController: NavHostController,
+    withDebug: Boolean,
     scanningViewModel: ScanningScreenViewModel = viewModel {
         ScanningScreenViewModel(
-            address = scannerAddress
+            address = scannerAddress,
+            withDebugInterceptor = withDebug
         )
     }
 ) {
@@ -711,6 +723,7 @@ fun ScanningScreen(
             DeletionDialog(
                 onDismiss = { scanningViewModel.setDeletePageDialogShown(false) },
                 onConfirmed = {
+                    Timber.d("Deleting page")
                     val index = scanningViewModel.scanningScreenData.pagerState.currentPage
                     Files.delete(Path(scanningViewModel.scanningScreenData.currentScansState[index].first))
                     scanningViewModel.removeScanAtIndex(index)

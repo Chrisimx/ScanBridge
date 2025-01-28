@@ -21,7 +21,6 @@ package io.github.chrisimx.scanbridge
 
 import android.content.Context
 import android.net.nsd.NsdManager
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -40,8 +39,7 @@ import io.github.chrisimx.scanbridge.uicomponents.FoundScannerItem
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.dialog.CustomScannerDialog
 import java.util.Optional
-
-private val TAG = "ScannerBrowser"
+import timber.log.Timber
 
 fun startScannerDiscovery(
     context: Context,
@@ -49,12 +47,12 @@ fun startScannerDiscovery(
 ): Optional<Pair<NsdManager, ScannerDiscovery>> {
     val service = getSystemService(context, NsdManager::class.java)
     if (service == null) {
-        Log.e(TAG, "Couldn't get NsdManager service")
+        Timber.e("Couldn't get NsdManager service")
         return Optional.empty()
     }
     val listener = ScannerDiscovery(service, scannerMap)
     service.discoverServices("_uscan._tcp", NsdManager.PROTOCOL_DNS_SD, listener)
-    Log.i(TAG, "Discovery started")
+    Timber.i("Discovery started")
     return Optional.of(Pair(service, listener))
 }
 

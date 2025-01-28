@@ -103,6 +103,7 @@ dependencies {
     implementation(libs.zoomable)
     implementation(libs.kotlin.reflect)
     implementation(libs.coil.compose)
+    implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
