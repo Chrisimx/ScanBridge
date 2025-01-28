@@ -79,4 +79,6 @@
     <string name="intent">Scanpreset:</string>
     <string name="scan_region">Scanbereich:</string>
     <string name="page_deletion_confirmation">Willst du wirklich die derzeitig ausgewählte Seite löschen? Dieser Vorgang ist unwiderruflich.</string>
+    <string name="debug_log">Debugprotokoll aufzeichnen</string>
+    <string name="debug_log_explanation">Alle Debuglogs werden zu einer in den Einstellungen exportierbaren Datei geschrieben. Dies kann zum Erstellen von Fehlerberichten sehr nützlich sein.</string>
 </resources>
