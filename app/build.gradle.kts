@@ -52,8 +52,8 @@ android {
         applicationId = "io.github.chrisimx.scanbridge"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1_000_001 // format is MAJ_MIN_PAT with always 3 digits
-        versionName = "1.0.1"
+        versionCode = 1_001_000 // format is MAJ_MIN_PAT with always 3 digits
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments["escl_server_url"] =
