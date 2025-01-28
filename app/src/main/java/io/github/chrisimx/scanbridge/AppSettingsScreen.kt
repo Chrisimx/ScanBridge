@@ -192,6 +192,7 @@ fun DebugOptions(
     onInformationRequested: (String) -> Unit,
     setWriteDebugLog: (Boolean) -> Unit
 ) {
+    val activity = LocalActivity.current as MainActivity
     ConstraintLayout(
         Modifier
             .fillMaxWidth()
@@ -204,6 +205,27 @@ fun DebugOptions(
                         .putBoolean("write_debug", it)
                         .apply()
                     setWriteDebugLog(it)
+
+                    if (it) {
+                        val debugDir = File(activity.filesDir, "debug")
+                        if (!debugDir.exists()) {
+                            debugDir.mkdir()
+                        }
+                        val output = File(debugDir, "debug.txt")
+                        if (!output.exists()) {
+                            output.createNewFile()
+                        }
+                        activity.debugWriter = BufferedWriter(FileWriter(output, true))
+                        activity.tree = FileLogger(activity.debugWriter!!)
+                        Timber.plant(activity.tree)
+                    } else {
+                        activity.tree?.let {
+                            Timber.uproot(it)
+                            activity.tree = null
+                        }
+                        activity.debugWriter?.close()
+                        activity.debugWriter = null
+                    }
                 },
                 role = Role.Checkbox
             )
@@ -256,7 +278,6 @@ fun DebugOptions(
         }
     }
     val context = LocalContext.current
-    val activity = LocalActivity.current as MainActivity
     OutlinedButton(
         onClick = {
             Timber.d("Clearing debug log")
@@ -276,7 +297,7 @@ fun DebugOptions(
             }
 
             if (sharedPreferences.getBoolean("write_debug", false)) {
-                val output = File(context.filesDir, "debug.txt")
+                val output = File(debugDir, "debug.txt")
                 if (!output.exists()) {
                     output.createNewFile()
                 }
