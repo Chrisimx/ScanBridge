@@ -56,6 +56,7 @@ import io.github.chrisimx.scanbridge.logs.FileLogger
 import io.github.chrisimx.scanbridge.uicomponents.TitledCard
 import io.github.chrisimx.scanbridge.uicomponents.dialog.SimpleTextDialog
 import io.github.chrisimx.scanbridge.uicomponents.settings.MoreInformationButton
+import io.github.chrisimx.scanbridge.uicomponents.settings.TimeoutOption
 import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
 import java.io.BufferedWriter
 import java.io.File
@@ -329,6 +330,22 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 { automaticCleanup = it }
             )
 
+            TimeoutOption(
+                { information = it },
+                {
+                    if (it != null) {
+                        sharedPreferences.edit().putInt("scanning_response_timeout", it.toInt()).apply()
+                    } else {
+                        sharedPreferences.edit().remove("scanning_response_timeout").apply()
+                    }
+                },
+                sharedPreferences.getInt("scanning_response_timeout", 25).toUInt()
+            )
+        }
+
+        TitledCard(
+            title = stringResource(R.string.advanced)
+        ) {
             DebugOptions(
                 sharedPreferences,
                 debugLog,
