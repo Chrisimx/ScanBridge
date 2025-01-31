@@ -185,6 +185,50 @@ fun AutoDeleteTempFiles(
     }
 }
 
+fun clearDebugLog(activity: MainActivity, sharedPreferences: SharedPreferences) {
+    Timber.d("Clearing debug log")
+    activity.tree?.let {
+        Timber.uproot(it)
+        activity.tree = null
+    }
+    activity.debugWriter?.close()
+    activity.debugWriter = null
+
+    val debugDir = File(activity.filesDir, "debug")
+    if (debugDir.exists()) {
+        val debugFile = File(debugDir, "debug.txt")
+        if (debugFile.exists()) {
+            debugFile.delete()
+        }
+    }
+
+    if (sharedPreferences.getBoolean("write_debug", false)) {
+        val output = File(debugDir, "debug.txt")
+        if (!output.exists()) {
+            output.createNewFile()
+        }
+        activity.debugWriter = BufferedWriter(FileWriter(output, true))
+        activity.tree = FileLogger(activity.debugWriter!!)
+        Timber.plant(activity.tree)
+    }
+}
+
+fun exportDebugLog(activity: MainActivity) {
+    activity.debugWriter?.flush()
+
+    val debugDir = File(activity.filesDir, "debug")
+    val debugFile = File(debugDir, "debug.txt")
+
+    if (debugFile.exists()) {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "text/plain"
+        intent.putExtra(Intent.EXTRA_TITLE, "debug_log.txt") // Suggested file name
+
+        activity.saveDebugFileLauncher?.launch(intent)
+    }
+}
+
 @Composable
 fun DebugOptions(
     sharedPreferences: SharedPreferences,
@@ -279,53 +323,13 @@ fun DebugOptions(
     }
     val context = LocalContext.current
     OutlinedButton(
-        onClick = {
-            Timber.d("Clearing debug log")
-            activity.tree?.let {
-                Timber.uproot(it)
-                activity.tree = null
-            }
-            activity.debugWriter?.close()
-            activity.debugWriter = null
-
-            val debugDir = File(context.filesDir, "debug")
-            if (debugDir.exists()) {
-                val debugFile = File(debugDir, "debug.txt")
-                if (debugFile.exists()) {
-                    debugFile.delete()
-                }
-            }
-
-            if (sharedPreferences.getBoolean("write_debug", false)) {
-                val output = File(debugDir, "debug.txt")
-                if (!output.exists()) {
-                    output.createNewFile()
-                }
-                activity.debugWriter = BufferedWriter(FileWriter(output, true))
-                activity.tree = FileLogger(activity.debugWriter!!)
-                Timber.plant(activity.tree)
-            }
-        }
+        onClick = { clearDebugLog(activity, sharedPreferences) }
     ) {
         Text("Clear debug log")
     }
 
     OutlinedButton(
-        onClick = {
-            activity.debugWriter?.flush()
-
-            val debugDir = File(context.filesDir, "debug")
-            val debugFile = File(debugDir, "debug.txt")
-
-            if (debugFile.exists()) {
-                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-                intent.addCategory(Intent.CATEGORY_OPENABLE)
-                intent.setType("text/plain")
-                intent.putExtra(Intent.EXTRA_TITLE, "debug_log.txt") // Suggested file name
-
-                activity.saveDebugFileLauncher?.launch(intent)
-            }
-        }
+        onClick = { exportDebugLog(activity) }
     ) {
         Text("Export debug log")
     }
