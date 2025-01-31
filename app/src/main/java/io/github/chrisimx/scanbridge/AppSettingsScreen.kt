@@ -23,7 +23,6 @@ import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -31,19 +30,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -55,62 +47,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import io.github.chrisimx.scanbridge.logs.FileLogger
-import io.github.chrisimx.scanbridge.theme.Poppins
-import io.github.chrisimx.scanbridge.theme.Teal1
-import io.github.chrisimx.scanbridge.theme.gradientBrush
+import io.github.chrisimx.scanbridge.uicomponents.TitledCard
+import io.github.chrisimx.scanbridge.uicomponents.dialog.SimpleTextDialog
+import io.github.chrisimx.scanbridge.uicomponents.settings.MoreInformationButton
+import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import timber.log.Timber
-
-@Composable
-fun VersionComposable() {
-    val context = LocalContext.current
-
-    Image(
-        modifier = Modifier
-            .size(200.dp)
-            .padding(16.dp),
-        painter = painterResource(R.drawable.icon_about_dialog),
-        contentDescription = stringResource(id = R.string.app_icon_desc)
-    )
-
-    Text(
-        stringResource(R.string.app_name),
-        modifier = Modifier.padding(PaddingValues(4.dp)),
-        fontFamily = Poppins,
-        fontSize = 24.sp,
-        fontWeight = FontWeight.ExtraBold,
-        style = MaterialTheme.typography.labelLarge.copy(
-            brush = gradientBrush
-        )
-    )
-
-    Text(
-        "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH})",
-        fontStyle = FontStyle.Normal,
-        fontFamily = Poppins
-    )
-
-    if (BuildConfig.DEBUG) {
-        Text(
-            stringResource(R.string.debug_build),
-            fontStyle = FontStyle.Italic,
-            fontFamily = Poppins
-        )
-    }
-}
 
 @Composable
 fun AutoDeleteTempFiles(
@@ -168,17 +118,12 @@ fun AutoDeleteTempFiles(
                     end.linkTo(parent.end)
                 }
         ) {
-            IconButton(onClick = {
+            MoreInformationButton {
                 onInformationRequested(
                     context.getString(
                         R.string.auto_cleanup_explanation,
                         context.getString(R.string.app_name)
                     )
-                )
-            }) {
-                Icon(
-                    Icons.Outlined.Info,
-                    contentDescription = stringResource(R.string.auto_cleanup_info_desc)
                 )
             }
         }
@@ -307,16 +252,11 @@ fun DebugOptions(
                     end.linkTo(parent.end)
                 }
         ) {
-            IconButton(onClick = {
+            MoreInformationButton {
                 onInformationRequested(
                     context.getString(
                         R.string.debug_log_explanation
                     )
-                )
-            }) {
-                Icon(
-                    Icons.Outlined.Info,
-                    contentDescription = stringResource(R.string.auto_cleanup_info_desc)
                 )
             }
         }
@@ -379,51 +319,29 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
             mutableStateOf(null)
         }
 
-        ElevatedCard(modifier = Modifier.padding(16.dp)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    stringResource(R.string.settings),
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    fontFamily = Poppins,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp,
-                    color = Teal1
-                )
+        TitledCard(
+            title = stringResource(R.string.settings)
+        ) {
+            AutoDeleteTempFiles(
+                sharedPreferences,
+                automaticCleanup,
+                { information = it },
+                { automaticCleanup = it }
+            )
 
-                AutoDeleteTempFiles(
-                    sharedPreferences,
-                    automaticCleanup,
-                    { information = it },
-                    { automaticCleanup = it }
-                )
-
-                DebugOptions(
-                    sharedPreferences,
-                    debugLog,
-                    { information = it },
-                    { debugLog = it }
-                )
-            }
+            DebugOptions(
+                sharedPreferences,
+                debugLog,
+                { information = it },
+                { debugLog = it }
+            )
         }
 
         if (information != null) {
-            Dialog(onDismissRequest = { information = null }) {
-                Card {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(
-                            information!!,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            }
+            SimpleTextDialog(
+                information!!,
+                { information = null }
+            )
         }
     }
 }
