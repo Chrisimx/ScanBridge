@@ -81,4 +81,6 @@
     <string name="page_deletion_confirmation">Willst du wirklich die derzeitig ausgewählte Seite löschen? Dieser Vorgang ist unwiderruflich.</string>
     <string name="debug_log">Debugprotokoll aufzeichnen</string>
     <string name="debug_log_explanation">Alle Debuglogs werden zu einer in den Einstellungen exportierbaren Datei geschrieben. Dies kann zum Erstellen von Fehlerberichten sehr nützlich sein.</string>
+    <string name="clear_debug_log">Debugprotokoll löschen</string>
+    <string name="export_debug_log">Debugprotokoll exportieren</string>
 </resources>

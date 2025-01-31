@@ -325,13 +325,13 @@ fun DebugOptions(
     OutlinedButton(
         onClick = { clearDebugLog(activity, sharedPreferences) }
     ) {
-        Text("Clear debug log")
+        Text(stringResource(R.string.clear_debug_log))
     }
 
     OutlinedButton(
         onClick = { exportDebugLog(activity) }
     ) {
-        Text("Export debug log")
+        Text(stringResource(R.string.export_debug_log))
     }
 }
 

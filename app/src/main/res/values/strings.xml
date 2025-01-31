@@ -81,4 +81,6 @@
     <string name="page_deletion_confirmation">Do you really want to delete the current page? This action can not be undone.</string>
     <string name="debug_log">Debug log</string>
     <string name="debug_log_explanation">This will write all available log data to an exportable file. This is useful for submitting bug repots.</string>
+    <string name="clear_debug_log">Clear debug log</string>
+    <string name="export_debug_log">Export debug log</string>
 </resources>
