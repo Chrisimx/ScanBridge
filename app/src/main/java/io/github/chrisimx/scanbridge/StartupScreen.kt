@@ -19,7 +19,6 @@
 
 package io.github.chrisimx.scanbridge
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -51,8 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-
-private val TAG = "StartupScreen"
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,14 +84,14 @@ fun StartupScreen(navController: NavController) {
 
         if (discoveryPairOptional.isEmpty) {
             return@DisposableEffect onDispose {
-                Log.e(TAG, "Couldn't start discovery")
+                Timber.e("Couldn't start discovery")
             }
         }
 
         val discoveryPair = discoveryPairOptional.get()
 
         onDispose {
-            Log.i(TAG, "Discovery stopped")
+            Timber.i("Discovery stopped")
             discoveryPair.first.stopServiceDiscovery(discoveryPair.second)
         }
     }

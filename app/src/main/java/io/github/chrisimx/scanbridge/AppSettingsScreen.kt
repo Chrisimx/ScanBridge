@@ -20,7 +20,9 @@
 package io.github.chrisimx.scanbridge
 
 import android.content.Context.MODE_PRIVATE
+import android.content.Intent
 import android.content.SharedPreferences
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +45,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -62,9 +65,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import io.github.chrisimx.scanbridge.logs.FileLogger
 import io.github.chrisimx.scanbridge.theme.Poppins
 import io.github.chrisimx.scanbridge.theme.Teal1
 import io.github.chrisimx.scanbridge.theme.gradientBrush
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
+import timber.log.Timber
 
 @Composable
 fun VersionComposable() {
@@ -177,6 +185,156 @@ fun AutoDeleteTempFiles(
     }
 }
 
+fun clearDebugLog(activity: MainActivity, sharedPreferences: SharedPreferences) {
+    Timber.d("Clearing debug log")
+    activity.tree?.let {
+        Timber.uproot(it)
+        activity.tree = null
+    }
+    activity.debugWriter?.close()
+    activity.debugWriter = null
+
+    val debugDir = File(activity.filesDir, "debug")
+    if (debugDir.exists()) {
+        val debugFile = File(debugDir, "debug.txt")
+        if (debugFile.exists()) {
+            debugFile.delete()
+        }
+    }
+
+    if (sharedPreferences.getBoolean("write_debug", false)) {
+        val output = File(debugDir, "debug.txt")
+        if (!output.exists()) {
+            output.createNewFile()
+        }
+        activity.debugWriter = BufferedWriter(FileWriter(output, true))
+        activity.tree = FileLogger(activity.debugWriter!!)
+        Timber.plant(activity.tree)
+    }
+}
+
+fun exportDebugLog(activity: MainActivity) {
+    activity.debugWriter?.flush()
+
+    val debugDir = File(activity.filesDir, "debug")
+    val debugFile = File(debugDir, "debug.txt")
+
+    if (debugFile.exists()) {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "text/plain"
+        intent.putExtra(Intent.EXTRA_TITLE, "debug_log.txt") // Suggested file name
+
+        activity.saveDebugFileLauncher?.launch(intent)
+    }
+}
+
+@Composable
+fun DebugOptions(
+    sharedPreferences: SharedPreferences,
+    debugLog: Boolean,
+    onInformationRequested: (String) -> Unit,
+    setWriteDebugLog: (Boolean) -> Unit
+) {
+    val activity = LocalActivity.current as MainActivity
+    ConstraintLayout(
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
+            .toggleable(
+                value = debugLog,
+                onValueChange = {
+                    sharedPreferences
+                        .edit()
+                        .putBoolean("write_debug", it)
+                        .apply()
+                    setWriteDebugLog(it)
+
+                    if (it) {
+                        val debugDir = File(activity.filesDir, "debug")
+                        if (!debugDir.exists()) {
+                            debugDir.mkdir()
+                        }
+                        val output = File(debugDir, "debug.txt")
+                        if (!output.exists()) {
+                            output.createNewFile()
+                        }
+                        activity.debugWriter = BufferedWriter(FileWriter(output, true))
+                        activity.tree = FileLogger(activity.debugWriter!!)
+                        Timber.plant(activity.tree)
+                    } else {
+                        activity.tree?.let {
+                            Timber.uproot(it)
+                            activity.tree = null
+                        }
+                        activity.debugWriter?.close()
+                        activity.debugWriter = null
+                    }
+                },
+                role = Role.Checkbox
+            )
+    ) {
+        val (checkbox, content, informationButton) = createRefs()
+
+        Checkbox(
+            checked = debugLog,
+            onCheckedChange = null,
+            modifier = Modifier
+                .constrainAs(checkbox) {
+                    start.linkTo(parent.start)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                }
+        )
+        Text(
+            text = stringResource(R.string.debug_log),
+            modifier = Modifier
+                .constrainAs(content) {
+                    start.linkTo(checkbox.end, 12.dp)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    end.linkTo(informationButton.start, 12.dp)
+                    width = Dimension.fillToConstraints
+                },
+            style = MaterialTheme.typography.bodyMedium
+        )
+        val context = LocalContext.current
+        Box(
+            modifier = Modifier
+                .constrainAs(informationButton) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    end.linkTo(parent.end)
+                }
+        ) {
+            IconButton(onClick = {
+                onInformationRequested(
+                    context.getString(
+                        R.string.debug_log_explanation
+                    )
+                )
+            }) {
+                Icon(
+                    Icons.Outlined.Info,
+                    contentDescription = stringResource(R.string.auto_cleanup_info_desc)
+                )
+            }
+        }
+    }
+    val context = LocalContext.current
+    OutlinedButton(
+        onClick = { clearDebugLog(activity, sharedPreferences) }
+    ) {
+        Text(stringResource(R.string.clear_debug_log))
+    }
+
+    OutlinedButton(
+        onClick = { exportDebugLog(activity) }
+    ) {
+        Text(stringResource(R.string.export_debug_log))
+    }
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun AppSettingsScreen(innerPadding: PaddingValues) {
@@ -190,6 +348,15 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
         mutableStateOf(
             sharedPreferences.getBoolean(
                 "auto_cleanup",
+                false
+            )
+        )
+    }
+
+    var debugLog by remember {
+        mutableStateOf(
+            sharedPreferences.getBoolean(
+                "write_debug",
                 false
             )
         )
@@ -233,6 +400,13 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                     automaticCleanup,
                     { information = it },
                     { automaticCleanup = it }
+                )
+
+                DebugOptions(
+                    sharedPreferences,
+                    debugLog,
+                    { information = it },
+                    { debugLog = it }
                 )
             }
         }

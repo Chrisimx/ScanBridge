@@ -6,4 +6,8 @@
     <files-path
         name="exportTempFiles"
         path="exportTempFiles/" />
+
+    <files-path
+        name="debug_files"
+        path="debug/" />
 </paths>

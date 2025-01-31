@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModel
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
+import io.github.chrisimx.scanbridge.logs.DebugInterceptor
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -30,10 +31,18 @@ import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 
-class ScanningScreenViewModel(address: HttpUrl) : ViewModel() {
+class ScanningScreenViewModel(address: HttpUrl, withDebugInterceptor: Boolean) : ViewModel() {
     private val _scanningScreenData =
         ScanningScreenData(
-            ESCLRequestClient(address, OkHttpClient.Builder().build())
+            ESCLRequestClient(
+                address,
+                OkHttpClient.Builder().let {
+                    if (withDebugInterceptor) {
+                        it.addInterceptor(DebugInterceptor())
+                    }
+                    it
+                }.build()
+            )
         )
     val scanningScreenData: ImmutableScanningScreenData
         get() = _scanningScreenData.toImmutable()

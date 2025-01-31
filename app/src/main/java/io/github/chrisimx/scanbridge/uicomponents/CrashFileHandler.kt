@@ -19,7 +19,6 @@
 
 package io.github.chrisimx.scanbridge.uicomponents
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import io.github.chrisimx.scanbridge.uicomponents.dialog.CrashFileDialog
 import java.io.File
 import kotlin.collections.isNotEmpty
+import timber.log.Timber
 
 @Composable
 fun CrashFileHandler() {
@@ -38,7 +38,7 @@ fun CrashFileHandler() {
     val context = LocalContext.current
 
     LaunchedEffect(true) {
-        Log.d("ScanBridgeApp", "Checking for crash files")
+        Timber.tag("ScanBridgeApp").d("Checking for crash files")
         val files =
             context.filesDir.listFiles { file, name -> name.startsWith("crash") && file.isFile }
         if (files != null && files.isNotEmpty()) {

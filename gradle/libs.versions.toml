@@ -15,6 +15,7 @@ lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.0"
 composeBom = "2025.01.00"
 okhttp = "4.12.0"
+timber = "4.7.1"
 zoomable = "0.14.0"
 material3 = "1.4.0-alpha06"
 materialIcons = "1.7.6"
@@ -46,6 +47,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3",
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlinReflect" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 zoomable = { module = "me.saket.telephoto:zoomable", version.ref = "zoomable" }
 
 [plugins]

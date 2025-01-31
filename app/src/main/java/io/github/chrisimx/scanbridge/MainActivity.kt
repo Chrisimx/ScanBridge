@@ -19,22 +19,59 @@
 
 package io.github.chrisimx.scanbridge
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import io.github.chrisimx.scanbridge.logs.FileLogger
+import java.io.BufferedWriter
 import java.io.File
+import java.io.FileWriter
+import timber.log.Timber
 
 class MainActivity : ComponentActivity() {
+    var debugWriter: BufferedWriter? = null
+    var tree: Timber.Tree? = null
+    var saveDebugFileLauncher: ActivityResultLauncher<Intent>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        if (this.getSharedPreferences("scanbridge", MODE_PRIVATE)
-                .getBoolean("auto_cleanup", false)
-        ) {
+        Timber.plant(Timber.DebugTree())
+
+        val sharedPreferences = this.getSharedPreferences("scanbridge", MODE_PRIVATE)
+
+        if (sharedPreferences.getBoolean("write_debug", false)) {
+            val debugDir = File(filesDir, "debug")
+            if (!debugDir.exists()) {
+                debugDir.mkdir()
+            }
+            val output = File(debugDir, "debug.txt")
+            if (!output.exists()) {
+                output.createNewFile()
+            }
+            debugWriter = BufferedWriter(FileWriter(output, true))
+            tree = FileLogger(debugWriter!!)
+            Timber.plant(tree)
+        }
+
+        Timber.i("ScanBridge starts")
+
+        saveDebugFileLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val uri = result.data?.data
+                saveDebugFileTo(uri)
+            }
+        }
+
+        if (sharedPreferences.getBoolean("auto_cleanup", false)) {
             cleanUpScansAndExportFiles()
         }
 
@@ -47,12 +84,21 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        Timber.i("ScanBridge stops: onDestroy")
+        Timber.i("Cleaning up debug writer")
+
+        debugWriter?.close()
+    }
+
     private fun cleanUpCacheFiles() {
-        Log.d("MainActivity", "Cleaning up cache files (used to provide data for sharing)")
+        Timber.tag("MainActivity").d("Cleaning up cache files (used to provide data for sharing)")
         val tempFileDir = File(filesDir, "exportTempFiles")
         if (!tempFileDir.exists()) return
         if (!tempFileDir.isDirectory) {
-            Log.e("MainActivity", "Temp file directory is not a directory!")
+            Timber.tag("MainActivity").e("Temp file directory is not a directory!")
             return
         }
         File(filesDir, "exportTempFiles").listFiles()?.forEach { file ->
@@ -61,7 +107,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun cleanUpScansAndExportFiles() {
-        Log.d("MainActivity", "Cleaning up scans and exports")
+        Timber.d("Cleaning up scans and exports")
         filesDir.listFiles()?.forEach { file ->
             if (file.name.startsWith("scan")) {
                 file.delete()
@@ -70,6 +116,19 @@ class MainActivity : ComponentActivity() {
         File(filesDir, "exports").listFiles()?.forEach { file ->
             if (file.name.startsWith("pdfexport") || file.name.startsWith("zipexport")) {
                 file.delete()
+            }
+        }
+    }
+
+    private fun saveDebugFileTo(uri: Uri?) {
+        val debugDir = File(filesDir, "debug")
+        val debugFile = File(debugDir, "debug.txt")
+
+        if (uri != null) {
+            contentResolver.openOutputStream(uri)?.use { outputStream ->
+                debugFile.inputStream().use { inputStream ->
+                    inputStream.copyTo(outputStream)
+                }
             }
         }
     }

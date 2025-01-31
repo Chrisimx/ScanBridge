@@ -21,7 +21,6 @@ package io.github.chrisimx.scanbridge.uicomponents
 
 import android.content.Context
 import android.icu.text.DecimalFormatSymbols
-import android.util.Log
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -33,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.util.toDoubleLocalized
+import timber.log.Timber
 
 enum class ErrorState {
     NOT_WITHIN_ALLOWED_RANGE,
@@ -82,7 +82,7 @@ fun ValidatedDimensionsTextEdit(
                 return@OutlinedTextField
             } else {
                 errorState.value = ErrorState.NOT_VALID_NUMBER
-                Log.d("ScanSettings", "Invalid Number")
+                Timber.tag("ScanSettings").d("Invalid Number")
                 return@OutlinedTextField
             }
         },
