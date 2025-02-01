@@ -52,12 +52,16 @@ fun ScanBridgeNavHost(navController: NavHostController) {
         composable<ScannerRoute> { backStackEntry ->
             val scannerRoute: ScannerRoute = backStackEntry.toRoute()
             val debug = sharedPreferences.getBoolean("write_debug", false)
+            val timeout = sharedPreferences.getInt("scanning_response_timeout", 25).toUInt()
             Timber.tag("ScanBridgeNavHost")
-                .d("Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerURL}. Debug is $debug")
+                .d(
+                    "Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerURL}. Timeout is $timeout seconds, Debug is $debug"
+                )
             ScanningScreen(
                 scannerRoute.scannerName,
                 scannerRoute.scannerURL.toHttpUrl(),
                 navController,
+                timeout,
                 debug
             )
         }
