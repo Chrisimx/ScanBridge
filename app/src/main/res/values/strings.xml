@@ -83,4 +83,7 @@
     <string name="debug_log_explanation">This will write all available log data to an exportable file. This is useful for submitting bug repots.</string>
     <string name="clear_debug_log">Clear debug log</string>
     <string name="export_debug_log">Export debug log</string>
+    <string name="timeout_info">This timeout determines how long ScanBridge waits at maximum for the scanner to respond to requests until it aborts the scan job.\n\nThis is mostly useful for slow scanners and large scan areas which take longer to scan.</string>
+    <string name="timeout">Response Timeout (in seconds)</string>
+    <string name="advanced">Advanced Settings</string>
 </resources>
