@@ -75,6 +75,7 @@ class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: Snaps
                     val url = try {
                         HttpUrl.Builder()
                             .host(sanitizedURL)
+                            .port(p0.port)
                             .encodedPath(rs)
                             .scheme("http")
                             .build()
