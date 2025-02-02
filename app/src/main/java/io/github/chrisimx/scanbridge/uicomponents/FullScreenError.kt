@@ -28,6 +28,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -47,6 +49,7 @@ import io.github.chrisimx.scanbridge.R
 @Composable
 fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = false) {
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
@@ -62,15 +65,21 @@ fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = 
             modifier = Modifier.size(64.dp),
             tint = MaterialTheme.colorScheme.primary
         )
-        Text(
-            errorMessage,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Light,
-            fontSize = 18.sp
-        )
+
+        Column(
+            modifier = Modifier.verticalScroll(scrollState)
+                .weight(1f, false)
+        ) {
+            Text(
+                errorMessage,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Light,
+                fontSize = 18.sp
+            )
+        }
 
         if (copyButton) {
             OutlinedButton(onClick = {
