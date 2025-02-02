@@ -386,6 +386,11 @@ fun doScan(
             return@thread
         }
 
+        for (i in 0 until 40) {
+            Timber.tag("CheckStatus").d("Scan status $i: ${job.scanJob.getJobStatus()}")
+            Thread.sleep(1000)
+        }
+
         while (true) {
             Timber.tag(TAG).d("Retrieving next page")
             var nextPage = job.scanJob.retrieveNextPage()
