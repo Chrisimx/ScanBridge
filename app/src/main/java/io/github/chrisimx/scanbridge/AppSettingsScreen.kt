@@ -156,6 +156,9 @@ fun clearDebugLog(activity: MainActivity, sharedPreferences: SharedPreferences) 
         activity.debugWriter = BufferedWriter(FileWriter(output, true))
         activity.tree = FileLogger(activity.debugWriter!!)
         Timber.plant(activity.tree)
+        Timber.i(
+            "Debug logging starts with ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE})"
+        )
     }
 }
 
@@ -208,7 +211,13 @@ fun DebugOptions(
                         activity.debugWriter = BufferedWriter(FileWriter(output, true))
                         activity.tree = FileLogger(activity.debugWriter!!)
                         Timber.plant(activity.tree)
+                        Timber.i(
+                            "Debug logging starts with ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE})"
+                        )
                     } else {
+                        Timber.i(
+                            "Debug logging stops with ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE})"
+                        )
                         activity.tree?.let {
                             Timber.uproot(it)
                             activity.tree = null

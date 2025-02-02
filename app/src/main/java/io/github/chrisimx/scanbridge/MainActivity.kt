@@ -60,7 +60,9 @@ class MainActivity : ComponentActivity() {
             Timber.plant(tree)
         }
 
-        Timber.i("ScanBridge starts")
+        Timber.i(
+            "ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE}) starts"
+        )
 
         saveDebugFileLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
