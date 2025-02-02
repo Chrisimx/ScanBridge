@@ -388,7 +388,21 @@ fun doScan(
 
         while (true) {
             Timber.tag(TAG).d("Retrieving next page")
-            var nextPage = job.scanJob.retrieveNextPage()
+            var nextPage: ESCLRequestClient.ScannerNextPageResult?
+            while (true) {
+                nextPage = job.scanJob.retrieveNextPage()
+                if (nextPage is ESCLRequestClient.ScannerNextPageResult.Success) {
+                    Timber.tag(TAG).d("Successfully retrieved next page in if-else loop")
+                    break
+                } else if (nextPage is ESCLRequestClient.ScannerNextPageResult.NoFurtherPages) {
+                    Timber.tag(TAG).d("No further pages in if-else loop")
+                    break
+                } else {
+                    Timber.tag(TAG).e("Error while retrieving next page: $nextPage")
+                    Timber.tag(TAG).e("Retrying in 1 second...")
+                    Thread.sleep(1000)
+                }
+            }
             Timber.tag(TAG).d("Next page result: $nextPage")
             val status = job.scanJob.getJobStatus()
             Timber.tag(TAG).d("Retrieved job info: $status")
