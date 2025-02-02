@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 
-class ScanningScreenViewModel(address: HttpUrl, withDebugInterceptor: Boolean) : ViewModel() {
+class ScanningScreenViewModel(address: HttpUrl, timeout: UInt, withDebugInterceptor: Boolean) : ViewModel() {
     private val _scanningScreenData =
         ScanningScreenData(
             ESCLRequestClient(
@@ -40,6 +40,8 @@ class ScanningScreenViewModel(address: HttpUrl, withDebugInterceptor: Boolean) :
                     if (withDebugInterceptor) {
                         it.addInterceptor(DebugInterceptor())
                     }
+                    it.connectTimeout(timeout.toLong(), java.util.concurrent.TimeUnit.SECONDS)
+                        .readTimeout(timeout.toLong(), java.util.concurrent.TimeUnit.SECONDS)
                     it
                 }.build()
             )

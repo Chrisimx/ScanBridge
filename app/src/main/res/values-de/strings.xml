@@ -83,4 +83,7 @@
     <string name="debug_log_explanation">Alle Debuglogs werden zu einer in den Einstellungen exportierbaren Datei geschrieben. Dies kann zum Erstellen von Fehlerberichten sehr nützlich sein.</string>
     <string name="clear_debug_log">Debugprotokoll löschen</string>
     <string name="export_debug_log">Debugprotokoll exportieren</string>
+    <string name="timeout_info">Diese Einstellung legt fest wie lange ScanBridge maximal auf eine Antwort vom Scanner wartet bevor es den Scanversuch abbricht.\n\nDiese Einstellung ist für langsame Scanner und große Scanbereiche nützlich.</string>
+    <string name="timeout">Timeoutlänge für Scannerantwort (in Sekunden)</string>
+    <string name="advanced">Erweiterte Einstellungen</string>
 </resources>

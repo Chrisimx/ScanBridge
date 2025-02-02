@@ -551,10 +551,12 @@ fun ScanningScreen(
     scannerName: String,
     scannerAddress: HttpUrl,
     navController: NavHostController,
+    timeout: UInt,
     withDebug: Boolean,
     scanningViewModel: ScanningScreenViewModel = viewModel {
         ScanningScreenViewModel(
             address = scannerAddress,
+            timeout = timeout,
             withDebugInterceptor = withDebug
         )
     }
