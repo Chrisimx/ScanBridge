@@ -70,7 +70,13 @@ class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: Snaps
 
                 val urls = mutableListOf<String>()
 
-                for (address in p0.hostAddresses) {
+                val addresses = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    p0.hostAddresses
+                } else {
+                    listOf(p0.host)
+                }
+
+                for (address in addresses) {
                     val sanitizedURL = address.hostAddress!!.substringBefore('%')
                     val url = try {
                         HttpUrl.Builder()
