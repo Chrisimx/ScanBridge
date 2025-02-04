@@ -34,7 +34,11 @@ the [releases page](https://github.com/Chrisimx/ScanBridge/releases).
 Here you can also find a nightly build. You can also build the app yourself by following the
 instructions below.
 
-Alternatively, you will likely be able to find the app on the F-Droid app store in the near future.
+Alternatively, you can get it on F-Droid by clicking the button below:
+
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/io.github.chrisimx.scanbridge/)
 
 ## Permissions
 
