@@ -40,7 +40,8 @@ class DebugInterceptor : Interceptor {
                     "Response: itself: $it, code: ${it.code} headers: ${it.headers} handshake: ${it.handshake} isRedirect: ${it.isRedirect} message: ${it.message} isSuccessful: ${it.isSuccessful} body: ${it.body} cacheControl: ${it.cacheControl} cacheResponse: ${it.cacheResponse} networkResponse: ${it.networkResponse} prior response: ${it.priorResponse} protocol: ${it.protocol} receivedResponseAt: ${it.receivedResponseAtMillis} sentRequestAtMillis: ${it.sentRequestAtMillis} request_url: ${it.request.url} request_method: ${it.request.method} request_headers: ${it.request.headers} request_body: ${it.request.body}"
                 )
 
-            val responseString = it.body?.string()
+            val responseBytes = it.body?.bytes()
+            val responseString = responseBytes?.toString(StandardCharsets.UTF_8)
             val contentType = it.body?.contentType()
 
             Timber.tag("DebugInterceptor")
@@ -50,7 +51,7 @@ class DebugInterceptor : Interceptor {
                 return it
             }
 
-            val wrappedBody = responseString.toResponseBody(contentType)
+            val wrappedBody = responseBytes.toResponseBody(contentType)
 
             it.newBuilder().body(wrappedBody).build()
         }
