@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
             }
             debugWriter = BufferedWriter(FileWriter(output, true))
             tree = FileLogger(debugWriter!!)
-            Timber.plant(tree)
+            Timber.plant(tree!!)
         }
 
         Timber.i(
