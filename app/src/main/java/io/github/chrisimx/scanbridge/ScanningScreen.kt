@@ -386,7 +386,45 @@ fun doScan(
             return@thread
         }
 
+        var polling = false
+
         while (true) {
+            if (polling) {
+                for (i in 0..60) {
+                    val status = job.scanJob.getJobStatus()
+                    val isRunning = status?.jobState == JobState.Processing || status?.jobState == JobState.Pending
+                    val imagesToTransfer = status?.imagesToTransfer
+                    Timber.tag(TAG).d("Polling job status. Result: $status imagesToTransfer: $imagesToTransfer isRunning: $isRunning")
+                    if (!isRunning) {
+                        Timber.tag(TAG).d("Job is reported to be not running anymore. jobRunning = false")
+                        viewModel.setScanJobRunning(false)
+                        viewModel.scrollToPage(
+                            scope = scope,
+                            pageNr = viewModel.scanningScreenData.currentScansState.size
+                        )
+                        if (status?.jobState != JobState.Completed) {
+                            val jobStateString = status?.jobState.toJobStateString(context)
+                            Timber.tag(TAG).w("Job info doesn't indicate completion: $jobStateString")
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    context.getString(
+                                        R.string.no_further_pages,
+                                        jobStateString
+                                    ),
+                                    withDismissAction = true
+                                )
+                            }
+                        }
+                        return@thread
+                    }
+                    if (imagesToTransfer != null && imagesToTransfer > 0u) {
+                        Timber.tag(TAG).d("There seem to be images to transfer. Breaking out of polling loop")
+                        break
+                    }
+                    Thread.sleep(1000)
+                }
+            }
+
             Timber.tag(TAG).d("Retrieving next page")
             var nextPage = job.scanJob.retrieveNextPage()
             Timber.tag(TAG).d("Next page result: $nextPage")
@@ -394,36 +432,81 @@ fun doScan(
             Timber.tag(TAG).d("Retrieved job info: $status")
             val jobStateString = status?.jobState.toJobStateString(context)
             Timber.tag(TAG).d("Job info as human readable: $jobStateString")
-            if (nextPage is ESCLRequestClient.ScannerNextPageResult.NoFurtherPages) {
-                Timber.tag(TAG).d("Next page result is seen as no further pages. jobRunning = false")
-                viewModel.setScanJobRunning(false)
-                viewModel.scrollToPage(
-                    scope = scope,
-                    pageNr = viewModel.scanningScreenData.currentScansState.size
-                )
-                if (status?.jobState != JobState.Completed) {
-                    Timber.tag(TAG).w("Job info doesn't indicate completion: $jobStateString")
-                    scope.launch {
-                        snackbarHostState.showSnackbar(
-                            context.getString(
-                                R.string.no_further_pages,
-                                jobStateString
-                            ),
-                            withDismissAction = true
+            when (nextPage) {
+                is ESCLRequestClient.ScannerNextPageResult.NoFurtherPages -> {
+                    Timber.tag(TAG).d("Next page result is seen as no further pages. jobRunning = false")
+                    viewModel.setScanJobRunning(false)
+                    viewModel.scrollToPage(
+                        scope = scope,
+                        pageNr = viewModel.scanningScreenData.currentScansState.size
+                    )
+                    if (status?.jobState != JobState.Completed) {
+                        Timber.tag(TAG).w("Job info doesn't indicate completion: $jobStateString")
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                context.getString(
+                                    R.string.no_further_pages,
+                                    jobStateString
+                                ),
+                                withDismissAction = true
+                            )
+                        }
+                    }
+                    return@thread
+                }
+                is ESCLRequestClient.ScannerNextPageResult.NotSuccessfulCode -> {
+                    if (status?.jobState == JobState.Completed) {
+                        Timber.tag(TAG).d("Job info indicates completion but response was not 404: $jobStateString")
+                        viewModel.setScanJobRunning(false)
+                        viewModel.scrollToPage(
+                            scope = scope,
+                            pageNr = viewModel.scanningScreenData.currentScansState.size
                         )
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                context.getString(
+                                    R.string.no_further_pages,
+                                    jobStateString
+                                ),
+                                withDismissAction = true
+                            )
+                        }
+                        return@thread
+                    } else {
+                        Timber.tag(TAG).e("Not successful code while retrieving next page: $nextPage")
+                        if (nextPage.responseCode == 503) {
+                            // Retry with polling
+                            polling = true
+                            continue
+                        } else {
+                            viewModel.setScanJobRunning(false)
+                            viewModel.scrollToPage(
+                                scope = scope,
+                                pageNr = viewModel.scanningScreenData.currentScansState.size
+                            )
+                            snackbarErrorRetrievingPage(
+                                nextPage.toString(),
+                                scope,
+                                context,
+                                snackbarHostState
+                            )
+                            return@thread
+                        }
                     }
                 }
-                return@thread
-            } else if (nextPage !is ESCLRequestClient.ScannerNextPageResult.Success) {
-                Timber.tag(TAG).e("Error while retrieving next page: $nextPage")
-                snackbarErrorRetrievingPage(
-                    nextPage.toString(),
-                    scope,
-                    context,
-                    snackbarHostState
-                )
-                viewModel.setScanJobRunning(false)
-                return@thread
+                is ESCLRequestClient.ScannerNextPageResult.Success -> {
+                }
+                else -> {
+                    Timber.tag(TAG).e("Error while retrieving next page: $nextPage")
+                    snackbarErrorRetrievingPage(
+                        nextPage.toString(),
+                        scope,
+                        context,
+                        snackbarHostState
+                    )
+                    viewModel.setScanJobRunning(false)
+                    return@thread
+                }
             }
             nextPage.page.use {
                 Timber.tag(TAG).d("Received page. Copying to file")
