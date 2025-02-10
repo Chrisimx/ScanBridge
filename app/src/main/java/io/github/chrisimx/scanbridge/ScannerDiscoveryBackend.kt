@@ -47,7 +47,7 @@ class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: Snaps
         // A service was found! Do something with it.
         Timber
             .d(
-                "Service (${service.hashCode()}) discovery success ${service.hostAddresses} ${service.serviceType} ${service.serviceName} ${service.port} ${service.network}"
+                "Service (${service.hashCode()}) discovery success ${if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) service.hostAddresses else service.host} ${service.serviceType} ${service.serviceName} ${service.port} ${service.network}"
             )
 
         val serviceIdentifier = "${service.serviceName}.${service.serviceType}"
