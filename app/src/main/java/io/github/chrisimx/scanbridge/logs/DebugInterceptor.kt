@@ -1,5 +1,6 @@
 package io.github.chrisimx.scanbridge.logs
 
+import android.os.Build
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import okhttp3.Interceptor
@@ -26,7 +27,11 @@ class DebugInterceptor : Interceptor {
                         body.writeTo(sink)
                         sink.flush()
                         sink.close()
-                        Timber.tag("DebugInterceptor").d("Request body: ${it.toString(StandardCharsets.UTF_8)}")
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            Timber.tag("DebugInterceptor").d("Request body: ${it.toString(StandardCharsets.UTF_8)}")
+                        } else {
+                            Timber.tag("DebugInterceptor").d("Request body: ${it.toString("UTF-8")}")
+                        }
                     }
                 } else {
                     Timber.tag("DebugInterceptor").d("Request body is one-shot")

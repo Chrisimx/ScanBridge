@@ -1,5 +1,6 @@
 package io.github.chrisimx.scanbridge.uicomponents.dialog
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -100,6 +101,7 @@ fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (HttpUrl) -> Un
     }
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
 @Composable
 fun CustomScannerDialogPreview() {
