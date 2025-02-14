@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.0] - 2025-02-14
+
+### Added
+
+- Debug logging option ([#41](https://github.com/Chrisimx/ScanBridge/issues/41))
+- Timeout setting ([#46](https://github.com/Chrisimx/ScanBridge/issues/46))
+
+### Fixed
+
+#### Scanner support
+- **Confirmed fixed:** HP Color Laserjet MFP M283fdw ([#39](https://github.com/Chrisimx/ScanBridge/issues/39)), HP DeskJet 3630 ([#47](https://github.com/Chrisimx/ScanBridge/issues/47)), EPSON ET-2650 ([#57](https://github.com/Chrisimx/ScanBridge/issues/57))
+- **Maybe fixed:** Kyocera ECOSYS M5521cdn ([#50](https://github.com/Chrisimx/ScanBridge/issues/50)), HP Neverstop Laser MFP 1200w ([#55](https://github.com/Chrisimx/ScanBridge/issues/55))
+
+#### Others issues
+
+- Use published port instead of 80/443 (76baa05f)
+- Layout of full screen error dialog with very long error messages (311f36c)
+- Crashes on older Android versions with API level < 34 because of unsupported API calls (64bebf55c, 9b5bd7577, bfde9e4a0ec)
+
+### Changed
+
+- Allow user-defined root CAs for HTTPS connections, disallowed before ([#48](https://github.com/Chrisimx/ScanBridge/issues/48))
+
 ## [1.1.0] - 2025-01-28
 
 ### Added
@@ -50,8 +73,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Handle temporary files properly
 - Localization for English and German
 
-[unreleased]: https://github.com/Chrisimx/ScanBridge/compare/v1.1.0...HEAD
+[unreleased]: https://github.com/Chrisimx/ScanBridge/compare/v1.2.0...HEAD
 
+[1.2.0]: https://github.com/Chrisimx/ScanBridge/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Chrisimx/ScanBridge/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/Chrisimx/ScanBridge/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Chrisimx/ScanBridge/commits/v1.0.0/
