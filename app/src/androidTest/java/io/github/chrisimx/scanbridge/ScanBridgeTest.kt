@@ -1,6 +1,7 @@
 package io.github.chrisimx.scanbridge
 
 import android.content.ContentValues
+import android.content.Context.MODE_PRIVATE
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Environment
@@ -93,6 +94,11 @@ class ScanBridgeTest {
 
     @Test
     fun discovery() {
+        composeTestRule.activity.getSharedPreferences("scanbridge", MODE_PRIVATE)
+            .edit()
+            .putBoolean("auto_cleanup", true)
+            .apply()
+
         composeTestRule.onNodeWithText("Discovery").assertIsDisplayed()
 
         composeTestRule.onNodeWithText("Discovered scanners").assertIsDisplayed()
@@ -102,11 +108,19 @@ class ScanBridgeTest {
 
     @Test
     fun discoveryScreenshot() {
+        composeTestRule.activity.getSharedPreferences("scanbridge", MODE_PRIVATE)
+            .edit()
+            .putBoolean("auto_cleanup", true)
+            .apply()
         saveScreenshot("discovery")
     }
 
     @Test
     fun settingsScreenshot() {
+        composeTestRule.activity.getSharedPreferences("scanbridge", MODE_PRIVATE)
+            .edit()
+            .putBoolean("auto_cleanup", true)
+            .apply()
         composeTestRule.onNodeWithText("Settings").performClick()
 
         saveScreenshot("settings")
@@ -115,6 +129,11 @@ class ScanBridgeTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun scanningInterface() {
+        composeTestRule.activity.getSharedPreferences("scanbridge", MODE_PRIVATE)
+            .edit()
+            .putBoolean("auto_cleanup", true)
+            .apply()
+
         val server = startServer()
 
         composeTestRule.onNodeWithTag("custom_scanner_fab").performClick()
@@ -132,6 +151,11 @@ class ScanBridgeTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun scan() {
+        composeTestRule.activity.getSharedPreferences("scanbridge", MODE_PRIVATE)
+            .edit()
+            .putBoolean("auto_cleanup", true)
+            .apply()
+
         val server = startServer()
 
         val url = InstrumentationRegistry.getArguments()
@@ -145,6 +169,11 @@ class ScanBridgeTest {
 
     @OptIn(ExperimentalTestApi::class)
     fun testConnectToScanner(url: String) {
+        composeTestRule.activity.getSharedPreferences("scanbridge", MODE_PRIVATE)
+            .edit()
+            .putBoolean("auto_cleanup", true)
+            .apply()
+
         composeTestRule.onNodeWithTag("custom_scanner_fab").performClick()
 
         Log.d("ScanBridgeTest", "Trying URL: $url")
@@ -161,6 +190,11 @@ class ScanBridgeTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testRootURLFix() {
+        composeTestRule.activity.getSharedPreferences("scanbridge", MODE_PRIVATE)
+            .edit()
+            .putBoolean("auto_cleanup", true)
+            .apply()
+
         val server = startServer("-s", "")
 
         testConnectToScanner("http://127.0.0.1:8080")
