@@ -77,12 +77,15 @@ fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): MutableESCLScan
         widthState = mutableStateOf("max")
     )
 
+    val chosenColorMode = inputCaps.settingProfiles.elementAtOrNull(0)?.colorModes?.maxByOrNull { it.ordinal }
+
     return MutableESCLScanSettingsState(
         versionState = mutableStateOf(this.interfaceVersion),
         inputSourceState = mutableStateOf(inputSource),
         scanRegionsState = mutableStateOf(maxScanRegion),
         xResolutionState = mutableStateOf(maxResolution.xResolution),
         yResolutionState = mutableStateOf(maxResolution.yResolution),
+        colorModeState = mutableStateOf(chosenColorMode),
         documentFormatExtState = mutableStateOf("image/jpeg")
     )
 }
