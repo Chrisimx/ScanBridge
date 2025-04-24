@@ -1,6 +1,5 @@
-import java.lang.ProcessBuilder
 import java.security.MessageDigest
-import java.util.Properties
+import java.util.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
@@ -52,8 +51,8 @@ android {
         applicationId = "io.github.chrisimx.scanbridge"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1_002_000 // format is MAJ_MIN_PAT with always 3 digits
-        versionName = "1.2.0"
+        versionCode = 1_003_000 // format is MAJ_MIN_PAT with always 3 digits
+        versionName = "1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments["escl_server_url"] =

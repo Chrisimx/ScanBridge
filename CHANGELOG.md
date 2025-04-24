@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.0] - 2025-04-24
+
+### Fixed
+
+#### Improved Scanner support
+- HP DeskJet 2700 ([#62](https://github.com/Chrisimx/ScanBridge/issues/62))
+- HP Color Laser MFP 179fnw ([#68](https://github.com/Chrisimx/ScanBridge/issues/68)))
+- HP Officejet 8020 ([#71](https://github.com/Chrisimx/ScanBridge/issues/71))
+- Canon MF628cw ([#65](https://github.com/Chrisimx/ScanBridge/issues/65))
+- Canon MF269dw ([#72](https://github.com/Chrisimx/ScanBridge/issues/72))
+- ...
+
+### Changed
+- Ignore link-local addresses (39b10e6d)
+- Always use highest quality color mode instead scanner default value (on some scanners the default was black-and-white) (7e516c05)
+
 ## [1.2.0] - 2025-02-14
 
 ### Added
@@ -75,6 +91,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 [unreleased]: https://github.com/Chrisimx/ScanBridge/compare/v1.2.0...HEAD
 
+[1.3.0]: https://github.com/Chrisimx/ScanBridge/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/Chrisimx/ScanBridge/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Chrisimx/ScanBridge/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/Chrisimx/ScanBridge/compare/v1.0.0...v1.0.1
