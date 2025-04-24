@@ -79,6 +79,10 @@ class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: Snaps
                         }
 
                         for (address in addresses) {
+                            if (address.isLinkLocalAddress) {
+                                Timber.tag(TAG).d("Ignoring link local address: ${address.hostAddress}")
+                                continue
+                            }
                             val sanitizedURL = address.hostAddress!!.substringBefore('%')
                             val url = try {
                                 HttpUrl.Builder()
