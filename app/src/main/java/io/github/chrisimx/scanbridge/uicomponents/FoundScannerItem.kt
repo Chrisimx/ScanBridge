@@ -21,11 +21,15 @@ package io.github.chrisimx.scanbridge.uicomponents
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,9 +43,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.ScannerRoute
+import timber.log.Timber
 
 @Composable
-fun FoundScannerItem(name: String, address: String, navController: NavController) {
+fun FoundScannerItem(name: String, address: String, navController: NavController, deleteScanner: (() -> Unit)? = null) {
     ElevatedCard(
         modifier = Modifier
             .defaultMinSize(minHeight = 60.dp)
@@ -65,16 +70,40 @@ fun FoundScannerItem(name: String, address: String, navController: NavController
                 contentDescription = stringResource(id = R.string.print_symbol_desc)
             )
             Column {
-                Text(
-                    name,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 18.sp,
-                    style = MaterialTheme.typography.labelLarge
-                )
+                Row {
+                    Text(
+                        name,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                    if (deleteScanner != null) {
+                        Icon(
+                            painter = painterResource(R.drawable.outline_edit_24),
+                            tint = MaterialTheme.colorScheme.surfaceTint,
+                            modifier = Modifier.padding(start = 8.dp),
+                            contentDescription = stringResource(id = R.string.custom)
+                        )
+                    }
+                }
                 Text(
                     address,
                     style = MaterialTheme.typography.labelLarge
                 )
+            }
+            if (deleteScanner != null) {
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = {
+                    deleteScanner.invoke()
+                    Timber.i("Delete button clicked for custom scanner: $name at $address")
+                }) {
+                    Icon(
+                        imageVector = Icons.Rounded.Delete,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        contentDescription = stringResource(id = R.string.delete),
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
             }
         }
     }

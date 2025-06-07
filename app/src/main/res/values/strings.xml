@@ -26,7 +26,7 @@
     <string name="no_scans_yet">No pages were scanned yet. Click the scan button :)</string>
     <string name="platen">Platen</string>
     <string name="adf">ADF</string>
-    <string name="header_scannerbrowser">Discovered scanners</string>
+    <string name="header_scannerbrowser">Available scanners</string>
     <string name="discovery">Discovery</string>
     <string name="copy_current_scanner_options_in_esclkt_format">Copy current scan options in eSCLKt format</string>
     <string name="scan_settings">Scan settings</string>
@@ -65,7 +65,7 @@
     <string name="rotate_right">Rotate right</string>
     <string name="rotating_page">Rotating…</string>
     <string name="custom_scanner_desc">Access custom scanner</string>
-    <string name="connect">Connect</string>
+    <string name="connect">Just connect</string>
     <string name="url_escl_resource">URL (eSCL resource)</string>
     <string name="custom_scanner_dialog_title">Connect to a custom scanner</string>
     <string name="invalid_url">Invalid URL</string>
@@ -86,4 +86,9 @@
     <string name="timeout_info">This timeout determines how long ScanBridge waits at maximum for the scanner to respond to requests until it aborts the scan job.\n\nThis is mostly useful for slow scanners and large scan areas which take longer to scan.</string>
     <string name="timeout">Response Timeout (in seconds)</string>
     <string name="advanced">Advanced Settings</string>
+    <string name="connect_and_save"><![CDATA[Connect & save]]></string>
+    <string name="name">Name</string>
+    <string name="scanner_name_placeholder">HP Deskjet</string>
+    <string name="discovered_scanners">Discovered scanners</string>
+    <string name="saved_scanners">Saved scanners</string>
 </resources>

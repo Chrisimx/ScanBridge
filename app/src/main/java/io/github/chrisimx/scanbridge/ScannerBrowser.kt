@@ -19,26 +19,39 @@
 
 package io.github.chrisimx.scanbridge
 
+import android.app.Application
 import android.content.Context
 import android.net.nsd.NsdManager
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import io.github.chrisimx.scanbridge.data.model.CustomScanner
+import io.github.chrisimx.scanbridge.data.ui.CustomScannerViewModel
 import io.github.chrisimx.scanbridge.uicomponents.FoundScannerItem
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.dialog.CustomScannerDialog
-import java.util.Optional
+import java.util.*
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import timber.log.Timber
 
 fun startScannerDiscovery(
@@ -60,7 +73,8 @@ fun startScannerDiscovery(
 fun ScannerList(
     innerPadding: PaddingValues,
     navController: NavController,
-    statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>
+    statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
+    customScannerViewModel: CustomScannerViewModel
 ) {
     LazyColumn(
         modifier = Modifier
@@ -78,9 +92,47 @@ fun ScannerList(
                 }
             }
         }
+
+        if (customScannerViewModel.customScanners.isNotEmpty() && statefulScannerMap.isNotEmpty()) {
+            item {
+                Text(
+                    stringResource(R.string.discovered_scanners),
+                    modifier = Modifier.fillMaxWidth(1f).padding(start = 16.dp),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+
+            item {
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp))
+            }
+        }
+
+        customScannerViewModel.customScanners.forEach { customScanner ->
+            item {
+                FoundScannerItem(
+                    customScanner.name,
+                    customScanner.url.toString(),
+                    navController,
+                    {
+                        customScannerViewModel.deleteScanner(customScanner)
+                    }
+                )
+            }
+        }
+
+        if (customScannerViewModel.customScanners.isNotEmpty() && statefulScannerMap.isNotEmpty()) {
+            item {
+                Text(
+                    stringResource(R.string.saved_scanners),
+                    modifier = Modifier.fillMaxWidth(1f).padding(start = 16.dp),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+        }
     }
 }
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 fun ScannerBrowser(
     innerPadding: PaddingValues,
@@ -89,9 +141,16 @@ fun ScannerBrowser(
     setShowCustomDialog: (Boolean) -> Unit,
     statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>
 ) {
-    AnimatedContent(targetState = statefulScannerMap.isNotEmpty(), label = "ScannerList") {
+    val customScannerViewModel: CustomScannerViewModel = viewModel(
+        factory = ViewModelProvider.AndroidViewModelFactory(LocalContext.current.applicationContext as Application)
+    )
+
+    AnimatedContent(
+        targetState = statefulScannerMap.isNotEmpty() || customScannerViewModel.customScanners.isNotEmpty(),
+        label = "ScannerList"
+    ) {
         if (it) {
-            ScannerList(innerPadding, navController, statefulScannerMap)
+            ScannerList(innerPadding, navController, statefulScannerMap, customScannerViewModel)
         } else {
             FullScreenError(
                 R.drawable.twotone_wifi_find_24,
@@ -104,12 +163,17 @@ fun ScannerBrowser(
         val context = LocalContext.current
         CustomScannerDialog(
             onDismiss = { setShowCustomDialog(false) },
-            onConnectClicked = { url ->
+            onConnectClicked = { name, url, save ->
+                val name = if (name.isEmpty()) context.getString(R.string.custom_scanner) else name
+                val url = if (url.toString().endsWith("/")) url.toString() else "$url/"
+                if (save) {
+                    customScannerViewModel.addScanner(CustomScanner(Uuid.random(), name, url.toHttpUrl()))
+                }
                 setShowCustomDialog(false)
                 navController.navigate(
                     ScannerRoute(
-                        context.getString(R.string.custom_scanner),
-                        if (url.toString().endsWith("/")) url.toString() else "$url/"
+                        name,
+                        url
                     )
                 )
             }

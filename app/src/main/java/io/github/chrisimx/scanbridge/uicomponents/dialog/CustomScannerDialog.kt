@@ -1,6 +1,5 @@
 package io.github.chrisimx.scanbridge.uicomponents.dialog
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -11,7 +10,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,21 +21,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.github.chrisimx.scanbridge.R
-import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (HttpUrl) -> Unit) {
-    var errorState: String? by remember { mutableStateOf(null) }
-    var text: String by remember { mutableStateOf("") }
+fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (String, HttpUrl, Boolean) -> Unit) {
+    var urlErrorState: String? by remember { mutableStateOf(null) }
+    var urlText: String by remember { mutableStateOf("") }
+    var nameText: String by remember { mutableStateOf("") }
 
     val context = LocalContext.current
+
+    val validateUrl = fun(): HttpUrl? {
+        if (urlText.isEmpty()) {
+            urlErrorState = context.getString(R.string.error_state_please_enter_an_url)
+            return null
+        }
+
+        try {
+            return urlText.toHttpUrl()
+        } catch (_: IllegalArgumentException) {
+            urlErrorState = context.getString(R.string.invalid_url)
+            return null
+        }
+    }
 
     Dialog(
         onDismissRequest = { onDismiss() }
@@ -59,16 +70,25 @@ fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (HttpUrl) -> Un
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
                 OutlinedTextField(
-                    modifier = Modifier.testTag("url_input"),
-                    value = text,
+                    modifier = Modifier.testTag("name_input"),
+                    value = nameText,
                     onValueChange = {
-                        errorState = null
-                        text = it
+                        nameText = it
+                    },
+                    label = { Text(stringResource(R.string.name)) },
+                    placeholder = { Text(stringResource(R.string.scanner_name_placeholder)) }
+                )
+                OutlinedTextField(
+                    modifier = Modifier.testTag("url_input"),
+                    value = urlText,
+                    onValueChange = {
+                        urlErrorState = null
+                        urlText = it
                     },
                     label = { Text(stringResource(R.string.url_escl_resource)) },
                     placeholder = { Text("http://192.168.178.2/eSCL/") },
                     supportingText = {
-                        errorState?.let {
+                        urlErrorState?.let {
                             Text(
                                 it,
                                 color = MaterialTheme.colorScheme.error,
@@ -79,35 +99,23 @@ fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (HttpUrl) -> Un
                 )
                 Button(
                     onClick = {
-                        if (text.isEmpty()) {
-                            errorState = context.getString(R.string.error_state_please_enter_an_url)
-                            return@Button
-                        }
-                        val url: HttpUrl?
-                        try {
-                            url = text.toHttpUrl()
-                        } catch (_: IllegalArgumentException) {
-                            errorState = context.getString(R.string.invalid_url)
-                            return@Button
-                        }
-                        onConnectClicked(url)
+                        val url = validateUrl() ?: return@Button
+                        onConnectClicked(nameText, url, true)
                     },
                     modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    Text(stringResource(R.string.connect_and_save))
+                }
+                Button(
+                    onClick = {
+                        val url = validateUrl() ?: return@Button
+                        onConnectClicked(nameText, url, false)
+                    },
+                    modifier = Modifier.padding(top = 8.dp)
                 ) {
                     Text(stringResource(R.string.connect))
                 }
             }
-        }
-    }
-}
-
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Preview
-@Composable
-fun CustomScannerDialogPreview() {
-    ScanBridgeTheme {
-        Scaffold { innerPadding ->
-            CustomScannerDialog({}, {})
         }
     }
 }
