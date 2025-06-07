@@ -101,7 +101,7 @@ class ScanBridgeTest {
 
         composeTestRule.onNodeWithText("Discovery").assertIsDisplayed()
 
-        composeTestRule.onNodeWithText("Discovered scanners").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Available scanners").assertIsDisplayed()
 
         composeTestRule.onNodeWithText("Settings").assertIsDisplayed()
     }
@@ -140,7 +140,7 @@ class ScanBridgeTest {
 
         composeTestRule.onNodeWithTag("url_input")
             .performTextInput("http://127.0.0.1:8080/eSCL")
-        composeTestRule.onNodeWithText("Connect").performClick()
+        composeTestRule.onNodeWithText("Just connect").performClick()
 
         composeTestRule.waitUntilExactlyOneExists(hasText("No pages", substring = true), 1000)
         saveScreenshot("scanning_interface")
@@ -178,7 +178,7 @@ class ScanBridgeTest {
 
         Log.d("ScanBridgeTest", "Trying URL: $url")
         composeTestRule.onNodeWithTag("url_input").performTextInput(url)
-        composeTestRule.onNodeWithText("Connect").performClick()
+        composeTestRule.onNodeWithText("Just connect").performClick()
 
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText("Scan", useUnmergedTree = true).performClick()
