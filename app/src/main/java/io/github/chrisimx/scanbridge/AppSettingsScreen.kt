@@ -52,6 +52,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.core.content.edit
 import io.github.chrisimx.scanbridge.logs.FileLogger
 import io.github.chrisimx.scanbridge.uicomponents.TitledCard
 import io.github.chrisimx.scanbridge.uicomponents.dialog.SimpleTextDialog
@@ -78,9 +79,9 @@ fun AutoDeleteTempFiles(
                 value = automaticCleanup,
                 onValueChange = {
                     sharedPreferences
-                        .edit()
-                        .putBoolean("auto_cleanup", it)
-                        .apply()
+                        .edit {
+                            putBoolean("auto_cleanup", it)
+                        }
                     setAutomaticCleanup(it)
                 },
                 role = Role.Checkbox
@@ -194,9 +195,9 @@ fun DebugOptions(
                 value = debugLog,
                 onValueChange = {
                     sharedPreferences
-                        .edit()
-                        .putBoolean("write_debug", it)
-                        .apply()
+                        .edit {
+                            putBoolean("write_debug", it)
+                        }
                     setWriteDebugLog(it)
 
                     if (it) {
@@ -271,7 +272,6 @@ fun DebugOptions(
             }
         }
     }
-    val context = LocalContext.current
     OutlinedButton(
         onClick = { clearDebugLog(activity, sharedPreferences) }
     ) {
