@@ -390,13 +390,17 @@ fun doScan(
 
         while (true) {
             if (polling) {
-                for (i in 0..60) {
+                for (retries in 0..60) {
                     val status = job.scanJob.getJobStatus()
                     val isRunning = status?.jobState == JobState.Processing || status?.jobState == JobState.Pending
                     val imagesToTransfer = status?.imagesToTransfer
                     Timber.tag(TAG).d("Polling job status. Result: $status imagesToTransfer: $imagesToTransfer isRunning: $isRunning")
                     if (!isRunning) {
                         Timber.tag(TAG).d("Job is reported to be not running anymore. jobRunning = false")
+
+                        val deleteResult = job.scanJob.cancle()
+                        Timber.tag(TAG).d("Cancelling job after (a likely) failure: $deleteResult")
+
                         viewModel.setScanJobRunning(false)
                         viewModel.scrollToPage(
                             scope = scope,
@@ -452,6 +456,8 @@ fun doScan(
                             )
                         }
                     }
+                    val deletionResult = job.scanJob.cancle()
+                    Timber.tag(TAG).d("Cancelling job after no further pages is reported: $deletionResult")
                     return@thread
                 }
                 is ESCLRequestClient.ScannerNextPageResult.NotSuccessfulCode -> {
@@ -471,11 +477,14 @@ fun doScan(
                                 withDismissAction = true
                             )
                         }
+                        val deletionResult = job.scanJob.cancle()
+                        Timber.tag(TAG).d("Cancelling job after non-standard completion: $deletionResult")
                         return@thread
                     } else {
                         Timber.tag(TAG).e("Not successful code while retrieving next page: $nextPage")
                         if (nextPage.responseCode == 503) {
                             // Retry with polling
+                            Timber.tag(TAG).d("503 error received. Retrying with polling")
                             polling = true
                             continue
                         } else {
@@ -490,6 +499,8 @@ fun doScan(
                                 context,
                                 snackbarHostState
                             )
+                            val deletionResult = job.scanJob.cancle()
+                            Timber.tag(TAG).d("Cancelling job after not successful response while trying to retrieve page: $deletionResult")
                             return@thread
                         }
                     }
@@ -505,6 +516,8 @@ fun doScan(
                         snackbarHostState
                     )
                     viewModel.setScanJobRunning(false)
+                    val deletionResult = job.scanJob.cancle()
+                    Timber.tag(TAG).d("Cancelling job after error while trying to retrieve page: $deletionResult")
                     return@thread
                 }
             }
@@ -538,6 +551,8 @@ fun doScan(
                         context,
                         snackbarHostState
                     )
+                    val deletionResult = job.scanJob.cancle()
+                    Timber.tag(TAG).d("Cancelling job after error while trying to copy received page to file: $deletionResult")
                     return@thread
                 }
 
@@ -551,6 +566,8 @@ fun doScan(
                         snackbarHostState
                     )
                     filePath.toFile().delete()
+                    val deletionResult = job.scanJob.cancle()
+                    Timber.tag(TAG).d("Cancelling job after error while trying to decode received page as bitmap: $deletionResult")
                     return@thread
                 }
                 viewModel.addScan(filePath.toString(), scanSettings)
