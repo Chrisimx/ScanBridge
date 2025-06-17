@@ -91,4 +91,6 @@
     <string name="scanner_name_placeholder">HP Deskjet</string>
     <string name="discovered_scanners">Discovered scanners</string>
     <string name="saved_scanners">Saved scanners</string>
+    <string name="pdf_export_max_pages_per_pdf">Max. pages per PDF file</string>
+    <string name="pdf_export_setting_info">As a smartphone has limited memory, it can becomes difficult to handle large PDFs. To prevent crashes, ScanBridge limits the maximum count pages stored in one PDF file when exporting scanned pages as PDF. If there are too much pages, multiple PDFs are created and stored into a ZIP archive. These PDFs can be merged afterwards, if needed.\n\nWarning: Increasing this too far can lead to crashes while exporting if a large number of pages are to be exported.</string>
 </resources>

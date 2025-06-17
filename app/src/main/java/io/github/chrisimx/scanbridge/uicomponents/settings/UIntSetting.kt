@@ -20,6 +20,7 @@
 package io.github.chrisimx.scanbridge.uicomponents.settings
 
 import android.annotation.SuppressLint
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -34,18 +35,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import io.github.chrisimx.scanbridge.R
+import androidx.core.content.edit
 import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import timber.log.Timber
 
 @Composable
-fun TimeoutOption(onInformationRequested: (String) -> Unit, setTimeout: (UInt?) -> Unit, initialTimeout: UInt = 25u) {
+fun UIntSettingBase(
+    settingName: String,
+    placeholder: String,
+    help: String,
+    onHelpRequested: (String) -> Unit,
+    changeSetting: (UInt?) -> Unit,
+    min: UInt,
+    max: UInt,
+    initialTimeout: UInt = 25u
+) {
     ConstraintLayout(
         Modifier
             .fillMaxWidth()
@@ -61,18 +69,24 @@ fun TimeoutOption(onInformationRequested: (String) -> Unit, setTimeout: (UInt?) 
                 timeoutValue = it
                 if (it.isNotEmpty()) {
                     try {
-                        setTimeout(it.toUInt())
+                        val value = it.toUInt()
+                        if (value in min..max) {
+                            changeSetting(value)
+                        } else {
+                            Timber.w("Value out of range: $value. Ignored")
+                            changeSetting(null)
+                        }
                     } catch (_: NumberFormatException) {
-                        Timber.w("Invalid timeout value. Ignored")
-                        setTimeout(null)
+                        Timber.w("Invalid setting value. Ignored")
+                        changeSetting(null)
                     }
                 } else {
-                    setTimeout(null)
+                    changeSetting(null)
                 }
             },
             label = {
                 Text(
-                    stringResource(R.string.timeout),
+                    settingName,
                     style = MaterialTheme.typography.labelMedium
                 )
             },
@@ -80,7 +94,7 @@ fun TimeoutOption(onInformationRequested: (String) -> Unit, setTimeout: (UInt?) 
                 keyboardType = KeyboardType.Number
             ),
             singleLine = true,
-            placeholder = { Text("25") },
+            placeholder = { Text(placeholder) },
             modifier = Modifier
                 .constrainAs(checkbox) {
                     top.linkTo(parent.top)
@@ -89,7 +103,6 @@ fun TimeoutOption(onInformationRequested: (String) -> Unit, setTimeout: (UInt?) 
                 }
                 .padding(end = 0.dp)
         )
-        val context = LocalContext.current
         Box(
             modifier = Modifier
                 .constrainAs(informationButton) {
@@ -99,10 +112,39 @@ fun TimeoutOption(onInformationRequested: (String) -> Unit, setTimeout: (UInt?) 
                 }
         ) {
             MoreInformationButton {
-                onInformationRequested(context.getString(R.string.timeout_info))
+                onHelpRequested(help)
             }
         }
     }
+}
+
+@Composable
+fun UIntSetting(
+    settingName: String,
+    default: UInt,
+    help: String,
+    onHelpRequested: (String) -> Unit,
+    sharedPreferences: SharedPreferences,
+    sharedPrefsName: String,
+    min: UInt = 0u,
+    max: UInt = UInt.MAX_VALUE
+) {
+    UIntSettingBase(
+        settingName,
+        default.toString(),
+        help,
+        { onHelpRequested(it) },
+        {
+            if (it != null) {
+                sharedPreferences.edit { putInt(sharedPrefsName, it.toInt()) }
+            } else {
+                sharedPreferences.edit { remove(sharedPrefsName) }
+            }
+        },
+        min,
+        max,
+        sharedPreferences.getInt(sharedPrefsName, default.toInt()).toUInt()
+    )
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -111,7 +153,7 @@ fun TimeoutOption(onInformationRequested: (String) -> Unit, setTimeout: (UInt?) 
 fun TimeoutOptionPreview() {
     ScanBridgeTheme {
         Scaffold {
-            TimeoutOption({}, {})
+            UIntSettingBase("Timeout", "25", "Timeout", {}, {}, 0u, 100u)
         }
     }
 }

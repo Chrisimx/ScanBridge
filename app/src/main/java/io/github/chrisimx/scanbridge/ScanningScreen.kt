@@ -21,6 +21,7 @@ package io.github.chrisimx.scanbridge
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -258,7 +259,10 @@ fun doPdfExport(scanningViewModel: ScanningScreenViewModel, context: Context, on
 
     var pageCounter = 0
 
-    val chunks = scanningViewModel.scanningScreenData.currentScansState.chunked(50)
+    val sharedPrefs = context.getSharedPreferences("scanbridge", MODE_PRIVATE)
+    val chunkSize = sharedPrefs.getInt("chunk_size_pdf_export", 50)
+
+    val chunks = scanningViewModel.scanningScreenData.currentScansState.chunked(chunkSize)
 
     chunks.forEachIndexed { index, chunk ->
         val pdfFile = File(

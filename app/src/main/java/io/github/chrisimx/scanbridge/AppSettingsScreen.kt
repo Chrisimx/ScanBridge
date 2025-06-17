@@ -57,7 +57,7 @@ import io.github.chrisimx.scanbridge.logs.FileLogger
 import io.github.chrisimx.scanbridge.uicomponents.TitledCard
 import io.github.chrisimx.scanbridge.uicomponents.dialog.SimpleTextDialog
 import io.github.chrisimx.scanbridge.uicomponents.settings.MoreInformationButton
-import io.github.chrisimx.scanbridge.uicomponents.settings.TimeoutOption
+import io.github.chrisimx.scanbridge.uicomponents.settings.UIntSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
 import java.io.BufferedWriter
 import java.io.File
@@ -339,16 +339,26 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 { automaticCleanup = it }
             )
 
-            TimeoutOption(
+            // Timeout setting
+            UIntSetting(
+                stringResource(R.string.timeout),
+                default = 25u,
+                stringResource(R.string.timeout_info),
                 { information = it },
-                {
-                    if (it != null) {
-                        sharedPreferences.edit().putInt("scanning_response_timeout", it.toInt()).apply()
-                    } else {
-                        sharedPreferences.edit().remove("scanning_response_timeout").apply()
-                    }
-                },
-                sharedPreferences.getInt("scanning_response_timeout", 25).toUInt()
+                sharedPreferences,
+                sharedPrefsName = "scanning_response_timeout"
+            )
+
+            // PDF chunk size setting
+            UIntSetting(
+                stringResource(R.string.pdf_export_max_pages_per_pdf),
+                50u,
+                stringResource(R.string.pdf_export_setting_info),
+                { information = it },
+                sharedPreferences,
+                sharedPrefsName = "chunk_size_pdf_export",
+                min = 1u,
+                max = UInt.MAX_VALUE
             )
         }
 
