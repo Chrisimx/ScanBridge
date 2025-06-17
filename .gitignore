@@ -12,3 +12,6 @@ testConfig.properties
 .kotlin
 cache
 app/src/androidTest/native-libs
+/kls_database.db
+/app/debug
+/app/release
