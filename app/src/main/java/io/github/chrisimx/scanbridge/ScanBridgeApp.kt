@@ -24,8 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
 import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import io.github.chrisimx.scanbridge.uicomponents.CrashFileHandler
-import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
-import io.github.chrisimx.scanbridge.util.doTempFilesExist
 
 @Composable
 fun ScanBridgeApp() {
@@ -34,10 +32,6 @@ fun ScanBridgeApp() {
         val context = LocalContext.current
 
         ScanBridgeNavHost(navController)
-
-        if (doTempFilesExist(context.filesDir)) {
-            TemporaryFileHandler()
-        }
 
         CrashFileHandler()
     }

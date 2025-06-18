@@ -28,6 +28,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
+import io.github.chrisimx.scanbridge.util.doTempFilesExist
 import kotlinx.serialization.Serializable
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import timber.log.Timber
@@ -48,7 +50,13 @@ fun ScanBridgeNavHost(navController: NavHostController) {
         navController = navController,
         startDestination = StartUpScreenRoute
     ) {
-        composable<StartUpScreenRoute> { StartupScreen(navController) }
+        composable<StartUpScreenRoute> {
+            StartupScreen(navController)
+
+            if (doTempFilesExist(context.filesDir)) {
+                TemporaryFileHandler()
+            }
+        }
         composable<ScannerRoute> { backStackEntry ->
             val scannerRoute: ScannerRoute = backStackEntry.toRoute()
             val debug = sharedPreferences.getBoolean("write_debug", false)
