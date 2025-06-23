@@ -33,16 +33,17 @@ private const val TAG = "ScannerDiscovery"
 
 data class DiscoveredScanner(val name: String, val addresses: List<String>)
 
-class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>) :
-    NsdManager.DiscoveryListener {
+class ScannerDiscovery(
+    val nsdManager: NsdManager,
+    val isSecure: Boolean,
+    val statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>
+) : NsdManager.DiscoveryListener {
 
-    // Called as soon as service discovery begins.
     override fun onDiscoveryStarted(regType: String) {
         Timber.i("Service discovery started")
     }
 
     override fun onServiceFound(service: NsdServiceInfo) {
-        // A service was found! Do something with it.
         Timber
             .d(
                 "Service (${service.hashCode()}) discovery success ${if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) service.hostAddresses else service.host} ${service.serviceType} ${service.serviceName} ${service.port}"
@@ -53,9 +54,13 @@ class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: Snaps
             Timber.d("Ignored service. Got it already")
             return
         }
-        if (service.serviceType != "_uscan._tcp.") {
+        if (!isSecure && service.serviceType != "_uscan._tcp.") {
             return
         }
+        if (isSecure && service.serviceType != "_uscans._tcp.") {
+            return
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.TIRAMISU) >= 7) {
             val serviceInfoCallback =
                 object : NsdManager.ServiceInfoCallback {
@@ -89,7 +94,7 @@ class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: Snaps
                                     .host(sanitizedURL)
                                     .port(p0.port)
                                     .encodedPath(rs)
-                                    .scheme("http")
+                                    .scheme(if (isSecure) "https" else "http")
                                     .build()
                             } catch (e: Exception) {
                                 Timber.tag(TAG).e("Couldn't built address from: ${address.hostAddress} Exception: $e")
@@ -156,8 +161,6 @@ class ScannerDiscovery(val nsdManager: NsdManager, val statefulScannerMap: Snaps
     }
 
     override fun onServiceLost(service: NsdServiceInfo) {
-        // When the network service is no longer available.
-        // Internal bookkeeping code goes here.
         Timber.i("service ${service.hashCode()} lost: $service")
     }
 

@@ -56,17 +56,20 @@ import timber.log.Timber
 
 fun startScannerDiscovery(
     context: Context,
-    scannerMap: SnapshotStateMap<String, DiscoveredScanner>
-): Optional<Pair<NsdManager, ScannerDiscovery>> {
+    scannerMap: SnapshotStateMap<String, DiscoveredScanner>,
+    scannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>
+): Optional<Pair<NsdManager, Array<ScannerDiscovery>>> {
     val service = getSystemService(context, NsdManager::class.java)
     if (service == null) {
         Timber.e("Couldn't get NsdManager service")
         return Optional.empty()
     }
-    val listener = ScannerDiscovery(service, scannerMap)
+    val listener = ScannerDiscovery(service, isSecure = false, scannerMap)
+    val listenerSecure = ScannerDiscovery(service, isSecure = true, scannerMapSecure)
     service.discoverServices("_uscan._tcp", NsdManager.PROTOCOL_DNS_SD, listener)
+    service.discoverServices("_uscans._tcp", NsdManager.PROTOCOL_DNS_SD, listenerSecure)
     Timber.i("Discovery started")
-    return Optional.of(Pair(service, listener))
+    return Optional.of(Pair(service, arrayOf(listener, listenerSecure)))
 }
 
 @Composable
@@ -74,6 +77,7 @@ fun ScannerList(
     innerPadding: PaddingValues,
     navController: NavController,
     statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
+    statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>,
     customScannerViewModel: CustomScannerViewModel
 ) {
     LazyColumn(
@@ -85,6 +89,15 @@ fun ScannerList(
         reverseLayout = true
     ) {
         statefulScannerMap.forEach {
+            val discoveredScanner = it.value
+            discoveredScanner.addresses.forEach {
+                item {
+                    FoundScannerItem(discoveredScanner.name, it, navController)
+                }
+            }
+        }
+
+        statefulScannerMapSecure.forEach {
             val discoveredScanner = it.value
             discoveredScanner.addresses.forEach {
                 item {
@@ -139,7 +152,8 @@ fun ScannerBrowser(
     navController: NavController,
     showCustomDialog: Boolean,
     setShowCustomDialog: (Boolean) -> Unit,
-    statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>
+    statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
+    statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>
 ) {
     val customScannerViewModel: CustomScannerViewModel = viewModel(
         factory = ViewModelProvider.AndroidViewModelFactory(LocalContext.current.applicationContext as Application)
@@ -150,7 +164,7 @@ fun ScannerBrowser(
         label = "ScannerList"
     ) {
         if (it) {
-            ScannerList(innerPadding, navController, statefulScannerMap, customScannerViewModel)
+            ScannerList(innerPadding, navController, statefulScannerMap, statefulScannerMapSecure, customScannerViewModel)
         } else {
             FullScreenError(
                 R.drawable.twotone_wifi_find_24,

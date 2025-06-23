@@ -78,9 +78,10 @@ fun StartupScreen(navController: NavController) {
         }
 
     val statefulScannerMap = remember { mutableStateMapOf<String, DiscoveredScanner>() }
+    val statefulScannerMapSecure = remember { mutableStateMapOf<String, DiscoveredScanner>() }
 
     DisposableEffect(Unit) {
-        val discoveryPairOptional = startScannerDiscovery(context, statefulScannerMap)
+        val discoveryPairOptional = startScannerDiscovery(context, statefulScannerMap, statefulScannerMapSecure)
 
         if (discoveryPairOptional.isEmpty) {
             return@DisposableEffect onDispose {
@@ -92,7 +93,10 @@ fun StartupScreen(navController: NavController) {
 
         onDispose {
             Timber.i("Discovery stopped")
-            discoveryPair.first.stopServiceDiscovery(discoveryPair.second)
+            for (d in discoveryPair.second) {
+                Timber.i("Stopping discovery for ${d.statefulScannerMap}")
+                discoveryPair.first.stopServiceDiscovery(d)
+            }
         }
     }
 
@@ -145,7 +149,8 @@ fun StartupScreen(navController: NavController) {
                     navController,
                     showCustomDialog,
                     { showCustomDialog = it },
-                    statefulScannerMap
+                    statefulScannerMap,
+                    statefulScannerMapSecure
                 )
                 1 -> {
                     AppSettingsScreen(innerPadding)
