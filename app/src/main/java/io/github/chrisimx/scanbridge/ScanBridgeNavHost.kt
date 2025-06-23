@@ -60,17 +60,19 @@ fun ScanBridgeNavHost(navController: NavHostController) {
         composable<ScannerRoute> { backStackEntry ->
             val scannerRoute: ScannerRoute = backStackEntry.toRoute()
             val debug = sharedPreferences.getBoolean("write_debug", false)
+            val certValidationDisabled = sharedPreferences.getBoolean("disable_cert_checks", false)
             val timeout = sharedPreferences.getInt("scanning_response_timeout", 25).toUInt()
             Timber.tag("ScanBridgeNavHost")
                 .d(
-                    "Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerURL}. Timeout is $timeout seconds, Debug is $debug"
+                    "Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerURL}. Timeout is $timeout seconds, Debug is $debug. Disabling of cert checks is $certValidationDisabled"
                 )
             ScanningScreen(
                 scannerRoute.scannerName,
                 scannerRoute.scannerURL.toHttpUrl(),
                 navController,
                 timeout,
-                debug
+                debug,
+                certValidationDisabled
             )
         }
     }

@@ -20,6 +20,7 @@
 package io.github.chrisimx.scanbridge.data.ui
 
 import androidx.lifecycle.ViewModel
+import getTrustAllTM
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
@@ -31,7 +32,8 @@ import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 
-class ScanningScreenViewModel(address: HttpUrl, timeout: UInt, withDebugInterceptor: Boolean) : ViewModel() {
+class ScanningScreenViewModel(address: HttpUrl, timeout: UInt, withDebugInterceptor: Boolean, certificateValidationDisabled: Boolean) :
+    ViewModel() {
     private val _scanningScreenData =
         ScanningScreenData(
             ESCLRequestClient(
@@ -42,6 +44,12 @@ class ScanningScreenViewModel(address: HttpUrl, timeout: UInt, withDebugIntercep
                     }
                     it.connectTimeout(timeout.toLong(), java.util.concurrent.TimeUnit.SECONDS)
                         .readTimeout(timeout.toLong(), java.util.concurrent.TimeUnit.SECONDS)
+                    if (certificateValidationDisabled) {
+                        val (socketFactory, trustManager) = getTrustAllTM()
+                        it.sslSocketFactory(socketFactory, trustManager)
+                        it.hostnameVerifier { _, _ -> true }
+                    }
+
                     it
                 }.build()
             )

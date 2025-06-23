@@ -56,6 +56,7 @@ import androidx.core.content.edit
 import io.github.chrisimx.scanbridge.logs.FileLogger
 import io.github.chrisimx.scanbridge.uicomponents.TitledCard
 import io.github.chrisimx.scanbridge.uicomponents.dialog.SimpleTextDialog
+import io.github.chrisimx.scanbridge.uicomponents.settings.CheckboxSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.MoreInformationButton
 import io.github.chrisimx.scanbridge.uicomponents.settings.UIntSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
@@ -65,70 +66,24 @@ import java.io.FileWriter
 import timber.log.Timber
 
 @Composable
-fun AutoDeleteTempFiles(
-    sharedPreferences: SharedPreferences,
-    automaticCleanup: Boolean,
-    onInformationRequested: (String) -> Unit,
-    setAutomaticCleanup: (Boolean) -> Unit
-) {
-    ConstraintLayout(
-        Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp)
-            .toggleable(
-                value = automaticCleanup,
-                onValueChange = {
-                    sharedPreferences
-                        .edit {
-                            putBoolean("auto_cleanup", it)
-                        }
-                    setAutomaticCleanup(it)
-                },
-                role = Role.Checkbox
-            )
+fun AutoDeleteTempFilesSetting(onInformationRequested: (String) -> Unit) {
+    CheckboxSetting(
+        "auto_cleanup",
+        stringResource(R.string.auto_cleanup),
+        stringResource(R.string.auto_cleanup_explanation)
     ) {
-        val (checkbox, content, informationButton) = createRefs()
+        onInformationRequested(it)
+    }
+}
 
-        Checkbox(
-            checked = automaticCleanup,
-            onCheckedChange = null,
-            modifier = Modifier
-                .constrainAs(checkbox) {
-                    start.linkTo(parent.start)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                }
-        )
-        Text(
-            text = stringResource(R.string.auto_cleanup),
-            modifier = Modifier
-                .constrainAs(content) {
-                    start.linkTo(checkbox.end, 12.dp)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    end.linkTo(informationButton.start, 12.dp)
-                    width = Dimension.fillToConstraints
-                },
-            style = MaterialTheme.typography.bodyMedium
-        )
-        val context = LocalContext.current
-        Box(
-            modifier = Modifier
-                .constrainAs(informationButton) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    end.linkTo(parent.end)
-                }
-        ) {
-            MoreInformationButton {
-                onInformationRequested(
-                    context.getString(
-                        R.string.auto_cleanup_explanation,
-                        context.getString(R.string.app_name)
-                    )
-                )
-            }
-        }
+@Composable
+fun DisableCertChecksSetting(onInformationRequested: (String) -> Unit) {
+    CheckboxSetting(
+        "disable_cert_checks",
+        stringResource(R.string.disable_cert_checks),
+        stringResource(R.string.disable_cert_checks_desc)
+    ) {
+        onInformationRequested(it)
     }
 }
 
@@ -294,15 +249,6 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
         context.getSharedPreferences("scanbridge", MODE_PRIVATE)
     }
 
-    var automaticCleanup by remember {
-        mutableStateOf(
-            sharedPreferences.getBoolean(
-                "auto_cleanup",
-                false
-            )
-        )
-    }
-
     var debugLog by remember {
         mutableStateOf(
             sharedPreferences.getBoolean(
@@ -332,12 +278,13 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
         TitledCard(
             title = stringResource(R.string.settings)
         ) {
-            AutoDeleteTempFiles(
-                sharedPreferences,
-                automaticCleanup,
-                { information = it },
-                { automaticCleanup = it }
-            )
+            AutoDeleteTempFilesSetting {
+                information = it
+            }
+
+            DisableCertChecksSetting {
+                information = it
+            }
 
             // Timeout setting
             UIntSetting(

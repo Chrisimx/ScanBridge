@@ -657,11 +657,13 @@ fun ScanningScreen(
     navController: NavHostController,
     timeout: UInt,
     withDebug: Boolean,
+    certificateValidationDisabled: Boolean,
     scanningViewModel: ScanningScreenViewModel = viewModel {
         ScanningScreenViewModel(
             address = scannerAddress,
             timeout = timeout,
-            withDebugInterceptor = withDebug
+            withDebugInterceptor = withDebug,
+            certificateValidationDisabled = certificateValidationDisabled
         )
     }
 ) {
