@@ -3,8 +3,10 @@ package io.github.chrisimx.scanbridge.data.model
 import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.Millimeters
 import io.github.chrisimx.esclkt.millimeters
+import kotlinx.serialization.Serializable
 
 // Paper format class
+@Serializable
 data class PaperFormat(val name: String, val width: LengthUnit, val height: LengthUnit)
 
 fun loadDefaultFormats(): List<PaperFormat> {

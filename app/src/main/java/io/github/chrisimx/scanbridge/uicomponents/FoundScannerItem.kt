@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.ScannerRoute
+import java.util.*
 import timber.log.Timber
 
 @Composable
@@ -52,7 +53,8 @@ fun FoundScannerItem(name: String, address: String, navController: NavController
             .defaultMinSize(minHeight = 60.dp)
             .padding(10.dp),
         onClick = {
-            navController.navigate(route = ScannerRoute(name, address))
+            val sessionID = UUID.randomUUID().toString()
+            navController.navigate(route = ScannerRoute(name, address, sessionID))
         }
     ) {
         Row(

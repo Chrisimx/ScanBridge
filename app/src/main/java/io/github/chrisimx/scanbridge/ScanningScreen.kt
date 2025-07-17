@@ -20,6 +20,7 @@
 package io.github.chrisimx.scanbridge
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
@@ -658,12 +659,16 @@ fun ScanningScreen(
     timeout: UInt,
     withDebug: Boolean,
     certificateValidationDisabled: Boolean,
+    sessionID: String,
+    application: Application,
     scanningViewModel: ScanningScreenViewModel = viewModel {
         ScanningScreenViewModel(
+            application = application,
             address = scannerAddress,
             timeout = timeout,
             withDebugInterceptor = withDebug,
-            certificateValidationDisabled = certificateValidationDisabled
+            certificateValidationDisabled = certificateValidationDisabled,
+            sessionID = sessionID
         )
     }
 ) {
@@ -855,7 +860,10 @@ fun ScanningScreen(
 
                     scanningViewModel.scanningScreenData.currentScansState.clear()
                     scanningViewModel.setConfirmDialogShown(false)
-                    navController.popBackStack()
+                    navController.navigate(StartUpScreenRoute) {
+                        popUpTo(0) {inclusive = true}
+                        launchSingleTop = true
+                    }
                 }
             )
         }

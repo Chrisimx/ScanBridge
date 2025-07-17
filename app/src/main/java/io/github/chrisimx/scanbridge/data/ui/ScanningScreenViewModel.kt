@@ -19,21 +19,38 @@
 
 package io.github.chrisimx.scanbridge.data.ui
 
+import android.app.Application
+import android.content.Context
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.application
 import getTrustAllTM
 import io.github.chrisimx.esclkt.ESCLRequestClient
+import io.github.chrisimx.esclkt.Inches
+import io.github.chrisimx.esclkt.LengthUnit
+import io.github.chrisimx.esclkt.Millimeters
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
+import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
+import io.github.chrisimx.scanbridge.data.model.Session
 import io.github.chrisimx.scanbridge.logs.DebugInterceptor
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.json.encodeToStream
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
+import timber.log.Timber
 
-class ScanningScreenViewModel(address: HttpUrl, timeout: UInt, withDebugInterceptor: Boolean, certificateValidationDisabled: Boolean) :
-    ViewModel() {
+class ScanningScreenViewModel(application: Application, address: HttpUrl, timeout: UInt, withDebugInterceptor: Boolean, certificateValidationDisabled: Boolean, sessionID: String) :
+    AndroidViewModel(application) {
     private val _scanningScreenData =
         ScanningScreenData(
             ESCLRequestClient(
@@ -52,13 +69,27 @@ class ScanningScreenViewModel(address: HttpUrl, timeout: UInt, withDebugIntercep
 
                     it
                 }.build()
-            )
+            ),
+            sessionID
         )
     val scanningScreenData: ImmutableScanningScreenData
         get() = _scanningScreenData.toImmutable()
 
+    val json = Json {
+        serializersModule = SerializersModule {
+            polymorphic(LengthUnit::class) {
+                subclass(Inches::class)
+                subclass(Millimeters::class)
+                subclass(ThreeHundredthsOfInch::class)
+            }
+        }
+        classDiscriminator = "type"
+        prettyPrint = false
+    }
+
     fun addTempFile(file: File) {
         _scanningScreenData.createdTempFiles.add(file)
+        saveSessionFile()
     }
 
     fun setShowExportOptionsPopup(show: Boolean) {
@@ -71,6 +102,7 @@ class ScanningScreenViewModel(address: HttpUrl, timeout: UInt, withDebugIntercep
 
     fun removeTempFile(index: Int) {
         _scanningScreenData.createdTempFiles.removeAt(index)
+        saveSessionFile()
     }
 
     fun setLoadingText(stringRes: Int?) {
@@ -107,19 +139,71 @@ class ScanningScreenViewModel(address: HttpUrl, timeout: UInt, withDebugIntercep
 
     fun setScannerCapabilities(caps: ScannerCapabilities) {
         _scanningScreenData.capabilities.value = caps
-        _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
-            ScanSettingsComposableData(
-                caps.calculateDefaultESCLScanSettingsState(),
-                caps
+        val storedSession = loadSessionFile()
+
+        if (storedSession != null) {
+            scanningScreenData.currentScansState.addAll(storedSession.scannedPages)
+            _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
+                ScanSettingsComposableData(storedSession.scanSettings?.toMutable() ?: caps.calculateDefaultESCLScanSettingsState(), caps)
             )
-        )
+        } else {
+            _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
+                ScanSettingsComposableData(
+                    caps.calculateDefaultESCLScanSettingsState(),
+                    caps
+                )
+            )
+            val sessionFile = application.applicationInfo.dataDir + "/files/" + scanningScreenData.sessionID + ".session"
+            addTempFile(File(sessionFile))
+            saveSessionFile()
+        }
     }
 
     fun addScan(path: String, settings: ScanSettings) {
         _scanningScreenData.stateCurrentScans.add(Pair(path, settings))
+        saveSessionFile()
     }
     fun addScanAtIndex(path: String, settings: ScanSettings, index: Int) {
         _scanningScreenData.stateCurrentScans.add(index, Pair(path, settings))
+        saveSessionFile()
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    fun saveSessionFile(): String {
+        val path = application.applicationInfo.dataDir + "/files/" + scanningScreenData.sessionID + ".session"
+        val file = File(path)
+
+        val currentSessionState = Session(
+            scanningScreenData.sessionID,
+            scanningScreenData.currentScansState.toList(),
+            scanningScreenData.scanSettingsVM?.getMutableScanSettingsComposableData()?.scanSettingsState?.toStateless(),
+            scanningScreenData.createdTempFiles.map { it.absolutePath }
+        )
+
+        val fos = file.outputStream()
+
+        json.encodeToStream(currentSessionState, fos)
+        fos.close()
+        return path
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    fun loadSessionFile(): Session? {
+        val path = application.applicationInfo.dataDir + "/files/" + scanningScreenData.sessionID + ".session"
+        val file = File(path)
+
+        if (!file.exists()) {
+            Timber.d("Could not find session file at $path")
+            return null
+        }
+
+        val inputStream = file.inputStream()
+
+        val storedSession = json.decodeFromStream<Session>(inputStream)
+
+        inputStream.close()
+
+        return storedSession
     }
 
     fun swapTwoPages(index1: Int, index2: Int) {
@@ -134,6 +218,7 @@ class ScanningScreenViewModel(address: HttpUrl, timeout: UInt, withDebugIntercep
         _scanningScreenData.stateCurrentScans[index1] =
             _scanningScreenData.stateCurrentScans[index2]
         _scanningScreenData.stateCurrentScans[index2] = tmp
+        saveSessionFile()
     }
 
     fun removeScanAtIndex(index: Int) {
@@ -141,5 +226,6 @@ class ScanningScreenViewModel(address: HttpUrl, timeout: UInt, withDebugIntercep
             return
         }
         _scanningScreenData.stateCurrentScans.removeAt(index)
+        saveSessionFile()
     }
 }

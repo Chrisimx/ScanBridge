@@ -16,7 +16,9 @@ import io.github.chrisimx.esclkt.InputSourceCaps
 import io.github.chrisimx.esclkt.ScanIntentData
 import io.github.chrisimx.esclkt.ScanRegions
 import io.github.chrisimx.esclkt.ScanSettings
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class MutableESCLScanSettingsState(
     private var versionState: MutableState<String>,
     private var intentState: MutableState<ScanIntentData?> = mutableStateOf(null),
@@ -110,10 +112,43 @@ data class MutableESCLScanSettingsState(
         feedDirectionState,
         blankPageDetectionAndRemovalState
     )
+
+    fun toStateless(): StatelessImmutableESCLScanSettingsState = StatelessImmutableESCLScanSettingsState(
+        versionState.value,
+        intentState.value,
+        scanRegionsState.value?.toStateless(),
+        documentFormatExtState.value,
+        contentTypeState.value,
+        inputSourceState.value,
+        xResolutionState.value,
+        yResolutionState.value,
+        colorModeState.value,
+        colorSpaceState.value,
+        mediaTypeState.value,
+        ccdChannelState.value,
+        binaryRenderingState.value,
+        duplexState.value,
+        numberOfPagesState.value,
+        brightnessState.value,
+        compressionFactorState.value,
+        contrastState.value,
+        gammaState.value,
+        highlightState.value,
+        noiseRemovalState.value,
+        shadowState.value,
+        sharpenState.value,
+        thresholdState.value,
+        contextIDState.value,
+        blankPageDetectionState.value,
+        feedDirectionState.value,
+        blankPageDetectionAndRemovalState.value
+    )
+
     fun toESCLKtScanSettings(selectedInputSourceCaps: InputSourceCaps): ScanSettings =
         toImmutable().toESCLKtScanSettings(selectedInputSourceCaps)
 }
 
+@Serializable
 data class ImmutableESCLScanSettingsState(
     val versionState: State<String>,
     val intentState: State<ScanIntentData?>,
@@ -211,4 +246,70 @@ data class ImmutableESCLScanSettingsState(
             blankPageDetectionAndRemoval = blankPageDetectionAndRemoval
         )
     }
+}
+
+@Serializable
+data class StatelessImmutableESCLScanSettingsState(
+    val version: String,
+    val intent: ScanIntentData?,
+    val scanRegions: StatelessImmutableScanRegion?,
+    val documentFormatExt: String?,
+    val contentType: ContentType?,
+    val inputSource: InputSource?,
+    val xResolution: UInt?,
+    val yResolution: UInt?,
+    val colorMode: ColorMode?,
+    val colorSpace: String?,
+    val mediaType: String?,
+    val ccdChannel: CcdChannel?,
+    val binaryRendering: BinaryRendering?,
+    val duplex: Boolean?,
+    val numberOfPages: UInt?,
+    val brightness: UInt?,
+    val compressionFactor: UInt?,
+    val contrast: UInt?,
+    val gamma: UInt?,
+    val highlight: UInt?,
+    val noiseRemoval: UInt?,
+    val shadow: UInt?,
+    val sharpen: UInt?,
+    val threshold: UInt?,
+    val contextID: String?,
+    val blankPageDetection: Boolean?,
+    val feedDirection: FeedDirection?,
+    val blankPageDetectionAndRemoval: Boolean?
+) {
+    fun toMutable(): MutableESCLScanSettingsState {
+        return MutableESCLScanSettingsState(
+            mutableStateOf(version),
+            mutableStateOf(intent),
+            mutableStateOf(scanRegions?.toMutable()),
+            mutableStateOf(documentFormatExt),
+            mutableStateOf(contentType),
+            mutableStateOf(inputSource),
+            mutableStateOf(xResolution),
+            mutableStateOf(yResolution),
+            mutableStateOf(colorMode),
+            mutableStateOf(colorSpace),
+            mutableStateOf(mediaType),
+            mutableStateOf(ccdChannel),
+            mutableStateOf(binaryRendering),
+            mutableStateOf(duplex),
+            mutableStateOf(numberOfPages),
+            mutableStateOf(brightness),
+            mutableStateOf(compressionFactor),
+            mutableStateOf(contrast),
+            mutableStateOf(gamma),
+            mutableStateOf(highlight),
+            mutableStateOf(noiseRemoval),
+            mutableStateOf(shadow),
+            mutableStateOf(sharpen),
+            mutableStateOf(threshold),
+            mutableStateOf(contextID),
+            mutableStateOf(blankPageDetection),
+            mutableStateOf(feedDirection),
+            mutableStateOf(blankPageDetectionAndRemoval)
+        )
+    }
+
 }

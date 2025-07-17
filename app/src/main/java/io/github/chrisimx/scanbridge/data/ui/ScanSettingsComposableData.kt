@@ -32,9 +32,13 @@ import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.scanbridge.data.model.ImmutableESCLScanSettingsState
 import io.github.chrisimx.scanbridge.data.model.MutableESCLScanSettingsState
 import io.github.chrisimx.scanbridge.data.model.PaperFormat
+import io.github.chrisimx.scanbridge.data.model.StatelessImmutableESCLScanSettingsState
 import io.github.chrisimx.scanbridge.data.model.loadDefaultFormats
 import io.github.chrisimx.scanbridge.util.getInputSourceOptions
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSettingsState, val capabilities: ScannerCapabilities) {
     val inputSourceOptions: List<InputSource> =
         capabilities.getInputSourceOptions()
@@ -82,8 +86,23 @@ data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSett
         intentOptionsState,
         supportedScanResolutionsState
     )
+
+    fun toStateless(): StatelessImmutableScanSettingsComposableData = StatelessImmutableScanSettingsComposableData(
+        scanSettingsState.toStateless(),
+        capabilities,
+        inputSourceOptions,
+        paperFormats,
+        duplexAdfSupported,
+        widthTextFieldState.value,
+        heightTextFieldState.value,
+        customMenuEnabledState.value,
+        selectedInputSourceCapabilitiesState.value,
+        intentOptionsState.value,
+        supportedScanResolutionsState.value
+    )
 }
 
+@Serializable
 data class ImmutableScanSettingsComposableData(
     val scanSettingsState: ImmutableESCLScanSettingsState,
     val capabilities: ScannerCapabilities,
@@ -104,3 +123,18 @@ data class ImmutableScanSettingsComposableData(
     val intentOptions by intentOptionsState
     val supportedScanResolutions by supportedScanResolutionsState
 }
+
+@Serializable
+data class StatelessImmutableScanSettingsComposableData(
+    val scanSettings: StatelessImmutableESCLScanSettingsState,
+    val capabilities: ScannerCapabilities,
+    val inputSourceOptions: List<InputSource>,
+    val paperFormats: List<PaperFormat>,
+    val duplexAdfSupported: Boolean,
+    val widthTextField: String,
+    val heightTextField: String,
+    val customMenuEnabled: Boolean,
+    val selectedInputSourceCapabilities: InputSourceCaps,
+    val intentOptions: List<ScanIntentData>,
+    val supportedScanResolutions: List<DiscreteResolution>
+)

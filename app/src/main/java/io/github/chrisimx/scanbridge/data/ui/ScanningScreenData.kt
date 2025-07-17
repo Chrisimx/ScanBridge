@@ -33,6 +33,7 @@ import java.io.File
 
 data class ScanningScreenData(
     val esclClient: ESCLRequestClient,
+    val sessionID: String,
     val confirmDialogShown: MutableState<Boolean> = mutableStateOf(false),
     val confirmPageDeleteDialogShown: MutableState<Boolean> = mutableStateOf(false),
     val errorString: MutableState<String?> = mutableStateOf(null),
@@ -51,6 +52,7 @@ data class ScanningScreenData(
 ) {
     fun toImmutable() = ImmutableScanningScreenData(
         esclClient,
+        sessionID,
         confirmDialogShown,
         confirmPageDeleteDialogShown,
         errorString,
@@ -69,6 +71,7 @@ data class ScanningScreenData(
 
 data class ImmutableScanningScreenData(
     val esclClient: ESCLRequestClient,
+    val sessionID: String,
     private val confirmDialogShownState: State<Boolean>,
     private val confirmPageDeleteDialogShownState: State<Boolean>,
     private val errorStringState: State<String?>,

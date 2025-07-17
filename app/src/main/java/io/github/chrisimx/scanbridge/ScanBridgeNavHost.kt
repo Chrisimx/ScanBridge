@@ -19,36 +19,59 @@
 
 package io.github.chrisimx.scanbridge
 
+import android.app.Application
 import android.content.Context.MODE_PRIVATE
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
 import io.github.chrisimx.scanbridge.util.doTempFilesExist
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import timber.log.Timber
 
 @Serializable
-object StartUpScreenRoute
+sealed interface BaseRoute
 
 @Serializable
-data class ScannerRoute(val scannerName: String, val scannerURL: String)
+@SerialName("StartUpScreenRoute")
+object StartUpScreenRoute : BaseRoute
+
+@Serializable
+@SerialName("ScannerRoute")
+data class ScannerRoute(val scannerName: String, val scannerURL: String, val sessionID: String) : BaseRoute
+
+fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
+    Timber.d("Route changed to: ${destination.route}")
+    return when (destination.route) {
+        "StartUpScreenRoute" -> StartUpScreenRoute
+        "ScannerRoute/{scannerName}/{scannerURL}/{sessionID}" -> {
+            val scannerName = arguments?.getString("scannerName") ?: return null
+            val scannerURL = arguments?.getString("scannerURL") ?: return null
+            val sessionID = arguments?.getString("sessionID") ?: return null
+            ScannerRoute(scannerName, scannerURL, sessionID)
+        }
+        else -> null
+    }
+}
 
 @Composable
-fun ScanBridgeNavHost(navController: NavHostController) {
+fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("scanbridge", MODE_PRIVATE)
 
     NavHost(
         modifier = Modifier.testTag("root_node"),
         navController = navController,
-        startDestination = StartUpScreenRoute
+        startDestination = startDestination
     ) {
         composable<StartUpScreenRoute> {
             StartupScreen(navController)
@@ -64,7 +87,7 @@ fun ScanBridgeNavHost(navController: NavHostController) {
             val timeout = sharedPreferences.getInt("scanning_response_timeout", 25).toUInt()
             Timber.tag("ScanBridgeNavHost")
                 .d(
-                    "Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerURL}. Timeout is $timeout seconds, Debug is $debug. Disabling of cert checks is $certValidationDisabled"
+                    "Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerURL}. Timeout is $timeout seconds, Debug is $debug. Disabling of cert checks is $certValidationDisabled. Session id is ${scannerRoute.sessionID}"
                 )
             ScanningScreen(
                 scannerRoute.scannerName,
@@ -72,7 +95,9 @@ fun ScanBridgeNavHost(navController: NavHostController) {
                 navController,
                 timeout,
                 debug,
-                certValidationDisabled
+                certValidationDisabled,
+                scannerRoute.sessionID,
+                context.applicationContext as Application,
             )
         }
     }
