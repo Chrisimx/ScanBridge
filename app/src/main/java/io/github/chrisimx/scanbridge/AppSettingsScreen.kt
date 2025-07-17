@@ -66,17 +66,6 @@ import java.io.FileWriter
 import timber.log.Timber
 
 @Composable
-fun AutoDeleteTempFilesSetting(onInformationRequested: (String) -> Unit) {
-    CheckboxSetting(
-        "auto_cleanup",
-        stringResource(R.string.auto_cleanup),
-        stringResource(R.string.auto_cleanup_explanation)
-    ) {
-        onInformationRequested(it)
-    }
-}
-
-@Composable
 fun DisableCertChecksSetting(onInformationRequested: (String) -> Unit) {
     CheckboxSetting(
         "disable_cert_checks",
@@ -278,9 +267,6 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
         TitledCard(
             title = stringResource(R.string.settings)
         ) {
-            AutoDeleteTempFilesSetting {
-                information = it
-            }
 
             DisableCertChecksSetting {
                 information = it

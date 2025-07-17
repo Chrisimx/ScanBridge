@@ -51,8 +51,6 @@
     <string name="leave_text">Verlassen</string>
     <string name="app_icon_desc">Appsymbol</string>
     <string name="debug_build">Debug</string>
-    <string name="auto_cleanup">Nicht fragen vor dem Löschen von übrig gebliebenen Dateien</string>
-    <string name="auto_cleanup_explanation">Wenn du %1$s aus der Appübersicht schließt (nicht die Scanoberfläche innerhalb der App schließt und den Verlassen-Dialog bestätigst), hat %1$s keine Möglichkeit, dich zu fragen, wie mit den temporären Scan-Dateien (z. B. gescannten Seiten und PDF-Exporten) verfahren werden soll. Daher bleiben diese in den App-Dateien erhalten.\n\nDiese Option löscht diese Dateien automatisch bei jedem App-Start. Das bedeutet jedoch, dass diese Scan-Dateien (die du möglicherweise noch nicht exportiert hast) bei jedem App-Start unwiderruflich gelöscht werden, ohne dass du erneut gefragt wirst. Wenn diese Option nicht aktiviert ist (Standardeinstellung), fragt %1$s jedes Mal nach, ob du die Scans und Exporte aus den App-Dateien löschen möchtest.</string>
     <string name="auto_cleanup_info_desc">Informationen zu dieser Einstellung</string>
     <string name="crash_log_file_exists">Absturzprotokoll gefunden</string>
     <string name="crash_log_was_found">Ein Absturzprotokoll wurde gefunden. Dies ist der Fehler der zum Absturz führte. Bitte füge ihn deinem Bugreport an:</string>

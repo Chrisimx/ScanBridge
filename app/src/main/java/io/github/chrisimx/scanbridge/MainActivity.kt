@@ -73,10 +73,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        if (sharedPreferences.getBoolean("auto_cleanup", false)) {
-            cleanUpScansAndExportFiles()
-        }
-
         cleanUpCacheFiles()
 
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this))

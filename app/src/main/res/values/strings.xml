@@ -51,8 +51,6 @@
     <string name="leave_text">Leave</string>
     <string name="app_icon_desc">App icon</string>
     <string name="debug_build">Debug</string>
-    <string name="auto_cleanup">Do not ask before deleting old scan files</string>
-    <string name="auto_cleanup_explanation">When you close %1$s from the task drawer (not closing the scanning screen from within the app and confirming the exit dialog) %1$s has no opportunity to ask you how it should handle the temporary scan files (e.g. scanned pages and PDF exports). Therefore, they remain in the app files.\n\nThis option automatically cleans these files up on every app start. However, this means that these scan files (which you might not have exported) get irreversibly deleted on every app start without asking you again. When this option is not checked (default) %1$s asks every time to confirm that you want to delete the scans and exports from the app files.</string>
     <string name="auto_cleanup_info_desc">Info button for the setting</string>
     <string name="crash_log_file_exists">Crash log file exists</string>
     <string name="crash_log_was_found">A crash log was found. This is the exception which led to the crash. Please attach this to your bug report:</string>
