@@ -690,6 +690,14 @@ fun ScanningScreen(
     }
 
     if (!isLoaded) {
+
+        BackHandler {
+            navController.navigate(StartUpScreenRoute) {
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+
         Scaffold { innerPadding ->
             if (!isError) {
                 LaunchedEffect(Unit) {
