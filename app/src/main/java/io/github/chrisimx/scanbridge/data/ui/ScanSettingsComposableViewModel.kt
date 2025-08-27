@@ -30,10 +30,7 @@ class ScanSettingsComposableViewModel(private val _scanSettingsComposableData: S
     val scanSettingsComposableData: ImmutableScanSettingsComposableData
         get() = _scanSettingsComposableData.toImmutable()
 
-
-    fun getMutableScanSettingsComposableData(): ScanSettingsComposableData {
-        return _scanSettingsComposableData
-    }
+    fun getMutableScanSettingsComposableData(): ScanSettingsComposableData = _scanSettingsComposableData
 
     fun setDuplex(duplex: Boolean) {
         _scanSettingsComposableData.scanSettingsState.duplex = duplex

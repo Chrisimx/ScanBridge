@@ -71,14 +71,12 @@ data class StatelessImmutableScanRegion(
         )
     }
 
-    fun toMutable(): MutableScanRegionState {
-        return MutableScanRegionState(
-            mutableStateOf(height),
-            mutableStateOf(width),
-            mutableStateOf(xOffset),
-            mutableStateOf(yOffset)
-        )
-    }
+    fun toMutable(): MutableScanRegionState = MutableScanRegionState(
+        mutableStateOf(height),
+        mutableStateOf(width),
+        mutableStateOf(xOffset),
+        mutableStateOf(yOffset)
+    )
 }
 
 @Serializable
@@ -95,6 +93,7 @@ data class MutableScanRegionState(
     var yOffset by yOffsetState
 
     fun toImmutable(): ImmutableScanRegionState = ImmutableScanRegionState(heightState, widthState, xOffsetState, yOffsetState)
-    fun toStateless(): StatelessImmutableScanRegion = StatelessImmutableScanRegion(heightState.value, widthState.value, xOffsetState.value, yOffsetState.value)
+    fun toStateless(): StatelessImmutableScanRegion =
+        StatelessImmutableScanRegion(heightState.value, widthState.value, xOffsetState.value, yOffsetState.value)
     fun toESCLScanRegion(selectedInputSourceCaps: InputSourceCaps): ScanRegion = toImmutable().toESCLScanRegion(selectedInputSourceCaps)
 }

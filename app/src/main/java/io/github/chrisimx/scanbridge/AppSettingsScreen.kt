@@ -267,7 +267,6 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
         TitledCard(
             title = stringResource(R.string.settings)
         ) {
-
             DisableCertChecksSetting {
                 information = it
             }

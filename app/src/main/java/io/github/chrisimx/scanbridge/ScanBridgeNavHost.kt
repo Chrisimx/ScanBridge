@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -97,7 +96,7 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
                 debug,
                 certValidationDisabled,
                 scannerRoute.sessionID,
-                context.applicationContext as Application,
+                context.applicationContext as Application
             )
         }
     }

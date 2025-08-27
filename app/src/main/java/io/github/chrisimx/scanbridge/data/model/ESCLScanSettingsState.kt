@@ -279,37 +279,34 @@ data class StatelessImmutableESCLScanSettingsState(
     val feedDirection: FeedDirection?,
     val blankPageDetectionAndRemoval: Boolean?
 ) {
-    fun toMutable(): MutableESCLScanSettingsState {
-        return MutableESCLScanSettingsState(
-            mutableStateOf(version),
-            mutableStateOf(intent),
-            mutableStateOf(scanRegions?.toMutable()),
-            mutableStateOf(documentFormatExt),
-            mutableStateOf(contentType),
-            mutableStateOf(inputSource),
-            mutableStateOf(xResolution),
-            mutableStateOf(yResolution),
-            mutableStateOf(colorMode),
-            mutableStateOf(colorSpace),
-            mutableStateOf(mediaType),
-            mutableStateOf(ccdChannel),
-            mutableStateOf(binaryRendering),
-            mutableStateOf(duplex),
-            mutableStateOf(numberOfPages),
-            mutableStateOf(brightness),
-            mutableStateOf(compressionFactor),
-            mutableStateOf(contrast),
-            mutableStateOf(gamma),
-            mutableStateOf(highlight),
-            mutableStateOf(noiseRemoval),
-            mutableStateOf(shadow),
-            mutableStateOf(sharpen),
-            mutableStateOf(threshold),
-            mutableStateOf(contextID),
-            mutableStateOf(blankPageDetection),
-            mutableStateOf(feedDirection),
-            mutableStateOf(blankPageDetectionAndRemoval)
-        )
-    }
-
+    fun toMutable(): MutableESCLScanSettingsState = MutableESCLScanSettingsState(
+        mutableStateOf(version),
+        mutableStateOf(intent),
+        mutableStateOf(scanRegions?.toMutable()),
+        mutableStateOf(documentFormatExt),
+        mutableStateOf(contentType),
+        mutableStateOf(inputSource),
+        mutableStateOf(xResolution),
+        mutableStateOf(yResolution),
+        mutableStateOf(colorMode),
+        mutableStateOf(colorSpace),
+        mutableStateOf(mediaType),
+        mutableStateOf(ccdChannel),
+        mutableStateOf(binaryRendering),
+        mutableStateOf(duplex),
+        mutableStateOf(numberOfPages),
+        mutableStateOf(brightness),
+        mutableStateOf(compressionFactor),
+        mutableStateOf(contrast),
+        mutableStateOf(gamma),
+        mutableStateOf(highlight),
+        mutableStateOf(noiseRemoval),
+        mutableStateOf(shadow),
+        mutableStateOf(sharpen),
+        mutableStateOf(threshold),
+        mutableStateOf(contextID),
+        mutableStateOf(blankPageDetection),
+        mutableStateOf(feedDirection),
+        mutableStateOf(blankPageDetectionAndRemoval)
+    )
 }

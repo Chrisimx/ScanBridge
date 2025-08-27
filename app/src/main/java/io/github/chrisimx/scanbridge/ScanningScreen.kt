@@ -690,7 +690,6 @@ fun ScanningScreen(
     }
 
     if (!isLoaded) {
-
         BackHandler {
             navController.navigate(StartUpScreenRoute) {
                 popUpTo(0) { inclusive = true }
@@ -869,7 +868,7 @@ fun ScanningScreen(
                     scanningViewModel.scanningScreenData.currentScansState.clear()
                     scanningViewModel.setConfirmDialogShown(false)
                     navController.navigate(StartUpScreenRoute) {
-                        popUpTo(0) {inclusive = true}
+                        popUpTo(0) { inclusive = true }
                         launchSingleTop = true
                     }
                 }

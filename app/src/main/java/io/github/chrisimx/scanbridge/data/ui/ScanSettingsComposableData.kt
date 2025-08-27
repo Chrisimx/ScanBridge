@@ -35,7 +35,6 @@ import io.github.chrisimx.scanbridge.data.model.PaperFormat
 import io.github.chrisimx.scanbridge.data.model.StatelessImmutableESCLScanSettingsState
 import io.github.chrisimx.scanbridge.data.model.loadDefaultFormats
 import io.github.chrisimx.scanbridge.util.getInputSourceOptions
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable

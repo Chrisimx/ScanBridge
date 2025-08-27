@@ -20,9 +20,7 @@
 package io.github.chrisimx.scanbridge.data.ui
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.application
 import getTrustAllTM
 import io.github.chrisimx.esclkt.ESCLRequestClient
@@ -49,8 +47,14 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import timber.log.Timber
 
-class ScanningScreenViewModel(application: Application, address: HttpUrl, timeout: UInt, withDebugInterceptor: Boolean, certificateValidationDisabled: Boolean, sessionID: String) :
-    AndroidViewModel(application) {
+class ScanningScreenViewModel(
+    application: Application,
+    address: HttpUrl,
+    timeout: UInt,
+    withDebugInterceptor: Boolean,
+    certificateValidationDisabled: Boolean,
+    sessionID: String
+) : AndroidViewModel(application) {
     private val _scanningScreenData =
         ScanningScreenData(
             ESCLRequestClient(
