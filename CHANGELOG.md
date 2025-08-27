@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.0] - 2025-08-27
+
+### Added
+- Scan session restoring (65e23af4)
+- Discovery of HTTPS scanners / secure scanners (0b30a9ab)
+- Custom scanners can now be saved (4db5876e)
+- Customizable PDF chunk size (18543620)
+- Option to deactivate HTTPS certificate validation (7b57a193)
+
+### Fixed
+
+#### Improved Scanner support
+- Canon LiDE20/N676U: Fixed scanning communication / Relative Location header support ([#78](https://github.com/Chrisimx/ScanBridge/issues/78))
+
+#### Further fixes
+- Invalid scanner caps don't crash the app anymore (4657d726)
+- Correctly cancle jobs when encountering any failure (fc1eb632)
+- Handle full recomposition correctly (fe3defa9)
+
 ## [1.3.0] - 2025-04-24
 
 ### Fixed

@@ -1,0 +1,7 @@
+New Features:
+- Automatic recovery of the most recent unfinished scan session when the app is launched, if present
+- Automatic discovery of HTTPS scanners on the network
+- Persistent storage of custom scanner connections for repeated use
+- Option to disable HTTPS certificate verification in the settings (to easily connect to scanners with self-signed certs)
+- Configurable maximum page count per PDF during export (adjustable in the app settings)
+...and a couple of bug fixes
