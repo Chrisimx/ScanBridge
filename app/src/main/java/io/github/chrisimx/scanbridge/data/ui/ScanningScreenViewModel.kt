@@ -27,6 +27,7 @@ import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.Inches
 import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.Millimeters
+import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
@@ -34,6 +35,7 @@ import io.github.chrisimx.scanbridge.data.model.Session
 import io.github.chrisimx.scanbridge.logs.DebugInterceptor
 import io.github.chrisimx.scanbridge.util.ScanSettingsStore
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
+import io.github.chrisimx.scanbridge.util.getInputSourceOptions
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

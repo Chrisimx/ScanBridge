@@ -42,7 +42,7 @@ class ScanSettingsStoreTest {
             inputSource = InputSource.Feeder, // ADF input
             xResolution = 300u,
             yResolution = 300u,
-            colorMode = ColorMode.Color24,
+            colorMode = ColorMode.RGB24,
             colorSpace = null,
             mediaType = null,
             ccdChannel = null,
@@ -104,7 +104,7 @@ class ScanSettingsStoreTest {
             inputSource = InputSource.Feeder, // ADF (Automatic Document Feeder)
             xResolution = 300u,
             yResolution = 300u,
-            colorMode = ColorMode.Color24,
+            colorMode = ColorMode.RGB24,
             colorSpace = null,
             mediaType = null,
             ccdChannel = null,
