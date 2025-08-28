@@ -27,6 +27,8 @@ import io.github.chrisimx.esclkt.ColorMode
 import io.github.chrisimx.esclkt.ContentType
 import io.github.chrisimx.esclkt.FeedDirection
 import io.github.chrisimx.esclkt.InputSource
+import io.github.chrisimx.esclkt.ScanIntent
+import io.github.chrisimx.esclkt.ScanIntentData
 import io.github.chrisimx.scanbridge.data.model.StatelessImmutableESCLScanSettingsState
 import io.github.chrisimx.scanbridge.data.model.StatelessImmutableScanRegion
 import timber.log.Timber
@@ -50,6 +52,10 @@ object ScanSettingsStore {
         sharedPreferences.edit {
             // Save all scan settings that we want to persist
             putString("version", scanSettings.version)
+            scanSettings.intent?.let {
+                if (it is ScanIntentData.ScanIntentEnum) putString("intent", it.scanIntent.name)
+                else if (it is ScanIntentData.StringData) putString("intent", it.string)
+            }
             scanSettings.documentFormatExt?.let { putString("documentFormatExt", it) }
             scanSettings.contentType?.let { putString("contentType", it.name) }
             scanSettings.inputSource?.let { putString("inputSource", it.name) }
@@ -114,9 +120,18 @@ object ScanSettingsStore {
                 )
             } else null
 
+            val intentString =  sharedPreferences.getString("intent", null)
+            val scanIntent = intentString?.let {
+                try {
+                    ScanIntentData.ScanIntentEnum(ScanIntent.valueOf(intentString))
+                } catch (exception: IllegalArgumentException) {
+                    ScanIntentData.StringData(it)
+                }
+            }
+
             return StatelessImmutableESCLScanSettingsState(
                 version = sharedPreferences.getString("version", "2.63") ?: "2.63",
-                intent = null, // Intent is not typically persisted
+                intent = scanIntent,
                 scanRegions = scanRegion,
                 documentFormatExt = sharedPreferences.getString("documentFormatExt", null),
                 contentType = sharedPreferences.getString("contentType", null)?.let { 
