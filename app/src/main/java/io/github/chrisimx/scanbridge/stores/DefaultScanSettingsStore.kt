@@ -60,7 +60,12 @@ object DefaultScanSettingsStore {
             return null
         }
 
-        return Json.decodeFromString<StatelessImmutableESCLScanSettingsState>(lastUsedScanSettings)
+        try {
+            return Json.decodeFromString<StatelessImmutableESCLScanSettingsState>(lastUsedScanSettings)
+        } catch (e: Exception) {
+            Timber.e("JSON in last_used_scan_settings is invalid. Not used!")
+            return null
+        }
     }
 
     fun clear(context: Context) {
