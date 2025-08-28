@@ -21,20 +21,11 @@ package io.github.chrisimx.scanbridge.util
 
 import android.content.Context
 import androidx.core.content.edit
-import io.github.chrisimx.esclkt.BinaryRendering
-import io.github.chrisimx.esclkt.CcdChannel
-import io.github.chrisimx.esclkt.ColorMode
-import io.github.chrisimx.esclkt.ContentType
-import io.github.chrisimx.esclkt.FeedDirection
-import io.github.chrisimx.esclkt.InputSource
-import io.github.chrisimx.esclkt.ScanIntent
-import io.github.chrisimx.esclkt.ScanIntentData
 import io.github.chrisimx.scanbridge.data.model.StatelessImmutableESCLScanSettingsState
-import io.github.chrisimx.scanbridge.data.model.StatelessImmutableScanRegion
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 
-object ScanSettingsStore {
+object DefaultScanSettingsStore {
     private const val PREF_NAME = "scan_settings_store"
     private const val APP_PREF_NAME = "scanbridge"
 

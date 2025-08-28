@@ -31,12 +31,15 @@ import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
+import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.scanbridge.data.model.Session
 import io.github.chrisimx.scanbridge.logs.DebugInterceptor
-import io.github.chrisimx.scanbridge.util.ScanSettingsStore
+import io.github.chrisimx.scanbridge.util.DefaultScanSettingsStore
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
+import io.github.chrisimx.scanbridge.util.getInputSourceCaps
 import io.github.chrisimx.scanbridge.util.getInputSourceOptions
 import java.io.File
+import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -156,7 +159,7 @@ class ScanningScreenViewModel(
             )
         } else {
             // Try to load saved scan settings first, fallback to defaults if none exist
-            val savedSettings = ScanSettingsStore.load(application.applicationContext)
+            val savedSettings = DefaultScanSettingsStore.load(application.applicationContext)
             val initialSettings = if (savedSettings != null) {
                 try {
                     // Merge saved settings with current capabilities to ensure compatibility
@@ -176,7 +179,31 @@ class ScanningScreenViewModel(
                         Timber.w("Duplex not supported with current input source, disabling duplex")
                         mutableSettings.duplex = false
                     }
-                    
+
+                    val selectedInputSourceCaps = caps.getInputSourceCaps(mutableSettings.inputSource ?: InputSource.Platen, mutableSettings.duplex ?: false)
+
+                    if (!selectedInputSourceCaps.supportedIntents.contains(mutableSettings.intent)) {
+                        mutableSettings.intent = selectedInputSourceCaps.supportedIntents.first()
+                    }
+
+                    if (mutableSettings.scanRegions != null) {
+                        val storedWidthThreeHOfInch = mutableSettings.scanRegions!!.width.toDoubleOrNull()
+                        val storedHeightThreeHOfInch = mutableSettings.scanRegions!!.width.toDoubleOrNull()
+
+                        val maxWidth = selectedInputSourceCaps.maxWidth.toMillimeters().value
+                        val minWidth = selectedInputSourceCaps.minWidth.toMillimeters().value
+
+                        val maxHeight = selectedInputSourceCaps.maxHeight.toMillimeters().value
+                        val minHeight = selectedInputSourceCaps.minHeight.toMillimeters().value
+
+                        if (storedWidthThreeHOfInch != null && (storedWidthThreeHOfInch > maxWidth || storedWidthThreeHOfInch < minWidth) ) {
+                            mutableSettings.scanRegions!!.width = "max"
+                        }
+                        if (storedHeightThreeHOfInch != null && (storedHeightThreeHOfInch > maxHeight || storedHeightThreeHOfInch < minHeight) ) {
+                            mutableSettings.scanRegions!!.height = "max"
+                        }
+                    }
+
                     mutableSettings
                 } catch (e: Exception) {
                     Timber.e(e, "Error applying saved settings, using defaults")
@@ -271,13 +298,13 @@ class ScanningScreenViewModel(
 
     fun saveScanSettings() {
         scanningScreenData.scanSettingsVM?.getMutableScanSettingsComposableData()?.scanSettingsState?.toStateless()?.let { settings ->
-            ScanSettingsStore.save(application.applicationContext, settings)
+            DefaultScanSettingsStore.save(application.applicationContext, settings)
             Timber.d("Scan settings saved to persistent storage")
         }
     }
 
     fun clearSavedScanSettings() {
-        ScanSettingsStore.clear(application.applicationContext)
+        DefaultScanSettingsStore.clear(application.applicationContext)
         Timber.d("Saved scan settings cleared")
     }
 }

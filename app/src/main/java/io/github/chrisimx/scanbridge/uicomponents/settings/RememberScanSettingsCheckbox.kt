@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.core.content.edit
-import io.github.chrisimx.scanbridge.util.ScanSettingsStore
+import io.github.chrisimx.scanbridge.util.DefaultScanSettingsStore
 
 @Composable
 fun RememberScanSettingsCheckbox(
@@ -68,7 +68,7 @@ fun RememberScanSettingsCheckbox(
                     
                     // Clear saved scan settings when user disables the setting
                     if (!it) {
-                        ScanSettingsStore.clear(context)
+                        DefaultScanSettingsStore.clear(context)
                     }
                 },
                 role = Role.Checkbox
