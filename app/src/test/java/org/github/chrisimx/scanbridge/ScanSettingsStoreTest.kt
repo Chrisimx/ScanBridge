@@ -32,7 +32,7 @@ class ScanSettingsStoreTest {
         // Test the basic persistence behavior described in the PR
         // This is a simple test to verify our data structures work correctly
         // The actual SharedPreferences testing would require Android testing framework
-        
+
         val testSettings = StatelessImmutableESCLScanSettingsState(
             version = "2.63",
             intent = null,
@@ -63,19 +63,19 @@ class ScanSettingsStoreTest {
             feedDirection = null,
             blankPageDetectionAndRemoval = null
         )
-        
+
         // Test the user story scenario: ADF + duplex + A4 + PDF
         assert(testSettings.inputSource == InputSource.Feeder) { "Should use ADF for automatic document feeding" }
         assert(testSettings.duplex == true) { "Should support duplex for double-sided scanning" }
         assert(testSettings.scanRegions?.width == "210") { "Should use A4 width (210mm)" }
         assert(testSettings.scanRegions?.height == "297") { "Should use A4 height (297mm)" }
         assert(testSettings.documentFormatExt == "application/pdf") { "Should export as PDF format" }
-        
+
         // Test conversion to mutable (for editing in UI)
         val mutableSettings = testSettings.toMutable()
         assert(mutableSettings.inputSource == InputSource.Feeder)
         assert(mutableSettings.duplex == true)
-        
+
         // Test conversion back to stateless (for persistence)
         val statelessSettings = mutableSettings.toStateless()
         assert(statelessSettings.inputSource == testSettings.inputSource)
@@ -87,14 +87,14 @@ class ScanSettingsStoreTest {
     fun testScanSettingsStatelessDataStructure() {
         // Test that we can create scan settings with the key settings mentioned in the issue
         // ADF+duplex+document+A4
-        
+
         val testScanRegion = StatelessImmutableScanRegion(
             "210", // A4 width in mm
-            "297", // A4 height in mm  
-            "0",   // x offset
-            "0"    // y offset
+            "297", // A4 height in mm
+            "0", // x offset
+            "0" // y offset
         )
-        
+
         val testSettings = StatelessImmutableESCLScanSettingsState(
             version = "2.63",
             intent = null,
@@ -131,13 +131,13 @@ class ScanSettingsStoreTest {
         assert(testSettings.duplex == true) { "Should have duplex enabled" }
         assert(testSettings.documentFormatExt == "image/jpeg") { "Should have document format set" }
         assert(testSettings.scanRegions != null) { "Should have A4 scan region" }
-        
+
         // Test the toMutable conversion to ensure settings can be converted back
         val mutableSettings = testSettings.toMutable()
         assert(mutableSettings.inputSource == InputSource.Feeder)
         assert(mutableSettings.duplex == true)
         assert(mutableSettings.documentFormatExt == "image/jpeg")
-        
+
         // Test that we can convert back to stateless
         val reconvertedSettings = mutableSettings.toStateless()
         assert(reconvertedSettings.inputSource == testSettings.inputSource)
@@ -150,19 +150,19 @@ class ScanSettingsStoreTest {
         // Test A4 paper format (210x297mm)
         val a4Region = StatelessImmutableScanRegion("210", "297", "0", "0")
         val mutableA4 = a4Region.toMutable()
-        
+
         assert(mutableA4.width == "210")
-        assert(mutableA4.height == "297") 
+        assert(mutableA4.height == "297")
         assert(mutableA4.xOffset == "0")
         assert(mutableA4.yOffset == "0")
-        
+
         // Test that we can modify mutable settings
         mutableA4.width = "148" // A5 width
         mutableA4.height = "210" // A5 height
-        
+
         assert(mutableA4.width == "148")
         assert(mutableA4.height == "210")
-        
+
         // Test conversion back to stateless
         val a5Region = mutableA4.toStateless()
         val reconvertedA5 = a5Region.toMutable()

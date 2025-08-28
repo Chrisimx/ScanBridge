@@ -65,7 +65,7 @@ fun RememberScanSettingsCheckbox(
                             putBoolean(settingsName, it)
                         }
                     checked = it
-                    
+
                     // Clear saved scan settings when user disables the setting
                     if (!it) {
                         DefaultScanSettingsStore.clear(context)

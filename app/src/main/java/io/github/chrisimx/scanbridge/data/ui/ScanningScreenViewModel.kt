@@ -25,13 +25,12 @@ import androidx.lifecycle.application
 import getTrustAllTM
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.Inches
+import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.Millimeters
-import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
-import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.scanbridge.data.model.Session
 import io.github.chrisimx.scanbridge.logs.DebugInterceptor
 import io.github.chrisimx.scanbridge.util.DefaultScanSettingsStore
@@ -39,7 +38,6 @@ import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
 import io.github.chrisimx.scanbridge.util.getInputSourceCaps
 import io.github.chrisimx.scanbridge.util.getInputSourceOptions
 import java.io.File
-import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -164,23 +162,30 @@ class ScanningScreenViewModel(
                 try {
                     // Merge saved settings with current capabilities to ensure compatibility
                     val mutableSettings = savedSettings.toMutable()
-                    
+
                     // Validate that the saved input source is still supported
                     val supportedInputSources = caps.getInputSourceOptions()
-                    if (mutableSettings.inputSource != null && 
-                        !supportedInputSources.contains(mutableSettings.inputSource)) {
-                        Timber.w("Saved input source ${mutableSettings.inputSource} not supported by current scanner, falling back to default")
+                    if (mutableSettings.inputSource != null &&
+                        !supportedInputSources.contains(mutableSettings.inputSource)
+                    ) {
+                        Timber.w(
+                            "Saved input source ${mutableSettings.inputSource} not supported by current scanner, falling back to default"
+                        )
                         mutableSettings.inputSource = supportedInputSources.firstOrNull() ?: InputSource.Platen
                     }
-                    
+
                     // Validate duplex setting - only allow if ADF supports duplex
-                    if (mutableSettings.duplex == true && 
-                        (mutableSettings.inputSource != InputSource.Feeder || caps.adf?.duplexCaps == null)) {
+                    if (mutableSettings.duplex == true &&
+                        (mutableSettings.inputSource != InputSource.Feeder || caps.adf?.duplexCaps == null)
+                    ) {
                         Timber.w("Duplex not supported with current input source, disabling duplex")
                         mutableSettings.duplex = false
                     }
 
-                    val selectedInputSourceCaps = caps.getInputSourceCaps(mutableSettings.inputSource ?: InputSource.Platen, mutableSettings.duplex ?: false)
+                    val selectedInputSourceCaps = caps.getInputSourceCaps(
+                        mutableSettings.inputSource ?: InputSource.Platen,
+                        mutableSettings.duplex ?: false
+                    )
 
                     if (!selectedInputSourceCaps.supportedIntents.contains(mutableSettings.intent)) {
                         mutableSettings.intent = selectedInputSourceCaps.supportedIntents.first()
@@ -196,10 +201,14 @@ class ScanningScreenViewModel(
                         val maxHeight = selectedInputSourceCaps.maxHeight.toMillimeters().value
                         val minHeight = selectedInputSourceCaps.minHeight.toMillimeters().value
 
-                        if (storedWidthThreeHOfInch != null && (storedWidthThreeHOfInch > maxWidth || storedWidthThreeHOfInch < minWidth) ) {
+                        if (storedWidthThreeHOfInch != null &&
+                            (storedWidthThreeHOfInch > maxWidth || storedWidthThreeHOfInch < minWidth)
+                        ) {
                             mutableSettings.scanRegions!!.width = "max"
                         }
-                        if (storedHeightThreeHOfInch != null && (storedHeightThreeHOfInch > maxHeight || storedHeightThreeHOfInch < minHeight) ) {
+                        if (storedHeightThreeHOfInch != null &&
+                            (storedHeightThreeHOfInch > maxHeight || storedHeightThreeHOfInch < minHeight)
+                        ) {
                             mutableSettings.scanRegions!!.height = "max"
                         }
                     }
@@ -212,7 +221,7 @@ class ScanningScreenViewModel(
             } else {
                 caps.calculateDefaultESCLScanSettingsState()
             }
-            
+
             _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
                 ScanSettingsComposableData(
                     initialSettings,

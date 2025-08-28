@@ -39,7 +39,7 @@ object DefaultScanSettingsStore {
             Timber.d("Scan settings persistence is disabled, skipping save")
             return
         }
-        
+
         val sharedPreferences = context.getSharedPreferences(APP_PREF_NAME, Context.MODE_PRIVATE)
         val serializedSettings = Json.encodeToString(scanSettings)
         sharedPreferences.edit {
@@ -52,7 +52,7 @@ object DefaultScanSettingsStore {
             Timber.d("Scan settings persistence is disabled, returning null")
             return null
         }
-        
+
         val sharedPreferences = context.getSharedPreferences(APP_PREF_NAME, Context.MODE_PRIVATE)
         val lastUsedScanSettings = sharedPreferences.getString("last_used_scan_settings", null)
 
