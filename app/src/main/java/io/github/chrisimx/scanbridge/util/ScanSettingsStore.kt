@@ -164,5 +164,6 @@ object ScanSettingsStore {
     fun clear(context: Context) {
         val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         sharedPreferences.edit { clear() }
+        Timber.d("Scan settings cleared from persistent storage")
     }
 }

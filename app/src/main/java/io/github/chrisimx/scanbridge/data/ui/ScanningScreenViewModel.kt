@@ -156,8 +156,30 @@ class ScanningScreenViewModel(
             // Try to load saved scan settings first, fallback to defaults if none exist
             val savedSettings = ScanSettingsStore.load(application.applicationContext)
             val initialSettings = if (savedSettings != null) {
-                // Merge saved settings with current capabilities to ensure compatibility
-                savedSettings.toMutable()
+                try {
+                    // Merge saved settings with current capabilities to ensure compatibility
+                    val mutableSettings = savedSettings.toMutable()
+                    
+                    // Validate that the saved input source is still supported
+                    val supportedInputSources = caps.getInputSourceOptions()
+                    if (mutableSettings.inputSource != null && 
+                        !supportedInputSources.contains(mutableSettings.inputSource)) {
+                        Timber.w("Saved input source ${mutableSettings.inputSource} not supported by current scanner, falling back to default")
+                        mutableSettings.inputSource = supportedInputSources.firstOrNull() ?: InputSource.Platen
+                    }
+                    
+                    // Validate duplex setting - only allow if ADF supports duplex
+                    if (mutableSettings.duplex == true && 
+                        (mutableSettings.inputSource != InputSource.Feeder || caps.adf?.duplexCaps == null)) {
+                        Timber.w("Duplex not supported with current input source, disabling duplex")
+                        mutableSettings.duplex = false
+                    }
+                    
+                    mutableSettings
+                } catch (e: Exception) {
+                    Timber.e(e, "Error applying saved settings, using defaults")
+                    caps.calculateDefaultESCLScanSettingsState()
+                }
             } else {
                 caps.calculateDefaultESCLScanSettingsState()
             }
@@ -250,5 +272,10 @@ class ScanningScreenViewModel(
             ScanSettingsStore.save(application.applicationContext, settings)
             Timber.d("Scan settings saved to persistent storage")
         }
+    }
+
+    fun clearSavedScanSettings() {
+        ScanSettingsStore.clear(application.applicationContext)
+        Timber.d("Saved scan settings cleared")
     }
 }
