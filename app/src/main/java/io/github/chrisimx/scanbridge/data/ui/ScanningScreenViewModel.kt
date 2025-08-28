@@ -193,7 +193,7 @@ class ScanningScreenViewModel(
 
                     if (mutableSettings.scanRegions != null) {
                         val storedWidthThreeHOfInch = mutableSettings.scanRegions!!.width.toDoubleOrNull()
-                        val storedHeightThreeHOfInch = mutableSettings.scanRegions!!.width.toDoubleOrNull()
+                        val storedHeightThreeHOfInch = mutableSettings.scanRegions!!.height.toDoubleOrNull()
 
                         val maxWidth = selectedInputSourceCaps.maxWidth.toMillimeters().value
                         val minWidth = selectedInputSourceCaps.minWidth.toMillimeters().value
