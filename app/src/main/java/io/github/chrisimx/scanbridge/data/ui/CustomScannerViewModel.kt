@@ -23,7 +23,7 @@ import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import io.github.chrisimx.scanbridge.data.model.CustomScanner
-import io.github.chrisimx.scanbridge.util.CustomScannerStore
+import io.github.chrisimx.scanbridge.stores.CustomScannerStore
 import kotlin.uuid.ExperimentalUuidApi
 
 class CustomScannerViewModel(application: Application) : AndroidViewModel(application) {

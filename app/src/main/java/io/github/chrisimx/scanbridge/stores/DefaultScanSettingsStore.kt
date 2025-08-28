@@ -17,7 +17,7 @@
  *     SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package io.github.chrisimx.scanbridge.util
+package io.github.chrisimx.scanbridge.stores
 
 import android.content.Context
 import androidx.core.content.edit
