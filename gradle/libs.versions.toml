@@ -1,5 +1,5 @@
 [versions]
-agp = "8.9.2"
+agp = "8.0.2"
 coilCompose = "3.1.0"
 constraintlayoutCompose = "1.1.1"
 esclkt = "1.4.13"
