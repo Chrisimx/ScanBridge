@@ -25,7 +25,10 @@ import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanIntentData
 import io.github.chrisimx.scanbridge.data.model.MutableScanRegionState
 
-class ScanSettingsComposableViewModel(private val _scanSettingsComposableData: ScanSettingsComposableData) : ViewModel() {
+class ScanSettingsComposableViewModel(
+    private val _scanSettingsComposableData: ScanSettingsComposableData,
+    private val onSettingsChanged: (() -> Unit)? = null
+) : ViewModel() {
 
     val scanSettingsComposableData: ImmutableScanSettingsComposableData
         get() = _scanSettingsComposableData.toImmutable()
@@ -34,19 +37,23 @@ class ScanSettingsComposableViewModel(private val _scanSettingsComposableData: S
 
     fun setDuplex(duplex: Boolean) {
         _scanSettingsComposableData.scanSettingsState.duplex = duplex
+        onSettingsChanged?.invoke()
     }
 
     fun setInputSourceOptions(inputSource: InputSource) {
         _scanSettingsComposableData.scanSettingsState.inputSource = inputSource
+        onSettingsChanged?.invoke()
     }
 
     fun setResolution(xResolution: UInt, yResolution: UInt) {
         _scanSettingsComposableData.scanSettingsState.xResolution = xResolution
         _scanSettingsComposableData.scanSettingsState.yResolution = yResolution
+        onSettingsChanged?.invoke()
     }
 
     fun setIntent(intent: ScanIntentData?) {
         _scanSettingsComposableData.scanSettingsState.intent = intent
+        onSettingsChanged?.invoke()
     }
 
     fun setCustomMenuEnabled(enabled: Boolean) {
@@ -69,10 +76,12 @@ class ScanSettingsComposableViewModel(private val _scanSettingsComposableData: S
                 xOffsetState = mutableStateOf("0"),
                 yOffsetState = mutableStateOf("0")
             )
+            onSettingsChanged?.invoke()
             return // We don't want to set the width and height twice
         }
         _scanSettingsComposableData.scanSettingsState.scanRegions!!.width = width.toString()
         _scanSettingsComposableData.scanSettingsState.scanRegions!!.height = height.toString()
+        onSettingsChanged?.invoke()
     }
 
     fun setOffset(xOffset: String, yOffset: String) {
@@ -83,9 +92,11 @@ class ScanSettingsComposableViewModel(private val _scanSettingsComposableData: S
                 xOffsetState = mutableStateOf(xOffset),
                 yOffsetState = mutableStateOf(yOffset)
             )
+            onSettingsChanged?.invoke()
             return // We don't want to set the width and height twice
         }
         _scanSettingsComposableData.scanSettingsState.scanRegions!!.xOffset = xOffset.toString()
         _scanSettingsComposableData.scanSettingsState.scanRegions!!.yOffset = yOffset.toString()
+        onSettingsChanged?.invoke()
     }
 }

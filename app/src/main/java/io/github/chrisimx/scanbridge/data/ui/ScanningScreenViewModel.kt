@@ -32,6 +32,7 @@ import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
 import io.github.chrisimx.scanbridge.data.model.Session
 import io.github.chrisimx.scanbridge.logs.DebugInterceptor
+import io.github.chrisimx.scanbridge.util.ScanSettingsStore
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -148,14 +149,25 @@ class ScanningScreenViewModel(
         if (storedSession != null) {
             scanningScreenData.currentScansState.addAll(storedSession.scannedPages)
             _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
-                ScanSettingsComposableData(storedSession.scanSettings?.toMutable() ?: caps.calculateDefaultESCLScanSettingsState(), caps)
+                ScanSettingsComposableData(storedSession.scanSettings?.toMutable() ?: caps.calculateDefaultESCLScanSettingsState(), caps),
+                onSettingsChanged = { saveScanSettings() }
             )
         } else {
+            // Try to load saved scan settings first, fallback to defaults if none exist
+            val savedSettings = ScanSettingsStore.load(application.applicationContext)
+            val initialSettings = if (savedSettings != null) {
+                // Merge saved settings with current capabilities to ensure compatibility
+                savedSettings.toMutable()
+            } else {
+                caps.calculateDefaultESCLScanSettingsState()
+            }
+            
             _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
                 ScanSettingsComposableData(
-                    caps.calculateDefaultESCLScanSettingsState(),
+                    initialSettings,
                     caps
-                )
+                ),
+                onSettingsChanged = { saveScanSettings() }
             )
             val sessionFile = application.applicationInfo.dataDir + "/files/" + scanningScreenData.sessionID + ".session"
             addTempFile(File(sessionFile))
@@ -231,5 +243,12 @@ class ScanningScreenViewModel(
         }
         _scanningScreenData.stateCurrentScans.removeAt(index)
         saveSessionFile()
+    }
+
+    fun saveScanSettings() {
+        scanningScreenData.scanSettingsVM?.getMutableScanSettingsComposableData()?.scanSettingsState?.toStateless()?.let { settings ->
+            ScanSettingsStore.save(application.applicationContext, settings)
+            Timber.d("Scan settings saved to persistent storage")
+        }
     }
 }
