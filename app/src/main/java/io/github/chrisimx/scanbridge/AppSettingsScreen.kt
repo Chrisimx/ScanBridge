@@ -58,6 +58,7 @@ import io.github.chrisimx.scanbridge.uicomponents.TitledCard
 import io.github.chrisimx.scanbridge.uicomponents.dialog.SimpleTextDialog
 import io.github.chrisimx.scanbridge.uicomponents.settings.CheckboxSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.MoreInformationButton
+import io.github.chrisimx.scanbridge.uicomponents.settings.RememberScanSettingsCheckbox
 import io.github.chrisimx.scanbridge.uicomponents.settings.UIntSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
 import java.io.BufferedWriter
@@ -268,6 +269,15 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
             title = stringResource(R.string.settings)
         ) {
             DisableCertChecksSetting {
+                information = it
+            }
+
+            RememberScanSettingsCheckbox(
+                "remember_scan_settings",
+                stringResource(R.string.remember_scan_settings),
+                stringResource(R.string.remember_scan_settings_desc),
+                default = true
+            ) {
                 information = it
             }
 

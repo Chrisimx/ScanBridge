@@ -33,8 +33,19 @@ import timber.log.Timber
 
 object ScanSettingsStore {
     private const val PREF_NAME = "scan_settings_store"
+    private const val APP_PREF_NAME = "scanbridge"
+
+    private fun isRememberSettingsEnabled(context: Context): Boolean {
+        val appPreferences = context.getSharedPreferences(APP_PREF_NAME, Context.MODE_PRIVATE)
+        return appPreferences.getBoolean("remember_scan_settings", true) // Default to true for existing users
+    }
 
     fun save(context: Context, scanSettings: StatelessImmutableESCLScanSettingsState) {
+        if (!isRememberSettingsEnabled(context)) {
+            Timber.d("Scan settings persistence is disabled, skipping save")
+            return
+        }
+        
         val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         sharedPreferences.edit {
             // Save all scan settings that we want to persist
@@ -81,6 +92,11 @@ object ScanSettingsStore {
     }
 
     fun load(context: Context): StatelessImmutableESCLScanSettingsState? {
+        if (!isRememberSettingsEnabled(context)) {
+            Timber.d("Scan settings persistence is disabled, returning null")
+            return null
+        }
+        
         val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         
         if (!sharedPreferences.getBoolean("settings_saved", false)) {
@@ -165,5 +181,12 @@ object ScanSettingsStore {
         val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         sharedPreferences.edit { clear() }
         Timber.d("Scan settings cleared from persistent storage")
+    }
+
+    fun clearIfDisabled(context: Context) {
+        if (!isRememberSettingsEnabled(context)) {
+            clear(context)
+            Timber.d("Scan settings cleared because persistence is disabled")
+        }
     }
 }
