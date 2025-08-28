@@ -31,6 +31,7 @@ import io.github.chrisimx.esclkt.ScanIntent
 import io.github.chrisimx.esclkt.ScanIntentData
 import io.github.chrisimx.scanbridge.data.model.StatelessImmutableESCLScanSettingsState
 import io.github.chrisimx.scanbridge.data.model.StatelessImmutableScanRegion
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 
 object ScanSettingsStore {
@@ -39,7 +40,7 @@ object ScanSettingsStore {
 
     private fun isRememberSettingsEnabled(context: Context): Boolean {
         val appPreferences = context.getSharedPreferences(APP_PREF_NAME, Context.MODE_PRIVATE)
-        return appPreferences.getBoolean("remember_scan_settings", true) // Default to true for existing users
+        return appPreferences.getBoolean("remember_scan_settings", true)
     }
 
     fun save(context: Context, scanSettings: StatelessImmutableESCLScanSettingsState) {
@@ -48,52 +49,10 @@ object ScanSettingsStore {
             return
         }
         
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(APP_PREF_NAME, Context.MODE_PRIVATE)
+        val serializedSettings = Json.encodeToString(scanSettings)
         sharedPreferences.edit {
-            // Save all scan settings that we want to persist
-            putString("version", scanSettings.version)
-            scanSettings.intent?.let {
-                if (it is ScanIntentData.ScanIntentEnum) putString("intent", it.scanIntent.name)
-                else if (it is ScanIntentData.StringData) putString("intent", it.string)
-            }
-            scanSettings.documentFormatExt?.let { putString("documentFormatExt", it) }
-            scanSettings.contentType?.let { putString("contentType", it.name) }
-            scanSettings.inputSource?.let { putString("inputSource", it.name) }
-            scanSettings.xResolution?.let { putInt("xResolution", it.toInt()) }
-            scanSettings.yResolution?.let { putInt("yResolution", it.toInt()) }
-            scanSettings.colorMode?.let { putString("colorMode", it.name) }
-            scanSettings.colorSpace?.let { putString("colorSpace", it) }
-            scanSettings.mediaType?.let { putString("mediaType", it) }
-            scanSettings.ccdChannel?.let { putString("ccdChannel", it.name) }
-            scanSettings.binaryRendering?.let { putString("binaryRendering", it.name) }
-            scanSettings.duplex?.let { putBoolean("duplex", it) }
-            scanSettings.numberOfPages?.let { putInt("numberOfPages", it.toInt()) }
-            scanSettings.brightness?.let { putInt("brightness", it.toInt()) }
-            scanSettings.compressionFactor?.let { putInt("compressionFactor", it.toInt()) }
-            scanSettings.contrast?.let { putInt("contrast", it.toInt()) }
-            scanSettings.gamma?.let { putInt("gamma", it.toInt()) }
-            scanSettings.highlight?.let { putInt("highlight", it.toInt()) }
-            scanSettings.noiseRemoval?.let { putInt("noiseRemoval", it.toInt()) }
-            scanSettings.shadow?.let { putInt("shadow", it.toInt()) }
-            scanSettings.sharpen?.let { putInt("sharpen", it.toInt()) }
-            scanSettings.threshold?.let { putInt("threshold", it.toInt()) }
-            scanSettings.contextID?.let { putString("contextID", it) }
-            scanSettings.blankPageDetection?.let { putBoolean("blankPageDetection", it) }
-            scanSettings.feedDirection?.let { putString("feedDirection", it.name) }
-            scanSettings.blankPageDetectionAndRemoval?.let { putBoolean("blankPageDetectionAndRemoval", it) }
-            
-            // Save scan region if present
-            scanSettings.scanRegions?.let { scanRegion ->
-                putString("scanRegion_width", scanRegion.width)
-                putString("scanRegion_height", scanRegion.height)
-                putString("scanRegion_xOffset", scanRegion.xOffset)
-                putString("scanRegion_yOffset", scanRegion.yOffset)
-                putBoolean("scanRegion_exists", true)
-            } ?: run {
-                putBoolean("scanRegion_exists", false)
-            }
-
-            putBoolean("settings_saved", true)
+            putString("last_used_scan_settings", serializedSettings)
         }
     }
 
@@ -103,105 +62,27 @@ object ScanSettingsStore {
             return null
         }
         
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        
-        if (!sharedPreferences.getBoolean("settings_saved", false)) {
+        val sharedPreferences = context.getSharedPreferences(APP_PREF_NAME, Context.MODE_PRIVATE)
+        val lastUsedScanSettings = sharedPreferences.getString("last_used_scan_settings", null)
+
+        if (lastUsedScanSettings == null) {
             Timber.d("No saved scan settings found")
             return null
         }
 
-        try {
-            val scanRegion = if (sharedPreferences.getBoolean("scanRegion_exists", false)) {
-                StatelessImmutableScanRegion(
-                    sharedPreferences.getString("scanRegion_height", "max") ?: "max",
-                    sharedPreferences.getString("scanRegion_width", "max") ?: "max",
-                    sharedPreferences.getString("scanRegion_xOffset", "0") ?: "0",
-                    sharedPreferences.getString("scanRegion_yOffset", "0") ?: "0"
-                )
-            } else null
-
-            val intentString =  sharedPreferences.getString("intent", null)
-            val scanIntent = intentString?.let {
-                try {
-                    ScanIntentData.ScanIntentEnum(ScanIntent.valueOf(intentString))
-                } catch (exception: IllegalArgumentException) {
-                    ScanIntentData.StringData(it)
-                }
-            }
-
-            return StatelessImmutableESCLScanSettingsState(
-                version = sharedPreferences.getString("version", "2.63") ?: "2.63",
-                intent = scanIntent,
-                scanRegions = scanRegion,
-                documentFormatExt = sharedPreferences.getString("documentFormatExt", null),
-                contentType = sharedPreferences.getString("contentType", null)?.let { 
-                    try { ContentType.valueOf(it) } catch (e: IllegalArgumentException) { null }
-                },
-                inputSource = sharedPreferences.getString("inputSource", null)?.let {
-                    try { InputSource.valueOf(it) } catch (e: IllegalArgumentException) { null }
-                },
-                xResolution = if (sharedPreferences.contains("xResolution")) 
-                    sharedPreferences.getInt("xResolution", 0).toUInt() else null,
-                yResolution = if (sharedPreferences.contains("yResolution")) 
-                    sharedPreferences.getInt("yResolution", 0).toUInt() else null,
-                colorMode = sharedPreferences.getString("colorMode", null)?.let {
-                    try { ColorMode.valueOf(it) } catch (e: IllegalArgumentException) { null }
-                },
-                colorSpace = sharedPreferences.getString("colorSpace", null),
-                mediaType = sharedPreferences.getString("mediaType", null),
-                ccdChannel = sharedPreferences.getString("ccdChannel", null)?.let {
-                    try { CcdChannel.valueOf(it) } catch (e: IllegalArgumentException) { null }
-                },
-                binaryRendering = sharedPreferences.getString("binaryRendering", null)?.let {
-                    try { BinaryRendering.valueOf(it) } catch (e: IllegalArgumentException) { null }
-                },
-                duplex = if (sharedPreferences.contains("duplex")) 
-                    sharedPreferences.getBoolean("duplex", false) else null,
-                numberOfPages = if (sharedPreferences.contains("numberOfPages"))
-                    sharedPreferences.getInt("numberOfPages", 0).toUInt() else null,
-                brightness = if (sharedPreferences.contains("brightness"))
-                    sharedPreferences.getInt("brightness", 0).toUInt() else null,
-                compressionFactor = if (sharedPreferences.contains("compressionFactor"))
-                    sharedPreferences.getInt("compressionFactor", 0).toUInt() else null,
-                contrast = if (sharedPreferences.contains("contrast"))
-                    sharedPreferences.getInt("contrast", 0).toUInt() else null,
-                gamma = if (sharedPreferences.contains("gamma"))
-                    sharedPreferences.getInt("gamma", 0).toUInt() else null,
-                highlight = if (sharedPreferences.contains("highlight"))
-                    sharedPreferences.getInt("highlight", 0).toUInt() else null,
-                noiseRemoval = if (sharedPreferences.contains("noiseRemoval"))
-                    sharedPreferences.getInt("noiseRemoval", 0).toUInt() else null,
-                shadow = if (sharedPreferences.contains("shadow"))
-                    sharedPreferences.getInt("shadow", 0).toUInt() else null,
-                sharpen = if (sharedPreferences.contains("sharpen"))
-                    sharedPreferences.getInt("sharpen", 0).toUInt() else null,
-                threshold = if (sharedPreferences.contains("threshold"))
-                    sharedPreferences.getInt("threshold", 0).toUInt() else null,
-                contextID = sharedPreferences.getString("contextID", null),
-                blankPageDetection = if (sharedPreferences.contains("blankPageDetection"))
-                    sharedPreferences.getBoolean("blankPageDetection", false) else null,
-                feedDirection = sharedPreferences.getString("feedDirection", null)?.let {
-                    try { FeedDirection.valueOf(it) } catch (e: IllegalArgumentException) { null }
-                },
-                blankPageDetectionAndRemoval = if (sharedPreferences.contains("blankPageDetectionAndRemoval"))
-                    sharedPreferences.getBoolean("blankPageDetectionAndRemoval", false) else null
-            )
-        } catch (e: Exception) {
-            Timber.e(e, "Error loading saved scan settings")
-            return null
-        }
+        return Json.decodeFromString<StatelessImmutableESCLScanSettingsState>(lastUsedScanSettings)
     }
 
     fun clear(context: Context) {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        sharedPreferences.edit { clear() }
+        val sharedPreferences = context.getSharedPreferences(APP_PREF_NAME, Context.MODE_PRIVATE)
+        sharedPreferences.edit { remove("last_used_scan_settings") }
         Timber.d("Scan settings cleared from persistent storage")
     }
 
     fun clearIfDisabled(context: Context) {
         if (!isRememberSettingsEnabled(context)) {
             clear(context)
-            Timber.d("Scan settings cleared because persistence is disabled")
+            Timber.d("Scan settings cleared as persistence is disabled")
         }
     }
 }
