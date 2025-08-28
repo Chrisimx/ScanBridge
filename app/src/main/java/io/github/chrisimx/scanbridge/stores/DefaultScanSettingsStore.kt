@@ -40,7 +40,8 @@ object DefaultScanSettingsStore {
         }
 
         val sharedPreferences = context.getSharedPreferences(APP_PREF_NAME, Context.MODE_PRIVATE)
-        val serializedSettings = Json.encodeToString(scanSettings)
+        val json = Json { ignoreUnknownKeys = true }
+        val serializedSettings = json.encodeToString(scanSettings)
         sharedPreferences.edit {
             putString("last_used_scan_settings", serializedSettings)
         }
@@ -61,8 +62,9 @@ object DefaultScanSettingsStore {
         }
 
         try {
-            return Json.decodeFromString<StatelessImmutableESCLScanSettingsState>(lastUsedScanSettings)
-        } catch (e: Exception) {
+            val json = Json { ignoreUnknownKeys = true }
+            return json.decodeFromString<StatelessImmutableESCLScanSettingsState>(lastUsedScanSettings)
+        } catch (_: Exception) {
             Timber.e("JSON in last_used_scan_settings is invalid. Not used!")
             return null
         }

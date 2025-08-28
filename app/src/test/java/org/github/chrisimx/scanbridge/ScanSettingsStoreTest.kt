@@ -23,6 +23,7 @@ import io.github.chrisimx.esclkt.ColorMode
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.scanbridge.data.model.StatelessImmutableESCLScanSettingsState
 import io.github.chrisimx.scanbridge.data.model.StatelessImmutableScanRegion
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ScanSettingsStoreTest {
@@ -36,7 +37,7 @@ class ScanSettingsStoreTest {
         val testSettings = StatelessImmutableESCLScanSettingsState(
             version = "2.63",
             intent = null,
-            scanRegions = StatelessImmutableScanRegion("210", "297", "0", "0"), // A4
+            scanRegions = StatelessImmutableScanRegion("297", "210", "0", "0"), // A4
             documentFormatExt = "application/pdf", // PDF document format
             contentType = null,
             inputSource = InputSource.Feeder, // ADF input
@@ -65,22 +66,22 @@ class ScanSettingsStoreTest {
         )
 
         // Test the user story scenario: ADF + duplex + A4 + PDF
-        assert(testSettings.inputSource == InputSource.Feeder) { "Should use ADF for automatic document feeding" }
-        assert(testSettings.duplex == true) { "Should support duplex for double-sided scanning" }
-        assert(testSettings.scanRegions?.width == "210") { "Should use A4 width (210mm)" }
-        assert(testSettings.scanRegions?.height == "297") { "Should use A4 height (297mm)" }
-        assert(testSettings.documentFormatExt == "application/pdf") { "Should export as PDF format" }
+        assertEquals("Should use ADF for automatic document feeding", InputSource.Feeder, testSettings.inputSource)
+        assertEquals("Should support duplex for double-sided scanning", true, testSettings.duplex)
+        assertEquals("210", testSettings.scanRegions?.width)
+        assertEquals("Should use A4 height (297mm)", "297", testSettings.scanRegions?.height)
+        assertEquals("Should export as PDF format", "application/pdf", testSettings.documentFormatExt)
 
         // Test conversion to mutable (for editing in UI)
         val mutableSettings = testSettings.toMutable()
-        assert(mutableSettings.inputSource == InputSource.Feeder)
-        assert(mutableSettings.duplex == true)
+        assertEquals(InputSource.Feeder, mutableSettings.inputSource)
+        assertEquals(true, mutableSettings.duplex)
 
         // Test conversion back to stateless (for persistence)
         val statelessSettings = mutableSettings.toStateless()
-        assert(statelessSettings.inputSource == testSettings.inputSource)
-        assert(statelessSettings.duplex == testSettings.duplex)
-        assert(statelessSettings.documentFormatExt == testSettings.documentFormatExt)
+        assertEquals(testSettings.inputSource, statelessSettings.inputSource)
+        assertEquals(testSettings.duplex, statelessSettings.duplex)
+        assertEquals(testSettings.documentFormatExt, statelessSettings.documentFormatExt)
     }
 
     @Test
@@ -89,8 +90,8 @@ class ScanSettingsStoreTest {
         // ADF+duplex+document+A4
 
         val testScanRegion = StatelessImmutableScanRegion(
-            "210", // A4 width in mm
-            "297", // A4 height in mm
+            "297", // A4 width in mm
+            "210", // A4 height in mm
             "0", // x offset
             "0" // y offset
         )
@@ -127,46 +128,46 @@ class ScanSettingsStoreTest {
         )
 
         // Verify the test settings have the expected values
-        assert(testSettings.inputSource == InputSource.Feeder) { "Should use ADF (Feeder)" }
-        assert(testSettings.duplex == true) { "Should have duplex enabled" }
-        assert(testSettings.documentFormatExt == "image/jpeg") { "Should have document format set" }
-        assert(testSettings.scanRegions != null) { "Should have A4 scan region" }
+        assertEquals("Should use ADF (Feeder)", InputSource.Feeder, testSettings.inputSource)
+        assertEquals("Should have duplex enabled", true, testSettings.duplex)
+        assertEquals("Should have document format set", "image/jpeg", testSettings.documentFormatExt)
+        assertEquals("Should have A4 scan region", true, testSettings.scanRegions != null)
 
         // Test the toMutable conversion to ensure settings can be converted back
         val mutableSettings = testSettings.toMutable()
-        assert(mutableSettings.inputSource == InputSource.Feeder)
-        assert(mutableSettings.duplex == true)
-        assert(mutableSettings.documentFormatExt == "image/jpeg")
+        assertEquals(InputSource.Feeder, mutableSettings.inputSource)
+        assertEquals(true, mutableSettings.duplex)
+        assertEquals("image/jpeg", mutableSettings.documentFormatExt)
 
         // Test that we can convert back to stateless
         val reconvertedSettings = mutableSettings.toStateless()
-        assert(reconvertedSettings.inputSource == testSettings.inputSource)
-        assert(reconvertedSettings.duplex == testSettings.duplex)
-        assert(reconvertedSettings.documentFormatExt == testSettings.documentFormatExt)
+        assertEquals(testSettings.inputSource, reconvertedSettings.inputSource)
+        assertEquals(testSettings.duplex, reconvertedSettings.duplex)
+        assertEquals(testSettings.documentFormatExt, reconvertedSettings.documentFormatExt)
     }
 
     @Test
     fun testScanRegionDataStructure() {
         // Test A4 paper format (210x297mm)
-        val a4Region = StatelessImmutableScanRegion("210", "297", "0", "0")
+        val a4Region = StatelessImmutableScanRegion("297", "210", "0", "0")
         val mutableA4 = a4Region.toMutable()
 
-        assert(mutableA4.width == "210")
-        assert(mutableA4.height == "297")
-        assert(mutableA4.xOffset == "0")
-        assert(mutableA4.yOffset == "0")
+        assertEquals("210", mutableA4.width)
+        assertEquals("297", mutableA4.height)
+        assertEquals("0", mutableA4.xOffset)
+        assertEquals("0", mutableA4.yOffset)
 
         // Test that we can modify mutable settings
         mutableA4.width = "148" // A5 width
         mutableA4.height = "210" // A5 height
 
-        assert(mutableA4.width == "148")
-        assert(mutableA4.height == "210")
+        assertEquals("148", mutableA4.width)
+        assertEquals("210", mutableA4.height)
 
         // Test conversion back to stateless
         val a5Region = mutableA4.toStateless()
         val reconvertedA5 = a5Region.toMutable()
-        assert(reconvertedA5.width == "148")
-        assert(reconvertedA5.height == "210")
+        assertEquals("148", reconvertedA5.width)
+        assertEquals("210", reconvertedA5.height)
     }
 }
