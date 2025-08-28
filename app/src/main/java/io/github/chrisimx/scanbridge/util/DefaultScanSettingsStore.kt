@@ -26,7 +26,6 @@ import kotlinx.serialization.json.Json
 import timber.log.Timber
 
 object DefaultScanSettingsStore {
-    private const val PREF_NAME = "scan_settings_store"
     private const val APP_PREF_NAME = "scanbridge"
 
     private fun isRememberSettingsEnabled(context: Context): Boolean {
@@ -68,12 +67,5 @@ object DefaultScanSettingsStore {
         val sharedPreferences = context.getSharedPreferences(APP_PREF_NAME, Context.MODE_PRIVATE)
         sharedPreferences.edit { remove("last_used_scan_settings") }
         Timber.d("Scan settings cleared from persistent storage")
-    }
-
-    fun clearIfDisabled(context: Context) {
-        if (!isRememberSettingsEnabled(context)) {
-            clear(context)
-            Timber.d("Scan settings cleared as persistence is disabled")
-        }
     }
 }

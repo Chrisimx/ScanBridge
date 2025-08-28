@@ -58,7 +58,6 @@ import io.github.chrisimx.scanbridge.uicomponents.TitledCard
 import io.github.chrisimx.scanbridge.uicomponents.dialog.SimpleTextDialog
 import io.github.chrisimx.scanbridge.uicomponents.settings.CheckboxSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.MoreInformationButton
-import io.github.chrisimx.scanbridge.uicomponents.settings.RememberScanSettingsCheckbox
 import io.github.chrisimx.scanbridge.uicomponents.settings.UIntSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
 import java.io.BufferedWriter
@@ -272,7 +271,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 information = it
             }
 
-            RememberScanSettingsCheckbox(
+            CheckboxSetting(
                 "remember_scan_settings",
                 stringResource(R.string.remember_scan_settings),
                 stringResource(R.string.remember_scan_settings_desc),
