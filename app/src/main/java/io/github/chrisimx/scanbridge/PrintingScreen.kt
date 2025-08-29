@@ -33,7 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import io.github.chrisimx.scanbridge.ipp.PrinterService
+import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
 import timber.log.Timber
 
@@ -52,6 +55,16 @@ fun PrintingScreen(
     val context = LocalContext.current
     var selectedFileUri by remember { mutableStateOf<Uri?>(null) }
     var selectedFileName by remember { mutableStateOf<String?>(null) }
+    var isPrinting by remember { mutableStateOf(false) }
+    var printMessage by remember { mutableStateOf<String?>(null) }
+    var copies by remember { mutableStateOf(1) }
+    
+    val scope = rememberCoroutineScope()
+    
+    // Create printer service
+    val printerService = remember {
+        PrinterService(printerURL, timeout, debug, certValidationDisabled)
+    }
 
     // File picker launcher for documents (PDF, images)
     val filePickerLauncher = rememberLauncherForActivityResult(
@@ -60,6 +73,7 @@ fun PrintingScreen(
         uri?.let {
             selectedFileUri = it
             selectedFileName = getFileNameFromUri(context, it)
+            printMessage = null // Clear any previous messages
             Timber.d("Selected file: $selectedFileName at $it")
         }
     }
@@ -136,14 +150,85 @@ fun PrintingScreen(
                     
                     if (selectedFileUri != null) {
                         Spacer(modifier = Modifier.height(8.dp))
+                        
+                        // Show print status message if any
+                        printMessage?.let { message ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (message.contains("success", ignoreCase = true)) 
+                                        MaterialTheme.colorScheme.primaryContainer 
+                                    else MaterialTheme.colorScheme.errorContainer
+                                )
+                            ) {
+                                Text(
+                                    text = message,
+                                    modifier = Modifier.padding(12.dp),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        
                         Button(
                             onClick = {
-                                // TODO: Implement actual printing
-                                Timber.d("Print button clicked for file: $selectedFileName")
+                                scope.launch {
+                                    isPrinting = true
+                                    printMessage = null
+                                    
+                                    try {
+                                        // Test connection first
+                                        val connectionResult = printerService.testConnection()
+                                        if (connectionResult.isFailure) {
+                                            printMessage = "Failed to connect to printer: ${connectionResult.exceptionOrNull()?.message}"
+                                            return@launch
+                                        }
+                                        
+                                        val printerInfo = connectionResult.getOrThrow()
+                                        if (!printerInfo.isOnline) {
+                                            printMessage = "Printer is not ready. State: ${printerInfo.state}"
+                                            return@launch
+                                        }
+                                        
+                                        // Print the document
+                                        val printResult = printerService.printDocument(
+                                            context = context,
+                                            documentUri = selectedFileUri!!,
+                                            jobName = selectedFileName ?: "ScanBridge Print",
+                                            copies = copies
+                                        )
+                                        
+                                        if (printResult.isSuccess) {
+                                            val result = printResult.getOrThrow()
+                                            printMessage = if (result.isSuccess) {
+                                                "Print job submitted successfully! Job ID: ${result.jobId}"
+                                            } else {
+                                                result.message
+                                            }
+                                        } else {
+                                            printMessage = "Print failed: ${printResult.exceptionOrNull()?.message}"
+                                        }
+                                    } catch (e: Exception) {
+                                        printMessage = "Print error: ${e.message}"
+                                        Timber.e(e, "Print operation failed")
+                                    } finally {
+                                        isPrinting = false
+                                    }
+                                }
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !isPrinting
                         ) {
-                            Text(stringResource(R.string.print))
+                            if (isPrinting) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Printing...")
+                            } else {
+                                Text(stringResource(R.string.print))
+                            }
                         }
                     }
                 }
@@ -162,13 +247,32 @@ fun PrintingScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    // Basic print settings placeholders
+                    // Basic print settings with interactive copies control
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(stringResource(R.string.copies))
-                        Text("1") // TODO: Make this editable
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(
+                                onClick = { if (copies > 1) copies-- },
+                                enabled = copies > 1
+                            ) {
+                                Text("-", style = MaterialTheme.typography.headlineSmall)
+                            }
+                            Text(
+                                text = copies.toString(),
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+                            IconButton(
+                                onClick = { if (copies < 10) copies++ },
+                                enabled = copies < 10
+                            ) {
+                                Text("+", style = MaterialTheme.typography.headlineSmall)
+                            }
+                        }
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(
