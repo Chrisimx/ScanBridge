@@ -37,6 +37,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.data.ui.CustomPrinterViewModel
+import io.github.chrisimx.scanbridge.uicomponents.FoundPrinterItem
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import timber.log.Timber
 import java.util.*
@@ -123,6 +124,5 @@ fun PrinterList(
 
 @Composable
 fun FoundPrinterItem(name: String, address: String, navController: NavController) {
-    // TODO: Implement printer item UI similar to FoundScannerItem
-    // For now, just a placeholder
+    io.github.chrisimx.scanbridge.uicomponents.FoundPrinterItem(name, address, navController)
 }
