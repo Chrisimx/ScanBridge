@@ -153,7 +153,10 @@ class ScanningScreenViewModel(
             scanningScreenData.currentScansState.addAll(storedSession.scannedPages)
             _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
                 ScanSettingsComposableData(storedSession.scanSettings?.toMutable() ?: caps.calculateDefaultESCLScanSettingsState(), caps),
-                onSettingsChanged = { saveScanSettings() }
+                onSettingsChanged = {
+                    saveScanSettings()
+                    saveSessionFile()
+                }
             )
         } else {
             // Try to load saved scan settings first, fallback to defaults if none exist
