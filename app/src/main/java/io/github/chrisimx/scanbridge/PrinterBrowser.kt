@@ -25,24 +25,35 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.data.ui.CustomPrinterViewModel
 import io.github.chrisimx.scanbridge.uicomponents.FoundPrinterItem
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
+import io.github.chrisimx.scanbridge.uicomponents.dialog.CustomPrinterDialog
 import timber.log.Timber
 import java.util.*
 import android.app.Application
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import io.github.chrisimx.scanbridge.data.model.CustomPrinter
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 fun PrinterBrowser(
     innerPadding: PaddingValues,
@@ -67,6 +78,28 @@ fun PrinterBrowser(
                 stringResource(R.string.no_printers_found)
             )
         }
+    }
+
+    if (showCustomDialog) {
+        val context = LocalContext.current
+        CustomPrinterDialog(
+            onDismiss = { setShowCustomDialog(false) },
+            onConnectClicked = { name, url, save ->
+                val printerName = if (name.isEmpty()) context.getString(R.string.custom_printer) else name
+                val sessionID = Uuid.random().toString()
+                if (save) {
+                    customPrinterViewModel.addPrinter(CustomPrinter(Uuid.random(), printerName, url))
+                }
+                setShowCustomDialog(false)
+                navController.navigate(
+                    PrinterRoute(
+                        printerName,
+                        url.toString(),
+                        sessionID
+                    )
+                )
+            }
+        )
     }
 }
 
@@ -111,7 +144,44 @@ fun PrinterList(
             }
         }
 
-        if (statefulPrinterMap.isEmpty()) {
+        if (customPrinterViewModel.customPrinters.isNotEmpty() && statefulPrinterMap.isNotEmpty()) {
+            item {
+                Text(
+                    stringResource(R.string.discovered_printers),
+                    modifier = Modifier.fillMaxWidth(1f).padding(start = 16.dp),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+
+            item {
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp))
+            }
+        }
+
+        customPrinterViewModel.customPrinters.forEach { customPrinter ->
+            item {
+                FoundPrinterItem(
+                    customPrinter.name,
+                    customPrinter.url.toString(),
+                    navController,
+                    {
+                        customPrinterViewModel.deletePrinter(customPrinter)
+                    }
+                )
+            }
+        }
+
+        if (customPrinterViewModel.customPrinters.isNotEmpty() && statefulPrinterMap.isNotEmpty()) {
+            item {
+                Text(
+                    stringResource(R.string.saved_printers),
+                    modifier = Modifier.fillMaxWidth(1f).padding(start = 16.dp),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+        }
+
+        if (statefulPrinterMap.isEmpty() && customPrinterViewModel.customPrinters.isEmpty()) {
             item {
                 FullScreenError(
                     R.drawable.twotone_wifi_find_24,

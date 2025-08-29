@@ -142,6 +142,18 @@ fun StartupScreen(navController: NavController) {
                         contentDescription = stringResource(R.string.custom_scanner_desc)
                     )
                 }
+            } else if (selectedItem.intValue == 1) {
+                FloatingActionButton(
+                    modifier = Modifier.testTag("custom_printer_fab"),
+                    onClick = {
+                        showCustomDialog = true
+                    }
+                ) {
+                    Icon(
+                        Icons.Filled.Create,
+                        contentDescription = stringResource(R.string.custom_scanner_printer_desc)
+                    )
+                }
             }
         }
     ) { innerPadding ->

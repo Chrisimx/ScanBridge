@@ -129,4 +129,5 @@
     <string name="custom_printer">Custom printer</string>
     <string name="discovered_printers">Discovered printers</string>
     <string name="saved_printers">Saved printers</string>
+    <string name="printer_name_placeholder">My Printer</string>
 </resources>
