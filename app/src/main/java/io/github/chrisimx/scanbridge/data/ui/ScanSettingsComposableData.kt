@@ -51,6 +51,10 @@ data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSett
     var widthTextFieldString by widthTextFieldState
     val heightTextFieldState = mutableStateOf("")
     var heightTextFieldString by heightTextFieldState
+    val xOffsetTextFieldState = mutableStateOf("0")
+    var xOffsetTextFieldString by xOffsetTextFieldState
+    val yOffsetTextFieldState = mutableStateOf("0")
+    var yOffsetTextFieldString by yOffsetTextFieldState
 
     private val selectedInputSourceCapabilitiesState = derivedStateOf {
         when (scanSettingsState.inputSource) {
@@ -80,6 +84,8 @@ data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSett
         duplexAdfSupported,
         widthTextFieldState,
         heightTextFieldState,
+        xOffsetTextFieldState,
+        yOffsetTextFieldState,
         customMenuEnabledState,
         selectedInputSourceCapabilitiesState,
         intentOptionsState,
@@ -94,6 +100,8 @@ data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSett
         duplexAdfSupported,
         widthTextFieldState.value,
         heightTextFieldState.value,
+        xOffsetTextFieldState.value,
+        yOffsetTextFieldState.value,
         customMenuEnabledState.value,
         selectedInputSourceCapabilitiesState.value,
         intentOptionsState.value,
@@ -110,6 +118,8 @@ data class ImmutableScanSettingsComposableData(
     val duplexAdfSupported: Boolean,
     private val widthTextFieldState: State<String>,
     private val heightTextFieldState: State<String>,
+    private val xOffsetTextFieldState: State<String>,
+    private val yOffsetTextFieldState: State<String>,
     private val customMenuEnabledState: State<Boolean>,
     private val selectedInputSourceCapabilitiesState: State<InputSourceCaps>,
     private val intentOptionsState: State<List<ScanIntentData>>,
@@ -118,6 +128,8 @@ data class ImmutableScanSettingsComposableData(
     val customMenuEnabled by customMenuEnabledState
     val widthTextFieldString by widthTextFieldState
     val heightTextFieldString by heightTextFieldState
+    val xOffsetTextFieldString by xOffsetTextFieldState
+    val yOffsetTextFieldString by yOffsetTextFieldState
     val selectedInputSourceCapabilities by selectedInputSourceCapabilitiesState
     val intentOptions by intentOptionsState
     val supportedScanResolutions by supportedScanResolutionsState
@@ -132,6 +144,8 @@ data class StatelessImmutableScanSettingsComposableData(
     val duplexAdfSupported: Boolean,
     val widthTextField: String,
     val heightTextField: String,
+    val xOffsetTextField: String,
+    val yOffsetTextField: String,
     val customMenuEnabled: Boolean,
     val selectedInputSourceCapabilities: InputSourceCaps,
     val intentOptions: List<ScanIntentData>,

@@ -95,4 +95,29 @@
     <string name="disable_cert_checks_desc">This option disables all HTTPS certificate validation. Any certificate will be accepted, including self-signed, expired, or otherwise invalid ones. Do not use this option on insecure or public networks, as it makes man-in-the-middle (MitM) attacks possible.\n\nIn most cases, scanners are used on private networks or over VPN connections, where concerns about authenticity are minimal. In such environments, disabling certificate checks is unlikely to pose a real security risk. And in case confidentiality or authenticity is a concern, even HTTPS won\'t help much, as eSCL lacks client authentication altogether. Anyone with access to the network can potentially retrieve scanned pages.</string>
     <string name="remember_scan_settings">Remember scan settings</string>
     <string name="remember_scan_settings_desc">When enabled, your last used scan settings (input source, duplex, etc.) will be restored when you create a new scan session.\n\nWhen disabled, each session starts with default scan settings (highest resolution, largest possible scan area).</string>
+    
+    <!-- New scan settings strings -->
+    <string name="content_type">Content Type:</string>
+    <string name="color_mode">Color Mode:</string>
+    <string name="color_space">Color Space:</string>
+    <string name="media_type">Media Type:</string>
+    <string name="ccd_channel">CCD Channel:</string>
+    <string name="binary_rendering">Binary Rendering:</string>
+    <string name="threshold">Threshold:</string>
+    <string name="number_of_pages">Number of Pages:</string>
+    <string name="blank_page_detection">Blank Page Detection</string>
+    <string name="blank_page_removal">Blank Page Removal</string>
+    <string name="feed_direction">Feed Direction:</string>
+    <string name="brightness">Brightness:</string>
+    <string name="compression_factor">Compression Factor:</string>
+    <string name="contrast">Contrast:</string>
+    <string name="gamma">Gamma:</string>
+    <string name="highlight">Highlight:</string>
+    <string name="noise_removal">Noise Removal:</string>
+    <string name="shadow">Shadow:</string>
+    <string name="sharpen">Sharpen:</string>
+    <string name="x_offset_in_mm">X Offset (in mm)</string>
+    <string name="y_offset_in_mm">Y Offset (in mm)</string>
+    <string name="advanced_settings">Advanced Settings</string>
+    <string name="effects">Effects</string>
 </resources>

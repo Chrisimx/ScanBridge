@@ -42,6 +42,7 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
@@ -182,6 +183,114 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text(
+                    stringResource(R.string.content_type),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+                
+                FlowRow(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    // For now, add a simple "Default" option - we can expand this later
+                    InputChip(
+                        onClick = {
+                            scanSettingsViewModel.setContentType(null)
+                        },
+                        label = { Text("Default") },
+                        selected = scanSettingsUIState.scanSettingsState.contentType == null
+                    )
+                }
+            }
+        }
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 15.dp, bottom = 15.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    stringResource(R.string.advanced_settings),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+
+                // Number of Pages
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.number_of_pages))
+                    ToggleButton(
+                        checked = scanSettingsUIState.scanSettingsState.numberOfPages != null,
+                        onCheckedChange = { enabled ->
+                            if (enabled) {
+                                scanSettingsViewModel.setNumberOfPages(1u)
+                            } else {
+                                scanSettingsViewModel.setNumberOfPages(null)
+                            }
+                        }
+                    ) {
+                        Text(if (scanSettingsUIState.scanSettingsState.numberOfPages != null) "Enabled" else "Disabled")
+                    }
+                }
+
+                // Blank Page Detection
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.blank_page_detection))
+                    ToggleButton(
+                        checked = scanSettingsUIState.scanSettingsState.blankPageDetection == true,
+                        onCheckedChange = { scanSettingsViewModel.setBlankPageDetection(it) }
+                    ) {
+                        Text(if (scanSettingsUIState.scanSettingsState.blankPageDetection == true) "On" else "Off")
+                    }
+                }
+
+                // Blank Page Removal
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.blank_page_removal))
+                    ToggleButton(
+                        checked = scanSettingsUIState.scanSettingsState.blankPageDetectionAndRemoval == true,
+                        onCheckedChange = { scanSettingsViewModel.setBlankPageDetectionAndRemoval(it) }
+                    ) {
+                        Text(if (scanSettingsUIState.scanSettingsState.blankPageDetectionAndRemoval == true) "On" else "Off")
+                    }
+                }
+
+                // Threshold
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.threshold))
+                    Slider(
+                        value = (scanSettingsUIState.scanSettingsState.threshold ?: 50u).toFloat(),
+                        onValueChange = { scanSettingsViewModel.setThreshold(it.toUInt()) },
+                        valueRange = 0f..100f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 15.dp, bottom = 15.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
                     stringResource(R.string.scan_region),
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
@@ -226,46 +335,134 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                     )
                 }
                 AnimatedVisibility(scanSettingsUIState.customMenuEnabled) {
-                    Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                        ValidatedDimensionsTextEdit(
-                            scanSettingsUIState.widthTextFieldString,
-                            context,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 10.dp),
-                            stringResource(R.string.width_in_mm),
-                            { newText: String ->
-                                scanSettingsViewModel.setWidthTextFieldContent(
-                                    newText
-                                )
-                            },
-                            { newWidth: String ->
-                                scanSettingsViewModel.setRegionDimension(
-                                    newWidth,
-                                    scanSettingsUIState.heightTextFieldString
-                                )
-                            },
-                            min = scanSettingsUIState.selectedInputSourceCapabilities.minWidth.toMillimeters().value,
-                            max = scanSettingsUIState.selectedInputSourceCapabilities.maxWidth.toMillimeters().value
-                        )
-                        ValidatedDimensionsTextEdit(
-                            scanSettingsUIState.heightTextFieldString,
-                            context,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 10.dp),
-                            stringResource(R.string.height_in_mm),
-                            { scanSettingsViewModel.setHeightTextFieldContent(it) },
-                            {
-                                scanSettingsViewModel.setRegionDimension(
-                                    scanSettingsUIState.widthTextFieldString,
-                                    it
-                                )
-                            },
-                            min = scanSettingsUIState.selectedInputSourceCapabilities.minHeight.toMillimeters().value,
-                            max = scanSettingsUIState.selectedInputSourceCapabilities.maxHeight.toMillimeters().value
-                        )
+                    Column {
+                        Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                            ValidatedDimensionsTextEdit(
+                                scanSettingsUIState.widthTextFieldString,
+                                context,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 10.dp),
+                                stringResource(R.string.width_in_mm),
+                                { newText: String ->
+                                    scanSettingsViewModel.setWidthTextFieldContent(
+                                        newText
+                                    )
+                                },
+                                { newWidth: String ->
+                                    scanSettingsViewModel.setRegionDimension(
+                                        newWidth,
+                                        scanSettingsUIState.heightTextFieldString
+                                    )
+                                },
+                                min = scanSettingsUIState.selectedInputSourceCapabilities.minWidth.toMillimeters().value,
+                                max = scanSettingsUIState.selectedInputSourceCapabilities.maxWidth.toMillimeters().value
+                            )
+                            ValidatedDimensionsTextEdit(
+                                scanSettingsUIState.heightTextFieldString,
+                                context,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 10.dp),
+                                stringResource(R.string.height_in_mm),
+                                { scanSettingsViewModel.setHeightTextFieldContent(it) },
+                                {
+                                    scanSettingsViewModel.setRegionDimension(
+                                        scanSettingsUIState.widthTextFieldString,
+                                        it
+                                    )
+                                },
+                                min = scanSettingsUIState.selectedInputSourceCapabilities.minHeight.toMillimeters().value,
+                                max = scanSettingsUIState.selectedInputSourceCapabilities.maxHeight.toMillimeters().value
+                            )
+                        }
+                        Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                            ValidatedDimensionsTextEdit(
+                                scanSettingsUIState.xOffsetTextFieldString,
+                                context,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 10.dp),
+                                stringResource(R.string.x_offset_in_mm),
+                                { newText: String ->
+                                    scanSettingsViewModel.setXOffsetTextFieldContent(newText)
+                                },
+                                { newXOffset: String ->
+                                    scanSettingsViewModel.setOffset(
+                                        newXOffset,
+                                        scanSettingsUIState.yOffsetTextFieldString
+                                    )
+                                },
+                                min = 0.0,
+                                max = scanSettingsUIState.selectedInputSourceCapabilities.maxWidth.toMillimeters().value
+                            )
+                            ValidatedDimensionsTextEdit(
+                                scanSettingsUIState.yOffsetTextFieldString,
+                                context,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 10.dp),
+                                stringResource(R.string.y_offset_in_mm),
+                                { newText: String ->
+                                    scanSettingsViewModel.setYOffsetTextFieldContent(newText)
+                                },
+                                { newYOffset: String ->
+                                    scanSettingsViewModel.setOffset(
+                                        scanSettingsUIState.xOffsetTextFieldString,
+                                        newYOffset
+                                    )
+                                },
+                                min = 0.0,
+                                max = scanSettingsUIState.selectedInputSourceCapabilities.maxHeight.toMillimeters().value
+                            )
+                        }
                     }
+                }
+            }
+        }
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 15.dp, bottom = 15.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    stringResource(R.string.effects),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+                
+                // Brightness
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.brightness))
+                    Slider(
+                        value = (scanSettingsUIState.scanSettingsState.brightness ?: 50u).toFloat(),
+                        onValueChange = { scanSettingsViewModel.setBrightness(it.toUInt()) },
+                        valueRange = 0f..100f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                
+                // Contrast
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.contrast))
+                    Slider(
+                        value = (scanSettingsUIState.scanSettingsState.contrast ?: 50u).toFloat(),
+                        onValueChange = { scanSettingsViewModel.setContrast(it.toUInt()) },
+                        valueRange = 0f..100f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                
+                // Sharpen
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.sharpen))
+                    Slider(
+                        value = (scanSettingsUIState.scanSettingsState.sharpen ?: 50u).toFloat(),
+                        onValueChange = { scanSettingsViewModel.setSharpen(it.toUInt()) },
+                        valueRange = 0f..100f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
