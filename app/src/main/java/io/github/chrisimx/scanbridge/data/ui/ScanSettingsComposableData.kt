@@ -82,6 +82,31 @@ data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSett
     }
     val availableColorModes by availableColorModesState
 
+    // Determine supported effects based on scanner capabilities
+    private val supportedEffectsState = derivedStateOf {
+        val basicEffects = setOf("brightness", "contrast", "sharpen")
+        val advancedEffects = mutableSetOf<String>()
+        
+        // Check if scanner supports advanced features that suggest more effect support
+        val settingProfile = selectedInputSourceCapabilities.settingProfiles.elementAtOrNull(0)
+        val hasMultipleColorModes = (settingProfile?.colorModes?.size ?: 0) > 1
+        val hasAdvancedColorSpaces = settingProfile?.colorSpaces?.any { it != "sRGB" } ?: false
+        val hasMultipleCcdChannels = (settingProfile?.ccdChannels?.size ?: 0) > 3
+        
+        // If scanner has advanced color capabilities, likely supports more effects
+        if (hasMultipleColorModes || hasAdvancedColorSpaces || hasMultipleCcdChannels) {
+            advancedEffects.addAll(setOf("gamma", "highlight", "shadow"))
+        }
+        
+        // If scanner has very advanced capabilities, it might support even more effects
+        if (hasMultipleColorModes && hasAdvancedColorSpaces && hasMultipleCcdChannels) {
+            advancedEffects.addAll(setOf("noiseRemoval", "compressionFactor"))
+        }
+        
+        basicEffects + advancedEffects
+    }
+    val supportedEffects by supportedEffectsState
+
     fun toImmutable(): ImmutableScanSettingsComposableData = ImmutableScanSettingsComposableData(
         scanSettingsState.toImmutable(),
         capabilities,
@@ -96,7 +121,8 @@ data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSett
         selectedInputSourceCapabilitiesState,
         intentOptionsState,
         supportedScanResolutionsState,
-        availableColorModesState
+        availableColorModesState,
+        supportedEffectsState
     )
 
     fun toStateless(): StatelessImmutableScanSettingsComposableData = StatelessImmutableScanSettingsComposableData(
@@ -113,7 +139,8 @@ data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSett
         selectedInputSourceCapabilitiesState.value,
         intentOptionsState.value,
         supportedScanResolutionsState.value,
-        availableColorModesState.value
+        availableColorModesState.value,
+        supportedEffectsState.value
     )
 }
 
@@ -132,7 +159,8 @@ data class ImmutableScanSettingsComposableData(
     private val selectedInputSourceCapabilitiesState: State<InputSourceCaps>,
     private val intentOptionsState: State<List<ScanIntentData>>,
     private val supportedScanResolutionsState: State<List<DiscreteResolution>>,
-    private val availableColorModesState: State<List<ColorMode>>
+    private val availableColorModesState: State<List<ColorMode>>,
+    private val supportedEffectsState: State<Set<String>>
 ) {
     val customMenuEnabled by customMenuEnabledState
     val widthTextFieldString by widthTextFieldState
@@ -143,6 +171,7 @@ data class ImmutableScanSettingsComposableData(
     val intentOptions by intentOptionsState
     val supportedScanResolutions by supportedScanResolutionsState
     val availableColorModes by availableColorModesState
+    val supportedEffects by supportedEffectsState
 }
 
 @Serializable
@@ -160,5 +189,6 @@ data class StatelessImmutableScanSettingsComposableData(
     val selectedInputSourceCapabilities: InputSourceCaps,
     val intentOptions: List<ScanIntentData>,
     val supportedScanResolutions: List<DiscreteResolution>,
-    val availableColorModes: List<ColorMode>
+    val availableColorModes: List<ColorMode>,
+    val supportedEffects: Set<String>
 )

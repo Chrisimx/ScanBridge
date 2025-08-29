@@ -543,91 +543,107 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                 )
                 
                 // Brightness
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text(stringResource(R.string.brightness))
-                    Slider(
-                        value = (scanSettingsUIState.scanSettingsState.brightness ?: 50u).toFloat(),
-                        onValueChange = { scanSettingsViewModel.setBrightness(it.toUInt()) },
-                        valueRange = 0f..100f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                if (scanSettingsUIState.supportedEffects.contains("brightness")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.brightness))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.brightness ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setBrightness(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
                 
                 // Contrast
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text(stringResource(R.string.contrast))
-                    Slider(
-                        value = (scanSettingsUIState.scanSettingsState.contrast ?: 50u).toFloat(),
-                        onValueChange = { scanSettingsViewModel.setContrast(it.toUInt()) },
-                        valueRange = 0f..100f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                if (scanSettingsUIState.supportedEffects.contains("contrast")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.contrast))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.contrast ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setContrast(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
                 
                 // Sharpen
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text(stringResource(R.string.sharpen))
-                    Slider(
-                        value = (scanSettingsUIState.scanSettingsState.sharpen ?: 50u).toFloat(),
-                        onValueChange = { scanSettingsViewModel.setSharpen(it.toUInt()) },
-                        valueRange = 0f..100f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                if (scanSettingsUIState.supportedEffects.contains("sharpen")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.sharpen))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.sharpen ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setSharpen(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
                 
                 // Gamma
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text(stringResource(R.string.gamma))
-                    Slider(
-                        value = (scanSettingsUIState.scanSettingsState.gamma ?: 50u).toFloat(),
-                        onValueChange = { scanSettingsViewModel.setGamma(it.toUInt()) },
-                        valueRange = 0f..100f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                if (scanSettingsUIState.supportedEffects.contains("gamma")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.gamma))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.gamma ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setGamma(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
                 
                 // Highlight
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text(stringResource(R.string.highlight))
-                    Slider(
-                        value = (scanSettingsUIState.scanSettingsState.highlight ?: 50u).toFloat(),
-                        onValueChange = { scanSettingsViewModel.setHighlight(it.toUInt()) },
-                        valueRange = 0f..100f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                if (scanSettingsUIState.supportedEffects.contains("highlight")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.highlight))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.highlight ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setHighlight(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
                 
                 // Noise Removal
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text(stringResource(R.string.noise_removal))
-                    Slider(
-                        value = (scanSettingsUIState.scanSettingsState.noiseRemoval ?: 50u).toFloat(),
-                        onValueChange = { scanSettingsViewModel.setNoiseRemoval(it.toUInt()) },
-                        valueRange = 0f..100f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                if (scanSettingsUIState.supportedEffects.contains("noiseRemoval")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.noise_removal))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.noiseRemoval ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setNoiseRemoval(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
                 
                 // Shadow
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text(stringResource(R.string.shadow))
-                    Slider(
-                        value = (scanSettingsUIState.scanSettingsState.shadow ?: 50u).toFloat(),
-                        onValueChange = { scanSettingsViewModel.setShadow(it.toUInt()) },
-                        valueRange = 0f..100f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                if (scanSettingsUIState.supportedEffects.contains("shadow")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.shadow))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.shadow ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setShadow(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
                 
                 // Compression Factor
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text(stringResource(R.string.compression_factor))
-                    Slider(
-                        value = (scanSettingsUIState.scanSettingsState.compressionFactor ?: 50u).toFloat(),
-                        onValueChange = { scanSettingsViewModel.setCompressionFactor(it.toUInt()) },
-                        valueRange = 0f..100f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                if (scanSettingsUIState.supportedEffects.contains("compressionFactor")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.compression_factor))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.compressionFactor ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setCompressionFactor(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
         }
