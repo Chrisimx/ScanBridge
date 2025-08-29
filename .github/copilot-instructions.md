@@ -45,6 +45,7 @@ sdkmanager "build-tools;35.0.0" "platforms;android-35" "platform-tools"
 - **Full build and test**: `./gradlew build` -- takes ~60 seconds. NEVER CANCEL. Set timeout to 120+ seconds.
 - **Clean build**: `./gradlew clean` -- takes ~10 seconds.
 - **Run unit tests**: `./gradlew test` -- takes ~60 seconds. NEVER CANCEL. Set timeout to 120+ seconds.
+- **Android instrumented tests**: `./gradlew connectedDebugAndroidTest` -- requires Android device/emulator. NEVER CANCEL. Set timeout to 300+ seconds.
 
 ### Code Quality
 - **Format check**: Download ktlint and run `./ktlint --editorconfig=./.editorconfig`
@@ -61,7 +62,19 @@ sdkmanager "build-tools;35.0.0" "platforms;android-35" "platform-tools"
 - **ALWAYS** run the complete environment setup before building
 - **ALWAYS** validate that builds complete successfully with `./gradlew build`
 - **ALWAYS** run unit tests with `./gradlew test` to ensure changes don't break functionality
-- **Manual validation requirement**: Test the application UI using Android instrumented tests when available
+- **Manual validation requirement**: After making changes, build and install APK to test functionality:
+  ```bash
+  ./gradlew assembleDebug
+  # Install APK: adb install app/build/outputs/apk/debug/app-debug.apk
+  # Test scanner discovery, scanning workflows, and settings functionality
+  ```
+
+### Testing Scanner Functionality
+The app includes a mock eSCL server for testing scanner functionality:
+- **Mock server**: Automatically downloaded and configured in Android tests
+- **Test scenarios**: Scanner discovery, connection, and scanning workflows
+- **UI testing**: Uses Compose UI testing framework for UI validation
+- **Screenshots**: Test suite can capture screenshots of the app screens
 
 ### Output Validation
 - Debug APK location: `app/build/outputs/apk/debug/app-debug.apk` (~48MB)
@@ -110,9 +123,13 @@ These warnings are expected and do not indicate build failures.
   - Material Design 3 components
 
 ### Testing Strategy
-- **Unit tests**: Located in `app/src/test/` - test business logic
+- **Unit tests**: Located in `app/src/test/` - test business logic (4 test classes)
 - **Android instrumented tests**: Located in `app/src/androidTest/` - test UI and integration
-- **Mock server**: Build script includes eSCL mock server for testing scanner functionality
+  - Includes `ScanBridgeTest.kt` with comprehensive UI and scanning workflow tests
+  - Uses mock eSCL server for testing scanner functionality without real hardware
+  - Tests include: discovery screen, settings, scanning interface, and end-to-end scan workflows
+- **Mock server**: Build script automatically downloads eSCL mock server for different architectures
+- **CI/CD**: All tests run automatically in GitHub Actions workflows
 
 ### CI/CD Information
 - **Build pipeline**: `.github/workflows/android.yml` - builds APKs and runs tests
@@ -134,7 +151,12 @@ These warnings are expected and do not indicate build failures.
 4. **Test locally**: `./gradlew test` to run unit tests
 5. **Format check**: Run ktlint to validate code formatting
 6. **Build APK**: `./gradlew assembleDebug` to create installable APK
-7. **Validate changes**: Install APK and test scanning functionality if UI changes made
+7. **Manual validation**: Install APK and test core functionality:
+   - Open app and verify main discovery screen loads
+   - Navigate to settings screen and verify options are accessible
+   - Test custom scanner input if making scanner-related changes
+   - Verify Material You design elements render correctly
+8. **Integration tests** (optional): Run `./gradlew connectedDebugAndroidTest` with Android device/emulator
 
 ### Key Locations for Common Changes
 - **UI Components**: `app/src/main/java/io/github/chrisimx/scanbridge/`
