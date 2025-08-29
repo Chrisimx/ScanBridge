@@ -9,6 +9,8 @@
     <string name="okay_text">Okay</string>
     <string name="trying_to_retrieve_scannercapabilities">Trying to retrieve ScannerCapabilities</string>
     <string name="scan">Scan</string>
+    <string name="cancel_scan">Cancel</string>
+    <string name="cancelling_scan">Cancelling…</string>
     <string name="desc_scanned_page">A scanned page</string>
     <string name="job_canceled">The job was canceled</string>
     <string name="job_aborted_because_error">The job was aborted because of an error</string>
