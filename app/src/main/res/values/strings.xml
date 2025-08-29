@@ -21,6 +21,7 @@
     <string name="swap_with_next_page">Swap with next</string>
     <string name="page_x_of_y">Page %1$s of %2$s</string>
     <string name="export">Export</string>
+    <string name="print">Print</string>
     <string name="retrieving_page">Retrieving page</string>
     <string name="exporting">Exporting…</string>
     <string name="no_scans_yet">No pages were scanned yet. Click the scan button :)</string>

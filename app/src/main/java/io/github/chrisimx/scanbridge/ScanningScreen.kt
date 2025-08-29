@@ -26,6 +26,14 @@ import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Bundle
+import android.os.CancellationSignal
+import android.os.ParcelFileDescriptor
+import android.print.PageRange
+import android.print.PrintAttributes
+import android.print.PrintDocumentAdapter
+import android.print.PrintDocumentInfo
+import android.print.PrintManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -350,6 +358,126 @@ fun doPdfExport(scanningViewModel: ScanningScreenViewModel, context: Context, on
         )
     )
     context.startActivity(share)
+}
+
+/**
+ * Print scanned documents using Android Print Framework (supports AirPrint/IPP Everywhere)
+ */
+fun doPrint(scanningViewModel: ScanningScreenViewModel, context: Context, onError: (String) -> Unit) {
+    if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
+        onError(context.getString(R.string.no_scans_yet))
+        return
+    }
+    if (scanningViewModel.scanningScreenData.scanJobRunning) {
+        onError(context.getString(R.string.job_still_running))
+        return
+    }
+
+    val printManager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
+    val printAdapter = ScanDocumentPrintAdapter(
+        context,
+        scanningViewModel.scanningScreenData.currentScansState.map { File(it.first) }
+    )
+    
+    val jobName = "ScanBridge - ${
+        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+    }"
+    
+    printManager.print(jobName, printAdapter, null)
+}
+
+/**
+ * PrintDocumentAdapter for printing scanned documents
+ */
+class ScanDocumentPrintAdapter(
+    private val context: Context,
+    private val imageFiles: List<File>
+) : PrintDocumentAdapter() {
+
+    override fun onLayout(
+        oldAttributes: PrintAttributes?,
+        newAttributes: PrintAttributes,
+        cancellationSignal: CancellationSignal?,
+        callback: LayoutResultCallback,
+        extras: Bundle?
+    ) {
+        if (cancellationSignal?.isCanceled == true) {
+            callback.onLayoutCancelled()
+            return
+        }
+
+        val info = PrintDocumentInfo.Builder("ScanBridge_Print")
+            .setContentType(PrintDocumentInfo.CONTENT_TYPE_PHOTO)
+            .setPageCount(imageFiles.size)
+            .build()
+
+        callback.onLayoutFinished(info, true)
+    }
+
+    override fun onWrite(
+        pages: Array<out PageRange>?,
+        destination: ParcelFileDescriptor,
+        cancellationSignal: CancellationSignal?,
+        callback: WriteResultCallback
+    ) {
+        try {
+            if (cancellationSignal?.isCanceled == true) {
+                callback.onWriteCancelled()
+                return
+            }
+
+            // Create a temporary file for the PDF
+            val tempFile = File.createTempFile("print_document", ".pdf")
+            val pdfWriter = PdfWriter(tempFile)
+            val pdfDocument = PdfDocument(pdfWriter)
+            val document = Document(pdfDocument)
+
+            imageFiles.forEachIndexed { index, imageFile ->
+                if (cancellationSignal?.isCanceled == true) {
+                    document.close()
+                    callback.onWriteCancelled()
+                    return
+                }
+
+                // Check if this page should be printed based on the page ranges
+                val shouldPrintPage = pages?.any { range ->
+                    index >= range.start && index <= range.end
+                } ?: true
+
+                if (shouldPrintPage) {
+                    val imageData = ImageDataFactory.create(imageFile.absolutePath)
+                    val image = Image(imageData)
+                    
+                    // Scale image to fit page
+                    val pageSize = PageSize.A4
+                    image.scaleToFit(pageSize.width - 72, pageSize.height - 72) // 1 inch margins
+                    image.setFixedPosition(36f, 36f) // Center on page
+                    
+                    if (index > 0) {
+                        document.add(com.itextpdf.layout.element.AreaBreak())
+                    }
+                    document.add(image)
+                }
+            }
+
+            document.close()
+
+            // Copy the temporary file to the destination
+            tempFile.inputStream().use { input ->
+                ParcelFileDescriptor.AutoCloseOutputStream(destination).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            
+            // Clean up temporary file
+            tempFile.delete()
+            
+            callback.onWriteFinished(arrayOf(PageRange.ALL_PAGES))
+            
+        } catch (e: Exception) {
+            callback.onWriteFailed(e.message)
+        }
+    }
 }
 
 @OptIn(ExperimentalUuidApi::class)
@@ -834,6 +962,22 @@ fun ScanningScreen(
                                 }
                             )
                         }
+                    },
+                    onPrint = {
+                        scanningViewModel.setShowExportOptionsPopup(false)
+                        doPrint(
+                            scanningViewModel,
+                            context,
+                            { error ->
+                                snackBarError(
+                                    error,
+                                    scope,
+                                    context,
+                                    snackbarHostState,
+                                    false
+                                )
+                            }
+                        )
                     }
                 )
             }
