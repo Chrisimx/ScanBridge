@@ -25,8 +25,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -50,6 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import io.github.chrisimx.scanbridge.data.ui.CustomPrinterViewModel
 import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,39 +66,43 @@ fun ScannerDiscoveryTopBar(header: String) {
 @Composable
 fun StartupScreen(navController: NavController) {
     var selectedItem = rememberSaveable { mutableIntStateOf(0) }
-    val items = listOf(stringResource(R.string.discovery), stringResource(R.string.settings))
-    val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Settings)
+    val items = listOf(stringResource(R.string.discovery), stringResource(R.string.print), stringResource(R.string.settings))
+    val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Share, Icons.Filled.Settings)
     val unselectedIcons =
-        listOf(Icons.Outlined.Home, Icons.Outlined.Settings)
+        listOf(Icons.Outlined.Home, Icons.Outlined.Share, Icons.Outlined.Settings)
     val context = LocalContext.current
     val header =
-        if (selectedItem.intValue == 0) {
-            stringResource(R.string.header_scannerbrowser)
-        } else {
-            stringResource(
-                R.string.settings
-            )
+        when (selectedItem.intValue) {
+            0 -> stringResource(R.string.header_scannerbrowser)
+            1 -> stringResource(R.string.header_printerbrowser)
+            else -> stringResource(R.string.settings)
         }
 
     val statefulScannerMap = remember { mutableStateMapOf<String, DiscoveredScanner>() }
     val statefulScannerMapSecure = remember { mutableStateMapOf<String, DiscoveredScanner>() }
+    val statefulPrinterMap = remember { mutableStateMapOf<String, DiscoveredPrinter>() }
 
     DisposableEffect(Unit) {
-        val discoveryPairOptional = startScannerDiscovery(context, statefulScannerMap, statefulScannerMapSecure)
-
-        if (discoveryPairOptional.isEmpty) {
-            return@DisposableEffect onDispose {
-                Timber.e("Couldn't start discovery")
-            }
-        }
-
-        val discoveryPair = discoveryPairOptional.get()
+        val scannerDiscoveryPairOptional = startScannerDiscovery(context, statefulScannerMap, statefulScannerMapSecure)
+        val printerDiscoveryPairOptional = startPrinterDiscovery(context, statefulPrinterMap)
 
         onDispose {
             Timber.i("Discovery stopped")
-            for (d in discoveryPair.second) {
-                Timber.i("Stopping discovery for ${d.statefulScannerMap}")
-                discoveryPair.first.stopServiceDiscovery(d)
+            
+            if (scannerDiscoveryPairOptional.isPresent) {
+                val scannerDiscoveryPair = scannerDiscoveryPairOptional.get()
+                for (d in scannerDiscoveryPair.second) {
+                    Timber.i("Stopping scanner discovery for ${d.statefulScannerMap}")
+                    scannerDiscoveryPair.first.stopServiceDiscovery(d)
+                }
+            }
+            
+            if (printerDiscoveryPairOptional.isPresent) {
+                val printerDiscoveryPair = printerDiscoveryPairOptional.get()
+                for (d in printerDiscoveryPair.second) {
+                    Timber.i("Stopping printer discovery for ${d.statefulPrinterMap}")
+                    printerDiscoveryPair.first.stopServiceDiscovery(d)
+                }
             }
         }
     }
@@ -152,7 +159,14 @@ fun StartupScreen(navController: NavController) {
                     statefulScannerMap,
                     statefulScannerMapSecure
                 )
-                1 -> {
+                1 -> PrinterBrowser(
+                    innerPadding,
+                    navController,
+                    showCustomDialog,
+                    { showCustomDialog = it },
+                    statefulPrinterMap
+                )
+                2 -> {
                     AppSettingsScreen(innerPadding)
                 }
             }
