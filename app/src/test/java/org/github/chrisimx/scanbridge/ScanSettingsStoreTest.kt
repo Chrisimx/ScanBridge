@@ -30,17 +30,13 @@ class ScanSettingsStoreTest {
 
     @Test
     fun testScanSettingsPersistenceBehavior() {
-        // Test the basic persistence behavior described in the PR
-        // This is a simple test to verify our data structures work correctly
-        // The actual SharedPreferences testing would require Android testing framework
-
         val testSettings = StatelessImmutableESCLScanSettingsState(
             version = "2.63",
             intent = null,
-            scanRegions = StatelessImmutableScanRegion("297", "210", "0", "0"), // A4
-            documentFormatExt = "application/pdf", // PDF document format
+            scanRegions = StatelessImmutableScanRegion("297", "210", "0", "0"),
+            documentFormatExt = "application/pdf",
             contentType = null,
-            inputSource = InputSource.Feeder, // ADF input
+            inputSource = InputSource.Feeder,
             xResolution = 300u,
             yResolution = 300u,
             colorMode = ColorMode.RGB24,
@@ -48,7 +44,7 @@ class ScanSettingsStoreTest {
             mediaType = null,
             ccdChannel = null,
             binaryRendering = null,
-            duplex = true, // Duplex enabled for double-sided scanning
+            duplex = true,
             numberOfPages = null,
             brightness = null,
             compressionFactor = null,
@@ -65,12 +61,11 @@ class ScanSettingsStoreTest {
             blankPageDetectionAndRemoval = null
         )
 
-        // Test the user story scenario: ADF + duplex + A4 + PDF
-        assertEquals("Should use ADF for automatic document feeding", InputSource.Feeder, testSettings.inputSource)
-        assertEquals("Should support duplex for double-sided scanning", true, testSettings.duplex)
+        assertEquals(InputSource.Feeder, testSettings.inputSource)
+        assertEquals(true, testSettings.duplex)
         assertEquals("210", testSettings.scanRegions?.width)
-        assertEquals("Should use A4 height (297mm)", "297", testSettings.scanRegions?.height)
-        assertEquals("Should export as PDF format", "application/pdf", testSettings.documentFormatExt)
+        assertEquals("297", testSettings.scanRegions?.height)
+        assertEquals("application/pdf", testSettings.documentFormatExt)
 
         // Test conversion to mutable (for editing in UI)
         val mutableSettings = testSettings.toMutable()
@@ -86,23 +81,20 @@ class ScanSettingsStoreTest {
 
     @Test
     fun testScanSettingsStatelessDataStructure() {
-        // Test that we can create scan settings with the key settings mentioned in the issue
-        // ADF+duplex+document+A4
-
         val testScanRegion = StatelessImmutableScanRegion(
-            "297", // A4 width in mm
-            "210", // A4 height in mm
-            "0", // x offset
-            "0" // y offset
+            "297",
+            "210",
+            "0",
+            "0"
         )
 
         val testSettings = StatelessImmutableESCLScanSettingsState(
             version = "2.63",
             intent = null,
             scanRegions = testScanRegion,
-            documentFormatExt = "image/jpeg", // document format
+            documentFormatExt = "image/jpeg",
             contentType = null,
-            inputSource = InputSource.Feeder, // ADF (Automatic Document Feeder)
+            inputSource = InputSource.Feeder,
             xResolution = 300u,
             yResolution = 300u,
             colorMode = ColorMode.RGB24,
@@ -110,7 +102,7 @@ class ScanSettingsStoreTest {
             mediaType = null,
             ccdChannel = null,
             binaryRendering = null,
-            duplex = true, // Duplex enabled
+            duplex = true,
             numberOfPages = null,
             brightness = null,
             compressionFactor = null,
@@ -127,11 +119,10 @@ class ScanSettingsStoreTest {
             blankPageDetectionAndRemoval = null
         )
 
-        // Verify the test settings have the expected values
-        assertEquals("Should use ADF (Feeder)", InputSource.Feeder, testSettings.inputSource)
-        assertEquals("Should have duplex enabled", true, testSettings.duplex)
-        assertEquals("Should have document format set", "image/jpeg", testSettings.documentFormatExt)
-        assertEquals("Should have A4 scan region", true, testSettings.scanRegions != null)
+        assertEquals(InputSource.Feeder, testSettings.inputSource)
+        assertEquals(true, testSettings.duplex)
+        assertEquals("image/jpeg", testSettings.documentFormatExt)
+        assertEquals(true, testSettings.scanRegions != null)
 
         // Test the toMutable conversion to ensure settings can be converted back
         val mutableSettings = testSettings.toMutable()
@@ -148,7 +139,6 @@ class ScanSettingsStoreTest {
 
     @Test
     fun testScanRegionDataStructure() {
-        // Test A4 paper format (210x297mm)
         val a4Region = StatelessImmutableScanRegion("297", "210", "0", "0")
         val mutableA4 = a4Region.toMutable()
 

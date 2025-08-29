@@ -40,8 +40,7 @@ object DefaultScanSettingsStore {
         }
 
         val sharedPreferences = context.getSharedPreferences(APP_PREF_NAME, Context.MODE_PRIVATE)
-        val json = Json { ignoreUnknownKeys = true }
-        val serializedSettings = json.encodeToString(scanSettings)
+        val serializedSettings = Json.encodeToString(scanSettings)
         sharedPreferences.edit {
             putString("last_used_scan_settings", serializedSettings)
         }

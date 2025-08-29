@@ -160,7 +160,6 @@ class ScanningScreenViewModel(
             val savedSettings = DefaultScanSettingsStore.load(application.applicationContext)
             val initialSettings = if (savedSettings != null) {
                 try {
-                    // Merge saved settings with current capabilities to ensure compatibility
                     val mutableSettings = savedSettings.toMutable()
 
                     // Validate that the saved input source is still supported
@@ -227,7 +226,10 @@ class ScanningScreenViewModel(
                     initialSettings,
                     caps
                 ),
-                onSettingsChanged = { saveScanSettings() }
+                onSettingsChanged = { 
+                    saveScanSettings()
+                    saveSessionFile()
+                }
             )
             val sessionFile = application.applicationInfo.dataDir + "/files/" + scanningScreenData.sessionID + ".session"
             addTempFile(File(sessionFile))
