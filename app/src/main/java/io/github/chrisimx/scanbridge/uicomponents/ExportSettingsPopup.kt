@@ -25,7 +25,8 @@ fun ExportSettingsPopup(
     onDismiss: () -> Unit,
     updateWidth: (Int) -> Unit,
     onExportPdf: () -> Unit,
-    onExportArchive: () -> Unit
+    onExportArchive: () -> Unit,
+    onPrint: () -> Unit
 ) {
     Popup(
         alignment = Alignment.TopStart,
@@ -56,6 +57,12 @@ fun ExportSettingsPopup(
                     Icon(
                         painterResource(R.drawable.baseline_image_24),
                         contentDescription = stringResource(R.string.export_as_archive)
+                    )
+                }
+                IconButton(onClick = { onPrint() }) {
+                    Icon(
+                        painterResource(R.drawable.round_print_36),
+                        contentDescription = stringResource(R.string.print)
                     )
                 }
             }
