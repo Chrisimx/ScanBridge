@@ -25,6 +25,7 @@ import androidx.lifecycle.application
 import getTrustAllTM
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.Inches
+import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.Millimeters
 import io.github.chrisimx.esclkt.ScanSettings
@@ -32,7 +33,10 @@ import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
 import io.github.chrisimx.scanbridge.data.model.Session
 import io.github.chrisimx.scanbridge.logs.DebugInterceptor
+import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
+import io.github.chrisimx.scanbridge.util.getInputSourceCaps
+import io.github.chrisimx.scanbridge.util.getInputSourceOptions
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -148,14 +152,87 @@ class ScanningScreenViewModel(
         if (storedSession != null) {
             scanningScreenData.currentScansState.addAll(storedSession.scannedPages)
             _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
-                ScanSettingsComposableData(storedSession.scanSettings?.toMutable() ?: caps.calculateDefaultESCLScanSettingsState(), caps)
+                ScanSettingsComposableData(storedSession.scanSettings?.toMutable() ?: caps.calculateDefaultESCLScanSettingsState(), caps),
+                onSettingsChanged = {
+                    saveScanSettings()
+                    saveSessionFile()
+                }
             )
         } else {
+            // Try to load saved scan settings first, fallback to defaults if none exist
+            val savedSettings = DefaultScanSettingsStore.load(application.applicationContext)
+            val initialSettings = if (savedSettings != null) {
+                try {
+                    val mutableSettings = savedSettings.toMutable()
+
+                    // Validate that the saved input source is still supported
+                    val supportedInputSources = caps.getInputSourceOptions()
+                    if (mutableSettings.inputSource != null &&
+                        !supportedInputSources.contains(mutableSettings.inputSource)
+                    ) {
+                        Timber.w(
+                            "Saved input source ${mutableSettings.inputSource} not supported by current scanner, falling back to default"
+                        )
+                        mutableSettings.inputSource = supportedInputSources.firstOrNull() ?: InputSource.Platen
+                    }
+
+                    // Validate duplex setting - only allow if ADF supports duplex
+                    if (mutableSettings.duplex == true &&
+                        (mutableSettings.inputSource != InputSource.Feeder || caps.adf?.duplexCaps == null)
+                    ) {
+                        Timber.w("Duplex not supported with current input source, disabling duplex")
+                        mutableSettings.duplex = false
+                    }
+
+                    val selectedInputSourceCaps = caps.getInputSourceCaps(
+                        mutableSettings.inputSource ?: InputSource.Platen,
+                        mutableSettings.duplex ?: false
+                    )
+
+                    if (!selectedInputSourceCaps.supportedIntents.contains(mutableSettings.intent)) {
+                        mutableSettings.intent = selectedInputSourceCaps.supportedIntents.first()
+                    }
+
+                    if (mutableSettings.scanRegions != null) {
+                        val storedWidthThreeHOfInch = mutableSettings.scanRegions!!.width.toDoubleOrNull()
+                        val storedHeightThreeHOfInch = mutableSettings.scanRegions!!.height.toDoubleOrNull()
+
+                        val maxWidth = selectedInputSourceCaps.maxWidth.toMillimeters().value
+                        val minWidth = selectedInputSourceCaps.minWidth.toMillimeters().value
+
+                        val maxHeight = selectedInputSourceCaps.maxHeight.toMillimeters().value
+                        val minHeight = selectedInputSourceCaps.minHeight.toMillimeters().value
+
+                        if (storedWidthThreeHOfInch != null &&
+                            (storedWidthThreeHOfInch > maxWidth || storedWidthThreeHOfInch < minWidth)
+                        ) {
+                            mutableSettings.scanRegions!!.width = "max"
+                        }
+                        if (storedHeightThreeHOfInch != null &&
+                            (storedHeightThreeHOfInch > maxHeight || storedHeightThreeHOfInch < minHeight)
+                        ) {
+                            mutableSettings.scanRegions!!.height = "max"
+                        }
+                    }
+
+                    mutableSettings
+                } catch (e: Exception) {
+                    Timber.e(e, "Error applying saved settings, using defaults")
+                    caps.calculateDefaultESCLScanSettingsState()
+                }
+            } else {
+                caps.calculateDefaultESCLScanSettingsState()
+            }
+
             _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
                 ScanSettingsComposableData(
-                    caps.calculateDefaultESCLScanSettingsState(),
+                    initialSettings,
                     caps
-                )
+                ),
+                onSettingsChanged = {
+                    saveScanSettings()
+                    saveSessionFile()
+                }
             )
             val sessionFile = application.applicationInfo.dataDir + "/files/" + scanningScreenData.sessionID + ".session"
             addTempFile(File(sessionFile))
@@ -231,5 +308,17 @@ class ScanningScreenViewModel(
         }
         _scanningScreenData.stateCurrentScans.removeAt(index)
         saveSessionFile()
+    }
+
+    fun saveScanSettings() {
+        scanningScreenData.scanSettingsVM?.getMutableScanSettingsComposableData()?.scanSettingsState?.toStateless()?.let { settings ->
+            DefaultScanSettingsStore.save(application.applicationContext, settings)
+            Timber.d("Scan settings saved to persistent storage")
+        }
+    }
+
+    fun clearSavedScanSettings() {
+        DefaultScanSettingsStore.clear(application.applicationContext)
+        Timber.d("Saved scan settings cleared")
     }
 }

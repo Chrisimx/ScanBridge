@@ -47,10 +47,10 @@ data class ImmutableScanRegionState(
 @Serializable
 data class StatelessImmutableScanRegion(
     // These are to be given in millimeters!
-    private val height: String,
-    private val width: String,
-    private val xOffset: String,
-    private val yOffset: String
+    val height: String,
+    val width: String,
+    val xOffset: String,
+    val yOffset: String
 ) {
 
     fun toESCLScanRegion(selectedInputSourceCaps: InputSourceCaps): ScanRegion {

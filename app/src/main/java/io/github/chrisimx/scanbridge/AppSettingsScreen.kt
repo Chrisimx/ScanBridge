@@ -271,6 +271,15 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 information = it
             }
 
+            CheckboxSetting(
+                "remember_scan_settings",
+                stringResource(R.string.remember_scan_settings),
+                stringResource(R.string.remember_scan_settings_desc),
+                default = true
+            ) {
+                information = it
+            }
+
             // Timeout setting
             UIntSetting(
                 stringResource(R.string.timeout),
