@@ -24,6 +24,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import io.github.chrisimx.esclkt.ColorMode
 import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.InputSourceCaps
@@ -76,6 +77,11 @@ data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSett
     }
     val supportedScanResolutions by supportedScanResolutionsState
 
+    private val availableColorModesState = derivedStateOf {
+        selectedInputSourceCapabilities.settingProfiles.elementAtOrNull(0)?.colorModes ?: emptyList()
+    }
+    val availableColorModes by availableColorModesState
+
     fun toImmutable(): ImmutableScanSettingsComposableData = ImmutableScanSettingsComposableData(
         scanSettingsState.toImmutable(),
         capabilities,
@@ -89,7 +95,8 @@ data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSett
         customMenuEnabledState,
         selectedInputSourceCapabilitiesState,
         intentOptionsState,
-        supportedScanResolutionsState
+        supportedScanResolutionsState,
+        availableColorModesState
     )
 
     fun toStateless(): StatelessImmutableScanSettingsComposableData = StatelessImmutableScanSettingsComposableData(
@@ -105,7 +112,8 @@ data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSett
         customMenuEnabledState.value,
         selectedInputSourceCapabilitiesState.value,
         intentOptionsState.value,
-        supportedScanResolutionsState.value
+        supportedScanResolutionsState.value,
+        availableColorModesState.value
     )
 }
 
@@ -123,7 +131,8 @@ data class ImmutableScanSettingsComposableData(
     private val customMenuEnabledState: State<Boolean>,
     private val selectedInputSourceCapabilitiesState: State<InputSourceCaps>,
     private val intentOptionsState: State<List<ScanIntentData>>,
-    private val supportedScanResolutionsState: State<List<DiscreteResolution>>
+    private val supportedScanResolutionsState: State<List<DiscreteResolution>>,
+    private val availableColorModesState: State<List<ColorMode>>
 ) {
     val customMenuEnabled by customMenuEnabledState
     val widthTextFieldString by widthTextFieldState
@@ -133,6 +142,7 @@ data class ImmutableScanSettingsComposableData(
     val selectedInputSourceCapabilities by selectedInputSourceCapabilitiesState
     val intentOptions by intentOptionsState
     val supportedScanResolutions by supportedScanResolutionsState
+    val availableColorModes by availableColorModesState
 }
 
 @Serializable
@@ -149,5 +159,6 @@ data class StatelessImmutableScanSettingsComposableData(
     val customMenuEnabled: Boolean,
     val selectedInputSourceCapabilities: InputSourceCaps,
     val intentOptions: List<ScanIntentData>,
-    val supportedScanResolutions: List<DiscreteResolution>
+    val supportedScanResolutions: List<DiscreteResolution>,
+    val availableColorModes: List<ColorMode>
 )

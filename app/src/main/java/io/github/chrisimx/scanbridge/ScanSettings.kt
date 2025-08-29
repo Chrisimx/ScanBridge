@@ -53,6 +53,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.chrisimx.esclkt.ColorMode
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanIntentData
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableViewModel
@@ -282,6 +283,27 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+
+                // Color Mode
+                if (scanSettingsUIState.availableColorModes.isNotEmpty()) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.color_mode))
+                        SingleChoiceSegmentedButtonRow {
+                            scanSettingsUIState.availableColorModes.forEachIndexed { index, colorMode ->
+                                SegmentedButton(
+                                    shape = SegmentedButtonDefaults.itemShape(
+                                        index = index,
+                                        count = scanSettingsUIState.availableColorModes.size
+                                    ),
+                                    onClick = { scanSettingsViewModel.setColorMode(colorMode) },
+                                    selected = scanSettingsUIState.scanSettingsState.colorMode == colorMode
+                                ) {
+                                    Text(colorMode.name)
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         OutlinedCard(
@@ -460,6 +482,61 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                     Slider(
                         value = (scanSettingsUIState.scanSettingsState.sharpen ?: 50u).toFloat(),
                         onValueChange = { scanSettingsViewModel.setSharpen(it.toUInt()) },
+                        valueRange = 0f..100f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                
+                // Gamma
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.gamma))
+                    Slider(
+                        value = (scanSettingsUIState.scanSettingsState.gamma ?: 50u).toFloat(),
+                        onValueChange = { scanSettingsViewModel.setGamma(it.toUInt()) },
+                        valueRange = 0f..100f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                
+                // Highlight
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.highlight))
+                    Slider(
+                        value = (scanSettingsUIState.scanSettingsState.highlight ?: 50u).toFloat(),
+                        onValueChange = { scanSettingsViewModel.setHighlight(it.toUInt()) },
+                        valueRange = 0f..100f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                
+                // Noise Removal
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.noise_removal))
+                    Slider(
+                        value = (scanSettingsUIState.scanSettingsState.noiseRemoval ?: 50u).toFloat(),
+                        onValueChange = { scanSettingsViewModel.setNoiseRemoval(it.toUInt()) },
+                        valueRange = 0f..100f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                
+                // Shadow
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.shadow))
+                    Slider(
+                        value = (scanSettingsUIState.scanSettingsState.shadow ?: 50u).toFloat(),
+                        onValueChange = { scanSettingsViewModel.setShadow(it.toUInt()) },
+                        valueRange = 0f..100f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                
+                // Compression Factor
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.compression_factor))
+                    Slider(
+                        value = (scanSettingsUIState.scanSettingsState.compressionFactor ?: 50u).toFloat(),
+                        onValueChange = { scanSettingsViewModel.setCompressionFactor(it.toUInt()) },
                         valueRange = 0f..100f,
                         modifier = Modifier.fillMaxWidth()
                     )
