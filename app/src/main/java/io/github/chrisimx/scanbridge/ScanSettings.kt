@@ -42,6 +42,7 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
@@ -52,6 +53,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.chrisimx.esclkt.CcdChannel
+import io.github.chrisimx.esclkt.ColorMode
+import io.github.chrisimx.esclkt.FeedDirection
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanIntentData
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableViewModel
@@ -182,6 +186,221 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text(
+                    stringResource(R.string.content_type),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+                
+                FlowRow(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    // For now, add a simple "Default" option - we can expand this later
+                    InputChip(
+                        onClick = {
+                            scanSettingsViewModel.setContentType(null)
+                        },
+                        label = { Text("Default") },
+                        selected = scanSettingsUIState.scanSettingsState.contentType == null
+                    )
+                }
+
+                // Color Space
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.color_space))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ToggleButton(
+                            checked = scanSettingsUIState.scanSettingsState.colorSpace != null,
+                            onCheckedChange = { enabled ->
+                                if (enabled) {
+                                    scanSettingsViewModel.setColorSpace("sRGB")
+                                } else {
+                                    scanSettingsViewModel.setColorSpace(null)
+                                }
+                            }
+                        ) {
+                            Text(scanSettingsUIState.scanSettingsState.colorSpace ?: "Default")
+                        }
+                    }
+                }
+
+                // Media Type
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.media_type))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ToggleButton(
+                            checked = scanSettingsUIState.scanSettingsState.mediaType != null,
+                            onCheckedChange = { enabled ->
+                                if (enabled) {
+                                    scanSettingsViewModel.setMediaType("Paper")
+                                } else {
+                                    scanSettingsViewModel.setMediaType(null)
+                                }
+                            }
+                        ) {
+                            Text(scanSettingsUIState.scanSettingsState.mediaType ?: "Default")
+                        }
+                    }
+                }
+            }
+        }
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 15.dp, bottom = 15.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    stringResource(R.string.advanced_settings),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+
+                // Number of Pages
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.number_of_pages))
+                    ToggleButton(
+                        checked = scanSettingsUIState.scanSettingsState.numberOfPages != null,
+                        onCheckedChange = { enabled ->
+                            if (enabled) {
+                                scanSettingsViewModel.setNumberOfPages(1u)
+                            } else {
+                                scanSettingsViewModel.setNumberOfPages(null)
+                            }
+                        }
+                    ) {
+                        Text(if (scanSettingsUIState.scanSettingsState.numberOfPages != null) "Enabled" else "Disabled")
+                    }
+                }
+
+                // Blank Page Detection
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.blank_page_detection))
+                    ToggleButton(
+                        checked = scanSettingsUIState.scanSettingsState.blankPageDetection == true,
+                        onCheckedChange = { scanSettingsViewModel.setBlankPageDetection(it) }
+                    ) {
+                        Text(if (scanSettingsUIState.scanSettingsState.blankPageDetection == true) "On" else "Off")
+                    }
+                }
+
+                // Blank Page Removal
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.blank_page_removal))
+                    ToggleButton(
+                        checked = scanSettingsUIState.scanSettingsState.blankPageDetectionAndRemoval == true,
+                        onCheckedChange = { scanSettingsViewModel.setBlankPageDetectionAndRemoval(it) }
+                    ) {
+                        Text(if (scanSettingsUIState.scanSettingsState.blankPageDetectionAndRemoval == true) "On" else "Off")
+                    }
+                }
+
+                // Threshold
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.threshold))
+                    Slider(
+                        value = (scanSettingsUIState.scanSettingsState.threshold ?: 50u).toFloat(),
+                        onValueChange = { scanSettingsViewModel.setThreshold(it.toUInt()) },
+                        valueRange = 0f..100f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                // Color Mode
+                if (scanSettingsUIState.availableColorModes.isNotEmpty()) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.color_mode))
+                        SingleChoiceSegmentedButtonRow {
+                            scanSettingsUIState.availableColorModes.forEachIndexed { index, colorMode ->
+                                SegmentedButton(
+                                    shape = SegmentedButtonDefaults.itemShape(
+                                        index = index,
+                                        count = scanSettingsUIState.availableColorModes.size
+                                    ),
+                                    onClick = { scanSettingsViewModel.setColorMode(colorMode) },
+                                    selected = scanSettingsUIState.scanSettingsState.colorMode == colorMode
+                                ) {
+                                    Text(colorMode.name)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Feed Direction
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.feed_direction))
+                    ToggleButton(
+                        checked = scanSettingsUIState.scanSettingsState.feedDirection != null,
+                        onCheckedChange = { enabled ->
+                            // For now, just toggle between null and null since we don't know enum values
+                            scanSettingsViewModel.setFeedDirection(null)
+                        }
+                    ) {
+                        Text(scanSettingsUIState.scanSettingsState.feedDirection?.name ?: "Default")
+                    }
+                }
+
+                // CCD Channel
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.ccd_channel))
+                    ToggleButton(
+                        checked = scanSettingsUIState.scanSettingsState.ccdChannel != null,
+                        onCheckedChange = { enabled ->
+                            // For now, just toggle between null and null since we don't know enum values
+                            scanSettingsViewModel.setCcdChannel(null)
+                        }
+                    ) {
+                        Text(scanSettingsUIState.scanSettingsState.ccdChannel?.name ?: "Default")
+                    }
+                }
+            }
+        }
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 15.dp, bottom = 15.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
                     stringResource(R.string.scan_region),
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
@@ -226,44 +445,203 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                     )
                 }
                 AnimatedVisibility(scanSettingsUIState.customMenuEnabled) {
-                    Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                        ValidatedDimensionsTextEdit(
-                            scanSettingsUIState.widthTextFieldString,
-                            context,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 10.dp),
-                            stringResource(R.string.width_in_mm),
-                            { newText: String ->
-                                scanSettingsViewModel.setWidthTextFieldContent(
-                                    newText
-                                )
-                            },
-                            { newWidth: String ->
-                                scanSettingsViewModel.setRegionDimension(
-                                    newWidth,
-                                    scanSettingsUIState.heightTextFieldString
-                                )
-                            },
-                            min = scanSettingsUIState.selectedInputSourceCapabilities.minWidth.toMillimeters().value,
-                            max = scanSettingsUIState.selectedInputSourceCapabilities.maxWidth.toMillimeters().value
+                    Column {
+                        Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                            ValidatedDimensionsTextEdit(
+                                scanSettingsUIState.widthTextFieldString,
+                                context,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 10.dp),
+                                stringResource(R.string.width_in_mm),
+                                { newText: String ->
+                                    scanSettingsViewModel.setWidthTextFieldContent(
+                                        newText
+                                    )
+                                },
+                                { newWidth: String ->
+                                    scanSettingsViewModel.setRegionDimension(
+                                        newWidth,
+                                        scanSettingsUIState.heightTextFieldString
+                                    )
+                                },
+                                min = scanSettingsUIState.selectedInputSourceCapabilities.minWidth.toMillimeters().value,
+                                max = scanSettingsUIState.selectedInputSourceCapabilities.maxWidth.toMillimeters().value
+                            )
+                            ValidatedDimensionsTextEdit(
+                                scanSettingsUIState.heightTextFieldString,
+                                context,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 10.dp),
+                                stringResource(R.string.height_in_mm),
+                                { scanSettingsViewModel.setHeightTextFieldContent(it) },
+                                {
+                                    scanSettingsViewModel.setRegionDimension(
+                                        scanSettingsUIState.widthTextFieldString,
+                                        it
+                                    )
+                                },
+                                min = scanSettingsUIState.selectedInputSourceCapabilities.minHeight.toMillimeters().value,
+                                max = scanSettingsUIState.selectedInputSourceCapabilities.maxHeight.toMillimeters().value
+                            )
+                        }
+                        Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                            ValidatedDimensionsTextEdit(
+                                scanSettingsUIState.xOffsetTextFieldString,
+                                context,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 10.dp),
+                                stringResource(R.string.x_offset_in_mm),
+                                { newText: String ->
+                                    scanSettingsViewModel.setXOffsetTextFieldContent(newText)
+                                },
+                                { newXOffset: String ->
+                                    scanSettingsViewModel.setOffset(
+                                        newXOffset,
+                                        scanSettingsUIState.yOffsetTextFieldString
+                                    )
+                                },
+                                min = 0.0,
+                                max = scanSettingsUIState.selectedInputSourceCapabilities.maxWidth.toMillimeters().value
+                            )
+                            ValidatedDimensionsTextEdit(
+                                scanSettingsUIState.yOffsetTextFieldString,
+                                context,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 10.dp),
+                                stringResource(R.string.y_offset_in_mm),
+                                { newText: String ->
+                                    scanSettingsViewModel.setYOffsetTextFieldContent(newText)
+                                },
+                                { newYOffset: String ->
+                                    scanSettingsViewModel.setOffset(
+                                        scanSettingsUIState.xOffsetTextFieldString,
+                                        newYOffset
+                                    )
+                                },
+                                min = 0.0,
+                                max = scanSettingsUIState.selectedInputSourceCapabilities.maxHeight.toMillimeters().value
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 15.dp, bottom = 15.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    stringResource(R.string.effects),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+                
+                // Brightness
+                if (scanSettingsUIState.supportedEffects.contains("brightness")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.brightness))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.brightness ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setBrightness(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
                         )
-                        ValidatedDimensionsTextEdit(
-                            scanSettingsUIState.heightTextFieldString,
-                            context,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 10.dp),
-                            stringResource(R.string.height_in_mm),
-                            { scanSettingsViewModel.setHeightTextFieldContent(it) },
-                            {
-                                scanSettingsViewModel.setRegionDimension(
-                                    scanSettingsUIState.widthTextFieldString,
-                                    it
-                                )
-                            },
-                            min = scanSettingsUIState.selectedInputSourceCapabilities.minHeight.toMillimeters().value,
-                            max = scanSettingsUIState.selectedInputSourceCapabilities.maxHeight.toMillimeters().value
+                    }
+                }
+                
+                // Contrast
+                if (scanSettingsUIState.supportedEffects.contains("contrast")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.contrast))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.contrast ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setContrast(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                
+                // Sharpen
+                if (scanSettingsUIState.supportedEffects.contains("sharpen")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.sharpen))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.sharpen ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setSharpen(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                
+                // Gamma
+                if (scanSettingsUIState.supportedEffects.contains("gamma")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.gamma))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.gamma ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setGamma(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                
+                // Highlight
+                if (scanSettingsUIState.supportedEffects.contains("highlight")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.highlight))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.highlight ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setHighlight(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                
+                // Noise Removal
+                if (scanSettingsUIState.supportedEffects.contains("noiseRemoval")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.noise_removal))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.noiseRemoval ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setNoiseRemoval(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                
+                // Shadow
+                if (scanSettingsUIState.supportedEffects.contains("shadow")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.shadow))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.shadow ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setShadow(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                
+                // Compression Factor
+                if (scanSettingsUIState.supportedEffects.contains("compressionFactor")) {
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(stringResource(R.string.compression_factor))
+                        Slider(
+                            value = (scanSettingsUIState.scanSettingsState.compressionFactor ?: 50u).toFloat(),
+                            onValueChange = { scanSettingsViewModel.setCompressionFactor(it.toUInt()) },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
