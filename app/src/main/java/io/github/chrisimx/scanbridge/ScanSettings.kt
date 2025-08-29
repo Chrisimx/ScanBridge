@@ -53,7 +53,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.chrisimx.esclkt.CcdChannel
 import io.github.chrisimx.esclkt.ColorMode
+import io.github.chrisimx.esclkt.FeedDirection
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanIntentData
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableViewModel
@@ -202,6 +204,52 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                         selected = scanSettingsUIState.scanSettingsState.contentType == null
                     )
                 }
+
+                // Color Space
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.color_space))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ToggleButton(
+                            checked = scanSettingsUIState.scanSettingsState.colorSpace != null,
+                            onCheckedChange = { enabled ->
+                                if (enabled) {
+                                    scanSettingsViewModel.setColorSpace("sRGB")
+                                } else {
+                                    scanSettingsViewModel.setColorSpace(null)
+                                }
+                            }
+                        ) {
+                            Text(scanSettingsUIState.scanSettingsState.colorSpace ?: "Default")
+                        }
+                    }
+                }
+
+                // Media Type
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(stringResource(R.string.media_type))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ToggleButton(
+                            checked = scanSettingsUIState.scanSettingsState.mediaType != null,
+                            onCheckedChange = { enabled ->
+                                if (enabled) {
+                                    scanSettingsViewModel.setMediaType("Paper")
+                                } else {
+                                    scanSettingsViewModel.setMediaType(null)
+                                }
+                            }
+                        ) {
+                            Text(scanSettingsUIState.scanSettingsState.mediaType ?: "Default")
+                        }
+                    }
+                }
             }
         }
         OutlinedCard(
@@ -302,6 +350,46 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                                 }
                             }
                         }
+                    }
+                }
+
+                // Feed Direction
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.feed_direction))
+                    ToggleButton(
+                        checked = scanSettingsUIState.scanSettingsState.feedDirection != null,
+                        onCheckedChange = { enabled ->
+                            // For now, just toggle between null and null since we don't know enum values
+                            scanSettingsViewModel.setFeedDirection(null)
+                        }
+                    ) {
+                        Text(scanSettingsUIState.scanSettingsState.feedDirection?.name ?: "Default")
+                    }
+                }
+
+                // CCD Channel
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.ccd_channel))
+                    ToggleButton(
+                        checked = scanSettingsUIState.scanSettingsState.ccdChannel != null,
+                        onCheckedChange = { enabled ->
+                            // For now, just toggle between null and null since we don't know enum values
+                            scanSettingsViewModel.setCcdChannel(null)
+                        }
+                    ) {
+                        Text(scanSettingsUIState.scanSettingsState.ccdChannel?.name ?: "Default")
                     }
                 }
             }
