@@ -226,7 +226,7 @@ class ScanningScreenViewModel(
                     initialSettings,
                     caps
                 ),
-                onSettingsChanged = { 
+                onSettingsChanged = {
                     saveScanSettings()
                     saveSessionFile()
                 }
