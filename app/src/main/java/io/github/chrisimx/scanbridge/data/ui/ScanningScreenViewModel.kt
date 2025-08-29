@@ -28,6 +28,9 @@ import io.github.chrisimx.esclkt.Inches
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.Millimeters
+import io.github.chrisimx.esclkt.ScanJob
+import timber.log.Timber
+import kotlin.concurrent.thread
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
@@ -49,7 +52,6 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import timber.log.Timber
 
 class ScanningScreenViewModel(
     application: Application,
@@ -139,6 +141,33 @@ class ScanningScreenViewModel(
 
     fun setScanJobRunning(value: Boolean) {
         _scanningScreenData.scanJobRunning.value = value
+    }
+
+    fun setScanJobCancelling(value: Boolean) {
+        _scanningScreenData.scanJobCancelling.value = value
+    }
+
+    fun setCurrentScanJob(job: ScanJob?) {
+        _scanningScreenData.currentScanJob.value = job
+    }
+
+    fun cancelCurrentScanJob() {
+        val currentJob = _scanningScreenData.currentScanJob.value
+        if (currentJob != null && _scanningScreenData.scanJobRunning.value && !_scanningScreenData.scanJobCancelling.value) {
+            setScanJobCancelling(true)
+            thread {
+                try {
+                    val result = currentJob.cancle()
+                    Timber.d("User initiated scan job cancellation result: $result")
+                } catch (e: Exception) {
+                    Timber.e(e, "Error while cancelling scan job")
+                } finally {
+                    setScanJobRunning(false)
+                    setScanJobCancelling(false)
+                    setCurrentScanJob(null)
+                }
+            }
+        }
     }
 
     fun setError(value: String?) {

@@ -378,6 +378,7 @@ fun doScan(
         }
 
         viewModel.setScanJobRunning(true)
+        viewModel.setScanJobCancelling(false)
         viewModel.scrollToPage(
             scope = scope,
             pageNr = viewModel.scanningScreenData.currentScansState.size
@@ -390,9 +391,14 @@ fun doScan(
         if (job !is ESCLRequestClient.ScannerCreateJobResult.Success) {
             Timber.tag(TAG).e("Job creation failed. Result: $job")
             viewModel.setScanJobRunning(false)
+            viewModel.setScanJobCancelling(false)
+            viewModel.setCurrentScanJob(null)
             snackbarErrorRetrievingPage(job.toString(), scope, context, snackbarHostState)
             return@thread
         }
+
+        // Store the job reference for cancellation
+        viewModel.setCurrentScanJob(job.scanJob)
 
         var polling = false
 
@@ -410,6 +416,8 @@ fun doScan(
                         Timber.tag(TAG).d("Cancelling job after (a likely) failure: $deleteResult")
 
                         viewModel.setScanJobRunning(false)
+                        viewModel.setScanJobCancelling(false)
+                        viewModel.setCurrentScanJob(null)
                         viewModel.scrollToPage(
                             scope = scope,
                             pageNr = viewModel.scanningScreenData.currentScansState.size
@@ -448,6 +456,8 @@ fun doScan(
                 is ESCLRequestClient.ScannerNextPageResult.NoFurtherPages -> {
                     Timber.tag(TAG).d("Next page result is seen as no further pages. jobRunning = false")
                     viewModel.setScanJobRunning(false)
+                    viewModel.setScanJobCancelling(false)
+                    viewModel.setCurrentScanJob(null)
                     viewModel.scrollToPage(
                         scope = scope,
                         pageNr = viewModel.scanningScreenData.currentScansState.size
@@ -472,6 +482,8 @@ fun doScan(
                     if (status?.jobState == JobState.Completed) {
                         Timber.tag(TAG).d("Job info indicates completion but response was not 404: $jobStateString")
                         viewModel.setScanJobRunning(false)
+                        viewModel.setScanJobCancelling(false)
+                        viewModel.setCurrentScanJob(null)
                         viewModel.scrollToPage(
                             scope = scope,
                             pageNr = viewModel.scanningScreenData.currentScansState.size
@@ -497,6 +509,8 @@ fun doScan(
                             continue
                         } else {
                             viewModel.setScanJobRunning(false)
+                            viewModel.setScanJobCancelling(false)
+                            viewModel.setCurrentScanJob(null)
                             viewModel.scrollToPage(
                                 scope = scope,
                                 pageNr = viewModel.scanningScreenData.currentScansState.size
@@ -524,6 +538,8 @@ fun doScan(
                         snackbarHostState
                     )
                     viewModel.setScanJobRunning(false)
+                    viewModel.setScanJobCancelling(false)
+                    viewModel.setCurrentScanJob(null)
                     val deletionResult = job.scanJob.cancle()
                     Timber.tag(TAG).d("Cancelling job after error while trying to retrieve page: $deletionResult")
                     return@thread
@@ -550,6 +566,8 @@ fun doScan(
                 } catch (e: Exception) {
                     Timber.tag(TAG).e(e, "Error while copying received image to file. Aborting!")
                     viewModel.setScanJobRunning(false)
+                    viewModel.setScanJobCancelling(false)
+                    viewModel.setCurrentScanJob(null)
                     snackbarErrorRetrievingPage(
                         context.getString(
                             R.string.error_while_copying_received_image_to_file,
@@ -621,33 +639,72 @@ fun ScanningScreenBottomBar(
             }
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    val scanSettingsData =
-                        scanningViewModel.scanningScreenData.scanSettingsVM!!.scanSettingsComposableData
-                    thread {
-                        doScan(
-                            scanningViewModel.scanningScreenData.esclClient,
-                            context,
-                            scope,
-                            snackbarHostState,
-                            scanSettingsData.scanSettingsState.toESCLKtScanSettings(
-                                scanSettingsData.selectedInputSourceCapabilities
-                            ),
-                            scanningViewModel
+            if (scanningViewModel.scanningScreenData.scanJobRunning) {
+                // Show cancel button when scanning
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        if (!scanningViewModel.scanningScreenData.scanJobCancelling) {
+                            scanningViewModel.cancelCurrentScanJob()
+                        }
+                    },
+                    containerColor = if (scanningViewModel.scanningScreenData.scanJobCancelling) {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    },
+                    contentColor = if (scanningViewModel.scanningScreenData.scanJobCancelling) {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    } else {
+                        MaterialTheme.colorScheme.onError
+                    },
+                    icon = {
+                        Icon(
+                            painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
+                            contentDescription = if (scanningViewModel.scanningScreenData.scanJobCancelling) {
+                                stringResource(R.string.cancelling_scan)
+                            } else {
+                                stringResource(R.string.cancel_scan)
+                            }
+                        )
+                    },
+                    text = { 
+                        Text(
+                            if (scanningViewModel.scanningScreenData.scanJobCancelling) {
+                                stringResource(R.string.cancelling_scan)
+                            } else {
+                                stringResource(R.string.cancel_scan)
+                            }
                         )
                     }
-                },
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.outline_scan_24),
-                        contentDescription = stringResource(
-                            R.string.scan
+                )
+            } else {
+                // Show scan button when not scanning
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        val scanSettingsData =
+                            scanningViewModel.scanningScreenData.scanSettingsVM!!.scanSettingsComposableData
+                        thread {
+                            doScan(
+                                scanningViewModel.scanningScreenData.esclClient,
+                                context,
+                                scope,
+                                snackbarHostState,
+                                scanSettingsData.scanSettingsState.toESCLKtScanSettings(
+                                    scanSettingsData.selectedInputSourceCapabilities
+                                ),
+                                scanningViewModel
+                            )
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.outline_scan_24),
+                            contentDescription = stringResource(R.string.scan)
                         )
-                    )
-                },
-                text = { Text(stringResource(R.string.scan)) }
-            )
+                    },
+                    text = { Text(stringResource(R.string.scan)) }
+                )
+            }
         }
     )
 }
