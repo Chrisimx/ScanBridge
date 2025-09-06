@@ -21,6 +21,7 @@
     <string name="swap_with_next_page">Nach rechts verschieben</string>
     <string name="page_x_of_y">Seite %1$s von %2$s</string>
     <string name="export">Exportieren</string>
+    <string name="print">Drucken</string>
     <string name="retrieving_page">Seite wird abgerufen</string>
     <string name="exporting">Wird exportiert…</string>
     <string name="no_scans_yet">Bisher keine Seiten. Klicke den Scanbutton :)</string>
