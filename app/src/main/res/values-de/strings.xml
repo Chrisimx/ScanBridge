@@ -17,8 +17,10 @@
     <string name="job_pages_still_processed">Es werden derzeit noch Seiten verarbeitet</string>
     <string name="job_state_cannot_be_retrieved">Der Status des Scanauftrags konnte nicht abrufen werden</string>
     <string name="delete_current_page">Seite löschen</string>
+    <string name="share_current_page">Seite teilen</string>
     <string name="swap_with_previous_page">Nach links verschieben</string>
     <string name="swap_with_next_page">Nach rechts verschieben</string>
+    <string name="annotate_current_page">Seite kommentieren</string>
     <string name="page_x_of_y">Seite %1$s von %2$s</string>
     <string name="export">Exportieren</string>
     <string name="retrieving_page">Seite wird abgerufen</string>
