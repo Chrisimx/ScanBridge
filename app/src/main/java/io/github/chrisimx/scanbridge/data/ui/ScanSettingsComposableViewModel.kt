@@ -21,6 +21,7 @@ package io.github.chrisimx.scanbridge.data.ui
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanIntentData
 import io.github.chrisimx.scanbridge.data.model.MutableScanRegionState
@@ -41,8 +42,28 @@ class ScanSettingsComposableViewModel(
     }
 
     fun setInputSourceOptions(inputSource: InputSource) {
-        _scanSettingsComposableData.scanSettingsState.inputSource = inputSource
+        val scanSettingsState = _scanSettingsComposableData.scanSettingsState
+        scanSettingsState.inputSource = inputSource
+        revalidateSettings()
         onSettingsChanged?.invoke()
+    }
+
+    fun revalidateSettings() {
+        val scanSettingsState = _scanSettingsComposableData.scanSettingsState
+        if (scanSettingsState.xResolution != null && scanSettingsState.yResolution != null) {
+            val isResolutionSupported = _scanSettingsComposableData.supportedScanResolutions.contains(
+                DiscreteResolution(scanSettingsState.xResolution!!, scanSettingsState.yResolution!!)
+            )
+            if (!isResolutionSupported) {
+                val highestScanResolution = _scanSettingsComposableData.supportedScanResolutions.maxBy { it.xResolution * it.yResolution }
+                setResolution(highestScanResolution.xResolution, highestScanResolution.yResolution)
+            }
+        }
+
+        val intentSupported = scanSettingsState.intent?.let { _scanSettingsComposableData.intentOptions.contains(it) }
+        if (intentSupported == false) {
+            setIntent(null)
+        }
     }
 
     fun setResolution(xResolution: UInt, yResolution: UInt) {
