@@ -100,6 +100,7 @@ import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.uicomponents.ExportSettingsPopup
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
+import io.github.chrisimx.scanbridge.uicomponents.ImageToolbar
 import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen
 import io.github.chrisimx.scanbridge.uicomponents.dialog.ConfirmCloseDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.DeletionDialog
@@ -965,74 +966,44 @@ fun ScanContent(
                 .padding(innerPadding),
             contentAlignment = Alignment.BottomCenter
         ) {
-            Box(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .clip(
-                        RoundedCornerShape(16.dp)
+            ImageToolbar(
+                onDelete = {
+                    if (scanningViewModel.scanningScreenData.currentScansState.size <= pagerState.currentPage) {
+                        return@ImageToolbar
+                    }
+                    scanningViewModel.setDeletePageDialogShown(true)
+                },
+                onShare = {
+                    // TODO: Implement share single page functionality
+                },
+                onSwapWithLeft = {
+                    scanningViewModel.swapTwoPages(
+                        pagerState.currentPage,
+                        pagerState.currentPage - 1
                     )
-                    .background(MaterialTheme.colorScheme.inverseOnSurface)
-            ) {
-                Row {
-                    IconButton(onClick = {
-                        if (scanningViewModel.scanningScreenData.currentScansState.size <= pagerState.currentPage) {
-                            return@IconButton
-                        }
-                        scanningViewModel.setDeletePageDialogShown(true)
-                    }) {
-                        Icon(
-                            Icons.Outlined.Delete,
-                            contentDescription = stringResource(
-                                R.string.delete_current_page
-                            )
-                        )
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
                     }
-                    IconButton(onClick = {
-                        scanningViewModel.swapTwoPages(
-                            pagerState.currentPage,
-                            pagerState.currentPage - 1
-                        )
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                        }
-                    }) {
-                        Icon(
-                            Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = stringResource(
-                                R.string.swap_with_previous_page
-                            )
-                        )
+                },
+                onSwapWithRight = {
+                    scanningViewModel.swapTwoPages(
+                        pagerState.currentPage,
+                        pagerState.currentPage + 1
+                    )
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
                     }
-                    IconButton(onClick = {
-                        scanningViewModel.swapTwoPages(
-                            pagerState.currentPage,
-                            pagerState.currentPage + 1
-                        )
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                        }
-                    }) {
-                        Icon(
-                            Icons.AutoMirrored.Outlined.ArrowForward,
-                            contentDescription = stringResource(
-                                R.string.swap_with_next_page
-                            )
-                        )
+                },
+                onAnnotate = {
+                    // TODO: Implement annotate page functionality
+                },
+                onRotate = {
+                    thread {
+                        rotate(context, scanningViewModel)
                     }
-                    IconButton(onClick = {
-                        thread {
-                            rotate(context, scanningViewModel)
-                        }
-                    }) {
-                        Icon(
-                            painterResource(R.drawable.baseline_rotate_right_24),
-                            contentDescription = stringResource(
-                                R.string.rotate_right
-                            )
-                        )
-                    }
-                }
-            }
+                },
+                modifier = Modifier.padding(10.dp)
+            )
         }
     }
 }
