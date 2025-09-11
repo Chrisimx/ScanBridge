@@ -9,6 +9,8 @@
     <string name="okay_text">Okay</string>
     <string name="trying_to_retrieve_scannercapabilities">Die Eigenschaften des Scanners werden abgerufen</string>
     <string name="scan">Scannen</string>
+    <string name="cancel_scan">Abbrechen</string>
+    <string name="cancelling_scan">Bricht ab…</string>
     <string name="desc_scanned_page">Eingescannte Seite</string>
     <string name="job_canceled">Der Scanauftrag wurde annulliert</string>
     <string name="job_aborted_because_error">Der Scanauftrag wurde aufgrund eines Fehlers abgebrochen</string>
