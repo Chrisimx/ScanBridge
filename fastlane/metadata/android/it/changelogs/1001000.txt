@@ -1,0 +1,8 @@
+Die neueste Version von ScanBridge bringt zahlreiche Optimierungen und Bugfixes mit sich, um die Benutzerfreundlichkeit und die Funktionalität zu verbessern:
+
+* Beim Löschen von Seiten muss nun ein Bestätigungsdialog bestätigt, um versehntliches Löschen zu verhindern
+* Die Scannerunterstützung wurde verbessert. Der HP Color Laserjet MFP M283fdw wird nun teilweise unterstützt
+* Das Problem, das gescannte Seiten in der Scan-Oberfläche unter bestimmten Umständen andere UI-Elemente überlappten, wurde behoben
+* URLs, bei denen sich die eSCL-Resource im Wurzelverzeichnis befindet (z.B. http://192.168.178.11/), werden nun unterstützt
+
+Vollständige Commit-History: https://github.com/Chrisimx/ScanBridge/compare/v1.0.1...v1.1.0

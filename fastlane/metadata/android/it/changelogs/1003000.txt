@@ -1,0 +1,10 @@
+## Bugfixes
+### Verbesserung der Scannerunterstüzung
+- HP DeskJet 2700
+- HP Color Laser MFP 179fnw
+- HP Officejet 8020
+- Canon MF628cw
+- Canon MF269dw und weitere...
+## Weitere Änderungen
+- Ignoriere Link-Local-Adressen anstatt sie anzuzeigen
+- Immer die höchste Farbqualität verwenden, anstatt den Standardwert des Scanners zu verwenden (bei einigen Scannern war der Standardwert "schwarz-weiß")
