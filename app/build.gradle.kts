@@ -47,6 +47,10 @@ android {
     namespace = "io.github.chrisimx.scanbridge"
     compileSdk = 35
 
+    androidResources {
+        generateLocaleConfig = true
+    }
+
     defaultConfig {
         applicationId = "io.github.chrisimx.scanbridge"
         minSdk = 28
