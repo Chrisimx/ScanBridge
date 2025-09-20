@@ -1,0 +1,11 @@
+## Features
+- Einstellbarer Timeout
+- Erlauben von benutzerdefinitierten Root CAs für HTTPS-Verbindungen
+- Debugprotokollfunktion
+## Bugfixes
+### Verbesserung der Scannerunterstüzung
+- Bestätigt: HP Color Laserjet MFP M283fdw, HP DeskJet 3630, EPSON ET-2650
+- Probleme möglicherweise gelöst: Kyocera ECOSYS M5521cdn, HP Neverstop Laser MFP 1200w
+### Weitere Fehlerbehebungen
+- Layout der Fehlerbildschirme bei langen Fehlermeldungen verbessert
+- Abstürze auf älteren Android-Versionen (<14) gelöst

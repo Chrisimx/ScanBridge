@@ -1,0 +1,7 @@
+Dies ist der erste Release von ScanBridge 🥳. Diese Version der App bietet:
+
+* Scannen von Dokumenten, Fotos und mehr über das AirScan/eSCL-Protokoll
+* Exportieren von Scans als PDF oder Bilder
+* Anordnen der gescannten Seiten
+* Anpassen von Einstellungen wie Scanquelle, Auflösung, Duplex-Scan, Scanbereich, ...
+* Und mehr...
