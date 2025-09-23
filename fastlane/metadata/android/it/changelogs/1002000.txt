@@ -2,6 +2,7 @@
 - Aggiunta impostazione timeout
 - Permesso l'uso di CA radice definite dall'utente per connessioni HTTPS, prima non consentito
 - Aggiunta opzione di logging di debug
+
 ## Correzioni
 ### Supporto Scanner
 - Confermato corretto: HP Color Laserjet MFP M283fdw, HP DeskJet 3630, EPSON ET-2650

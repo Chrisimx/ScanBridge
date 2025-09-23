@@ -1,5 +1,4 @@
 Nuove Funzionalità:
-
 - Recupero automatico della sessione di scansione più recente non completata all'avvio dell'app, se presente
 - Rilevamento automatico degli scanner HTTPS sulla rete
 - Memorizzazione persistente delle connessioni personalizzate agli scanner per uso ripetuto

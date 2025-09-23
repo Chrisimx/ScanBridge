@@ -1,5 +1,4 @@
 Questa è una nuova versione di ScanBridge con numerosi miglioramenti e correzioni di bug:
-
 * L'eliminazione delle pagine nell'interfaccia di scansione ora richiede conferma per prevenire cancellazioni accidentali
 * Il supporto scanner è stato migliorato, HP Color Laserjet MFP M283fdw è ora parzialmente supportato
 * Le pagine scansionate nell'interfaccia di scansione a volte si sovrapponevano ad altri elementi dell'interfaccia utente, ora questo è corretto

@@ -1,4 +1,4 @@
-<p><b>ScanBridge</b> è un'app basata su Material You che ti permette di scansionare documenti, foto e altro tramite il protocollo AirScan/eSCL.
+<p><b>ScanBridge</b> è un'app basata su Material You che permette di scansionare documenti, foto e altro tramite il protocollo AirScan/eSCL.
 AirScan/eSCL è un protocollo ampiamente supportato che consente di connettersi a scanner di rete e di scansionare documenti senza la necessità di software o driver aggiuntivi.</p>
 <p><b>Funzionalità:</b><ul>
     <li>Individua gli scanner presenti sulla rete che supportano il protocollo eSCL</li>

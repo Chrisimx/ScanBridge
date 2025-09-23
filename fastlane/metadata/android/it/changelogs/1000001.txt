@@ -1,5 +1,4 @@
 Questa è una nuova versione di ScanBridge con alcune correzioni di bug minori:
-
 * Correzione della distorsione delle scansioni nell'esportazione PDF se le proporzioni non corrispondono a quelle previste
 * Correzione del crash quando uno scanner pubblicizza un indirizzo non valido, ignora tali scanner. Se l'indirizzo ha un ID ambito IPv6 rimuovilo prima di usare l'indirizzo
 

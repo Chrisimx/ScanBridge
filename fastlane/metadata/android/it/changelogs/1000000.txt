@@ -1,5 +1,4 @@
 Questa è la versione iniziale di ScanBridge 🥳. Include:
-
 * Scansione di documenti, foto e altro tramite il protocollo AirScan/eSCL
 * Esportazione delle scansioni come PDF o immagini
 * Organizzazione delle pagine scansionate
