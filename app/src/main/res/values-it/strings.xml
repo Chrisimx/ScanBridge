@@ -2,7 +2,7 @@
     <string name="app_name" translate="false">ScanBridge</string>
     <string name="print_symbol_desc">Icona stampante</string>
     <string name="settings">Impostazioni</string>
-    <string name="no_scanners_found">Nessuno scanner trovato. Sei connesso alla rete locale?</string>
+    <string name="no_scanners_found">Nessuno scanner disponibile. Sei connesso alla rete locale?</string>
     <string name="warning_desc">Icona di avviso</string>
     <string name="error_title">Errore</string>
     <string name="scannercapabilities_retrieve_error">Si è verificato un errore durante il tentativo di recuperare le funzionalità dello scanner:\n\n%1$s</string>
@@ -28,7 +28,7 @@
     <string name="adf">Alimentatore</string>
     <string name="header_scannerbrowser">Scanner disponibili</string>
     <string name="discovery">Analisi della rete</string>
-    <string name="copy_current_scanner_options_in_esclkt_format">Copia le opzioni di scansione correnti in formato eSCLKt</string>
+    <string name="copy_current_scanner_options_in_esclkt_format">Copia le impostazioni di scansione correnti in formato eSCLKt</string>
     <string name="scan_settings">Impostazioni di scansione</string>
     <string name="error_state_not_in_allowed_range">Valore fuori dall\'intervallo consentito</string>
     <string name="error_state_not_a_valid_number">Numero non valido</string>
@@ -70,7 +70,7 @@
     <string name="error_state_please_enter_an_url">Per favore Inserisci un URL</string>
     <string name="custom_scanner">Scanner personalizzato</string>
     <string name="export_pdf">Esporta come PDF</string>
-    <string name="export_as_archive">Esporta come archivio di di file JPEG</string>
+    <string name="export_as_archive">Esporta come archivio di file JPEG</string>
     <string name="no_further_pages">Nessuna pagina aggiuntiva. %1$s</string>
     <string name="error_while_copying_received_image_to_file">Errore durante la copia dell\'immagine ricevuta nel file: %1$s</string>
     <string name="couldn_t_decode_received_image">Impossibile decodificare l\'immagine ricevuta. %1$s</string>

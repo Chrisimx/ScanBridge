@@ -1,6 +1,6 @@
-Diese neue Version von ScanBridge enthält kleinere Fehlerbehebungen:
+Questa è una nuova versione di ScanBridge con alcune correzioni di bug minori:
 
-* Verzerrung von Scans im PDF-Export wird verhindert. Dise trat auf, wenn das Seitenverhältnis nicht dem erwarteten entspricht
-* Verhindern von Abstürzen, wenn ein Scanner eine ungültige Adresse bekanntmacht  – diese Addressen werden nun ignoriert. Falls die Adresse eine IPv6-Scope-ID enthält, wird diese vor der Verwendung entfernt
+* Correzione della distorsione delle scansioni nell'esportazione PDF se le proporzioni non corrispondono a quelle previste
+* Correzione del crash quando uno scanner pubblicizza un indirizzo non valido, ignora tali scanner. Se l'indirizzo ha un ID ambito IPv6 rimuovilo prima di usare l'indirizzo
 
-Vollständige Commit-History: [https://github.com/Chrisimx/ScanBridge/compare/v1.0.0...v1.0.1](https://github.com/Chrisimx/ScanBridge/compare/v1.0.0...v1.0.1)
+Log completo dei commit: https://github.com/Chrisimx/ScanBridge/compare/v1.0.0...v1.0.1
