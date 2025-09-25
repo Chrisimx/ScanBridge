@@ -73,7 +73,7 @@
     <string name="no_further_pages">Nessuna pagina aggiuntiva. %1$s</string>
     <string name="error_while_copying_received_image_to_file">Errore durante la copia dell\'immagine ricevuta nel file: %1$s</string>
     <string name="couldn_t_decode_received_image">Impossibile decodificare l\'immagine ricevuta. %1$s</string>
-    <string name="intent">Comando:</string>
+    <string name="intent">Modalità di scansione:</string>
     <string name="scan_region">Area di scansione:</string>
     <string name="page_deletion_confirmation">Eliminare la pagina corrente? Questa azione non può essere annullata.</string>
     <string name="debug_log">Log di debug</string>
