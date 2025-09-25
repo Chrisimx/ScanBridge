@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translate="false">ScanBridge</string>
     <string name="print_symbol_desc">Icona stampante</string>
     <string name="settings">Impostazioni</string>
     <string name="no_scanners_found">Nessuno scanner disponibile. Sei connesso alla rete locale?</string>
