@@ -51,7 +51,7 @@
     <string name="app_icon_desc">Icona applicazione</string>
     <string name="debug_build">Debug</string>
     <string name="auto_cleanup_info_desc">Ulteriori informazioni su questa impostazione</string>
-    <string name="crash_log_file_exists">Registro degli arresti anomali esistente</string>
+    <string name="crash_log_file_exists">Registro degli arresti anomali trovato</string>
     <string name="crash_log_was_found">Registro degli arresti anomali individuato. Questa è l\'eccezione che ha causato l\'arresto anomalo. Allega questo messaggio alla tua segnalazione di bug:</string>
     <string name="confirm_crash_log_deletion">OK, eliminalo</string>
     <string name="camera">Fotocamera</string>
