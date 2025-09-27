@@ -82,6 +82,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -900,7 +901,7 @@ fun ScanContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (!scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
-            Text(scannerName)
+            Text(modifier = Modifier.padding(horizontal = 5.dp), text = scannerName, textAlign = TextAlign.Center)
             Text(
                 stringResource(
                     R.string.page_x_of_y,
