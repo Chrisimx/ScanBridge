@@ -934,7 +934,7 @@ fun ScanContent(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     CircularProgressIndicator()
-                    Text(stringResource(R.string.retrieving_page))
+                    Text(modifier = Modifier.padding(vertical = 15.dp), text = stringResource(R.string.retrieving_page))
                 }
                 return@HorizontalPager
             } else {
