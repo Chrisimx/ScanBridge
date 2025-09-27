@@ -18,6 +18,7 @@ ScanBridge is an Android scanning application written in Kotlin using Jetpack Co
 - Use **ktlint** for Kotlin code formatting (version 1.5.0)
 - Follow the `.editorconfig` configuration
 - Run `./ktlint --editorconfig=./.editorconfig` to check formatting
+- Run `./ktlint --editorconfig=./.editorconfig --format` to fix formatting
 - Code should follow Material Design 3 patterns for UI components
 
 ### Project Structure
