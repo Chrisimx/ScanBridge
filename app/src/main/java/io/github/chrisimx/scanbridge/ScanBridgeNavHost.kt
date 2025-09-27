@@ -48,6 +48,10 @@ object StartUpScreenRoute : BaseRoute
 @SerialName("ScannerRoute")
 data class ScannerRoute(val scannerName: String, val scannerURL: String, val sessionID: String) : BaseRoute
 
+@Serializable
+@SerialName("PrinterRoute")
+data class PrinterRoute(val printerName: String, val printerURL: String, val sessionID: String) : BaseRoute
+
 fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
     Timber.d("Route changed to: ${destination.route}")
     return when (destination.route) {
@@ -57,6 +61,12 @@ fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
             val scannerURL = arguments?.getString("scannerURL") ?: return null
             val sessionID = arguments?.getString("sessionID") ?: return null
             ScannerRoute(scannerName, scannerURL, sessionID)
+        }
+        "PrinterRoute/{printerName}/{printerURL}/{sessionID}" -> {
+            val printerName = arguments?.getString("printerName") ?: return null
+            val printerURL = arguments?.getString("printerURL") ?: return null
+            val sessionID = arguments?.getString("sessionID") ?: return null
+            PrinterRoute(printerName, printerURL, sessionID)
         }
         else -> null
     }
@@ -96,6 +106,26 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
                 debug,
                 certValidationDisabled,
                 scannerRoute.sessionID,
+                context.applicationContext as Application
+            )
+        }
+        composable<PrinterRoute> { backStackEntry ->
+            val printerRoute: PrinterRoute = backStackEntry.toRoute()
+            val debug = sharedPreferences.getBoolean("write_debug", false)
+            val certValidationDisabled = sharedPreferences.getBoolean("disable_cert_checks", false)
+            val timeout = sharedPreferences.getInt("scanning_response_timeout", 25).toUInt()
+            Timber.tag("ScanBridgeNavHost")
+                .d(
+                    "Navigating to printer ${printerRoute.printerName} at ${printerRoute.printerURL}. Timeout is $timeout seconds, Debug is $debug. Disabling of cert checks is $certValidationDisabled. Session id is ${printerRoute.sessionID}"
+                )
+            PrintingScreen(
+                printerRoute.printerName,
+                printerRoute.printerURL.toHttpUrl(),
+                navController,
+                timeout,
+                debug,
+                certValidationDisabled,
+                printerRoute.sessionID,
                 context.applicationContext as Application
             )
         }
