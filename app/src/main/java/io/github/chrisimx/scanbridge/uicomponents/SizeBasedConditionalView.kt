@@ -6,10 +6,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
-import timber.log.Timber
 
 @Composable
-fun SizeBasedConditionalView(modifier: Modifier = Modifier, largeView: @Composable () -> Unit, smallView: @Composable () -> Unit) {
+fun SizeBasedConditionalView(
+    modifier: Modifier = Modifier,
+    largeView: @Composable () -> Unit,
+    smallView: @Composable () -> Unit,
+    onViewChosen: (Boolean) -> Unit = {}
+) {
     SubcomposeLayout(modifier = modifier) { constraints ->
         val relaxedWidthConstraints = Constraints(
             minWidth = 0,
@@ -23,9 +27,7 @@ fun SizeBasedConditionalView(modifier: Modifier = Modifier, largeView: @Composab
         }
 
         val totalHeightA = placeablesA.maxOfOrNull { it.height } ?: 0
-        Timber.d(totalHeightA.toString())
         val totalWidthA = placeablesA.maxOfOrNull { it.width } ?: 0
-        Timber.d(totalWidthA.toString())
 
         val fitsInBounds = totalWidthA <= constraints.maxWidth &&
             totalHeightA <= constraints.maxHeight
@@ -35,6 +37,8 @@ fun SizeBasedConditionalView(modifier: Modifier = Modifier, largeView: @Composab
         } else {
             subcompose("UsedB", smallView).map { it.measure(constraints) }
         }
+
+        onViewChosen(fitsInBounds)
 
         val layoutWidth = placeablesToUse.maxOfOrNull { it.width } ?: 0
         val layoutHeight = placeablesToUse.maxOfOrNull { it.height } ?: 0

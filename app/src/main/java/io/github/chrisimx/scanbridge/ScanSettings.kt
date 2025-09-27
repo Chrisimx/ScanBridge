@@ -45,6 +45,10 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -86,8 +90,9 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
     ) {
         Text(stringResource(R.string.input_source))
         FlowRow(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)
         ) {
             SingleChoiceSegmentedButtonRow {
                 scanSettingsUIState.inputSourceOptions.forEachIndexed { index, inputSource ->
@@ -112,6 +117,8 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
             ) { Text(stringResource(R.string.setting_duplex)) }
         }
 
+        var fitsRowVersion by remember { mutableStateOf(false) }
+
         SizeBasedConditionalView(
             modifier = Modifier,
             largeView = {
@@ -119,13 +126,14 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
             },
             smallView = {
                 ResolutionSettingCardVersion(scanSettingsUIState, scanSettingsViewModel)
-            }
+            },
+            onViewChosen = { fitsRowVersion = it }
         )
 
         OutlinedCard(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 15.dp)
+                .padding(start = 20.dp, end = 20.dp, top = if (fitsRowVersion) 30.dp else 15.dp, bottom = 15.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text(
