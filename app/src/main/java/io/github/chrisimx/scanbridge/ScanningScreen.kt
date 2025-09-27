@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -76,6 +77,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -770,9 +772,12 @@ fun ScanningScreen(
         }
 
         if (scanningViewModel.scanningScreenData.scanSettingsMenuOpen) {
+            val configuration = LocalConfiguration.current
+            val screenHeight = configuration.screenHeightDp.dp
+
             ModalBottomSheet({ scanningViewModel.setScanSettingsMenuOpen(false) }) {
                 ScanSettingsUI(
-                    Modifier,
+                    Modifier.heightIn(max = screenHeight * 0.8f),
                     context,
                     scanningViewModel.scanningScreenData.scanSettingsVM!!
                 )
