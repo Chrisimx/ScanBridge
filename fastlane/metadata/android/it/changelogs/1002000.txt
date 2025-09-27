@@ -1,0 +1,13 @@
+## Funzionalità
+- Aggiunta impostazione timeout
+- Permesso l'uso di CA radice definite dall'utente per connessioni HTTPS, prima non consentito
+- Aggiunta opzione di logging di debug
+
+## Correzioni
+### Supporto Scanner
+- Confermato corretto: HP Color Laserjet MFP M283fdw, HP DeskJet 3630, EPSON ET-2650
+- Forse corretto: Kyocera ECOSYS M5521cdn, HP Neverstop Laser MFP 1200w
+### Altro
+- Uso della porta pubblicata invece di 80/443
+- Layout del dialogo di errore a schermo intero con messaggi di errore molto lunghi
+- Crash su versioni Android più vecchie con livello API < 34
