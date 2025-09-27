@@ -102,12 +102,6 @@ All Kotlin files should include the GPL-3.0 license header:
 - Reference issue numbers in commits when applicable
 - Code comments should explain complex business logic, not obvious code
 
-### Contributing
-- Fork the repository and create feature branches
-- Ensure GPG-signed commits when possible
-- Follow the guidelines in `CONTRIBUTING.md`
-- Be respectful and considerate in all interactions
-- Submit detailed bug reports and feature requests
 
 ### Security and Licensing
 - This is GPL-3.0-or-later licensed software
