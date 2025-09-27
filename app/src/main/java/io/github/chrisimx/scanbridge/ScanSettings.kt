@@ -257,22 +257,26 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
             }
         }
         val localContext = LocalContext.current
-        Button(onClick = {
-            val systemClipboard =
-                localContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-            val scanSettingsString =
-                scanSettingsUIState.scanSettingsState.toESCLKtScanSettings(scanSettingsUIState.selectedInputSourceCapabilities)
-                    .toString()
-            systemClipboard.setPrimaryClip(
-                ClipData.newPlainText(
-                    localContext.getString(R.string.scan_settings),
-                    scanSettingsString
+        Button(
+            modifier = Modifier.padding(horizontal = 15.dp),
+            onClick = {
+                val systemClipboard =
+                    localContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                val scanSettingsString =
+                    scanSettingsUIState.scanSettingsState.toESCLKtScanSettings(scanSettingsUIState.selectedInputSourceCapabilities)
+                        .toString()
+                systemClipboard.setPrimaryClip(
+                    ClipData.newPlainText(
+                        localContext.getString(R.string.scan_settings),
+                        scanSettingsString
+                    )
                 )
-            )
-        }) {
+            }
+        ) {
             Text(
                 stringResource(R.string.copy_current_scanner_options_in_esclkt_format),
-                style = MaterialTheme.typography.labelMedium
+                style = MaterialTheme.typography.labelMedium,
+                textAlign = TextAlign.Center
             )
         }
     }
