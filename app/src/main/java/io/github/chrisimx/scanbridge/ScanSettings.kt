@@ -54,7 +54,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanIntentData
+import io.github.chrisimx.scanbridge.data.ui.ImmutableScanSettingsComposableData
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableViewModel
+import io.github.chrisimx.scanbridge.uicomponents.SizeBasedConditionalView
 import io.github.chrisimx.scanbridge.uicomponents.ValidatedDimensionsTextEdit
 import io.github.chrisimx.scanbridge.util.toReadableString
 import timber.log.Timber
@@ -109,32 +111,17 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                 onCheckedChange = { scanSettingsViewModel.setDuplex(it) }
             ) { Text(stringResource(R.string.setting_duplex)) }
         }
-        Text(stringResource(R.string.resolution_dpi))
-        SingleChoiceSegmentedButtonRow {
-            scanSettingsUIState.supportedScanResolutions.forEachIndexed { index, discreteResolution ->
-                SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        index = index,
-                        count = scanSettingsUIState.supportedScanResolutions.size
-                    ),
-                    onClick = {
-                        scanSettingsViewModel.setResolution(
-                            discreteResolution.xResolution,
-                            discreteResolution.yResolution
-                        )
-                    },
-                    selected =
-                    scanSettingsUIState.scanSettingsState.xResolution == discreteResolution.xResolution &&
-                        scanSettingsUIState.scanSettingsState.yResolution == discreteResolution.yResolution
-                ) {
-                    if (discreteResolution.xResolution == discreteResolution.yResolution) {
-                        Text("${discreteResolution.xResolution}")
-                    } else {
-                        Text("${discreteResolution.xResolution}x${discreteResolution.yResolution}")
-                    }
-                }
+
+        SizeBasedConditionalView(
+            modifier = Modifier,
+            largeView = {
+                ResolutionSettingButtonRowVersion(scanSettingsUIState, scanSettingsViewModel)
+            },
+            smallView = {
+                ResolutionSettingCardVersion(scanSettingsUIState, scanSettingsViewModel)
             }
-        }
+        )
+
         OutlinedCard(
             modifier = Modifier
                 .fillMaxWidth()
@@ -287,6 +274,87 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                 stringResource(R.string.copy_current_scanner_options_in_esclkt_format),
                 style = MaterialTheme.typography.labelMedium
             )
+        }
+    }
+}
+
+@Composable
+private fun ResolutionSettingButtonRowVersion(
+    scanSettingsUIState: ImmutableScanSettingsComposableData,
+    scanSettingsViewModel: ScanSettingsComposableViewModel
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(stringResource(R.string.resolution_dpi))
+        SingleChoiceSegmentedButtonRow {
+            scanSettingsUIState.supportedScanResolutions.forEachIndexed { index, discreteResolution ->
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = scanSettingsUIState.supportedScanResolutions.size
+                    ),
+                    onClick = {
+                        scanSettingsViewModel.setResolution(
+                            discreteResolution.xResolution,
+                            discreteResolution.yResolution
+                        )
+                    },
+                    selected =
+                    scanSettingsUIState.scanSettingsState.xResolution == discreteResolution.xResolution &&
+                        scanSettingsUIState.scanSettingsState.yResolution == discreteResolution.yResolution
+                ) {
+                    if (discreteResolution.xResolution == discreteResolution.yResolution) {
+                        Text("${discreteResolution.xResolution}")
+                    } else {
+                        Text("${discreteResolution.xResolution}x${discreteResolution.yResolution}")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ResolutionSettingCardVersion(
+    scanSettingsUIState: ImmutableScanSettingsComposableData,
+    scanSettingsViewModel: ScanSettingsComposableViewModel
+) {
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 15.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                stringResource(R.string.resolution_dpi),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+
+            FlowRow(
+                Modifier.fillMaxWidth(),
+
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                scanSettingsUIState.supportedScanResolutions.forEachIndexed { index, discreteResolution ->
+                    val text = if (discreteResolution.xResolution == discreteResolution.yResolution) {
+                        "${discreteResolution.xResolution}"
+                    } else {
+                        "${discreteResolution.xResolution}x${discreteResolution.yResolution}"
+                    }
+                    InputChip(
+                        onClick = {
+                            scanSettingsViewModel.setResolution(
+                                discreteResolution.xResolution,
+                                discreteResolution.yResolution
+                            )
+                        },
+                        label = { Text(text) },
+                        selected =
+                        scanSettingsUIState.scanSettingsState.xResolution == discreteResolution.xResolution &&
+                            scanSettingsUIState.scanSettingsState.yResolution == discreteResolution.yResolution
+                    )
+                }
+            }
         }
     }
 }
