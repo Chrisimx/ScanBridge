@@ -8,6 +8,7 @@
     <string name="okay_text">OK</string>
     <string name="trying_to_retrieve_scannercapabilities">Tentativo di recupero delle funzionalità dello scanner</string>
     <string name="scan">Scansiona</string>
+    <string name="cancelling_scan">Annullamento in corso…</string>
     <string name="desc_scanned_page">Pagina scansionata</string>
     <string name="job_canceled">L\'attività è stata annullata</string>
     <string name="job_aborted_because_error">L\'attività è stata interrotta a causa di un errore</string>
@@ -96,4 +97,5 @@
     <string name="remember_scan_settings_desc">Se abilitata, quando si crea una nuova sessione di scansione verranno ripristinate le ultime impostazioni di scansione utilizzate (sorgente di input, duplex, ecc.). Se disabilitata, ogni sessione inizia con le impostazioni di scansione predefinite (massima risoluzione, area di scansione più ampia possibile).</string>
     <string name="donate">Dona a ScanBridge</string>
     <string name="source_code">Codice sorgente</string>
+    <string name="cancel_scan">Annulla</string>
 </resources>

@@ -141,6 +141,10 @@ class ScanningScreenViewModel(
         _scanningScreenData.scanJobRunning.value = value
     }
 
+    fun setScanJobCancelling(value: Boolean) {
+        _scanningScreenData.scanJobCancelling.value = value
+    }
+
     fun setError(value: String?) {
         _scanningScreenData.errorString.value = value
     }

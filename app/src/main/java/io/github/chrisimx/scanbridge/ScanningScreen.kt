@@ -27,11 +27,14 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -96,6 +99,7 @@ import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Image
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.JobState
+import io.github.chrisimx.esclkt.ScanJob
 import io.github.chrisimx.esclkt.ScanRegion
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.millimeters
@@ -355,6 +359,17 @@ fun doPdfExport(scanningViewModel: ScanningScreenViewModel, context: Context, on
     context.startActivity(share)
 }
 
+fun abortIfCancelling(viewModel: ScanningScreenViewModel, scanJob: ScanJob? = null): Boolean =
+    if (viewModel.scanningScreenData.scanJobCancelling) {
+        Timber.tag(TAG).d("Scan job cancelling is set. Aborting, cancling job if possible. scanJob: $scanJob")
+        scanJob?.cancle()
+        viewModel.setScanJobRunning(false)
+        viewModel.setScanJobCancelling(false)
+        true
+    } else {
+        false
+    }
+
 @OptIn(ExperimentalUuidApi::class)
 fun doScan(
     esclRequestClient: ESCLRequestClient,
@@ -378,10 +393,13 @@ fun doScan(
         }
 
         viewModel.setScanJobRunning(true)
+        viewModel.setScanJobCancelling(false)
         viewModel.scrollToPage(
             scope = scope,
             pageNr = viewModel.scanningScreenData.currentScansState.size
         )
+
+        if (abortIfCancelling(viewModel)) return@thread
 
         Timber.tag(TAG).d("Creating scan job. eSCLKt scan settings: $scanSettings")
         val job =
@@ -393,20 +411,24 @@ fun doScan(
             snackbarErrorRetrievingPage(job.toString(), scope, context, snackbarHostState)
             return@thread
         }
+        val jobResult = job.scanJob
+
+        if (abortIfCancelling(viewModel, jobResult)) return@thread
 
         var polling = false
 
         while (true) {
             if (polling) {
                 for (retries in 0..60) {
-                    val status = job.scanJob.getJobStatus()
+                    if (abortIfCancelling(viewModel, jobResult)) return@thread
+                    val status = jobResult.getJobStatus()
                     val isRunning = status?.jobState == JobState.Processing || status?.jobState == JobState.Pending
                     val imagesToTransfer = status?.imagesToTransfer
                     Timber.tag(TAG).d("Polling job status. Result: $status imagesToTransfer: $imagesToTransfer isRunning: $isRunning")
                     if (!isRunning) {
                         Timber.tag(TAG).d("Job is reported to be not running anymore. jobRunning = false")
 
-                        val deleteResult = job.scanJob.cancle()
+                        val deleteResult = jobResult.cancle()
                         Timber.tag(TAG).d("Cancelling job after (a likely) failure: $deleteResult")
 
                         viewModel.setScanJobRunning(false)
@@ -437,10 +459,12 @@ fun doScan(
                 }
             }
 
+            if (abortIfCancelling(viewModel, jobResult)) return@thread
+
             Timber.tag(TAG).d("Retrieving next page")
-            var nextPage = job.scanJob.retrieveNextPage()
+            var nextPage = jobResult.retrieveNextPage()
             Timber.tag(TAG).d("Next page result: $nextPage")
-            val status = job.scanJob.getJobStatus()
+            val status = jobResult.getJobStatus()
             Timber.tag(TAG).d("Retrieved job info: $status")
             val jobStateString = status?.jobState.toJobStateString(context)
             Timber.tag(TAG).d("Job info as human readable: $jobStateString")
@@ -464,7 +488,7 @@ fun doScan(
                             )
                         }
                     }
-                    val deletionResult = job.scanJob.cancle()
+                    val deletionResult = jobResult.cancle()
                     Timber.tag(TAG).d("Cancelling job after no further pages is reported: $deletionResult")
                     return@thread
                 }
@@ -485,7 +509,7 @@ fun doScan(
                                 withDismissAction = true
                             )
                         }
-                        val deletionResult = job.scanJob.cancle()
+                        val deletionResult = jobResult.cancle()
                         Timber.tag(TAG).d("Cancelling job after non-standard completion: $deletionResult")
                         return@thread
                     } else {
@@ -507,7 +531,7 @@ fun doScan(
                                 context,
                                 snackbarHostState
                             )
-                            val deletionResult = job.scanJob.cancle()
+                            val deletionResult = jobResult.cancle()
                             Timber.tag(TAG).d("Cancelling job after not successful response while trying to retrieve page: $deletionResult")
                             return@thread
                         }
@@ -524,7 +548,7 @@ fun doScan(
                         snackbarHostState
                     )
                     viewModel.setScanJobRunning(false)
-                    val deletionResult = job.scanJob.cancle()
+                    val deletionResult = jobResult.cancle()
                     Timber.tag(TAG).d("Cancelling job after error while trying to retrieve page: $deletionResult")
                     return@thread
                 }
@@ -559,7 +583,7 @@ fun doScan(
                         context,
                         snackbarHostState
                     )
-                    val deletionResult = job.scanJob.cancle()
+                    val deletionResult = jobResult.cancle()
                     Timber.tag(TAG).d("Cancelling job after error while trying to copy received page to file: $deletionResult")
                     return@thread
                 }
@@ -574,7 +598,7 @@ fun doScan(
                         snackbarHostState
                     )
                     filePath.toFile().delete()
-                    val deletionResult = job.scanJob.cancle()
+                    val deletionResult = jobResult.cancle()
                     Timber.tag(TAG).d("Cancelling job after error while trying to decode received page as bitmap: $deletionResult")
                     return@thread
                 }
@@ -621,33 +645,94 @@ fun ScanningScreenBottomBar(
             }
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    val scanSettingsData =
-                        scanningViewModel.scanningScreenData.scanSettingsVM!!.scanSettingsComposableData
-                    thread {
-                        doScan(
-                            scanningViewModel.scanningScreenData.esclClient,
-                            context,
-                            scope,
-                            snackbarHostState,
-                            scanSettingsData.scanSettingsState.toESCLKtScanSettings(
-                                scanSettingsData.selectedInputSourceCapabilities
-                            ),
-                            scanningViewModel
-                        )
-                    }
-                },
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.outline_scan_24),
-                        contentDescription = stringResource(
-                            R.string.scan
-                        )
+            AnimatedContent(
+                scanningViewModel.scanningScreenData.scanJobRunning
+            ) {
+                if (it) {
+                    val isCancelling = scanningViewModel.scanningScreenData.scanJobCancelling
+                    val containerColor by animateColorAsState(
+                        targetValue = if (isCancelling) {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        },
+                        animationSpec = tween(durationMillis = 300)
                     )
-                },
-                text = { Text(stringResource(R.string.scan)) }
-            )
+
+                    val contentColor by animateColorAsState(
+                        targetValue = if (isCancelling) {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        } else {
+                            MaterialTheme.colorScheme.onError
+                        },
+                        animationSpec = tween(durationMillis = 300)
+                    )
+
+                    // Show cancel button when scanning
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            if (!isCancelling) {
+                                scanningViewModel.setScanJobCancelling(true)
+                            }
+                        },
+                        containerColor = containerColor,
+                        contentColor = contentColor,
+                        icon = {
+                            Icon(
+                                painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
+                                contentDescription = if (scanningViewModel.scanningScreenData.scanJobCancelling) {
+                                    stringResource(R.string.cancelling_scan)
+                                } else {
+                                    stringResource(R.string.cancel_scan)
+                                }
+                            )
+                        },
+                        text = {
+                            AnimatedContent(
+                                targetState = isCancelling,
+                                transitionSpec = {
+                                    fadeIn(animationSpec = tween(200)).togetherWith(fadeOut(animationSpec = tween(200)))
+                                }
+                            ) { targetCancelling ->
+                                Text(
+                                    text = if (targetCancelling) {
+                                        stringResource(R.string.cancelling_scan)
+                                    } else {
+                                        stringResource(R.string.cancel_scan)
+                                    }
+                                )
+                            }
+                        }
+                    )
+                } else {
+                    // Show scan button when not scanning
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            val scanSettingsData =
+                                scanningViewModel.scanningScreenData.scanSettingsVM!!.scanSettingsComposableData
+                            thread {
+                                doScan(
+                                    scanningViewModel.scanningScreenData.esclClient,
+                                    context,
+                                    scope,
+                                    snackbarHostState,
+                                    scanSettingsData.scanSettingsState.toESCLKtScanSettings(
+                                        scanSettingsData.selectedInputSourceCapabilities
+                                    ),
+                                    scanningViewModel
+                                )
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.outline_scan_24),
+                                contentDescription = stringResource(R.string.scan)
+                            )
+                        },
+                        text = { Text(stringResource(R.string.scan)) }
+                    )
+                }
+            }
         }
     )
 }

@@ -41,6 +41,7 @@ data class ScanningScreenData(
     val capabilities: MutableState<ScannerCapabilities?> = mutableStateOf(null),
     val scanSettingsMenuOpen: MutableState<Boolean> = mutableStateOf(false),
     val scanJobRunning: MutableState<Boolean> = mutableStateOf(false),
+    val scanJobCancelling: MutableState<Boolean> = mutableStateOf(false),
     val showExportOptions: MutableState<Boolean> = mutableStateOf(false),
     val exportOptionsPopupPosition: MutableState<Pair<Int, Int>?> = mutableStateOf(null),
     val stateProgressStringRes: MutableState<Int?> = mutableStateOf(null),
@@ -62,6 +63,7 @@ data class ScanningScreenData(
         showExportOptions,
         exportOptionsPopupPosition,
         scanJobRunning,
+        scanJobCancelling,
         stateProgressStringRes,
         createdTempFiles,
         pagerState,
@@ -81,6 +83,7 @@ data class ImmutableScanningScreenData(
     private val showExportOptionsState: State<Boolean>,
     private val exportOptionsPopupPositionState: State<Pair<Int, Int>?>,
     private val scanJobRunningState: State<Boolean>,
+    private val scanJobCancellingState: State<Boolean>,
     private val progressStringResState: State<Int?>,
     val createdTempFiles: List<File>,
     val pagerState: PagerState,
@@ -91,6 +94,7 @@ data class ImmutableScanningScreenData(
     val scanSettingsVM by scanSettingsVMState
     val scanSettingsMenuOpen by scanSettingsMenuOpenState
     val scanJobRunning by scanJobRunningState
+    val scanJobCancelling by scanJobCancellingState
     val progressStringResource by progressStringResState
     val capabilities by capabilitiesState
     val errorString by errorStringState
