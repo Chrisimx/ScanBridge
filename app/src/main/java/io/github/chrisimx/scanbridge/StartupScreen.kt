@@ -60,6 +60,7 @@ fun ScannerDiscoveryTopBar(header: String) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StartupScreen(navController: NavController) {
     var selectedItem = rememberSaveable { mutableIntStateOf(0) }

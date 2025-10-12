@@ -45,7 +45,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
 
 android {
     namespace = "io.github.chrisimx.scanbridge"
-    compileSdk = 35
+    compileSdk = 36
 
     androidResources {
         generateLocaleConfig = true
@@ -54,7 +54,7 @@ android {
     defaultConfig {
         applicationId = "io.github.chrisimx.scanbridge"
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1_004_000 // format is MAJ_MIN_PAT with always 3 digits
         versionName = "1.4.0"
 

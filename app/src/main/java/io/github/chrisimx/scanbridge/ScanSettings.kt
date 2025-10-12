@@ -66,7 +66,6 @@ import io.github.chrisimx.scanbridge.util.toReadableString
 import timber.log.Timber
 
 @OptIn(
-    ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalLayoutApi::class,
     ExperimentalFoundationApi::class
 )
