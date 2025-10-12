@@ -1,0 +1,8 @@
+New Features:
+- 🇮🇹 Italian language support — thanks a lot to @LucaMaroglio!
+- 🌐 Per-app language setting — choose your preferred language without changing system settings.
+- 📄 US paper formats — now Letter and Legal sizes provided as selection.
+- ⚙️ Save scan settings — your preferences are now remembered for new sessions.
+- ✖️ Cancel button — easily stop a scan in progress.
+- ✨ Design improvements — cleaner and more polished interface.
+- 🛠️ Bug fixes — better compatibility with scanners.

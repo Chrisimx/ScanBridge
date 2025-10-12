@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.0] - 2025-10-12
+### Added
+- Italian localization (c2881f5d). Thanks so much to @LucaMaroglio for the contribution!
+- Per-App language setting (3caba03c)
+- US paper formats (Letter, Legal) (a7025b69)
+- Saving scan settings as default for new sessions (b3e2f3a1)
+- Cancel button (0630997a)
+- Source code and sponsor button in the settings screen (f9ccbeb4)
+
+### Changed
+- Design improvements (8c22b503, 722b4879, 9ca9de8b, fc93547e, 16552ace, 201b098a)
+
+## Fixed
+- A bug where an invalid resolution could be selected after changing the input source (635abe39)
+- Improved scanner support (349986e5)
+
 ## [1.4.0] - 2025-08-27
 
 ### Added
