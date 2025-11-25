@@ -155,6 +155,7 @@ class ScanningScreenViewModel(
 
         if (storedSession != null) {
             scanningScreenData.currentScansState.addAll(storedSession.scannedPages)
+            _scanningScreenData.createdTempFiles.addAll(storedSession.tmpFiles.map { File(it) })
             _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
                 ScanSettingsComposableData(storedSession.scanSettings?.toMutable() ?: caps.calculateDefaultESCLScanSettingsState(), caps),
                 onSettingsChanged = {
