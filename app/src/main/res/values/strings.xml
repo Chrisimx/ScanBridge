@@ -101,4 +101,5 @@
     <string name="source_code">View source code</string>
     <string name="f_droid" translatable="false">F-Droid</string>
     <string name="google_play" translatable="false">Play Store</string>
+    <string name="save_to_file">Save to File</string>
 </resources>

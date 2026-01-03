@@ -99,4 +99,5 @@
     <string name="remember_scan_settings_desc">Wenn diese Option aktiviert ist, werden die zuletzt verwendeten Scaneinstellungen (z.B. Quelle, Duplex usw.) beim Erstellen einer neuen Scansitzung wiederhergestellt.\n\nWenn sie deaktiviert ist, beginnt jede Sitzung mit den standardmäßigen Scaneinstellungen (höchste Auflösung, größtmöglicher Scanbereich).</string>
     <string name="donate">Für ScanBridge spenden</string>
     <string name="source_code">Den Quellcode anschauen</string>
+    <string name="save_to_file">In Datei speichern</string>
 </resources>

@@ -104,8 +104,20 @@ class ScanningScreenViewModel(
         _scanningScreenData.showExportOptions.value = show
     }
 
-    fun setExportPopupPosition(x: Int, y: Int) {
-        _scanningScreenData.exportOptionsPopupPosition.value = Pair(x, y)
+    fun setExportPopupPosition(x: Int, y: Int, height: Int) {
+        _scanningScreenData.exportOptionsPopupPosition.value = Triple(x, y, height)
+    }
+
+    fun setFileToSave(file: File) {
+        _scanningScreenData.sourceFileToSave.value = file
+    }
+
+    fun setShowSaveOptionsPopup(show: Boolean) {
+        _scanningScreenData.showSaveOptions.value = show
+    }
+
+    fun setSavePopupPosition(x: Int, y: Int, height: Int) {
+        _scanningScreenData.savePopupPosition.value = Triple(x, y, height)
     }
 
     fun removeTempFile(index: Int) {

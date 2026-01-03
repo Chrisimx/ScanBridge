@@ -43,13 +43,16 @@ data class ScanningScreenData(
     val scanJobRunning: MutableState<Boolean> = mutableStateOf(false),
     val scanJobCancelling: MutableState<Boolean> = mutableStateOf(false),
     val showExportOptions: MutableState<Boolean> = mutableStateOf(false),
-    val exportOptionsPopupPosition: MutableState<Pair<Int, Int>?> = mutableStateOf(null),
+    val showSaveOptions: MutableState<Boolean> = mutableStateOf(false),
+    val exportOptionsPopupPosition: MutableState<Triple<Int, Int, Int>?> = mutableStateOf(null),
+    val savePopupPosition: MutableState<Triple<Int, Int, Int>?> = mutableStateOf(null),
     val stateProgressStringRes: MutableState<Int?> = mutableStateOf(null),
     val stateCurrentScans: SnapshotStateList<Pair<String, ScanSettings>> = mutableStateListOf(),
     val createdTempFiles: MutableList<File> = mutableListOf(),
     val pagerState: PagerState = PagerState {
         stateCurrentScans.size + if (scanJobRunning.value) 1 else 0
-    }
+    },
+    val sourceFileToSave: MutableState<File?> = mutableStateOf(null)
 ) {
     fun toImmutable() = ImmutableScanningScreenData(
         esclClient,
@@ -61,10 +64,13 @@ data class ScanningScreenData(
         capabilities,
         scanSettingsMenuOpen,
         showExportOptions,
+        showSaveOptions,
         exportOptionsPopupPosition,
+        savePopupPosition,
         scanJobRunning,
         scanJobCancelling,
         stateProgressStringRes,
+        sourceFileToSave,
         createdTempFiles,
         pagerState,
         stateCurrentScans
@@ -81,10 +87,13 @@ data class ImmutableScanningScreenData(
     private val capabilitiesState: State<ScannerCapabilities?>,
     private val scanSettingsMenuOpenState: State<Boolean>,
     private val showExportOptionsState: State<Boolean>,
-    private val exportOptionsPopupPositionState: State<Pair<Int, Int>?>,
+    private val showSaveOptionsState: State<Boolean>,
+    private val exportOptionsPopupPositionState: State<Triple<Int, Int, Int>?>,
+    private val saveOptionsPopupPositionState: State<Triple<Int, Int, Int>?>,
     private val scanJobRunningState: State<Boolean>,
     private val scanJobCancellingState: State<Boolean>,
     private val progressStringResState: State<Int?>,
+    private val sourceFileToSaveState: State<File?>,
     val createdTempFiles: List<File>,
     val pagerState: PagerState,
     val currentScansState: SnapshotStateList<Pair<String, ScanSettings>>
@@ -99,5 +108,8 @@ data class ImmutableScanningScreenData(
     val capabilities by capabilitiesState
     val errorString by errorStringState
     val showExportOptions by showExportOptionsState
+    val showSaveOptions by showSaveOptionsState
     val exportOptionsPopupPosition by exportOptionsPopupPositionState
+    val saveOptionsPopupPosition by saveOptionsPopupPositionState
+    val sourceFileToSave by sourceFileToSaveState
 }

@@ -98,4 +98,5 @@
     <string name="donate">Dona a ScanBridge</string>
     <string name="source_code">Codice sorgente</string>
     <string name="cancel_scan">Annulla</string>
+    <string name="save_to_file">Salva in file</string>
 </resources>

@@ -26,7 +26,11 @@ import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -70,6 +74,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -193,7 +198,12 @@ fun rotate(context: Context, scanningViewModel: ScanningScreenViewModel) {
     scanningViewModel.setLoadingText(null)
 }
 
-fun doZipExport(scanningViewModel: ScanningScreenViewModel, context: Context, onError: (String) -> Unit) {
+fun doZipExport(
+    scanningViewModel: ScanningScreenViewModel,
+    context: Context,
+    onError: (String) -> Unit,
+    saveFileLauncher: ActivityResultLauncher<String>? = null
+) {
     if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
         onError(context.getString(R.string.no_scans_yet))
         return
@@ -230,20 +240,32 @@ fun doZipExport(scanningViewModel: ScanningScreenViewModel, context: Context, on
 
     scanningViewModel.setLoadingText(null)
 
-    val share = Intent(Intent.ACTION_SEND)
-    share.type = "application/zip"
-    share.putExtra(
-        Intent.EXTRA_STREAM,
-        FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            zipOutputFile
+    scanningViewModel.addTempFile(zipOutputFile)
+
+    if (saveFileLauncher == null) {
+        val share = Intent(Intent.ACTION_SEND)
+        share.type = "application/zip"
+        share.putExtra(
+            Intent.EXTRA_STREAM,
+            FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                zipOutputFile
+            )
         )
-    )
-    context.startActivity(share)
+        context.startActivity(share)
+    } else {
+        scanningViewModel.setFileToSave(zipOutputFile)
+        saveFileLauncher.launch(zipOutputFile.name)
+    }
 }
 
-fun doPdfExport(scanningViewModel: ScanningScreenViewModel, context: Context, onError: (String) -> Unit) {
+fun doPdfExport(
+    scanningViewModel: ScanningScreenViewModel,
+    context: Context,
+    onError: (String) -> Unit,
+    saveFileLauncher: ActivityResultLauncher<String>? = null
+) {
     if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
         onError(context.getString(R.string.no_scans_yet))
         return
@@ -346,17 +368,25 @@ fun doPdfExport(scanningViewModel: ScanningScreenViewModel, context: Context, on
     }
 
     scanningViewModel.setLoadingText(null)
-    val share = Intent(Intent.ACTION_SEND)
-    share.type = if (tempPdfFiles.size > 1) "application/zip" else "application/pdf"
-    share.putExtra(
-        Intent.EXTRA_STREAM,
-        FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            outputFile
+
+    val mimetype = if (tempPdfFiles.size > 1) "application/zip" else "application/pdf"
+
+    if (saveFileLauncher == null) {
+        val share = Intent(Intent.ACTION_SEND)
+        share.type = mimetype
+        share.putExtra(
+            Intent.EXTRA_STREAM,
+            FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                outputFile
+            )
         )
-    )
-    context.startActivity(share)
+        context.startActivity(share)
+    } else {
+        scanningViewModel.setFileToSave(outputFile)
+        saveFileLauncher.launch(outputFile.name)
+    }
 }
 
 fun abortIfCancelling(viewModel: ScanningScreenViewModel, scanJob: ScanJob? = null): Boolean =
@@ -613,7 +643,8 @@ fun ScanningScreenBottomBar(
     scanningViewModel: ScanningScreenViewModel,
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
-    onExportPositionChange: (Pair<Int, Int>) -> Unit
+    onSaveButtonPositionChanged: (Triple<Int, Int, Int>) -> Unit,
+    onExportPositionChange: (Triple<Int, Int, Int>) -> Unit
 ) {
     val context = LocalContext.current
     BottomAppBar(
@@ -627,13 +658,33 @@ fun ScanningScreenBottomBar(
             }
             IconButton(
                 onClick = {
+                    scanningViewModel.setShowSaveOptionsPopup(true)
+                },
+                modifier = Modifier.onGloballyPositioned {
+                    onSaveButtonPositionChanged(
+                        Triple(
+                            it.positionInWindow().x.toInt(),
+                            it.positionInWindow().y.toInt(),
+                            it.size.height
+                        )
+                    )
+                }
+            ) {
+                Icon(
+                    painterResource(R.drawable.outline_file_save_24),
+                    contentDescription = stringResource(R.string.save_to_file)
+                )
+            }
+            IconButton(
+                onClick = {
                     scanningViewModel.setShowExportOptionsPopup(true)
                 },
                 modifier = Modifier.onGloballyPositioned {
                     onExportPositionChange(
-                        Pair(
+                        Triple(
                             it.positionInWindow().x.toInt(),
-                            it.positionInWindow().y.toInt()
+                            it.positionInWindow().y.toInt(),
+                            it.size.height
                         )
                     )
                 }
@@ -735,6 +786,14 @@ fun ScanningScreenBottomBar(
             }
         }
     )
+}
+
+fun saveFile(context: Context, sourceFile: File, destUri: Uri) {
+    context.contentResolver.openOutputStream(destUri)?.use { out ->
+        sourceFile.inputStream().use { input ->
+            input.copyTo(out)
+        }
+    }
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -846,7 +905,15 @@ fun ScanningScreen(
                 onExportPositionChange = {
                     scanningViewModel.setExportPopupPosition(
                         it.first,
-                        it.second
+                        it.second,
+                        it.third
+                    )
+                },
+                onSaveButtonPositionChanged = {
+                    scanningViewModel.setSavePopupPosition(
+                        it.first,
+                        it.second,
+                        it.third
                     )
                 }
             )
@@ -872,22 +939,43 @@ fun ScanningScreen(
         val exportOptionsPopupPosition =
             scanningViewModel.scanningScreenData.exportOptionsPopupPosition
         var exportOptionsWidth by remember { mutableIntStateOf(0) }
-        val alpha by animateFloatAsState(
+        val exportAlpha by animateFloatAsState(
             targetValue = if (scanningViewModel.scanningScreenData.showExportOptions) 1f else 0f,
             label = "alphaAnimationExportOptions",
             animationSpec = tween(300)
         )
 
+        val saveOptionsPopupPosition =
+            scanningViewModel.scanningScreenData.saveOptionsPopupPosition
+        var saveOptionsWidth by remember { mutableIntStateOf(0) }
+        val saveOptionsAlpha by animateFloatAsState(
+            targetValue = if (scanningViewModel.scanningScreenData.showSaveOptions) 1f else 0f,
+            label = "alphaAnimationSaveOptions",
+            animationSpec = tween(300)
+        )
+
+        val currentSourceFileToSave = scanningViewModel.scanningScreenData.sourceFileToSave
+
+        val saveFileLauncher =
+            rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.CreateDocument("application/octet-stream")
+            ) { uri ->
+                uri?.let { uri ->
+                    currentSourceFileToSave?.let { sourceFile ->
+                        saveFile(context, sourceFile, uri)
+                    }
+                }
+            }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
         ) {
-            if (alpha > 0) {
+            if (exportAlpha > 0) {
                 ExportSettingsPopup(
                     exportOptionsPopupPosition,
                     exportOptionsWidth,
-                    alpha,
+                    exportAlpha,
                     onDismiss = { scanningViewModel.setShowExportOptionsPopup(false) },
                     updateWidth = { exportOptionsWidth = it },
                     onExportPdf = {
@@ -923,6 +1011,54 @@ fun ScanningScreen(
                                         false
                                     )
                                 }
+                            )
+                        }
+                    }
+                )
+            }
+
+            if (saveOptionsAlpha > 0) {
+                ExportSettingsPopup(
+                    saveOptionsPopupPosition,
+                    saveOptionsWidth,
+                    saveOptionsAlpha,
+                    onDismiss = { scanningViewModel.setShowSaveOptionsPopup(false) },
+                    updateWidth = { exportOptionsWidth = it },
+                    onExportPdf = {
+                        scanningViewModel.setShowSaveOptionsPopup(false)
+                        thread {
+                            doPdfExport(
+                                scanningViewModel,
+                                context,
+                                { error ->
+                                    snackBarError(
+                                        error,
+                                        scope,
+                                        context,
+                                        snackbarHostState,
+                                        false
+                                    )
+                                },
+                                saveFileLauncher
+                            )
+                        }
+                    },
+                    onExportArchive = {
+                        scanningViewModel.setShowSaveOptionsPopup(false)
+                        thread {
+                            doZipExport(
+                                scanningViewModel,
+                                context,
+                                { error ->
+                                    snackBarError(
+                                        error,
+                                        scope,
+                                        context,
+                                        snackbarHostState,
+                                        false
+                                    )
+                                },
+                                saveFileLauncher
                             )
                         }
                     }

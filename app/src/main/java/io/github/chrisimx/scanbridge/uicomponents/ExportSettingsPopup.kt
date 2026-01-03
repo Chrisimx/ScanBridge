@@ -19,7 +19,7 @@ import io.github.chrisimx.scanbridge.R
 
 @Composable
 fun ExportSettingsPopup(
-    exportOptionsPopupPosition: Pair<Int, Int>?,
+    exportOptionsPopupPosition: Triple<Int, Int, Int>?,
     exportOptionsWidth: Int,
     alpha: Float,
     onDismiss: () -> Unit,
@@ -31,7 +31,7 @@ fun ExportSettingsPopup(
         alignment = Alignment.TopStart,
         offset = IntOffset(
             exportOptionsPopupPosition?.first?.minus(exportOptionsWidth / 4) ?: 0,
-            (exportOptionsPopupPosition?.second?.minus(400)) ?: 0
+            exportOptionsPopupPosition?.second?.minus(exportOptionsPopupPosition.third) ?: 0
         ),
         onDismissRequest = { onDismiss() }
     ) {
