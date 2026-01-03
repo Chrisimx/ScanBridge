@@ -22,6 +22,7 @@ package io.github.chrisimx.scanbridge.uicomponents
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +37,7 @@ import io.github.chrisimx.scanbridge.theme.Teal1
 
 @Composable
 fun TitledCard(title: String, color: Color = Teal1, content: @Composable () -> Unit) {
-    ElevatedCard(modifier = Modifier.padding(16.dp)) {
+    ElevatedCard(modifier = Modifier.padding(16.dp).widthIn(min = 0.dp, max = 800.dp)) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

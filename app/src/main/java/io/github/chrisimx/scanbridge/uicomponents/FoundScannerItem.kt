@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.ElevatedCard
@@ -51,6 +52,7 @@ fun FoundScannerItem(name: String, address: String, navController: NavController
     ElevatedCard(
         modifier = Modifier
             .defaultMinSize(minHeight = 60.dp)
+            .widthIn(max = 700.dp)
             .padding(10.dp),
         onClick = {
             val sessionID = UUID.randomUUID().toString()

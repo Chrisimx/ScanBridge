@@ -99,4 +99,6 @@
     <string name="remember_scan_settings_desc">When enabled, your last used scan settings (input source, duplex, etc.) will be restored when you create a new scan session.\n\nWhen disabled, each session starts with default scan settings (highest resolution, largest possible scan area).</string>
     <string name="donate">Support ScanBridge\'s development</string>
     <string name="source_code">View source code</string>
+    <string name="f_droid" translatable="false">F-Droid</string>
+    <string name="google_play" translatable="false">Play Store</string>
 </resources>

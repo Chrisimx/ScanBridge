@@ -25,6 +25,7 @@ import android.content.SharedPreferences
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -109,7 +110,7 @@ fun clearDebugLog(activity: MainActivity, sharedPreferences: SharedPreferences) 
         activity.tree = FileLogger(activity.debugWriter!!)
         Timber.plant(activity.tree!!)
         Timber.i(
-            "Debug logging starts with ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE})"
+            "Debug logging starts with ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE}, ${BuildConfig.FLAVOR})"
         )
     }
 }
@@ -164,11 +165,11 @@ fun DebugOptions(
                         activity.tree = FileLogger(activity.debugWriter!!)
                         Timber.plant(activity.tree!!)
                         Timber.i(
-                            "Debug logging starts with ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE})"
+                            "Debug logging starts with ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE}, ${BuildConfig.FLAVOR})"
                         )
                     } else {
                         Timber.i(
-                            "Debug logging stops with ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE})"
+                            "Debug logging stops with ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE}, ${BuildConfig.FLAVOR})"
                         )
                         activity.tree?.let {
                             Timber.uproot(it)
@@ -265,24 +266,28 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
     ) {
         VersionComposable()
 
-        Row(modifier = Modifier.padding(vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Button(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, "https://github.com/sponsors/Chrisimx".toUri())
-                    context.startActivity(intent)
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFF6F61),
-                    contentColor = Color.White
-                )
-            ) {
-                Icon(
-                    modifier = Modifier.padding(end = 8.dp),
-                    painter = painterResource(R.drawable.favorite_24px),
-                    contentDescription = stringResource(R.string.donate)
-                )
-                Text(stringResource(R.string.donate))
+        val isFdroidVariant = BuildConfig.FLAVOR == "fdroid"
+        val padding = if (isFdroidVariant) 16.dp else 10.dp
+        Row(modifier = Modifier.padding(vertical = padding), verticalAlignment = Alignment.CenterVertically) {
+            if (isFdroidVariant) {
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, "https://github.com/sponsors/Chrisimx".toUri())
+                        context.startActivity(intent)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFF6F61),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Icon(
+                        modifier = Modifier.padding(end = 8.dp),
+                        painter = painterResource(R.drawable.favorite_24px),
+                        contentDescription = stringResource(R.string.donate)
+                    )
+                    Text(stringResource(R.string.donate))
+                }
             }
             OutlinedIconButton(onClick = {
                 val intent = Intent(Intent.ACTION_VIEW, "https://github.com/Chrisimx/ScanBridge".toUri())
@@ -298,54 +303,56 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
             mutableStateOf(null)
         }
 
-        TitledCard(
-            title = stringResource(R.string.settings)
-        ) {
-            DisableCertChecksSetting {
-                information = it
-            }
-
-            CheckboxSetting(
-                "remember_scan_settings",
-                stringResource(R.string.remember_scan_settings),
-                stringResource(R.string.remember_scan_settings_desc),
-                default = true
+        FlowRow {
+            TitledCard(
+                title = stringResource(R.string.settings)
             ) {
-                information = it
+                DisableCertChecksSetting {
+                    information = it
+                }
+
+                CheckboxSetting(
+                    "remember_scan_settings",
+                    stringResource(R.string.remember_scan_settings),
+                    stringResource(R.string.remember_scan_settings_desc),
+                    default = true
+                ) {
+                    information = it
+                }
+
+                // Timeout setting
+                UIntSetting(
+                    stringResource(R.string.timeout),
+                    default = 25u,
+                    stringResource(R.string.timeout_info),
+                    { information = it },
+                    sharedPreferences,
+                    sharedPrefsName = "scanning_response_timeout"
+                )
+
+                // PDF chunk size setting
+                UIntSetting(
+                    stringResource(R.string.pdf_export_max_pages_per_pdf),
+                    50u,
+                    stringResource(R.string.pdf_export_setting_info),
+                    { information = it },
+                    sharedPreferences,
+                    sharedPrefsName = "chunk_size_pdf_export",
+                    min = 1u,
+                    max = UInt.MAX_VALUE
+                )
             }
 
-            // Timeout setting
-            UIntSetting(
-                stringResource(R.string.timeout),
-                default = 25u,
-                stringResource(R.string.timeout_info),
-                { information = it },
-                sharedPreferences,
-                sharedPrefsName = "scanning_response_timeout"
-            )
-
-            // PDF chunk size setting
-            UIntSetting(
-                stringResource(R.string.pdf_export_max_pages_per_pdf),
-                50u,
-                stringResource(R.string.pdf_export_setting_info),
-                { information = it },
-                sharedPreferences,
-                sharedPrefsName = "chunk_size_pdf_export",
-                min = 1u,
-                max = UInt.MAX_VALUE
-            )
-        }
-
-        TitledCard(
-            title = stringResource(R.string.advanced)
-        ) {
-            DebugOptions(
-                sharedPreferences,
-                debugLog,
-                { information = it },
-                { debugLog = it }
-            )
+            TitledCard(
+                title = stringResource(R.string.advanced)
+            ) {
+                DebugOptions(
+                    sharedPreferences,
+                    debugLog,
+                    { information = it },
+                    { debugLog = it }
+                )
+            }
         }
 
         if (information != null) {

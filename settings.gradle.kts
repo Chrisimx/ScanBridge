@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ScanBridge"
 include(":app")
+include(":lvl_library")
+project(":lvl_library").projectDir = File(rootDir, "libraries/play-licensing/lvl_library/")

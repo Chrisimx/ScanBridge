@@ -55,7 +55,7 @@ android {
         applicationId = "io.github.chrisimx.scanbridge"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1_005_000 // format is MAJ_MIN_PAT with always 3 digits
+        versionCode = 1_006_000 // format is MAJ_MIN_PAT with always 3 digits
         versionName = "1.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -87,6 +87,19 @@ android {
             }
         }
     }
+    flavorDimensions += "edition"
+
+    productFlavors {
+        create("fdroid") {
+            dimension = "edition"
+        }
+        create("play") {
+            dimension = "edition"
+            applicationIdSuffix = ".play"
+            versionNameSuffix = "-play"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -122,6 +135,10 @@ dependencies {
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.itext7.core)
+    "playImplementation"(project(":lvl_library"))
+    "playImplementation"("com.squareup.retrofit2:retrofit:3.0.0")
+    "playImplementation"("com.squareup.retrofit2:converter-gson:2.9.0")
+    "playImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -224,11 +241,11 @@ tasks.register("copyEsclMockServerAll") {
 
 afterEvaluate {
 
-    tasks.named("connectedDebugAndroidTest") {
+    tasks.named("connectedFdroidDebugAndroidTest") {
         dependsOn("copyEsclMockServerAll")
     }
 
-    tasks.named("mergeDebugAndroidTestJniLibFolders") {
+    tasks.named("mergeFdroidDebugAndroidTestJniLibFolders") {
         dependsOn("copyEsclMockServerAll")
     }
 

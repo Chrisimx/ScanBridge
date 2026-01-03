@@ -67,18 +67,28 @@ fun VersionComposable() {
     )
 
     Text(
-        "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH})",
+        "${BuildConfig.VERSION_NAME.removeSuffix("-play")} (${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH})",
         fontStyle = FontStyle.Normal,
         fontFamily = Poppins
     )
 
-    if (BuildConfig.DEBUG) {
-        Text(
-            stringResource(R.string.debug_build),
-            fontStyle = FontStyle.Italic,
-            fontFamily = Poppins
-        )
+    val editionNotice = mutableListOf<String>()
+
+    if (BuildConfig.FLAVOR == "fdroid") {
+        editionNotice.add(stringResource(R.string.f_droid))
+    } else {
+        editionNotice.add(stringResource(R.string.google_play))
     }
+
+    if (BuildConfig.DEBUG) {
+        editionNotice.add(stringResource(R.string.debug_build))
+    }
+
+    Text(
+        editionNotice.joinToString(),
+        fontStyle = FontStyle.Italic,
+        fontFamily = Poppins
+    )
 }
 
 @Preview

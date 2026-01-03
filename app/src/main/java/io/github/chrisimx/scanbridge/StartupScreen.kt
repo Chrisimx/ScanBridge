@@ -20,13 +20,10 @@
 package io.github.chrisimx.scanbridge
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -39,13 +36,15 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -60,23 +59,28 @@ fun ScannerDiscoveryTopBar(header: String) {
     )
 }
 
+data class StartupScreen(val nameResource: Int,
+                         val titleResource: Int,
+                         val selectedIcon: ImageVector,
+                         val unselectedIcon: ImageVector,
+                         val fabActivated: Boolean,
+                         val screenComposable: @Composable (innerPadding: PaddingValues,
+                                                     navController: NavController,
+                                                     showCustomDialog: Boolean,
+                                                     setShowCustomDialog: (Boolean) -> Unit,
+                                                     statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
+                                                     statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>) -> Unit)
+
+val INDEXED_TABS = STARTUP_TABS.withIndex()
+val StartupScreenSaver = Saver<IndexedValue<StartupScreen>, Int>(save = { it.index }, restore = { IndexedValue(it, STARTUP_TABS[it]) })
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StartupScreen(navController: NavController) {
-    var selectedItem = rememberSaveable { mutableIntStateOf(0) }
-    val items = listOf(stringResource(R.string.discovery), stringResource(R.string.settings))
-    val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Settings)
-    val unselectedIcons =
-        listOf(Icons.Outlined.Home, Icons.Outlined.Settings)
+    var selectedScreen by rememberSaveable(stateSaver = StartupScreenSaver) { mutableStateOf(INDEXED_TABS.first()) }
+    val unindexedSelectedScreen = selectedScreen.value
+
     val context = LocalContext.current
-    val header =
-        if (selectedItem.intValue == 0) {
-            stringResource(R.string.header_scannerbrowser)
-        } else {
-            stringResource(
-                R.string.settings
-            )
-        }
 
     val statefulScannerMap = remember { mutableStateMapOf<String, DiscoveredScanner>() }
     val statefulScannerMapSecure = remember { mutableStateMapOf<String, DiscoveredScanner>() }
@@ -105,26 +109,26 @@ fun StartupScreen(navController: NavController) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = @Composable { ScannerDiscoveryTopBar(header) },
+        topBar = @Composable { ScannerDiscoveryTopBar(stringResource(unindexedSelectedScreen.titleResource)) },
         bottomBar = @Composable {
             NavigationBar {
-                items.forEachIndexed { index, item ->
+                STARTUP_TABS.forEachIndexed { idx, screen ->
                     NavigationBarItem(
                         icon = {
                             Icon(
-                                if (selectedItem.intValue == index) selectedIcons[index] else unselectedIcons[index],
-                                contentDescription = item
+                                if (unindexedSelectedScreen == screen) screen.selectedIcon else screen.unselectedIcon,
+                                contentDescription = stringResource(screen.nameResource)
                             )
                         },
-                        label = { Text(item, style = MaterialTheme.typography.labelMedium) },
-                        selected = selectedItem.intValue == index,
-                        onClick = { selectedItem.intValue = index }
+                        label = { Text(stringResource(screen.nameResource), style = MaterialTheme.typography.labelMedium) },
+                        selected = unindexedSelectedScreen == screen,
+                        onClick = { selectedScreen = IndexedValue(idx, screen) }
                     )
                 }
             }
         },
         floatingActionButton = {
-            if (selectedItem.intValue == 0) {
+            if (unindexedSelectedScreen.fabActivated) {
                 FloatingActionButton(
                     modifier = Modifier.testTag("custom_scanner_fab"),
                     onClick = {
@@ -141,22 +145,17 @@ fun StartupScreen(navController: NavController) {
     ) { innerPadding ->
 
         AnimatedContent(
-            targetState = selectedItem.intValue,
+            targetState = unindexedSelectedScreen,
             label = "StartupScreen bottom navigation"
-        ) {
-            when (it) {
-                0 -> ScannerBrowser(
-                    innerPadding,
-                    navController,
-                    showCustomDialog,
-                    { showCustomDialog = it },
-                    statefulScannerMap,
-                    statefulScannerMapSecure
-                )
-                1 -> {
-                    AppSettingsScreen(innerPadding)
-                }
-            }
+        ) { currentScreen ->
+            currentScreen.screenComposable(
+                innerPadding,
+                navController,
+                showCustomDialog,
+                { showCustomDialog = it },
+                statefulScannerMap,
+                statefulScannerMapSecure
+            )
         }
     }
 }

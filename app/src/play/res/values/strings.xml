@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="support">Support</string>
+    <string name="licensed">Your license was successfully verified.</string>
+    <string name="not_licensed">You don\'t seem to own a license to this app</string>
+    <string name="licensed_package_not_on_google_play">This app could not be found on Google Play and as such your license could not be verified. This is not your fault. Please report this issue to our support at support@fireamp.eu</string>
+    <string name="google_license_server_failure">An error has occurred on Google\'s licensing server.</string>
+    <string name="google_license_server_over_quota">Google\'s licensing server refused to confirm your license because the rate limit was exceeded</string>
+    <string name="google_license_server_unreachable">There was an error contacting Google\'s licensing server.</string>
+    <string name="licensed_package_has_invalid_name">This app seems to have an invalid package name. The license cannot be checked. This is an internal error and not your fault. Please report this issue to our support using the e-mail support@fireamp.eu</string>
+    <string name="google_license_user_undetermined">Google\'s licensing server failed to determine your Google account. Your app license couldn\'t be checked because of this.</string>
+    <string name="google_play_services_not_running">It seems like you haven\'t installed Google Play Services. These services are necessary to confirm that you\'ve purchased our app.</string>
+    <string name="licensed_but_data_got_lost">Your license was confirmed, but there was an internal error and the licensing data could not be found.</string>
+    <string name="application_license_public_key_invalid">The app\'s public key used for the signature verification of the licensing is invalid. This is not your fault. Please report this to support@fireamp.eu</string>
+    <string name="application_license_check_permission_missing">The permission allowing to check your license is missing. Please report this issue to support@fireamp.eu</string>
+    <string name="google_licensing_server_invalid_response">Google\'s licesning server responded with invalid data.</string>
+    <string name="licensing_unknown_server_response_code">Google\'s licensing server responded with an unknown response code. Please report this to support@fireamp.eu.</string>
+    <string name="internet_connection_needed">To use the support feature, please connect your device to the internet</string>
+    <string name="welcome_message_support_login">Welcome to Fireamp Support!</string>
+    <string name="back">Back</string>
+    <string name="signup">Sign-up</string>
+    <string name="explanation_support">Here you can create a prioritized support account. Sign-up and you will receive an e-mail shortly after to set your password. After that you can use the account e-mail to send your support inquiry to support@fireamp.eu or alternatively log-in under the website https://support.fireamp.eu and receive prioritized support. Both methods can directly be accessed here:</string>
+    <string name="created_successfully">Created successfully</string>
+    <string name="vip_creation_token_is_invalid">The token is invalid</string>
+    <string name="vip_creation_account_unable_to_be_created">Account could not be created. Are the entered email and name valid? Does an account with that e-mail maybe already exist?</string>
+    <string name="vip_creation_google_proof_is_from_the_future">Google proof is from the future. This should not be possible.</string>
+    <string name="vip_creation_google_proof_is_not_recent_enough">Google licensing proof is not recent enough. Is your internet exceptionally slow?</string>
+    <string name="vip_creation_purchase_was_already_used">This purchase was already used to create a prioritized account.</string>
+    <string name="vip_creation_empty_email_or_name">Please enter an e-mail and a password.</string>
+    <string name="google_proof_has_wrong_response_code">Google licensing proof has wrong response code.</string>
+    <string name="google_proof_has_wrong_package_name">Google licesing proof is for the wrong package.</string>
+    <string name="google_proof_has_wrong_nonce">Google licensing proof has wrong nonce</string>
+    <string name="google_proof_is_invalid">Google licensing proof has wrong format</string>
+    <string name="vip_creation_challenge_expired">The challenge expired. Please try again.</string>
+    <string name="google_proof_signature_is_invalid">Google licensing proof signature is invalid.</string>
+    <string name="account_created_successfully">Your prioritized account was created!</string>
+    <string name="explanation_account_creation_completion">Your account was created. You will receive an e-mail shortly that asks you to set a password. Follow the steps given there, to complete the account setup. After this, you will be able to reach our support either by e-mail to support@fireamp.eu or over the web at our website https://support.fireamp.eu. Both of these options can be opened here:</string>
+    <string name="by_joining_i_accept">"By signing up, I accept the "</string>
+    <string name="fireamp_privacy_policy">Fireamp Privacy Policy</string>
+    <string name="last_part_privacy_accept">.</string>
+    <string name="please_accept_the_privacy_policy_to_sign_up">Please accept the privacy policy to sign-up.</string>
+    <string name="contact_support_over_email">Contact support over e-mail</string>
+    <string name="open_support_website">Open support website</string>
+    <string name="signup_to_fireamp">Sign-up to Fireamp Support</string>
+    <string name="e_mail">Email</string>
+</resources>

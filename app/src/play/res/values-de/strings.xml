@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="support">Support</string>
+    <string name="licensed">Deine Lizenz wurde erfolgreich verifiziert.</string>
+    <string name="not_licensed">Du scheinst keine Lizenz für ScanBridge zu besitzen.</string>
+    <string name="explanation_account_creation_completion">Dein Account wurde erstellt. Du wirst in Kürze eine E-Mail erhalten, um dein Passwort festzulegen. Um die Accounterstellung abzuschließen, folge den dort genannten Schritten. Danach kannst du unseren Support durch eine E-Mail an support@fireamp.eu erreichen als auch über die Webseite https://support.fireamp.eu. Nutze dafür deine registrierte E-Mail. Beide Optionen kannst du hier aufrufen:</string>
+    <string name="by_joining_i_accept">"Ich stimme der "</string>
+    <string name="fireamp_privacy_policy">Fireamp-Datenschutzerklärung</string>
+    <string name="licensed_package_not_on_google_play">ScanBridge wurde nicht auf Google Play gefunden. Dies ist ein interner Fehler. Bitte melde ihn an unseren Support mit einer E-Mail an support@fireamp.eu</string>
+    <string name="google_license_server_failure">Ein Fehler trat auf dem Google-Lizenzserver auf.</string>
+    <string name="google_license_server_over_quota">Der Google-Lizenzserver hat ein Bestätigen deiner Lizenz abgelehnt, da die maximale Häufigkeit der Anfragen überschritten wurde.</string>
+    <string name="google_license_server_unreachable">Die Google-Lizenzserver konnten nicht erreicht werden.</string>
+    <string name="last_part_privacy_accept">" zu."</string>
+    <string name="please_accept_the_privacy_policy_to_sign_up">Akzeptiere die Datenschutzerklärung, um dich zu registrieren.</string>
+    <string name="contact_support_over_email">Support über E-Mail</string>
+    <string name="open_support_website">Support über Web</string>
+    <string name="signup_to_fireamp">Registrierung bei Fireamp Support</string>
+    <string name="internet_connection_needed">Bitte verbinde dich mit dem Internet, um die Supportfunktionen verwenden zu können.</string>
+    <string name="welcome_message_support_login">Willkommen bei Fireamp Support!</string>
+    <string name="back">Zurück</string>
+    <string name="signup">Registrieren</string>
+    <string name="vip_creation_token_is_invalid">Ungültiger Token</string>
+    <string name="vip_creation_account_unable_to_be_created">Account konnte nicht erstellt werden. Hast du eine gültige E-Mail und einen gültigen Namen eingetragen? Existiert bereits ein Account mit dieser E-Mail?</string>
+    <string name="vip_creation_google_proof_is_from_the_future">Die Lizenzbestätigung ist aus der Zukunft.</string>
+    <string name="vip_creation_google_proof_is_not_recent_enough">Die Lizenzbestätigung ist zu alt.</string>
+    <string name="vip_creation_purchase_was_already_used">Dieser Kauf von ScanBridge wurde bereits verwendet um einen priorisierten Account zu erstellen.</string>
+    <string name="vip_creation_empty_email_or_name">Bitte gebe eine E-Mail und ein Passwort ein.</string>
+    <string name="google_proof_has_wrong_response_code">Die Lizenzbestätigung hat einen ungültigen Ergebniscode.</string>
+    <string name="google_proof_has_wrong_package_name">Die Lizenzbestätigung ist für eine andere App.</string>
+    <string name="google_proof_has_wrong_nonce">Die Lizenzbestätigung hat die falsche einmalige Nummer.</string>
+    <string name="google_proof_is_invalid">Die Lizenzbestätigung hat die falsche Form.</string>
+    <string name="vip_creation_challenge_expired">Die Lizenz konnte erst nach dem notwendigen Zeitintervall bestätigt werden.</string>
+    <string name="google_proof_signature_is_invalid">Die Signatur der Google-Lizenzbestätigung ist ungültig.</string>
+    <string name="account_created_successfully">Dein priorisierter Supportaccount wurde erstellt!</string>
+    <string name="google_play_services_not_running">Die Google Play Services scheinen nicht installiert zu sein. Diese sind notwendig zum Bestätigen deines Kaufs von ScanBridge.</string>
+    <string name="licensed_but_data_got_lost">Die Lizenz wurde bestätigt, aber die Daten sind verloren gegangen. Bitte melde diesen Fehler an support@fireamp.eu.</string>
+    <string name="application_license_public_key_invalid">Der zur Überprüfung der Lizenz verwendete öffentliche Schlüssel ist ungültig. Bitte melde dies an support@fireamp.eu.</string>
+    <string name="application_license_check_permission_missing">ScanBridge fehlt die Berechtigung deine Lizenz zu überprüfen.</string>
+    <string name="google_licensing_server_invalid_response">Die Google-Lizenzserver haben ungültige Daten geliefert.</string>
+    <string name="licensing_unknown_server_response_code">Die Google-Lizenzserver haben einen unbekannten Antwortcode geliefert. Bitte melde dies an support@fireamp.eu.</string>
+    <string name="licensed_package_has_invalid_name">ScanBridge scheint einen ungültigen Paketnamen zu haben. Die Lizenz kann nicht überprüft werden. Dies ist ein interner Fehler und nicht deine Schuld. Bitte melde dieses Problem unserem Support per E‑Mail an support@fireamp.eu.</string>
+    <string name="google_license_user_undetermined">Die Google-Lizenzserver konnten deinen Google-Account nicht bestimmen. Die Lizenz konnte deshalb nicht geprüft werden.</string>
+    <string name="explanation_support">In diesem Bereich kannst du einen priorisierten Supportaccount erstellen. Registriere dich und erhalte eine E-Mail, um dein Passwort zu setzen. Danach kannst du deine registrierte E-Mail verwenden um support@fireamp.eu zu kontaktieren oder wahlweise dich auf https://support.fireamp.eu anmelden, um priorisierten Support zu erhalten.</string>
+    <string name="created_successfully">Account erfolgreich erstellt</string>
+    <string name="e_mail">E-Mail</string>
+</resources>
