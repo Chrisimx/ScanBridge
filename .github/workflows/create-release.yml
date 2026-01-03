@@ -85,18 +85,18 @@ jobs:
         # ID used to access action output
         id: sign_app
         with:
-          releaseDirectory: app/build/outputs/apk/release
+          releaseDirectory: app/build/outputs/apk/fdroid/release
           signingKeyBase64: ${{ secrets.RELEASE_KEY_STORE_BASE64 }}
           alias: ${{ secrets.RELEASE_ALIAS }}
           keyStorePassword: ${{ secrets.RELEASE_KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.RELEASE_KEY_PASSWORD }}
       - name: Rename signed APK
-        run: mv ${{steps.sign_app.outputs.signedReleaseFile}} app/build/outputs/apk/release/ScanBridge${{ needs.prepare.outputs.artifact_version_suffix }}.apk
+        run: mv ${{steps.sign_app.outputs.signedReleaseFile}} app/build/outputs/apk/fdroid/release/ScanBridge${{ needs.prepare.outputs.artifact_version_suffix }}.apk
       - name: Upload signed APK
         uses: actions/upload-artifact@v4.5.0
         with:
           name: signed-release-apk
-          path: app/build/outputs/apk/release/ScanBridge${{ needs.prepare.outputs.artifact_version_suffix }}.apk
+          path: app/build/outputs/apk/fdroid/release/ScanBridge${{ needs.prepare.outputs.artifact_version_suffix }}.apk
           if-no-files-found: error
 
   publish-result:

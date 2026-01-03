@@ -31,7 +31,7 @@ jobs:
         uses: actions/upload-artifact@v4.5.0
         with:
           name: unsigned-release-apk
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          path: app/build/outputs/apk/fdroid/release/app-fdroid-release-unsigned.apk
           if-no-files-found: error
       - uses: noriban/sign-android-release@v5
         name: Sign app APK
@@ -39,7 +39,7 @@ jobs:
         # ID used to access action output
         id: sign_app
         with:
-          releaseDirectory: app/build/outputs/apk/release
+          releaseDirectory: app/build/outputs/apk/fdroid/release
           signingKeyBase64: ${{ secrets.CI_KEYSTORE_BASE64 }}
           alias: ${{ secrets.CI_ALIAS }}
           keyStorePassword: ${{ secrets.CI_KEY_STORE_PASSWORD }}
