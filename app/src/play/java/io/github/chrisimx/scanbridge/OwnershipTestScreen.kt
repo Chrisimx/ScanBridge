@@ -11,12 +11,11 @@ import timber.log.Timber
 fun OwnershipTestScreen(innerPadding: PaddingValues) {
     val context = LocalContext.current
 
-    LaunchedEffect (Unit) {
+    LaunchedEffect(Unit) {
         val ops = OwnershipProofService(context.applicationContext)
-        val proof = ops.requestOwnershipProof(20);
+        val proof = ops.requestOwnershipProof(20)
         if (proof is LicensingRequestResult.OwnershipProof) {
             Timber.d("Proof: ${proof.responseData.originalResponse} Sig: ${proof.signature}")
         }
-
     }
 }

@@ -36,7 +36,7 @@ fun SupportScreen(innerPadding: PaddingValues) {
                     SupportScreenStates.SetupScreen -> AccountSetupScreen(Modifier.padding(innerPadding)) {
                         currentState = SupportScreenStates.SignupScreen
                     }
-                    SupportScreenStates.SignupScreen -> SignupScreen(Modifier.padding(innerPadding),onBack =  {
+                    SupportScreenStates.SignupScreen -> SignupScreen(Modifier.padding(innerPadding), onBack = {
                         currentState = SupportScreenStates.SetupScreen
                     }, onSuccess = {
                         currentState = SupportScreenStates.SuccessScreen
@@ -46,10 +46,6 @@ fun SupportScreen(innerPadding: PaddingValues) {
                     })
                 }
             }
-
         }
     }
-
-
-
 }

@@ -11,11 +11,8 @@ import retrofit2.http.POST
 interface AccountVerifierApi {
 
     @POST("/customerExtraApi/userCreate")
-    suspend fun createAccount(
-        @Body body: AccountCreationRequest,
-    ): JsonWrappedResult<VIPCreationResult>
+    suspend fun createAccount(@Body body: AccountCreationRequest): JsonWrappedResult<VIPCreationResult>
 
     @GET("/customerExtraApi/googleChallenge")
     suspend fun getGoogleChallenge(): GoogleChallenge
-
 }

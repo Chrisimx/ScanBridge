@@ -15,9 +15,7 @@ enum class VIPCreationResult(val message: Int) {
     GoogleProofTooOld(R.string.vip_creation_google_proof_is_not_recent_enough),
     GoogleProofFromTheFuture(R.string.vip_creation_google_proof_is_from_the_future),
     AccountCouldntBeCreated(R.string.vip_creation_account_unable_to_be_created),
-    EmptyEmailOrName(R.string.vip_creation_empty_email_or_name);
+    EmptyEmailOrName(R.string.vip_creation_empty_email_or_name)
 }
 
-data class JsonWrappedResult<T>(
-    val result: T
-)
+data class JsonWrappedResult<T>(val result: T)

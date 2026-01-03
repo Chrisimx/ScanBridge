@@ -1,8 +1,8 @@
 
-package io.github.chrisimx.scanbridge;
+package io.github.chrisimx.scanbridge
 
 import com.google.android.vending.licensing.LicenseValidationResultCode
-import com.google.android.vending.licensing.Policy;
+import com.google.android.vending.licensing.Policy
 import com.google.android.vending.licensing.ResponseData
 
 /**
@@ -30,7 +30,12 @@ class SimpleStrictLicensePolicy : Policy {
      * @param response the result from validating the server response
      * @param rawData the raw server response data
      */
-    override fun processServerResponse(response: Int, rawData: ResponseData?, signature: String?, actualError: LicenseValidationResultCode) {
+    override fun processServerResponse(
+        response: Int,
+        rawData: ResponseData?,
+        signature: String?,
+        actualError: LicenseValidationResultCode
+    ) {
         if (response == Policy.LICENSED) {
             if (rawData == null || signature == null) { // Should be impossible
                 lastResponse = null
@@ -48,13 +53,9 @@ class SimpleStrictLicensePolicy : Policy {
      * This implementation allows access if and only if a LICENSED response
      * was received the last time the server was contacted.
      */
-    override fun allowAccess(): Boolean {
-        return lastResponse is LicensingRequestResult.OwnershipProof
-    }
+    override fun allowAccess(): Boolean = lastResponse is LicensingRequestResult.OwnershipProof
 
-    override fun getLicensingUrl(): String? {
-        return null
-    }
+    override fun getLicensingUrl(): String? = null
 }
 
 sealed class LicensingRequestResult {

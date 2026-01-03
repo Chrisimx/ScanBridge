@@ -51,7 +51,6 @@ private fun isConnected(cm: ConnectivityManager): Boolean {
     return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 }
 
-
 @Composable
 fun rememberInternetConnectivityState(): State<Boolean> {
     val context = LocalContext.current.applicationContext

@@ -60,16 +60,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-
-class SignupViewModel(
-    application: Application
-) : AndroidViewModel(application) {
-    fun signUp(
-        name: CharSequence,
-        email: CharSequence,
-        snackbarHostState: SnackbarHostState,
-        onSuccess: () -> Unit
-    ) {
+class SignupViewModel(application: Application) : AndroidViewModel(application) {
+    fun signUp(name: CharSequence, email: CharSequence, snackbarHostState: SnackbarHostState, onSuccess: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 try {
@@ -85,7 +77,8 @@ class SignupViewModel(
                             application.getString(R.string.error) + ": " + ownershipProofResult.errorCode.asLocalizedString(application),
                             viewModelScope,
                             application,
-                            snackbarHostState)
+                            snackbarHostState
+                        )
                         return@withContext
                     } else if (ownershipProofResult is LicensingRequestResult.OwnershipProof) {
                         val rawProof = ownershipProofResult.responseData.originalResponse
@@ -94,7 +87,11 @@ class SignupViewModel(
                         Timber.d("Ownership proof acquired")
 
                         val creationRequest = AccountCreationRequest(
-                            name.toString(), email.toString(), googleChallenge.token, rawProof, signature
+                            name.toString(),
+                            email.toString(),
+                            googleChallenge.token,
+                            rawProof,
+                            signature
                         )
 
                         val accountCreationResult = api.createAccount(creationRequest)
@@ -102,12 +99,17 @@ class SignupViewModel(
                         Timber.d("Account creation request sent")
 
                         if (accountCreationResult.result != VIPCreationResult.Success) {
-                            Timber.e("%s: %s", application.getString(R.string.error), application.getString(accountCreationResult.result.message))
+                            Timber.e(
+                                "%s: %s",
+                                application.getString(R.string.error),
+                                application.getString(accountCreationResult.result.message)
+                            )
                             snackBarError(
                                 application.getString(R.string.error) + ": " + application.getString(accountCreationResult.result.message),
                                 viewModelScope,
                                 application,
-                                snackbarHostState)
+                                snackbarHostState
+                            )
                             return@withContext
                         }
                         onSuccess()
@@ -118,13 +120,13 @@ class SignupViewModel(
                         application.getString(R.string.error) + ": " + error.message,
                         viewModelScope,
                         application,
-                        snackbarHostState)
+                        snackbarHostState
+                    )
                 }
             }
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -137,7 +139,6 @@ fun SignupScreen(modifier: Modifier, onBack: () -> Unit, onSuccess: () -> Unit) 
 
     val privacyPolicyLink: AnnotatedString = remember {
         buildAnnotatedString {
-
             val styleCenter = localTextStyle.copy(
                 color = Color(0xff64B5F6),
                 textDecoration = TextDecoration.Underline
@@ -156,10 +157,12 @@ fun SignupScreen(modifier: Modifier, onBack: () -> Unit, onSuccess: () -> Unit) 
             append(context.getString(R.string.last_part_privacy_accept))
         }
     }
-    
-    Box(modifier = modifier
-        .fillMaxSize(), contentAlignment = Alignment.Center) {
 
+    Box(
+        modifier = modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
@@ -196,16 +199,17 @@ fun SignupScreen(modifier: Modifier, onBack: () -> Unit, onSuccess: () -> Unit) 
                     textAlign = TextAlign.Center
                 )
 
-                OutlinedTextField(nameState,
+                OutlinedTextField(
+                    nameState,
                     modifier = Modifier.padding(horizontal = 20.dp),
                     placeholder = { Text("Jonathan Steinberg") },
-                    label = { Text(stringResource(R.string.name) )},
+                    label = { Text(stringResource(R.string.name)) }
                 )
                 OutlinedTextField(
                     emailState,
                     modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
                     placeholder = { Text("example@e-mail.com") },
-                    label = { Text(stringResource(R.string.e_mail)) },
+                    label = { Text(stringResource(R.string.e_mail)) }
                 )
 
                 Row(
@@ -223,13 +227,16 @@ fun SignupScreen(modifier: Modifier, onBack: () -> Unit, onSuccess: () -> Unit) 
                     Text(privacyPolicyLink, textAlign = TextAlign.Justify)
                 }
 
-
                 Row {
-                    Button ({
+                    Button({
                         if (!privacyPolicyAccepted) {
                             snackBarError(
                                 context.getString(R.string.please_accept_the_privacy_policy_to_sign_up),
-                                viewModel.viewModelScope, context, snackbarHostState, false)
+                                viewModel.viewModelScope,
+                                context,
+                                snackbarHostState,
+                                false
+                            )
                             return@Button
                         }
 
@@ -241,18 +248,16 @@ fun SignupScreen(modifier: Modifier, onBack: () -> Unit, onSuccess: () -> Unit) 
                         Text(stringResource(R.string.back))
                     }
                 }
-
             }
         }
     }
-
 }
 
 @Composable
 @Preview()
 fun SignupScreenPreview() {
     ScanBridgeTheme {
-        Scaffold() { innerPadding ->
+        Scaffold { innerPadding ->
             SignupScreen(Modifier.padding(innerPadding), {}, {})
         }
     }

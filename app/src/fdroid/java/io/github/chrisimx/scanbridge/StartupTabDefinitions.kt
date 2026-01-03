@@ -23,7 +23,9 @@ val STARTUP_TABS = listOf(
                 setShowCustomDialog,
                 statefulScannerMap,
                 statefulScannerMapSecure
-            )}),
+            )
+        }
+    ),
     StartupScreen(
         R.string.settings,
         R.string.settings,

@@ -59,17 +59,21 @@ fun ScannerDiscoveryTopBar(header: String) {
     )
 }
 
-data class StartupScreen(val nameResource: Int,
-                         val titleResource: Int,
-                         val selectedIcon: ImageVector,
-                         val unselectedIcon: ImageVector,
-                         val fabActivated: Boolean,
-                         val screenComposable: @Composable (innerPadding: PaddingValues,
-                                                     navController: NavController,
-                                                     showCustomDialog: Boolean,
-                                                     setShowCustomDialog: (Boolean) -> Unit,
-                                                     statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
-                                                     statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>) -> Unit)
+data class StartupScreen(
+    val nameResource: Int,
+    val titleResource: Int,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector,
+    val fabActivated: Boolean,
+    val screenComposable: @Composable (
+        innerPadding: PaddingValues,
+        navController: NavController,
+        showCustomDialog: Boolean,
+        setShowCustomDialog: (Boolean) -> Unit,
+        statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
+        statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>
+    ) -> Unit
+)
 
 val INDEXED_TABS = STARTUP_TABS.withIndex()
 val StartupScreenSaver = Saver<IndexedValue<StartupScreen>, Int>(save = { it.index }, restore = { IndexedValue(it, STARTUP_TABS[it]) })

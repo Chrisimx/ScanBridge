@@ -24,7 +24,8 @@ val STARTUP_TABS = listOf(
                 statefulScannerMap,
                 statefulScannerMapSecure
             )
-        }),
+        }
+    ),
     StartupScreen(
         io.github.chrisimx.scanbridge.R.string.settings,
         io.github.chrisimx.scanbridge.R.string.settings,

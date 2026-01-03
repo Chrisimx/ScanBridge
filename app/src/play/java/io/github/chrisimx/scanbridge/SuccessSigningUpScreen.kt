@@ -35,16 +35,16 @@ import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun SuccessSigningUpScreen(modifier: Modifier,
-                       onBack: () -> Unit = {}
-) {
+fun SuccessSigningUpScreen(modifier: Modifier, onBack: () -> Unit = {}) {
     val context = LocalContext.current
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(30.dp, 0.dp, 30.dp, 30.dp), verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally) {
-
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(30.dp, 0.dp, 30.dp, 30.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Image(
             painter = painterResource(R.drawable.fireamp_icon),
             "Fireamp Icon",
@@ -65,9 +65,8 @@ fun SuccessSigningUpScreen(modifier: Modifier,
             style = MaterialTheme.typography.bodyMedium
         )
 
-
         FlowRow {
-            ElevatedButton ({
+            ElevatedButton({
                 val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                     data = "mailto:support@fireamp.eu".toUri() // only email apps handle this
                     putExtra(Intent.EXTRA_SUBJECT, "Problem with ScanBridge")
@@ -76,24 +75,27 @@ fun SuccessSigningUpScreen(modifier: Modifier,
                 context.startActivity(emailIntent)
             }, modifier = Modifier.padding(horizontal = 10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon( Icons.Rounded.Email, stringResource(R.string.contact_support_over_email), modifier = Modifier.padding(end = 10.dp))
+                    Icon(Icons.Rounded.Email, stringResource(R.string.contact_support_over_email), modifier = Modifier.padding(end = 10.dp))
                     Text(stringResource(R.string.contact_support_over_email))
                 }
             }
-            ElevatedButton ({
+            ElevatedButton({
                 val url = "https://support.fireamp.eu/#login"
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data = url.toUri()
                 context.startActivity(intent)
             }, modifier = Modifier.padding(horizontal = 10.dp)) {
-
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon( painterResource(R.drawable.outline_globe_24), stringResource(R.string.contact_support_over_email), modifier = Modifier.padding(end = 10.dp))
+                    Icon(
+                        painterResource(R.drawable.outline_globe_24),
+                        stringResource(R.string.contact_support_over_email),
+                        modifier = Modifier.padding(end = 10.dp)
+                    )
                     Text(stringResource(R.string.open_support_website))
                 }
             }
 
-            Button (onBack, modifier = Modifier.padding(10.dp)) {
+            Button(onBack, modifier = Modifier.padding(10.dp)) {
                 Text(stringResource(R.string.back))
             }
         }
@@ -104,7 +106,7 @@ fun SuccessSigningUpScreen(modifier: Modifier,
 @Preview(showBackground = true, device = NEXUS_5, showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 fun SuccessSigningUpScreenPreview() {
     ScanBridgeTheme {
-        Scaffold() { innerPadding ->
+        Scaffold { innerPadding ->
             SuccessSigningUpScreen(Modifier.padding(innerPadding))
         }
     }
@@ -114,9 +116,8 @@ fun SuccessSigningUpScreenPreview() {
 @Preview(showBackground = true, device = TABLET, showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 fun SuccessSigningUpScreenTabletPreview() {
     ScanBridgeTheme {
-        Scaffold() { innerPadding ->
+        Scaffold { innerPadding ->
             SuccessSigningUpScreen(Modifier.padding(innerPadding))
         }
     }
 }
-

@@ -5,5 +5,5 @@ data class AccountCreationRequest(
     val email: String,
     val token: String,
     val google_proof: String,
-    val google_proof_signature: String,
+    val google_proof_signature: String
 )
