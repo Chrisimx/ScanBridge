@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material3.Button
@@ -62,7 +63,7 @@ fun AccountSetupScreen(modifier: Modifier, onSignUp: () -> Unit = {}) {
 
         Text(
             stringResource(R.string.explanation_support),
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(20.dp).widthIn(max = 700.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyMedium
         )
