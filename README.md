@@ -4,7 +4,7 @@
 
 <p align="center" style="text-align: center;">
 <a href='https://f-droid.org/packages/io.github.chrisimx.scanbridge/' target="_blank">
-    <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+    <img src="https://f-droid.org/badge/get-it-on.svg"
          align="center"         
          alt="Get it on F-Droid"
          style="height: 50px"
