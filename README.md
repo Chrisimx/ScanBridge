@@ -36,21 +36,21 @@ instructions below.
 
 Alternatively, you can get it on F-Droid by clicking the button below:
 
-<div>
+<p align="center" style="text-align: center;">
 <a href='https://f-droid.org/packages/io.github.chrisimx.scanbridge/' target="_blank">
     <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
          alt="Get it on F-Droid"
-         height="80">
+         height="50">
 </a>
 
 <a href='https://play.google.com/store/apps/details?id=io.github.chrisimx.scanbridge.play' target="_blank">
   <img src='assets/GetItOnGooglePlay_Badge_Web_color_English.svg'
        align="center"
-       alt='Play Store Badge'
+       alt='Get it on Google Play'
        style="height: 50px"
-       height="80" />
+       height="50" />
 </a>
-</div>
+</p>
 
 
 ## Permissions
