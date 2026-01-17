@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.1] - 2026-01-17
+
+### Added
+- Feature for exporting directly to a file (2c5e684d)
+
+### Changed
+- Upgrade AGP from 8.11.1 to 8.13.2 (20e68506)
+- Adjust user interface for tablets and larger screens
+
+### Fixed
+- German translation of 'saved scanners' corrected (6aa87f1c)
+- Temp files not being deleted after session (8f2d4a79)
+- ADF-only scanners not usable (#112, fixed in e696325c)
+
+## [1.6.0] - 2026-01-07
+
+### Added
+- First Google Play release
+- Support interface in Google Play version
+
 ## [1.5.0] - 2025-10-12
 ### Added
 - Italian localization (c2881f5d). Thanks so much to @LucaMaroglio for the contribution!

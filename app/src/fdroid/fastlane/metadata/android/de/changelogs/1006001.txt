@@ -1,0 +1,4 @@
+Mit dieser neuen Version können Scans nun direkt in eine Datei exportiert werden, ohne dafür einen Workaround (wie z.B. die App Save Locally) zu verwenden.
+Die Benutzeroberfläche wurde außerdem für größere Bildschirme wie Tablets angepasst,
+außerdem sollten ADF-Scanner (also Scanner ohne Vorlagenglas) nun ebenfalls funktionieren.
+Des Weiteren wurde eine unvollständige Übersetzung korrigiert und ein Problem mit nicht automatisch gelöschten temporären Dateien behoben.

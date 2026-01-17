@@ -23,11 +23,11 @@ import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -268,10 +268,13 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
 
         val isFdroidVariant = BuildConfig.FLAVOR == "fdroid"
         val padding = if (isFdroidVariant) 16.dp else 10.dp
-        Row(modifier = Modifier.padding(vertical = padding), verticalAlignment = Alignment.CenterVertically) {
+        FlowRow(
+            modifier = Modifier.padding(vertical = padding),
+            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+        ) {
             if (isFdroidVariant) {
                 Button(
-                    modifier = Modifier.padding(horizontal = 8.dp),
                     onClick = {
                         val intent = Intent(Intent.ACTION_VIEW, "https://github.com/sponsors/Chrisimx".toUri())
                         context.startActivity(intent)

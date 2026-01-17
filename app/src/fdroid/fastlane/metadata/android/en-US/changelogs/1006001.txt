@@ -1,0 +1,3 @@
+With this new version, scans can now be exported directly to a file without having to use a workaround (such as the Save Locally app).
+The user interface has also been adapted for larger screens like tablets, and ADF scanners (i.e. scanners without a flatbed) should now work as well.
+Furthermore, an incomplete translation in German has been corrected and an issue with temporary files not being deleted automatically has been resolved.

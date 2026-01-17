@@ -16,4 +16,4 @@ app/src/androidTest/native-libs
 /app/debug
 /app/release
 /app/play
-fastlane
+/fastlane
