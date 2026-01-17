@@ -38,13 +38,12 @@ class PaperFormatTest {
             Pair(74, 105), // A7
             Pair(52, 74), // A8
             Pair(37, 52), // A9
-            Pair(26, 37), // A10
+            Pair(26, 37) // A10
         )
 
         val paperFormats = loadDefaultFormats()
 
         for (i in expectedSizes.indices) {
-
             val expected = expectedSizes[i]
             val actual = paperFormats[i]
 

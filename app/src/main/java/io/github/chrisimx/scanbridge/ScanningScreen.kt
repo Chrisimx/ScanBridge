@@ -654,7 +654,8 @@ fun ScanningScreenBottomBar(
                     scanningViewModel.setScanSettingsMenuOpen(
                         true
                     )
-            }) {
+                }
+            ) {
                 Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
             }
             IconButton(

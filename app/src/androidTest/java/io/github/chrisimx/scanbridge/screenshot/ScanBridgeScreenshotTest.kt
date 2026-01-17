@@ -132,11 +132,11 @@ class ScanBridgeScreenshotTest {
 
         server.destroy()
 
-        //pressBack()
+        // pressBack()
 
-        //composeTestRule.waitForIdle()
+        // composeTestRule.waitForIdle()
 
-        //composeTestRule.onNodeWithTag("leave_diag_button").performClick()
+        // composeTestRule.onNodeWithTag("leave_diag_button").performClick()
 
         cleanupForTest()
     }
@@ -172,11 +172,10 @@ class ScanBridgeScreenshotTest {
 
         server.destroy()
 
-        //composeTestRule.waitUntilAtLeastOneExists(hasTestTag("leave_diag_button"), 20000)
+        // composeTestRule.waitUntilAtLeastOneExists(hasTestTag("leave_diag_button"), 20000)
 
-        //composeTestRule.onNodeWithTag("leave_diag_button").performClick()
+        // composeTestRule.onNodeWithTag("leave_diag_button").performClick()
 
         cleanupForTest()
     }
-
 }
