@@ -258,7 +258,6 @@ afterEvaluate {
         dependsOn("copyEsclMockServerAll")
     }
 
-
     tasks.named("clean") {
         doLast {
             delete(file("src/androidTest/native-libs"), file("../cache"))
