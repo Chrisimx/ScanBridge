@@ -2,6 +2,25 @@
   <img src="app/src/main/res/drawable/icon_about_dialog.png" alt="App icon" style="width: 200px;" />
 </p>
 
+<p align="center" style="text-align: center;">
+<a href='https://f-droid.org/packages/io.github.chrisimx.scanbridge/' target="_blank">
+    <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+         align="center"         
+         alt="Get it on F-Droid"
+         style="height: 50px"
+         height="50">
+</a>
+
+<a href='https://play.google.com/store/apps/details?id=io.github.chrisimx.scanbridge.play' target="_blank">
+  <img src='assets/GetItOnGooglePlay_Badge_Web_color_English.svg'
+       align="center"
+       alt='Get it on Google Play'
+       style="height: 50px"
+       height="50" />
+</a>
+</p>
+
+
 ## ScanBridge: An easy to use android app for scanning documents
 
 <b>ScanBridge</b> is a Material You app featuring scanning of documents, photos, and more over the
@@ -34,24 +53,8 @@ the [releases page](https://github.com/Chrisimx/ScanBridge/releases).
 Here you can also find a nightly build. You can also build the app yourself by following the
 instructions below.
 
-Alternatively, you can get it on F-Droid by clicking the button below:
-
-<p align="center" style="text-align: center;">
-<a href='https://f-droid.org/packages/io.github.chrisimx.scanbridge/' target="_blank">
-    <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-         alt="Get it on F-Droid"
-         height="50">
-</a>
-
-<a href='https://play.google.com/store/apps/details?id=io.github.chrisimx.scanbridge.play' target="_blank">
-  <img src='assets/GetItOnGooglePlay_Badge_Web_color_English.svg'
-       align="center"
-       alt='Get it on Google Play'
-       style="height: 50px"
-       height="50" />
-</a>
-</p>
-
+Alternatively, you can get it on F-Droid or buy it on Google Play, both linked at the top of the page.
+With your purchase, you will directly support the development and improvement of ScanBridge.
 
 ## Permissions
 
