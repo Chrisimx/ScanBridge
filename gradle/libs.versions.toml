@@ -21,6 +21,7 @@ material3 = "1.5.0-alpha06"
 materialIcons = "1.7.8"
 navigationCompose = "2.9.5"
 versionsPlugin = "0.53.0"
+screengrab = "2.1.1"
 
 [libraries]
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
@@ -47,6 +48,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3",
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlinReflect" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+screengrab = { module = "tools.fastlane:screengrab", version.ref = "screengrab" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 zoomable = { module = "me.saket.telephoto:zoomable", version.ref = "zoomable" }
 

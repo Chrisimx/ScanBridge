@@ -648,10 +648,12 @@ fun ScanningScreenBottomBar(
     val context = LocalContext.current
     BottomAppBar(
         actions = {
-            IconButton(onClick = {
-                scanningViewModel.setScanSettingsMenuOpen(
-                    true
-                )
+            IconButton(
+                modifier = Modifier.testTag("scansettings"),
+                onClick = {
+                    scanningViewModel.setScanSettingsMenuOpen(
+                        true
+                    )
             }) {
                 Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
             }
@@ -773,6 +775,7 @@ fun ScanningScreenBottomBar(
                                 )
                             }
                         },
+                        modifier = Modifier.testTag("scanbtn"),
                         icon = {
                             Icon(
                                 painter = painterResource(R.drawable.outline_scan_24),

@@ -111,7 +111,7 @@ fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (String, HttpUr
                         val url = validateUrl() ?: return@Button
                         onConnectClicked(nameText, url, false)
                     },
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp).testTag("justconnect")
                 ) {
                     Text(stringResource(R.string.connect))
                 }

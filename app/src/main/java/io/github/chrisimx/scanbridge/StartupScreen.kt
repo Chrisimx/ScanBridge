@@ -118,6 +118,7 @@ fun StartupScreen(navController: NavController) {
             NavigationBar {
                 STARTUP_TABS.forEachIndexed { idx, screen ->
                     NavigationBarItem(
+                        modifier = Modifier.testTag("bottombutton$idx"),
                         icon = {
                             Icon(
                                 if (unindexedSelectedScreen == screen) screen.selectedIcon else screen.unselectedIcon,

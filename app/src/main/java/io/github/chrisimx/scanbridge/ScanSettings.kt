@@ -52,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -84,6 +85,7 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
         modifier
             .fillMaxWidth()
             .padding(10.dp)
+            .testTag("scsetcolumn")
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -265,7 +267,7 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
         }
         val localContext = LocalContext.current
         Button(
-            modifier = Modifier.padding(horizontal = 15.dp),
+            modifier = Modifier.padding(horizontal = 15.dp).testTag("copyesclkt"),
             onClick = {
                 val systemClipboard =
                     localContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager

@@ -56,7 +56,7 @@ android {
         minSdk = 28
         targetSdk = 36
         versionCode = 1_006_000 // format is MAJ_MIN_PAT with always 3 digits
-        versionName = "1.5.0"
+        versionName = "1.6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments["escl_server_url"] =
@@ -144,6 +144,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.screengrab)
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
@@ -248,6 +249,15 @@ afterEvaluate {
     tasks.named("mergeFdroidDebugAndroidTestJniLibFolders") {
         dependsOn("copyEsclMockServerAll")
     }
+
+    tasks.named("connectedPlayDebugAndroidTest") {
+        dependsOn("copyEsclMockServerAll")
+    }
+
+    tasks.named("mergePlayDebugAndroidTestJniLibFolders") {
+        dependsOn("copyEsclMockServerAll")
+    }
+
 
     tasks.named("clean") {
         doLast {

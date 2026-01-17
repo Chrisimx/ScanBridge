@@ -38,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -74,6 +75,7 @@ fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = 
                 errorMessage,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .testTag("full_screen_error_message")
                     .padding(20.dp),
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Light,
