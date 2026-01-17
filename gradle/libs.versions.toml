@@ -2,7 +2,7 @@
 agp = "8.13.2"
 coilCompose = "3.3.0"
 constraintlayoutCompose = "1.1.1"
-esclkt = "1.5.2"
+esclkt = "1.5.4"
 itextCore = "9.3.0"
 kotlin = "2.2.20"
 coreKtx = "1.17.0"
