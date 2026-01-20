@@ -1,7 +1,0 @@
-Neue Funktionen:
-- 🇮🇹 Italienische Übersetzung — ein großes Dankeschön an @LucaMaroglio für den Beitrag!
-- 🌐 App-spezifische Spracheinstellung — wähle deine bevorzugte Sprache, ohne die Systemeinstellungen zu ändern.
-- 📄 US-Papierformate — Letter- und Legal-Formate jetzt direkt zur Auswahl verfügbar.
-- ⚙️ Scan-Einstellungen speichern — deine Einstellungen werden für neue Sitzungen übernommen.
-- ✖️ Abbrechen-Button — Scans abbrechen.
-- ✨ Designverbesserungen — schöneres Interface.

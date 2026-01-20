@@ -1,0 +1,3 @@
+Con questa nuova versione è possibile esportare le scansioni direttamente in un file senza workaround (come ad esempio l’app Android Save Locally).
+L’interfaccia è stata adattata a schermi più grandi e ora funzionano anche gli scanner con solo alimentatore automatico.
+Corrette inoltre una traduzione incompleta e la gestione dei file temporanei.

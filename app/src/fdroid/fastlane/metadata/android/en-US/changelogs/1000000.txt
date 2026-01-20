@@ -1,7 +1,0 @@
-This is the initial release of ScanBridge 🥳. It features:
-
-* Scanning of documents, photos, and more over the AirScan/eSCL protocol
-* Exporting scans as PDF or images
-* Arranging the scanned pages
-* Adjusting settings like input source, resolution, duplex scan, scanning dimensions, ...
-* And more...

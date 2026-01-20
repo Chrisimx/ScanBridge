@@ -1,7 +1,0 @@
-Nuove Funzionalità:
-- Recupero automatico della sessione di scansione più recente non completata all'avvio dell'app, se presente
-- Rilevamento automatico degli scanner HTTPS sulla rete
-- Memorizzazione persistente delle connessioni personalizzate agli scanner per uso ripetuto
-- Opzione per disabilitare la verifica del certificato HTTPS nelle impostazioni (per collegare facilmente scanner con certificati auto-firmati)
-- Numero massimo di pagine per PDF configurabile durante l'esportazione (regolabile nelle impostazioni dell'app)
-...e alcune correzioni di bug

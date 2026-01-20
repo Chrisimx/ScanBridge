@@ -1,6 +1,0 @@
-- 🇮🇹 Supporto della lingua italiana — grazie mille a @LucaMaroglio!
-- 🌐 Impostazione della lingua per singola app — scegli la tua lingua preferita senza modificare le impostazioni di sistema.
-- 📄 Formati carta USA — ora disponibili i formati Letter e Legal.
-- ⚙️ Salvataggio delle impostazioni di scansione — le tue preferenze vengono ricordate per nuove sessioni.
-- ✖️ Pulsante Annulla — interrompi facilmente una scansione in corso.
-- ✨ Miglioramenti al design — interfaccia più chiara e raffinata.
