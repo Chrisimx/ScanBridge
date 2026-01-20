@@ -31,9 +31,9 @@ scanners.
 It is written in Kotlin and uses Jetpack Compose.
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-  <img src="app/src/fdroid/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" alt="Discover scanners in your network" style="width: 30%; height: auto;" />
-  <img src="app/src/fdroid/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" alt="Scan multiple pages" style="width: 30%; height: auto;" />
-  <img src="app/src/fdroid/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" alt="Use your scanner to the maximum of its abilities" style="width: 30%; height: auto;" />
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" alt="Discover scanners in your network" style="width: 30%; height: auto;" />
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" alt="Scan multiple pages" style="width: 30%; height: auto;" />
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" alt="Use your scanner to the maximum of its abilities" style="width: 30%; height: auto;" />
 </div>
 
 ## Features
