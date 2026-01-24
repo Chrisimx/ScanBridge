@@ -39,8 +39,8 @@ class MainActivity : ComponentActivity() {
     var saveDebugFileLauncher: ActivityResultLauncher<Intent>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
 
         Timber.plant(Timber.DebugTree())
 
