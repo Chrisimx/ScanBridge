@@ -31,6 +31,9 @@ import io.github.chrisimx.scanbridge.logs.FileLogger
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class MainActivity : ComponentActivity() {
@@ -73,7 +76,9 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        cleanUpCacheFiles()
+        CoroutineScope(Dispatchers.IO).launch {
+            cleanUpCacheFiles()
+        }
 
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this))
 
