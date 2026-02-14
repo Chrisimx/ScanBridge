@@ -1,4 +1,3 @@
-import java.net.URI
 import java.security.MessageDigest
 import java.util.*
 import okhttp3.OkHttpClient

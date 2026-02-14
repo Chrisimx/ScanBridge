@@ -81,7 +81,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
@@ -101,12 +100,7 @@ import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Image
-import io.github.chrisimx.esclkt.ESCLHttpCallResult
-import io.github.chrisimx.esclkt.ESCLRequestClient
-import io.github.chrisimx.esclkt.JobState
-import io.github.chrisimx.esclkt.ScanJob
 import io.github.chrisimx.esclkt.ScanRegion
-import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
@@ -118,8 +112,6 @@ import io.github.chrisimx.scanbridge.uicomponents.dialog.DeletionDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
 import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.snackBarError
-import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
-import io.github.chrisimx.scanbridge.util.toJobStateString
 import io.github.chrisimx.scanbridge.util.toReadableString
 import io.github.chrisimx.scanbridge.util.zipFiles
 import io.ktor.http.Url
@@ -130,13 +122,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.concurrent.thread
 import kotlin.io.path.Path
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
