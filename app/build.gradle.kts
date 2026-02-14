@@ -2,6 +2,7 @@ import java.security.MessageDigest
 import java.util.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 val testConfig = Properties()
 val testConfigFile = rootProject.file("testConfig.properties")
@@ -31,7 +32,7 @@ fun getGitCommitHash(): String {
 
         val result = process.inputStream.bufferedReader().readText()
 
-        result.toString().trim()
+        result.trim()
     } catch (_: Exception) {
         "unknown" // Fallback
     }
@@ -104,17 +105,19 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
     buildFeatures {
         compose = true
         buildConfig = true
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
+    }
+}
+
 dependencies {
-    implementation(libs.okhttp)
     implementation(libs.esclkt)
     implementation(libs.zoomable)
     implementation(libs.kotlin.reflect)
@@ -135,6 +138,8 @@ dependencies {
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.itext7.core)
+    implementation(libs.ktor.cio)
+    implementation(libs.ktor.logging)
     "playImplementation"(project(":lvl_library"))
     "playImplementation"("com.squareup.retrofit2:retrofit:3.0.0")
     "playImplementation"("com.squareup.retrofit2:converter-gson:2.9.0")

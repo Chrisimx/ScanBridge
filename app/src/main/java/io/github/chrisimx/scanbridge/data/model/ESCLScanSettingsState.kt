@@ -7,13 +7,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import io.github.chrisimx.esclkt.BinaryRendering
-import io.github.chrisimx.esclkt.CcdChannel
-import io.github.chrisimx.esclkt.ColorMode
-import io.github.chrisimx.esclkt.ContentType
+import io.github.chrisimx.esclkt.CcdChannelEnumOrRaw
+import io.github.chrisimx.esclkt.ColorModeEnumOrRaw
+import io.github.chrisimx.esclkt.ContentTypeEnumOrRaw
 import io.github.chrisimx.esclkt.FeedDirection
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.InputSourceCaps
-import io.github.chrisimx.esclkt.ScanIntentData
+import io.github.chrisimx.esclkt.ScanIntentEnumOrRaw
 import io.github.chrisimx.esclkt.ScanRegions
 import io.github.chrisimx.esclkt.ScanSettings
 import kotlinx.serialization.Serializable
@@ -21,19 +21,19 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MutableESCLScanSettingsState(
     private var versionState: MutableState<String>,
-    private var intentState: MutableState<ScanIntentData?> = mutableStateOf(null),
+    private var intentState: MutableState<ScanIntentEnumOrRaw?> = mutableStateOf(null),
     private var scanRegionsState: MutableState<MutableScanRegionState?> = mutableStateOf(null),
     private var documentFormatExtState: MutableState<String?> = mutableStateOf(null),
-    private var contentTypeState: MutableState<ContentType?> = mutableStateOf(null),
+    private var contentTypeState: MutableState<ContentTypeEnumOrRaw?> = mutableStateOf(null),
     private var inputSourceState: MutableState<InputSource?> = mutableStateOf(null),
     /** Specified in DPI **/
     private var xResolutionState: MutableState<UInt?> = mutableStateOf(null),
     /** Specified in DPI **/
     private var yResolutionState: MutableState<UInt?> = mutableStateOf(null),
-    private var colorModeState: MutableState<ColorMode?> = mutableStateOf(null),
+    private var colorModeState: MutableState<ColorModeEnumOrRaw?> = mutableStateOf(null),
     private var colorSpaceState: MutableState<String?> = mutableStateOf(null),
     private var mediaTypeState: MutableState<String?> = mutableStateOf(null),
-    private var ccdChannelState: MutableState<CcdChannel?> = mutableStateOf(null),
+    private var ccdChannelState: MutableState<CcdChannelEnumOrRaw?> = mutableStateOf(null),
     private var binaryRenderingState: MutableState<BinaryRendering?> = mutableStateOf(null),
     private var duplexState: MutableState<Boolean?> = mutableStateOf(null),
     private var numberOfPagesState: MutableState<UInt?> = mutableStateOf(null),
@@ -151,17 +151,17 @@ data class MutableESCLScanSettingsState(
 @Serializable
 data class ImmutableESCLScanSettingsState(
     val versionState: State<String>,
-    val intentState: State<ScanIntentData?>,
+    val intentState: State<ScanIntentEnumOrRaw?>,
     val scanRegionsState: State<ImmutableScanRegionState?>,
     val documentFormatExtState: State<String?>,
-    val contentTypeState: State<ContentType?>,
+    val contentTypeState: State<ContentTypeEnumOrRaw?>,
     val inputSourceState: State<InputSource?>,
     val xResolutionState: State<UInt?>,
     val yResolutionState: State<UInt?>,
-    val colorModeState: State<ColorMode?>,
+    val colorModeState: State<ColorModeEnumOrRaw?>,
     val colorSpaceState: State<String?>,
     val mediaTypeState: State<String?>,
-    val ccdChannelState: State<CcdChannel?>,
+    val ccdChannelState: State<CcdChannelEnumOrRaw?>,
     val binaryRenderingState: State<BinaryRendering?>,
     val duplexState: State<Boolean?>,
     val numberOfPagesState: State<UInt?>,
@@ -251,17 +251,17 @@ data class ImmutableESCLScanSettingsState(
 @Serializable
 data class StatelessImmutableESCLScanSettingsState(
     val version: String,
-    val intent: ScanIntentData?,
+    val intent: ScanIntentEnumOrRaw?,
     val scanRegions: StatelessImmutableScanRegion?,
     val documentFormatExt: String?,
-    val contentType: ContentType?,
+    val contentType: ContentTypeEnumOrRaw?,
     val inputSource: InputSource?,
     val xResolution: UInt?,
     val yResolution: UInt?,
-    val colorMode: ColorMode?,
+    val colorMode: ColorModeEnumOrRaw?,
     val colorSpace: String?,
     val mediaType: String?,
-    val ccdChannel: CcdChannel?,
+    val ccdChannel: CcdChannelEnumOrRaw?,
     val binaryRendering: BinaryRendering?,
     val duplex: Boolean?,
     val numberOfPages: UInt?,

@@ -24,26 +24,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.github.chrisimx.scanbridge.R
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import io.ktor.http.Url
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (String, HttpUrl, Boolean) -> Unit) {
+fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (String, Url, Boolean) -> Unit) {
     var urlErrorState: String? by remember { mutableStateOf(null) }
     var urlText: String by remember { mutableStateOf("") }
     var nameText: String by remember { mutableStateOf("") }
 
     val context = LocalContext.current
 
-    val validateUrl = fun(): HttpUrl? {
+    val validateUrl = fun(): Url? {
         if (urlText.isEmpty()) {
             urlErrorState = context.getString(R.string.error_state_please_enter_an_url)
             return null
         }
 
         try {
-            return urlText.toHttpUrl()
+            return Url(urlText)
         } catch (_: IllegalArgumentException) {
             urlErrorState = context.getString(R.string.invalid_url)
             return null

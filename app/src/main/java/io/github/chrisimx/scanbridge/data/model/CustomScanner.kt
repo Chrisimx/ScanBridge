@@ -19,10 +19,10 @@
 
 package io.github.chrisimx.scanbridge.data.model
 
+import io.ktor.http.Url
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-import okhttp3.HttpUrl
 
 data class CustomScanner
 @OptIn(ExperimentalUuidApi::class)
-constructor(val uuid: Uuid, val name: String, val url: HttpUrl)
+constructor(val uuid: Uuid, val name: String, val url: Url)

@@ -65,6 +65,7 @@ fun ScanBridgeTheme(
         }
 
         darkTheme -> DarkColorScheme
+
         else -> LightColorScheme
     }
 

@@ -24,9 +24,11 @@ import android.net.nsd.NsdServiceInfo
 import android.os.Build
 import android.os.ext.SdkExtensions
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
+import io.ktor.http.encodedPath
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ForkJoinPool
-import okhttp3.HttpUrl
 import timber.log.Timber
 
 private const val TAG = "ScannerDiscovery"
@@ -90,12 +92,12 @@ class ScannerDiscovery(
                             }
                             val sanitizedURL = address.hostAddress!!.substringBefore('%')
                             val url = try {
-                                HttpUrl.Builder()
-                                    .host(sanitizedURL)
-                                    .port(p0.port)
-                                    .encodedPath(rs)
-                                    .scheme(if (isSecure) "https" else "http")
-                                    .build()
+                                URLBuilder().apply {
+                                    protocol = if (isSecure) URLProtocol.HTTPS else URLProtocol.HTTP
+                                    host = sanitizedURL
+                                    port = p0.port
+                                    encodedPath = rs
+                                }.build()
                             } catch (e: Exception) {
                                 Timber.tag(TAG).e("Couldn't built address from: ${address.hostAddress} Exception: $e")
                                 continue
@@ -139,12 +141,13 @@ class ScannerDiscovery(
                         val address = serviceInfo.host
                         val sanitizedURL = address.hostAddress!!.substringBefore('%')
                         val url = try {
-                            HttpUrl.Builder()
-                                .host(sanitizedURL)
-                                .port(serviceInfo.port)
-                                .encodedPath(rs)
-                                .scheme("http")
-                                .build()
+                            URLBuilder()
+                                .apply {
+                                    host = sanitizedURL
+                                    port = serviceInfo.port
+                                    encodedPath = rs
+                                    protocol = URLProtocol.HTTP
+                                }.build()
                         } catch (e: Exception) {
                             Timber.tag(TAG).e("Couldn't built address from: ${address.hostAddress} Exception: $e")
                             return

@@ -20,26 +20,49 @@
 package io.github.chrisimx.scanbridge.data.ui
 
 import android.app.Application
+import android.content.Context
+import android.graphics.BitmapFactory
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
+import androidx.lifecycle.viewModelScope
 import getTrustAllTM
+import io.github.chrisimx.esclkt.ESCLHttpCallResult
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.Inches
 import io.github.chrisimx.esclkt.InputSource
+import io.github.chrisimx.esclkt.JobState
 import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.Millimeters
+import io.github.chrisimx.esclkt.ScanJob
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
+import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.data.model.Session
-import io.github.chrisimx.scanbridge.logs.DebugInterceptor
 import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
 import io.github.chrisimx.scanbridge.util.getInputSourceCaps
 import io.github.chrisimx.scanbridge.util.getInputSourceOptions
+import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
+import io.github.chrisimx.scanbridge.util.toJobStateString
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.http.Url
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -47,13 +70,11 @@ import kotlinx.serialization.json.encodeToStream
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import timber.log.Timber
 
 class ScanningScreenViewModel(
     application: Application,
-    address: HttpUrl,
+    address: Url,
     timeout: UInt,
     withDebugInterceptor: Boolean,
     certificateValidationDisabled: Boolean,
@@ -63,20 +84,29 @@ class ScanningScreenViewModel(
         ScanningScreenData(
             ESCLRequestClient(
                 address,
-                OkHttpClient.Builder().let {
+                HttpClient(CIO) {
+                    install(HttpTimeout) {
+                        requestTimeoutMillis = timeout.toLong() * 1000
+                        connectTimeoutMillis = timeout.toLong() * 1000
+                        socketTimeoutMillis = timeout.toLong() * 1000
+                    }
                     if (withDebugInterceptor) {
-                        it.addInterceptor(DebugInterceptor())
+                        install(Logging) {
+                            logger = object : Logger {
+                                override fun log(message: String) {
+                                    Timber.tag("ESCLRequestClient").d(message)
+                                }
+                            }
+                        }
                     }
-                    it.connectTimeout(timeout.toLong(), java.util.concurrent.TimeUnit.SECONDS)
-                        .readTimeout(timeout.toLong(), java.util.concurrent.TimeUnit.SECONDS)
                     if (certificateValidationDisabled) {
-                        val (socketFactory, trustManager) = getTrustAllTM()
-                        it.sslSocketFactory(socketFactory, trustManager)
-                        it.hostnameVerifier { _, _ -> true }
+                        engine {
+                            https {
+                                trustManager = getTrustAllTM().second
+                            }
+                        }
                     }
-
-                    it
-                }.build()
+                }
             ),
             sessionID
         )
@@ -337,5 +367,297 @@ class ScanningScreenViewModel(
     fun clearSavedScanSettings() {
         DefaultScanSettingsStore.clear(application.applicationContext)
         Timber.d("Saved scan settings cleared")
+    }
+
+    fun scan(snackBarScope: CoroutineScope, snackBarHostState: SnackbarHostState) {
+        viewModelScope.launch {
+            doScan(snackBarScope, snackBarHostState)
+        }
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
+    private suspend fun doScan(snackBarScope: CoroutineScope, snackBarHostState: SnackbarHostState) {
+        if (scanningScreenData.scanJobRunning) {
+            Timber.e("Job still running")
+            snackbarErrorRetrievingPage(
+                application.getString(R.string.job_still_running),
+                snackBarScope,
+                application,
+                snackBarHostState,
+                false
+            )
+            return
+        }
+
+        val scanSettingsData =
+            scanningScreenData.scanSettingsVM!!.scanSettingsComposableData
+
+        val currentScanSettings = scanSettingsData.scanSettingsState.toESCLKtScanSettings(
+            scanSettingsData.selectedInputSourceCapabilities
+        )
+
+        val esclRequestClient = _scanningScreenData.esclClient
+
+        setScanJobRunning(true)
+        setScanJobCancelling(false)
+        scrollToPage(
+            scope = snackBarScope,
+            pageNr = scanningScreenData.currentScansState.size
+        )
+
+        if (abortIfCancelling()) return
+
+        Timber.d("Creating scan job. eSCLKt scan settings: $currentScanSettings")
+        val job =
+            esclRequestClient.createJob(currentScanSettings)
+        Timber.d("Creation request done. Result: $job")
+        if (job !is ESCLRequestClient.ScannerCreateJobResult.Success) {
+            Timber.e("Job creation failed. Result: $job")
+            setScanJobRunning(false)
+            snackbarErrorRetrievingPage(job.toString(), snackBarScope, application, snackBarHostState)
+            return
+        }
+        val jobResult = job.scanJob
+
+        if (abortIfCancelling(jobResult)) return
+
+        var polling = false
+
+        while (true) {
+            if (polling) {
+                for (retries in 0..60) {
+                    if (abortIfCancelling(jobResult)) return
+                    val status = jobResult.getJobStatus()
+                    val isRunning = status?.jobState == JobState.Processing || status?.jobState == JobState.Pending
+                    val imagesToTransfer = status?.imagesToTransfer
+                    Timber.d(
+                        "Polling job status. Retry: $retries Result: $status imagesToTransfer: $imagesToTransfer isRunning: $isRunning"
+                    )
+                    if (!isRunning) {
+                        Timber.d("Job is reported to be not running anymore. jobRunning = false")
+
+                        val deleteResult = jobResult.cancel()
+                        Timber.d("Cancelling job after (a likely) failure: $deleteResult")
+
+                        setScanJobRunning(false)
+                        scrollToPage(
+                            scope = snackBarScope,
+                            pageNr = scanningScreenData.currentScansState.size
+                        )
+                        if (status?.jobState != JobState.Completed) {
+                            val jobStateString = status?.jobState.toJobStateString(application)
+                            Timber.w("Job info doesn't indicate completion: $jobStateString")
+                            snackBarScope.launch {
+                                snackBarHostState.showSnackbar(
+                                    application.getString(
+                                        R.string.no_further_pages,
+                                        jobStateString
+                                    ),
+                                    withDismissAction = true
+                                )
+                            }
+                        }
+                        return
+                    }
+                    if (imagesToTransfer != null && imagesToTransfer > 0u) {
+                        Timber.d("There seem to be images to transfer. Breaking out of polling loop")
+                        break
+                    }
+                    delay(1000)
+                }
+            }
+
+            if (abortIfCancelling(jobResult)) return
+
+            Timber.d("Retrieving next page")
+            val nextPage = jobResult.retrieveNextPage()
+            Timber.d("Next page result: $nextPage")
+            val status = jobResult.getJobStatus()
+            Timber.d("Retrieved job info: $status")
+            val jobStateString = status?.jobState.toJobStateString(application)
+            Timber.d("Job info as human readable: $jobStateString")
+            when (nextPage) {
+                is ESCLRequestClient.ScannerNextPageResult.NoFurtherPages -> {
+                    Timber.d("Next page result is seen as no further pages. jobRunning = false")
+                    setScanJobRunning(false)
+                    scrollToPage(
+                        scope = snackBarScope,
+                        pageNr = scanningScreenData.currentScansState.size
+                    )
+                    if (status?.jobState != JobState.Completed) {
+                        Timber.w("Job info doesn't indicate completion: $jobStateString")
+                        snackBarScope.launch {
+                            snackBarHostState.showSnackbar(
+                                application.getString(
+                                    R.string.no_further_pages,
+                                    jobStateString
+                                ),
+                                withDismissAction = true
+                            )
+                        }
+                    }
+                    val deletionResult = jobResult.cancel()
+                    Timber.d("Cancelling job after no further pages is reported: $deletionResult")
+                    return
+                }
+
+                is ESCLRequestClient.ScannerNextPageResult.RequestFailure -> {
+                    if (nextPage.exception !is ESCLHttpCallResult.Error.HttpError) {
+                        reportErrorWhileScanning(nextPage, snackBarScope, application, snackBarHostState, jobResult)
+                        return
+                    }
+                    val error = nextPage.exception as ESCLHttpCallResult.Error.HttpError
+
+                    if (status?.jobState == JobState.Completed) {
+                        Timber.d("Job info indicates completion but response was not 404: $jobStateString")
+                        setScanJobRunning(false)
+                        scrollToPage(
+                            scope = snackBarScope,
+                            pageNr = scanningScreenData.currentScansState.size
+                        )
+                        snackBarScope.launch {
+                            snackBarHostState.showSnackbar(
+                                application.getString(
+                                    R.string.no_further_pages,
+                                    jobStateString
+                                ),
+                                withDismissAction = true
+                            )
+                        }
+                        val deletionResult = jobResult.cancel()
+                        Timber.d("Cancelling job after non-standard completion: $deletionResult")
+                        return
+                    } else {
+                        Timber.e("Not successful code while retrieving next page: $nextPage")
+                        if (error.code == 503) {
+                            // Retry with polling
+                            Timber.d("503 error received. Retrying with polling")
+                            polling = true
+                            continue
+                        } else {
+                            setScanJobRunning(false)
+                            scrollToPage(
+                                scope = snackBarScope,
+                                pageNr = scanningScreenData.currentScansState.size
+                            )
+                            snackbarErrorRetrievingPage(
+                                nextPage.toString(),
+                                snackBarScope,
+                                application,
+                                snackBarHostState
+                            )
+                            val deletionResult = jobResult.cancel()
+                            Timber.d("Cancelling job after not successful response while trying to retrieve page: $deletionResult")
+                            return
+                        }
+                    }
+                }
+
+                is ESCLRequestClient.ScannerNextPageResult.Success -> {
+                }
+
+                else -> {
+                    reportErrorWhileScanning(nextPage, snackBarScope, application, snackBarHostState, jobResult)
+                    return
+                }
+            }
+            Timber.d("Received page. Copying to file")
+            var filePath: Path
+            while (true) {
+                val scanPageFile = "scan-" + Uuid.random().toString() + ".jpg"
+                val file = File(application.filesDir, scanPageFile)
+                file.exists().let {
+                    if (!it) {
+                        filePath = file.toPath()
+                        break
+                    }
+                }
+            }
+
+            Timber.d("Scan page file created: $filePath")
+
+            try {
+                withContext(Dispatchers.IO) {
+                    Files.copy(nextPage.page.data.inputStream(), filePath)
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Error while copying received image to file. Aborting!")
+                setScanJobRunning(false)
+                snackbarErrorRetrievingPage(
+                    application.getString(
+                        R.string.error_while_copying_received_image_to_file,
+                        e.message
+                    ),
+                    snackBarScope,
+                    application,
+                    snackBarHostState
+                )
+                val deletionResult = jobResult.cancel()
+                Timber.d("Cancelling job after error while trying to copy received page to file: $deletionResult")
+                return
+            }
+
+            val imageBitmap = withContext(Dispatchers.IO) {
+                BitmapFactory.decodeFile(filePath.toString())?.asImageBitmap()
+            }
+
+            if (imageBitmap == null) {
+                Timber.e("Couldn't decode received image as Bitmap. Aborting!")
+                snackbarErrorRetrievingPage(
+                    application.getString(R.string.couldn_t_decode_received_image, jobStateString),
+                    snackBarScope,
+                    application,
+                    snackBarHostState
+                )
+                filePath.toFile().delete()
+                val deletionResult = jobResult.cancel()
+                Timber.d("Cancelling job after error while trying to decode received page as bitmap: $deletionResult")
+                return
+            }
+            addScan(filePath.toString(), currentScanSettings)
+        }
+    }
+
+    fun retrieveScannerCapabilities() = viewModelScope.launch {
+        val esclClient = scanningScreenData.esclClient
+
+        val scannerCapabilitiesResult = esclClient.getScannerCapabilities()
+
+        if (scannerCapabilitiesResult !is ESCLRequestClient.ScannerCapabilitiesResult.Success) {
+            Timber.e("Error while retrieving ScannerCapabilities: $scannerCapabilitiesResult")
+            setError("$scannerCapabilitiesResult")
+            return@launch
+        }
+
+        setScannerCapabilities(scannerCapabilitiesResult.scannerCapabilities)
+    }
+
+    private suspend fun abortIfCancelling(scanJob: ScanJob? = null): Boolean = if (scanningScreenData.scanJobCancelling) {
+        Timber.d("Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob")
+        scanJob?.cancel()
+        setScanJobRunning(false)
+        setScanJobCancelling(false)
+        true
+    } else {
+        false
+    }
+
+    private suspend fun reportErrorWhileScanning(
+        nextPage: ESCLRequestClient.ScannerNextPageResult,
+        scope: CoroutineScope,
+        context: Context,
+        snackbarHostState: SnackbarHostState,
+        jobResult: ScanJob
+    ) {
+        Timber.e("Error while retrieving next page: $nextPage")
+        snackbarErrorRetrievingPage(
+            nextPage.toString(),
+            scope,
+            context,
+            snackbarHostState
+        )
+        setScanJobRunning(false)
+        val deletionResult = jobResult.cancel()
+        Timber.d("Cancelling job after error while trying to retrieve page: $deletionResult")
     }
 }

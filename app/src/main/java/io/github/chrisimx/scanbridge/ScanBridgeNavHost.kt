@@ -32,9 +32,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
 import io.github.chrisimx.scanbridge.util.doTempFilesExist
+import io.ktor.http.Url
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import timber.log.Timber
 
 @Serializable
@@ -52,12 +52,14 @@ fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
     Timber.d("Route changed to: ${destination.route}")
     return when (destination.route) {
         "StartUpScreenRoute" -> StartUpScreenRoute
+
         "ScannerRoute/{scannerName}/{scannerURL}/{sessionID}" -> {
             val scannerName = arguments?.getString("scannerName") ?: return null
             val scannerURL = arguments?.getString("scannerURL") ?: return null
             val sessionID = arguments?.getString("sessionID") ?: return null
             ScannerRoute(scannerName, scannerURL, sessionID)
         }
+
         else -> null
     }
 }
@@ -90,7 +92,7 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
                 )
             ScanningScreen(
                 scannerRoute.scannerName,
-                scannerRoute.scannerURL.toHttpUrl(),
+                Url(scannerRoute.scannerURL),
                 navController,
                 timeout,
                 debug,
