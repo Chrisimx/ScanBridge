@@ -470,7 +470,7 @@ class ScanningScreenViewModel(
             if (abortIfCancelling(jobResult)) return
 
             Timber.d("Retrieving next page")
-            var nextPage = jobResult.retrieveNextPage()
+            val nextPage = jobResult.retrieveNextPage()
             Timber.d("Next page result: $nextPage")
             val status = jobResult.getJobStatus()
             Timber.d("Retrieved job info: $status")

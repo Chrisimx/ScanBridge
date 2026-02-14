@@ -117,7 +117,6 @@ import io.github.chrisimx.scanbridge.util.zipFiles
 import io.ktor.http.Url
 import java.io.File
 import java.nio.file.Files
-import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.concurrent.thread
@@ -299,7 +298,6 @@ fun doPdfExport(
                         if (actualImageOrientation != scanRegionOrientation) {
                             val tmp = width72thInches
                             width72thInches = height72thInches
-                            height72thInches = tmp
                         }
 
                         val aspectRatio = imageData.width / imageData.height
@@ -373,7 +371,6 @@ fun ScanningScreenBottomBar(
     onSaveButtonPositionChanged: (Triple<Int, Int, Int>) -> Unit,
     onExportPositionChange: (Triple<Int, Int, Int>) -> Unit
 ) {
-    val context = LocalContext.current
     BottomAppBar(
         actions = {
             IconButton(

@@ -24,12 +24,9 @@ import android.net.nsd.NsdServiceInfo
 import android.os.Build
 import android.os.ext.SdkExtensions
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import io.ktor.client.request.invoke
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.encodedPath
-import io.ktor.http.invoke
-import io.ktor.http.set
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ForkJoinPool
 import timber.log.Timber
