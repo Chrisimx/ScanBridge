@@ -22,9 +22,9 @@ package io.github.chrisimx.scanbridge.stores
 import android.content.Context
 import androidx.core.content.edit
 import io.github.chrisimx.scanbridge.data.model.CustomScanner
+import io.ktor.http.Url
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import timber.log.Timber
 
 object CustomScannerStore {
@@ -65,7 +65,7 @@ object CustomScannerStore {
             try {
                 val scanner = CustomScanner(
                     name = name,
-                    url = url.toHttpUrl(),
+                    url = Url(url),
                     uuid = Uuid.parse(uuid)
                 )
                 scannerList.add(scanner)

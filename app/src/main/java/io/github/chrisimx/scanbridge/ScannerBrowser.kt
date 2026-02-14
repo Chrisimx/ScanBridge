@@ -48,10 +48,10 @@ import io.github.chrisimx.scanbridge.data.ui.CustomScannerViewModel
 import io.github.chrisimx.scanbridge.uicomponents.FoundScannerItem
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.dialog.CustomScannerDialog
+import io.ktor.http.Url
 import java.util.*
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import timber.log.Timber
 
 fun startScannerDiscovery(
@@ -178,11 +178,11 @@ fun ScannerBrowser(
         CustomScannerDialog(
             onDismiss = { setShowCustomDialog(false) },
             onConnectClicked = { name, url, save ->
-                val name = if (name.isEmpty()) context.getString(R.string.custom_scanner) else name
+                val name = name.ifEmpty { context.getString(R.string.custom_scanner) }
                 val url = if (url.toString().endsWith("/")) url.toString() else "$url/"
                 val sessionID = Uuid.random().toString()
                 if (save) {
-                    customScannerViewModel.addScanner(CustomScanner(Uuid.random(), name, url.toHttpUrl()))
+                    customScannerViewModel.addScanner(CustomScanner(Uuid.random(), name, Url(url)))
                 }
                 setShowCustomDialog(false)
                 navController.navigate(

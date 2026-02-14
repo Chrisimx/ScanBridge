@@ -58,7 +58,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.chrisimx.esclkt.InputSource
-import io.github.chrisimx.esclkt.ScanIntentData
 import io.github.chrisimx.scanbridge.data.ui.ImmutableScanSettingsComposableData
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableViewModel
 import io.github.chrisimx.scanbridge.uicomponents.SizeBasedConditionalView
@@ -149,10 +148,7 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     scanSettingsUIState.intentOptions.forEach { intentData ->
-                        val name = when (intentData) {
-                            is ScanIntentData.ScanIntentEnum -> intentData.scanIntent.name
-                            is ScanIntentData.StringData -> intentData.string
-                        }
+                        val name = intentData.asString()
                         InputChip(
                             onClick = {
                                 scanSettingsViewModel.setIntent(intentData)
@@ -299,11 +295,11 @@ private fun ResolutionSettingButtonRowVersion(
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(stringResource(R.string.resolution_dpi))
         SingleChoiceSegmentedButtonRow {
-            scanSettingsUIState.supportedScanResolutions.forEachIndexed { index, discreteResolution ->
+            scanSettingsUIState.supportedScanResolutions.discreteResolutions.forEachIndexed { index, discreteResolution ->
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(
                         index = index,
-                        count = scanSettingsUIState.supportedScanResolutions.size
+                        count = scanSettingsUIState.supportedScanResolutions.discreteResolutions.size
                     ),
                     onClick = {
                         scanSettingsViewModel.setResolution(
@@ -348,7 +344,7 @@ private fun ResolutionSettingCardVersion(
 
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                scanSettingsUIState.supportedScanResolutions.forEachIndexed { index, discreteResolution ->
+                scanSettingsUIState.supportedScanResolutions.discreteResolutions.forEachIndexed { index, discreteResolution ->
                     val text = if (discreteResolution.xResolution == discreteResolution.yResolution) {
                         "${discreteResolution.xResolution}"
                     } else {

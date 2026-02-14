@@ -27,8 +27,9 @@ import androidx.compose.runtime.setValue
 import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.InputSourceCaps
-import io.github.chrisimx.esclkt.ScanIntentData
+import io.github.chrisimx.esclkt.ScanIntentEnumOrRaw
 import io.github.chrisimx.esclkt.ScannerCapabilities
+import io.github.chrisimx.esclkt.SupportedResolutions
 import io.github.chrisimx.scanbridge.data.model.ImmutableESCLScanSettingsState
 import io.github.chrisimx.scanbridge.data.model.MutableESCLScanSettingsState
 import io.github.chrisimx.scanbridge.data.model.PaperFormat
@@ -97,7 +98,7 @@ data class ScanSettingsComposableData(val scanSettingsState: MutableESCLScanSett
         customMenuEnabledState.value,
         selectedInputSourceCapabilitiesState.value,
         intentOptionsState.value,
-        supportedScanResolutionsState.value
+        supportedScanResolutionsState.value.discreteResolutions
     )
 }
 
@@ -112,8 +113,8 @@ data class ImmutableScanSettingsComposableData(
     private val heightTextFieldState: State<String>,
     private val customMenuEnabledState: State<Boolean>,
     private val selectedInputSourceCapabilitiesState: State<InputSourceCaps>,
-    private val intentOptionsState: State<List<ScanIntentData>>,
-    private val supportedScanResolutionsState: State<List<DiscreteResolution>>
+    private val intentOptionsState: State<List<ScanIntentEnumOrRaw>>,
+    private val supportedScanResolutionsState: State<SupportedResolutions>
 ) {
     val customMenuEnabled by customMenuEnabledState
     val widthTextFieldString by widthTextFieldState
@@ -134,6 +135,6 @@ data class StatelessImmutableScanSettingsComposableData(
     val heightTextField: String,
     val customMenuEnabled: Boolean,
     val selectedInputSourceCapabilities: InputSourceCaps,
-    val intentOptions: List<ScanIntentData>,
+    val intentOptions: List<ScanIntentEnumOrRaw>,
     val supportedScanResolutions: List<DiscreteResolution>
 )

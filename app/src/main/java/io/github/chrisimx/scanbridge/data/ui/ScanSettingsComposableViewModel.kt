@@ -23,7 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.InputSource
-import io.github.chrisimx.esclkt.ScanIntentData
+import io.github.chrisimx.esclkt.ScanIntentEnumOrRaw
 import io.github.chrisimx.scanbridge.data.model.MutableScanRegionState
 
 class ScanSettingsComposableViewModel(
@@ -51,11 +51,11 @@ class ScanSettingsComposableViewModel(
     fun revalidateSettings() {
         val scanSettingsState = _scanSettingsComposableData.scanSettingsState
         if (scanSettingsState.xResolution != null && scanSettingsState.yResolution != null) {
-            val isResolutionSupported = _scanSettingsComposableData.supportedScanResolutions.contains(
+            val isResolutionSupported = _scanSettingsComposableData.supportedScanResolutions.discreteResolutions.contains(
                 DiscreteResolution(scanSettingsState.xResolution!!, scanSettingsState.yResolution!!)
             )
             if (!isResolutionSupported) {
-                val highestScanResolution = _scanSettingsComposableData.supportedScanResolutions.maxBy { it.xResolution * it.yResolution }
+                val highestScanResolution = _scanSettingsComposableData.supportedScanResolutions.discreteResolutions.maxBy { it.xResolution * it.yResolution }
                 setResolution(highestScanResolution.xResolution, highestScanResolution.yResolution)
             }
         }
@@ -72,7 +72,7 @@ class ScanSettingsComposableViewModel(
         onSettingsChanged?.invoke()
     }
 
-    fun setIntent(intent: ScanIntentData?) {
+    fun setIntent(intent: ScanIntentEnumOrRaw?) {
         _scanSettingsComposableData.scanSettingsState.intent = intent
         onSettingsChanged?.invoke()
     }

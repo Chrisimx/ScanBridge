@@ -22,6 +22,7 @@ package io.github.chrisimx.scanbridge.util
 import android.content.Context
 import android.icu.text.DecimalFormat
 import androidx.compose.runtime.mutableStateOf
+import io.github.chrisimx.esclkt.EnumOrRaw
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.InputSourceCaps
 import io.github.chrisimx.esclkt.JobState
@@ -71,13 +72,18 @@ fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): MutableESCLScan
     val inputCaps = this.getInputSourceCaps(inputSource)
     val maxResolution = inputCaps
         .settingProfiles.first()
-        .supportedResolutions.maxBy { it.xResolution }
+        .supportedResolutions.discreteResolutions.maxBy { it.xResolution }
     val maxScanRegion = MutableScanRegionState(
         heightState = mutableStateOf("max"),
         widthState = mutableStateOf("max")
     )
 
-    val chosenColorMode = inputCaps.settingProfiles.elementAtOrNull(0)?.colorModes?.maxByOrNull { it.ordinal }
+    val chosenColorMode = inputCaps.settingProfiles.elementAtOrNull(0)?.colorModes?.maxByOrNull {
+        when (it) {
+            is EnumOrRaw.Known -> it.value.ordinal
+            is EnumOrRaw.Unknown -> 0
+        }
+    }
 
     return MutableESCLScanSettingsState(
         versionState = mutableStateOf(this.interfaceVersion),

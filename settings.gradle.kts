@@ -1,3 +1,5 @@
+import java.net.URI
+
 pluginManagement {
     repositories {
         google {
@@ -11,11 +13,22 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
+        maven {
+            name = "Central Portal Snapshots"
+            url = URI.create("https://central.sonatype.com/repository/maven-snapshots/")
+
+            content {
+                includeGroup("io.github.chrisimx")
+            }
+        }
     }
 }
 

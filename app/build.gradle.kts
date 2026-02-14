@@ -1,3 +1,4 @@
+import java.net.URI
 import java.security.MessageDigest
 import java.util.*
 import okhttp3.OkHttpClient
@@ -114,7 +115,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.okhttp)
     implementation(libs.esclkt)
     implementation(libs.zoomable)
     implementation(libs.kotlin.reflect)
@@ -135,6 +135,8 @@ dependencies {
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.itext7.core)
+    implementation(libs.ktor.cio)
+    implementation(libs.ktor.logging)
     "playImplementation"(project(":lvl_library"))
     "playImplementation"("com.squareup.retrofit2:retrofit:3.0.0")
     "playImplementation"("com.squareup.retrofit2:converter-gson:2.9.0")
