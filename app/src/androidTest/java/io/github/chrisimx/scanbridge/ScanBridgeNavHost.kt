@@ -30,9 +30,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import io.ktor.http.Url
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import timber.log.Timber
 
 @Serializable
@@ -86,7 +86,7 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
                 )
             ScanningScreen(
                 scannerRoute.scannerName,
-                scannerRoute.scannerURL.toHttpUrl(),
+                Url(scannerRoute.scannerURL),
                 navController,
                 timeout,
                 debug,

@@ -26,7 +26,9 @@ import android.os.ext.SdkExtensions
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
+import io.ktor.http.Url
 import io.ktor.http.encodedPath
+import java.net.InetAddress
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ForkJoinPool
 import timber.log.Timber
@@ -71,43 +73,28 @@ class ScannerDiscovery(
                         Timber.tag(TAG).d("ServiceInfoCallBack (${this.hashCode()}) Registration failed!!! $p0")
                     }
 
-                    override fun onServiceUpdated(p0: NsdServiceInfo) {
-                        Timber.tag(TAG).d("Service (${this.hashCode()}) updated! $p0")
-                        var rs = p0.attributes["rs"]?.toString(StandardCharsets.UTF_8) ?: "/"
+                    override fun onServiceUpdated(serviceInfo: NsdServiceInfo) {
+                        Timber.tag(TAG).d("Service (${this.hashCode()}) updated! $serviceInfo")
+                        var rs = serviceInfo.attributes["rs"]?.toString(StandardCharsets.UTF_8) ?: "/"
 
                         rs = if (rs.isEmpty()) "/" else "/$rs/"
 
                         val urls = mutableListOf<String>()
 
                         val addresses = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                            p0.hostAddresses
+                            serviceInfo.hostAddresses
                         } else {
-                            listOf(p0.host)
+                            listOf(serviceInfo.host)
                         }
 
                         for (address in addresses) {
-                            if (address.isLinkLocalAddress) {
-                                Timber.tag(TAG).d("Ignoring link local address: ${address.hostAddress}")
-                                continue
-                            }
-                            val sanitizedURL = address.hostAddress!!.substringBefore('%')
-                            val url = try {
-                                URLBuilder().apply {
-                                    protocol = if (isSecure) URLProtocol.HTTPS else URLProtocol.HTTP
-                                    host = sanitizedURL
-                                    port = p0.port
-                                    encodedPath = rs
-                                }.build()
-                            } catch (e: Exception) {
-                                Timber.tag(TAG).e("Couldn't built address from: ${address.hostAddress} Exception: $e")
-                                continue
-                            }
+                            val url = tryParseScannerUrl(address, serviceInfo, rs) ?: continue
 
                             Timber.tag(TAG).d("Built URL: $url with address: ${address.hostAddress}")
                             urls.add(url.toString())
                         }
 
-                        statefulScannerMap.put(serviceIdentifier, DiscoveredScanner(p0.serviceName, urls))
+                        statefulScannerMap.put(serviceIdentifier, DiscoveredScanner(serviceInfo.serviceName, urls))
                     }
 
                     override fun onServiceLost() {
@@ -136,25 +123,12 @@ class ScannerDiscovery(
 
                         rs = if (rs.isEmpty()) "/" else "/$rs/"
 
-                        val urls = mutableListOf<String>()
-
                         val address = serviceInfo.host
-                        val sanitizedURL = address.hostAddress!!.substringBefore('%')
-                        val url = try {
-                            URLBuilder()
-                                .apply {
-                                    host = sanitizedURL
-                                    port = serviceInfo.port
-                                    encodedPath = rs
-                                    protocol = URLProtocol.HTTP
-                                }.build()
-                        } catch (e: Exception) {
-                            Timber.tag(TAG).e("Couldn't built address from: ${address.hostAddress} Exception: $e")
-                            return
-                        }
+                        val url = tryParseScannerUrl(address, serviceInfo, rs) ?: return
+
+                        val urls = mutableListOf(url.toString())
 
                         Timber.tag(TAG).d("Built URL: $url with address: ${address.hostAddress}")
-                        urls.add(url.toString())
 
                         statefulScannerMap.put(serviceIdentifier, DiscoveredScanner(service.serviceName, urls))
                     }
@@ -179,5 +153,35 @@ class ScannerDiscovery(
     override fun onStopDiscoveryFailed(serviceType: String, errorCode: Int) {
         Timber.e("Discovery failed: Error code:$errorCode")
         nsdManager.stopServiceDiscovery(this)
+    }
+}
+
+private fun ScannerDiscovery.tryParseScannerUrl(
+    address: InetAddress,
+    serviceInfo: NsdServiceInfo,
+    rs: String
+): Url? {
+    if (address.isLinkLocalAddress) {
+        Timber.tag(TAG).d("Ignoring link local address: ${address.hostAddress}")
+        return null
+    }
+    val sanitizedURLHost = address.hostAddress!!.substringBefore('%')
+    val ipv6FormattedURLHost = if (address.address.size == 16) {
+        "[$sanitizedURLHost]"
+    } else {
+        sanitizedURLHost
+    }
+    return try {
+        val result = URLBuilder().apply {
+            protocol = if (isSecure) URLProtocol.HTTPS else URLProtocol.HTTP
+            host = ipv6FormattedURLHost
+            port = serviceInfo.port
+            encodedPath = rs
+        }.build()
+        Url(result.toString()) // Try to parse it to confirm that no invalid URLs will be shown
+        result
+    } catch (e: Exception) {
+        Timber.tag(TAG).e("Couldn't built address from: ${address.hostAddress} Exception: $e")
+        null
     }
 }
