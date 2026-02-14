@@ -55,7 +55,10 @@ class ScanSettingsComposableViewModel(
                 DiscreteResolution(scanSettingsState.xResolution!!, scanSettingsState.yResolution!!)
             )
             if (!isResolutionSupported) {
-                val highestScanResolution = _scanSettingsComposableData.supportedScanResolutions.discreteResolutions.maxBy { it.xResolution * it.yResolution }
+                val highestScanResolution = _scanSettingsComposableData.supportedScanResolutions.discreteResolutions.maxBy {
+                    it.xResolution *
+                        it.yResolution
+                }
                 setResolution(highestScanResolution.xResolution, highestScanResolution.yResolution)
             }
         }

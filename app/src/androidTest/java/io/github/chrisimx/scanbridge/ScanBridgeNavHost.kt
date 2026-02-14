@@ -50,12 +50,14 @@ fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
     Timber.d("Route changed to: ${destination.route}")
     return when (destination.route) {
         "StartUpScreenRoute" -> StartUpScreenRoute
+
         "ScannerRoute/{scannerName}/{scannerURL}/{sessionID}" -> {
             val scannerName = arguments?.getString("scannerName") ?: return null
             val scannerURL = arguments?.getString("scannerURL") ?: return null
             val sessionID = arguments?.getString("sessionID") ?: return null
             ScannerRoute(scannerName, scannerURL, sessionID)
         }
+
         else -> null
     }
 }

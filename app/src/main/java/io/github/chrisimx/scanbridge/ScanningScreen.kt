@@ -378,8 +378,6 @@ fun doPdfExport(
     }
 }
 
-
-
 @Composable
 fun ScanningScreenBottomBar(
     scanningViewModel: ScanningScreenViewModel,

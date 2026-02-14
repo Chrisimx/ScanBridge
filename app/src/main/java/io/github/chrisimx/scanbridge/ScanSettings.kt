@@ -195,11 +195,11 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                             },
                             label = { Text(paperFormat.name) },
                             selected =
-                            scanSettingsUIState.scanSettingsState.scanRegions?.width ==
-                                paperFormat.width.toMillimeters().value.toString() &&
-                                scanSettingsUIState.scanSettingsState.scanRegions?.height ==
-                                paperFormat.height.toMillimeters().value.toString() &&
-                                !scanSettingsUIState.customMenuEnabled
+                                scanSettingsUIState.scanSettingsState.scanRegions?.width ==
+                                    paperFormat.width.toMillimeters().value.toString() &&
+                                    scanSettingsUIState.scanSettingsState.scanRegions?.height ==
+                                    paperFormat.height.toMillimeters().value.toString() &&
+                                    !scanSettingsUIState.customMenuEnabled
                         )
                     }
                     InputChip(
@@ -209,7 +209,7 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                         },
                         label = { Text(stringResource(R.string.maximum_size)) },
                         selected =
-                        scanSettingsUIState.scanSettingsState.scanRegions?.width == "max" && !scanSettingsUIState.customMenuEnabled
+                            scanSettingsUIState.scanSettingsState.scanRegions?.width == "max" && !scanSettingsUIState.customMenuEnabled
                     )
                     InputChip(
                         selected = scanSettingsUIState.customMenuEnabled,
@@ -308,8 +308,8 @@ private fun ResolutionSettingButtonRowVersion(
                         )
                     },
                     selected =
-                    scanSettingsUIState.scanSettingsState.xResolution == discreteResolution.xResolution &&
-                        scanSettingsUIState.scanSettingsState.yResolution == discreteResolution.yResolution
+                        scanSettingsUIState.scanSettingsState.xResolution == discreteResolution.xResolution &&
+                            scanSettingsUIState.scanSettingsState.yResolution == discreteResolution.yResolution
                 ) {
                     if (discreteResolution.xResolution == discreteResolution.yResolution) {
                         Text("${discreteResolution.xResolution}")
@@ -359,8 +359,8 @@ private fun ResolutionSettingCardVersion(
                         },
                         label = { Text(text) },
                         selected =
-                        scanSettingsUIState.scanSettingsState.xResolution == discreteResolution.xResolution &&
-                            scanSettingsUIState.scanSettingsState.yResolution == discreteResolution.yResolution
+                            scanSettingsUIState.scanSettingsState.xResolution == discreteResolution.xResolution &&
+                                scanSettingsUIState.scanSettingsState.yResolution == discreteResolution.yResolution
                     )
                 }
             }

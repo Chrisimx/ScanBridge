@@ -369,17 +369,14 @@ class ScanningScreenViewModel(
         Timber.d("Saved scan settings cleared")
     }
 
-    fun scan(snackBarScope: CoroutineScope,
-             snackBarHostState: SnackbarHostState) {
+    fun scan(snackBarScope: CoroutineScope, snackBarHostState: SnackbarHostState) {
         viewModelScope.launch {
             doScan(snackBarScope, snackBarHostState)
         }
     }
+
     @OptIn(ExperimentalUuidApi::class)
-    private suspend fun doScan(
-        snackBarScope: CoroutineScope,
-        snackBarHostState: SnackbarHostState,
-    ) {
+    private suspend fun doScan(snackBarScope: CoroutineScope, snackBarHostState: SnackbarHostState) {
         if (scanningScreenData.scanJobRunning) {
             Timber.e("Job still running")
             snackbarErrorRetrievingPage(
@@ -433,7 +430,9 @@ class ScanningScreenViewModel(
                     val status = jobResult.getJobStatus()
                     val isRunning = status?.jobState == JobState.Processing || status?.jobState == JobState.Pending
                     val imagesToTransfer = status?.imagesToTransfer
-                    Timber.d("Polling job status. Retry: $retries Result: $status imagesToTransfer: $imagesToTransfer isRunning: $isRunning")
+                    Timber.d(
+                        "Polling job status. Retry: $retries Result: $status imagesToTransfer: $imagesToTransfer isRunning: $isRunning"
+                    )
                     if (!isRunning) {
                         Timber.d("Job is reported to be not running anymore. jobRunning = false")
 
@@ -501,7 +500,8 @@ class ScanningScreenViewModel(
                     Timber.d("Cancelling job after no further pages is reported: $deletionResult")
                     return
                 }
-                is ESCLRequestClient.ScannerNextPageResult.RequestFailure  -> {
+
+                is ESCLRequestClient.ScannerNextPageResult.RequestFailure -> {
                     if (nextPage.exception !is ESCLHttpCallResult.Error.HttpError) {
                         reportErrorWhileScanning(nextPage, snackBarScope, application, snackBarHostState, jobResult)
                         return
@@ -552,8 +552,10 @@ class ScanningScreenViewModel(
                         }
                     }
                 }
+
                 is ESCLRequestClient.ScannerNextPageResult.Success -> {
                 }
+
                 else -> {
                     reportErrorWhileScanning(nextPage, snackBarScope, application, snackBarHostState, jobResult)
                     return
@@ -616,31 +618,29 @@ class ScanningScreenViewModel(
         }
     }
 
-    fun retrieveScannerCapabilities() =
-        viewModelScope.launch {
-            val esclClient = scanningScreenData.esclClient
+    fun retrieveScannerCapabilities() = viewModelScope.launch {
+        val esclClient = scanningScreenData.esclClient
 
-            val scannerCapabilitiesResult = esclClient.getScannerCapabilities()
+        val scannerCapabilitiesResult = esclClient.getScannerCapabilities()
 
-            if (scannerCapabilitiesResult !is ESCLRequestClient.ScannerCapabilitiesResult.Success) {
-                Timber.e("Error while retrieving ScannerCapabilities: $scannerCapabilitiesResult")
-                setError("$scannerCapabilitiesResult")
-                return@launch
-            }
-
-            setScannerCapabilities(scannerCapabilitiesResult.scannerCapabilities)
+        if (scannerCapabilitiesResult !is ESCLRequestClient.ScannerCapabilitiesResult.Success) {
+            Timber.e("Error while retrieving ScannerCapabilities: $scannerCapabilitiesResult")
+            setError("$scannerCapabilitiesResult")
+            return@launch
         }
 
-    private suspend fun abortIfCancelling(scanJob: ScanJob? = null): Boolean =
-        if (scanningScreenData.scanJobCancelling) {
-            Timber.d("Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob")
-            scanJob?.cancle()
-            setScanJobRunning(false)
-            setScanJobCancelling(false)
-            true
-        } else {
-            false
-        }
+        setScannerCapabilities(scannerCapabilitiesResult.scannerCapabilities)
+    }
+
+    private suspend fun abortIfCancelling(scanJob: ScanJob? = null): Boolean = if (scanningScreenData.scanJobCancelling) {
+        Timber.d("Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob")
+        scanJob?.cancle()
+        setScanJobRunning(false)
+        setScanJobCancelling(false)
+        true
+    } else {
+        false
+    }
 
     private suspend fun reportErrorWhileScanning(
         nextPage: ESCLRequestClient.ScannerNextPageResult,
@@ -660,5 +660,4 @@ class ScanningScreenViewModel(
         val deletionResult = jobResult.cancle()
         Timber.d("Cancelling job after error while trying to retrieve page: $deletionResult")
     }
-
 }
