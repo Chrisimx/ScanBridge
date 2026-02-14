@@ -436,7 +436,7 @@ class ScanningScreenViewModel(
                     if (!isRunning) {
                         Timber.d("Job is reported to be not running anymore. jobRunning = false")
 
-                        val deleteResult = jobResult.cancle()
+                        val deleteResult = jobResult.cancel()
                         Timber.d("Cancelling job after (a likely) failure: $deleteResult")
 
                         setScanJobRunning(false)
@@ -496,7 +496,7 @@ class ScanningScreenViewModel(
                             )
                         }
                     }
-                    val deletionResult = jobResult.cancle()
+                    val deletionResult = jobResult.cancel()
                     Timber.d("Cancelling job after no further pages is reported: $deletionResult")
                     return
                 }
@@ -524,7 +524,7 @@ class ScanningScreenViewModel(
                                 withDismissAction = true
                             )
                         }
-                        val deletionResult = jobResult.cancle()
+                        val deletionResult = jobResult.cancel()
                         Timber.d("Cancelling job after non-standard completion: $deletionResult")
                         return
                     } else {
@@ -546,7 +546,7 @@ class ScanningScreenViewModel(
                                 application,
                                 snackBarHostState
                             )
-                            val deletionResult = jobResult.cancle()
+                            val deletionResult = jobResult.cancel()
                             Timber.d("Cancelling job after not successful response while trying to retrieve page: $deletionResult")
                             return
                         }
@@ -592,7 +592,7 @@ class ScanningScreenViewModel(
                     application,
                     snackBarHostState
                 )
-                val deletionResult = jobResult.cancle()
+                val deletionResult = jobResult.cancel()
                 Timber.d("Cancelling job after error while trying to copy received page to file: $deletionResult")
                 return
             }
@@ -610,7 +610,7 @@ class ScanningScreenViewModel(
                     snackBarHostState
                 )
                 filePath.toFile().delete()
-                val deletionResult = jobResult.cancle()
+                val deletionResult = jobResult.cancel()
                 Timber.d("Cancelling job after error while trying to decode received page as bitmap: $deletionResult")
                 return
             }
@@ -634,7 +634,7 @@ class ScanningScreenViewModel(
 
     private suspend fun abortIfCancelling(scanJob: ScanJob? = null): Boolean = if (scanningScreenData.scanJobCancelling) {
         Timber.d("Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob")
-        scanJob?.cancle()
+        scanJob?.cancel()
         setScanJobRunning(false)
         setScanJobCancelling(false)
         true
@@ -657,7 +657,7 @@ class ScanningScreenViewModel(
             snackbarHostState
         )
         setScanJobRunning(false)
-        val deletionResult = jobResult.cancle()
+        val deletionResult = jobResult.cancel()
         Timber.d("Cancelling job after error while trying to retrieve page: $deletionResult")
     }
 }
