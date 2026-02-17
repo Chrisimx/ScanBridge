@@ -41,6 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.saket.telephoto.zoomable.EnabledZoomGestures
+import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 
@@ -84,7 +85,7 @@ fun CropScreen(sessionID: String, pageIdx: Int, returnRoute: BaseRoute, navContr
     val context = LocalContext.current
 
     var zoomEnabled by remember { mutableStateOf(false) }
-    val zoomableState = rememberZoomableState()
+    val zoomableState = rememberZoomableState(ZoomSpec(maxZoomFactor = 5f))
     val coroutineScope = rememberCoroutineScope()
     var currentRect by remember { mutableStateOf(Rect(0f, 0f, 1f, 1f)) }
 

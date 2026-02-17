@@ -33,22 +33,9 @@ import androidx.compose.ui.unit.toSize
 import coil3.compose.AsyncImage
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import timber.log.Timber
-
-/**
- * Determines if a given position is within a rect with a clearance for a given error (so that touch does not feel clunky).
- *
- * @param errorEpsilon This is the allowed touch area outside of the actual rectangle
- */
-fun isPositionInRect(position: Offset, rect: Rect, errorEpsilon: Float = 40f): Boolean {
-    val isHorizontallyInRect = abs(position.x - rect.center.x) < (rect.width / 2) + errorEpsilon
-    val isVerticallyInRect = abs(position.y - rect.center.y) < (rect.height / 2) + errorEpsilon
-
-    return isHorizontallyInRect && isVerticallyInRect
-}
 
 enum class Edge { TOP, LEFT, BOTTOM, RIGHT }
 
@@ -63,6 +50,13 @@ data class HandleSpec(val position: Offset, val draggedEdges: Set<Edge>) {
             right = Edge.RIGHT in draggedEdges
         )
 }
+
+fun Rect.deflate(x: Float, y: Float): Rect = copy(
+    left = min(left + x, left + width / 2),
+    right = max(right - x, right - width / 2),
+    top = min(top + y, top + height / 2),
+    bottom = max(bottom - y, bottom - height / 2)
+)
 
 /**
  * Create a HandleSpec based on the handle position and edges that should be moved when the handle is dragged
@@ -132,19 +126,28 @@ fun CropOverlay(modifier: Modifier, touchPaddingAroundInPx: Int, handleTouchRadi
                         val offset = offset - Offset(touchPaddingAroundInPx.toFloat(), touchPaddingAroundInPx.toFloat())
                         lastDragEventType = CropDragEvent.DraggedOutside
 
-                        if (!isPositionInRect(offset, rect, handleTouchRadius.toPx())) {
+                        if (!rect.inflate(handleTouchRadius.toPx()).contains(offset)) {
                             return@detectDragGestures
                         }
 
                         lastDragEventType = CropDragEvent.DraggedInside
 
-                        handles.forEachIndexed { idx, handle ->
-                            val distanceBetweenPointerAndHandle = (handle.position - offset).getDistanceSquared()
-                            val isNear = distanceBetweenPointerAndHandle < handleTouchRadius.toPx() * handleTouchRadius.toPx()
+                        if (rect.deflate(rect.width / 4, rect.height / 4).contains(offset)) {
+                            return@detectDragGestures
+                        }
 
-                            if (isNear) {
-                                lastDragEventType = CropDragEvent.ResizeHandleDragged(idx)
+                        val nearestHandle = handles
+                            .mapIndexed { idx, handle ->
+                                Pair(
+                                    idx,
+                                    (handle.position - offset).getDistance()
+                                )
                             }
+                            .filter { it.second < handleTouchRadius.toPx() }
+                            .minByOrNull { it.second }
+
+                        if (nearestHandle != null) {
+                            lastDragEventType = CropDragEvent.ResizeHandleDragged(nearestHandle.first)
                         }
                     },
                     onDrag = { pointerInputChange, dragChange ->
