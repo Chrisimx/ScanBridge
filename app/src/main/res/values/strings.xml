@@ -107,4 +107,6 @@
     <string name="crop_button">Crop</string>
     <string name="cropping">Cropping page…</string>
     <string name="activate_zoom_gestures">Activate zoom gestures</string>
+    <string name="crash">ScanBridge crashed :(</string>
+    <string name="crash_occured">"We are sorry. ScanBridge has crashed. Please report this issue and attach the following stacktrace (you can copy it with the button at the bottom)"</string>
 </resources>

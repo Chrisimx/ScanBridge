@@ -21,6 +21,7 @@ package io.github.chrisimx.scanbridge
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.content.Intent
 import androidx.core.content.edit
 import java.io.File
 import java.time.LocalDateTime
@@ -32,26 +33,40 @@ class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {
     private val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
 
     override fun uncaughtException(t: Thread, e: Throwable) {
-        Timber.e(e, "Uncaught exception")
+        try {
+            Timber.e(e, "Uncaught exception")
 
-        val format = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
-        val dateTime = LocalDateTime.now().format(format)
+            val format = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
+            val dateTime = LocalDateTime.now().format(format)
 
-        val crashDir = File(context.filesDir, "crashes")
-        if (!crashDir.exists()) {
-            if (!crashDir.mkdirs()) {
-                Timber.e("Couldn't create crash directory")
-                File(context.filesDir, "crash-$dateTime.log").writeText(e.stackTraceToString())
-                return
+            val crashDir = File(context.filesDir, "crashes")
+            if (!crashDir.exists()) {
+                if (!crashDir.mkdirs()) {
+                    Timber.e("Couldn't create crash directory")
+                    File(context.filesDir, "crash-$dateTime.log").writeText(e.stackTraceToString())
+                    return
+                }
             }
+            File(crashDir, "crash-$dateTime.log").writeText(e.stackTraceToString())
+
+            context.getSharedPreferences("route_store", MODE_PRIVATE)
+                .edit {
+                    remove("last_route")
+                }
+
+            // Try to show an error activity
+            val intent = Intent(context, CrashActivity::class.java).apply {
+                putExtra("error", e.stackTraceToString())
+                putExtra("crash_file", crashDir.resolve("crash-$dateTime.log").absolutePath)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+
+            context.startActivity(intent)
+
+            android.os.Process.killProcess(android.os.Process.myPid())
+
+        } catch (newException: Exception) {
+            Timber.e(newException, "Uncaught exception in CrashHandler")
         }
-        File(crashDir, "crash-$dateTime.log").writeText(e.stackTraceToString())
-
-        context.getSharedPreferences("route_store", MODE_PRIVATE)
-            .edit {
-                remove("last_route")
-            }
-
-        defaultHandler?.uncaughtException(t, e)
     }
 }

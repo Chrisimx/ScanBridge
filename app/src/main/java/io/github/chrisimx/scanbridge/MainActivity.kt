@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
     var saveDebugFileLauncher: ActivityResultLauncher<Intent>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this))
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
@@ -79,8 +80,6 @@ class MainActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             cleanUpCacheFiles()
         }
-
-        Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this))
 
         setContent {
             ScanBridgeApp()

@@ -30,6 +30,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
 import io.github.chrisimx.scanbridge.util.doTempFilesExist
 import io.ktor.http.Url
@@ -53,6 +54,10 @@ data class ScannerRoute(val scannerName: String, val scannerURL: String, val ses
 @SerialName("CropImageRoute")
 data class CropImageRoute(val sessionID: String, val pageIdx: Int, val returnRoute: String) : BaseRoute
 
+@Serializable
+@SerialName("ErrorRoute")
+data class ErrorRoute(val error: String) : BaseRoute
+
 fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
     Timber.d("Route changed to: ${destination.route}")
     return when (destination.route) {
@@ -72,6 +77,11 @@ fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
             ScannerRoute(scannerName, scannerURL, sessionID)
         }
 
+        "ErrorRoute/{error}" -> {
+            val error = arguments?.getString("error") ?: return null
+            ErrorRoute(error)
+        }
+
         else -> null
     }
 }
@@ -86,6 +96,12 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
         navController = navController,
         startDestination = startDestination
     ) {
+        composable<ErrorRoute> { backStackEntry ->
+            val errorRoute: ErrorRoute = backStackEntry.toRoute()
+            val errorMessage = errorRoute.error
+
+            FullScreenError(R.drawable.outline_error_24, errorMessage, true)
+        }
         composable<StartUpScreenRoute> {
             StartupScreen(navController)
 
