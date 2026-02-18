@@ -175,11 +175,3 @@ fun CropScreen(sessionID: String, pageIdx: Int, returnRoute: BaseRoute, navContr
         }
     }
 }
-
-@Composable
-fun CropScreenBottomBar() {
-    BottomAppBar(
-        actions = {
-        }
-    )
-}
