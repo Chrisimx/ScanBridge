@@ -50,17 +50,15 @@ class ScanSettingsComposableViewModel(
 
     fun revalidateSettings() {
         val scanSettingsState = _scanSettingsComposableData.scanSettingsState
-        if (scanSettingsState.xResolution != null && scanSettingsState.yResolution != null) {
-            val isResolutionSupported = _scanSettingsComposableData.supportedScanResolutions.discreteResolutions.contains(
-                DiscreteResolution(scanSettingsState.xResolution!!, scanSettingsState.yResolution!!)
-            )
-            if (!isResolutionSupported) {
-                val highestScanResolution = _scanSettingsComposableData.supportedScanResolutions.discreteResolutions.maxBy {
-                    it.xResolution *
-                        it.yResolution
-                }
-                setResolution(highestScanResolution.xResolution, highestScanResolution.yResolution)
+        val isResolutionSupported = _scanSettingsComposableData.supportedScanResolutions.discreteResolutions.contains(
+            DiscreteResolution(scanSettingsState.xResolution, scanSettingsState.yResolution)
+        )
+        if (!isResolutionSupported) {
+            val highestScanResolution = _scanSettingsComposableData.supportedScanResolutions.discreteResolutions.maxBy {
+                it.xResolution *
+                    it.yResolution
             }
+            setResolution(highestScanResolution.xResolution, highestScanResolution.yResolution)
         }
 
         val intentSupported = scanSettingsState.intent?.let { _scanSettingsComposableData.intentOptions.contains(it) }

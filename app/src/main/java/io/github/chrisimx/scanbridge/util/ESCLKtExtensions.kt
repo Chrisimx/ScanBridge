@@ -22,6 +22,8 @@ package io.github.chrisimx.scanbridge.util
 import android.content.Context
 import android.icu.text.DecimalFormat
 import androidx.compose.runtime.mutableStateOf
+import io.github.chrisimx.esclkt.ColorModeEnumOrRaw
+import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.EnumOrRaw
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.InputSourceCaps
@@ -67,23 +69,37 @@ fun InputSource.toReadableString(context: Context): String = when (this) {
     InputSource.Camera -> context.getString(R.string.camera)
 }
 
-fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): MutableESCLScanSettingsState {
-    val inputSource = this.getInputSourceOptions().firstOrNull() ?: InputSource.Platen
+fun ScannerCapabilities.getMaxResolution(inputSource: InputSource): DiscreteResolution {
     val inputCaps = this.getInputSourceCaps(inputSource)
     val maxResolution = inputCaps
         .settingProfiles.first()
-        .supportedResolutions.discreteResolutions.maxBy { it.xResolution }
-    val maxScanRegion = MutableScanRegionState(
-        heightState = mutableStateOf("max"),
-        widthState = mutableStateOf("max")
-    )
+        .supportedResolutions.discreteResolutions.maxBy { it.xResolution * it.yResolution }
 
+    return maxResolution
+}
+
+fun ScannerCapabilities.getBestColorMode(inputSource: InputSource): ColorModeEnumOrRaw? {
+    val inputCaps = this.getInputSourceCaps(inputSource)
     val chosenColorMode = inputCaps.settingProfiles.elementAtOrNull(0)?.colorModes?.maxByOrNull {
         when (it) {
             is EnumOrRaw.Known -> it.value.ordinal
             is EnumOrRaw.Unknown -> 0
         }
     }
+    return chosenColorMode
+}
+
+fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): MutableESCLScanSettingsState {
+    val inputSource = this.getInputSourceOptions().firstOrNull() ?: InputSource.Platen
+
+    val maxResolution = getMaxResolution(inputSource)
+
+    val maxScanRegion = MutableScanRegionState(
+        heightState = mutableStateOf("max"),
+        widthState = mutableStateOf("max")
+    )
+
+    val bestColorMode = getBestColorMode(inputSource)
 
     return MutableESCLScanSettingsState(
         versionState = mutableStateOf(this.interfaceVersion),
@@ -91,7 +107,7 @@ fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): MutableESCLScan
         scanRegionsState = mutableStateOf(maxScanRegion),
         xResolutionState = mutableStateOf(maxResolution.xResolution),
         yResolutionState = mutableStateOf(maxResolution.yResolution),
-        colorModeState = mutableStateOf(chosenColorMode),
+        colorModeState = mutableStateOf(bestColorMode),
         documentFormatExtState = mutableStateOf("image/jpeg")
     )
 }

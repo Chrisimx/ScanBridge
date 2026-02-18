@@ -102,4 +102,9 @@
     <string name="f_droid" translatable="false">F-Droid</string>
     <string name="google_play" translatable="false">Play Store</string>
     <string name="save_to_file">Save to File</string>
+    <string name="loading_image">Loading image…</string>
+    <string name="crop">Crop current page</string>
+    <string name="crop_button">Crop</string>
+    <string name="cropping">Cropping page…</string>
+    <string name="activate_zoom_gestures">Activate zoom gestures</string>
 </resources>

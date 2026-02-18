@@ -20,16 +20,16 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MutableESCLScanSettingsState(
+    /** Specified in DPI **/
+    private var xResolutionState: MutableState<UInt>,
+    /** Specified in DPI **/
+    private var yResolutionState: MutableState<UInt>,
     private var versionState: MutableState<String>,
     private var intentState: MutableState<ScanIntentEnumOrRaw?> = mutableStateOf(null),
     private var scanRegionsState: MutableState<MutableScanRegionState?> = mutableStateOf(null),
     private var documentFormatExtState: MutableState<String?> = mutableStateOf(null),
     private var contentTypeState: MutableState<ContentTypeEnumOrRaw?> = mutableStateOf(null),
     private var inputSourceState: MutableState<InputSource?> = mutableStateOf(null),
-    /** Specified in DPI **/
-    private var xResolutionState: MutableState<UInt?> = mutableStateOf(null),
-    /** Specified in DPI **/
-    private var yResolutionState: MutableState<UInt?> = mutableStateOf(null),
     private var colorModeState: MutableState<ColorModeEnumOrRaw?> = mutableStateOf(null),
     private var colorSpaceState: MutableState<String?> = mutableStateOf(null),
     private var mediaTypeState: MutableState<String?> = mutableStateOf(null),
@@ -156,8 +156,8 @@ data class ImmutableESCLScanSettingsState(
     val documentFormatExtState: State<String?>,
     val contentTypeState: State<ContentTypeEnumOrRaw?>,
     val inputSourceState: State<InputSource?>,
-    val xResolutionState: State<UInt?>,
-    val yResolutionState: State<UInt?>,
+    val xResolutionState: State<UInt>,
+    val yResolutionState: State<UInt>,
     val colorModeState: State<ColorModeEnumOrRaw?>,
     val colorSpaceState: State<String?>,
     val mediaTypeState: State<String?>,
@@ -256,8 +256,8 @@ data class StatelessImmutableESCLScanSettingsState(
     val documentFormatExt: String?,
     val contentType: ContentTypeEnumOrRaw?,
     val inputSource: InputSource?,
-    val xResolution: UInt?,
-    val yResolution: UInt?,
+    val xResolution: UInt,
+    val yResolution: UInt,
     val colorMode: ColorModeEnumOrRaw?,
     val colorSpace: String?,
     val mediaType: String?,
@@ -280,14 +280,14 @@ data class StatelessImmutableESCLScanSettingsState(
     val blankPageDetectionAndRemoval: Boolean?
 ) {
     fun toMutable(): MutableESCLScanSettingsState = MutableESCLScanSettingsState(
+        mutableStateOf(xResolution),
+        mutableStateOf(yResolution),
         mutableStateOf(version),
         mutableStateOf(intent),
         mutableStateOf(scanRegions?.toMutable()),
         mutableStateOf(documentFormatExt),
         mutableStateOf(contentType),
         mutableStateOf(inputSource),
-        mutableStateOf(xResolution),
-        mutableStateOf(yResolution),
         mutableStateOf(colorMode),
         mutableStateOf(colorSpace),
         mutableStateOf(mediaType),

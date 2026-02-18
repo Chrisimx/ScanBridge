@@ -30,6 +30,24 @@ import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import java.io.File
+import kotlinx.serialization.Serializable
+
+enum class ScanRelativeRotation {
+    Rotated,
+    Original
+}
+
+fun ScanRelativeRotation.toggleRotation() = when (this) {
+    ScanRelativeRotation.Rotated -> ScanRelativeRotation.Original
+    ScanRelativeRotation.Original -> ScanRelativeRotation.Rotated
+}
+
+@Serializable
+data class ScanMetadata(
+    val filePath: String,
+    val originalScanSettings: ScanSettings,
+    val rotation: ScanRelativeRotation = ScanRelativeRotation.Original
+)
 
 data class ScanningScreenData(
     val esclClient: ESCLRequestClient,
@@ -47,7 +65,7 @@ data class ScanningScreenData(
     val exportOptionsPopupPosition: MutableState<Triple<Int, Int, Int>?> = mutableStateOf(null),
     val savePopupPosition: MutableState<Triple<Int, Int, Int>?> = mutableStateOf(null),
     val stateProgressStringRes: MutableState<Int?> = mutableStateOf(null),
-    val stateCurrentScans: SnapshotStateList<Pair<String, ScanSettings>> = mutableStateListOf(),
+    val stateCurrentScans: SnapshotStateList<ScanMetadata> = mutableStateListOf(),
     val createdTempFiles: MutableList<File> = mutableListOf(),
     val pagerState: PagerState = PagerState {
         stateCurrentScans.size + if (scanJobRunning.value) 1 else 0
@@ -96,7 +114,7 @@ data class ImmutableScanningScreenData(
     private val sourceFileToSaveState: State<File?>,
     val createdTempFiles: List<File>,
     val pagerState: PagerState,
-    val currentScansState: SnapshotStateList<Pair<String, ScanSettings>>
+    val currentScansState: SnapshotStateList<ScanMetadata>
 ) {
     val confirmDialogShown by confirmDialogShownState
     val confirmPageDeleteDialogShown by confirmPageDeleteDialogShownState

@@ -35,6 +35,7 @@ import io.github.chrisimx.scanbridge.util.doTempFilesExist
 import io.ktor.http.Url
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 
 @Serializable
@@ -48,10 +49,21 @@ object StartUpScreenRoute : BaseRoute
 @SerialName("ScannerRoute")
 data class ScannerRoute(val scannerName: String, val scannerURL: String, val sessionID: String) : BaseRoute
 
+@Serializable
+@SerialName("CropImageRoute")
+data class CropImageRoute(val sessionID: String, val pageIdx: Int, val returnRoute: String) : BaseRoute
+
 fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
     Timber.d("Route changed to: ${destination.route}")
     return when (destination.route) {
         "StartUpScreenRoute" -> StartUpScreenRoute
+
+        "CropImageRoute/{sessionID}/{pageIdx}/{returnRoute}" -> {
+            val sessionID = arguments?.getString("sessionID") ?: return null
+            val pageIdx = arguments?.getInt("pageIdx") ?: return null
+            val returnRouteString = arguments?.getString("returnRoute") ?: return null
+            CropImageRoute(sessionID, pageIdx, returnRouteString)
+        }
 
         "ScannerRoute/{scannerName}/{scannerURL}/{sessionID}" -> {
             val scannerName = arguments?.getString("scannerName") ?: return null
@@ -80,6 +92,11 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
             if (doTempFilesExist(context.filesDir)) {
                 TemporaryFileHandler()
             }
+        }
+        composable<CropImageRoute> { backStackEntry ->
+            val scannerRoute: CropImageRoute = backStackEntry.toRoute()
+            val returnRoute = Json.decodeFromString<BaseRoute>(scannerRoute.returnRoute)
+            CropScreen(scannerRoute.sessionID, scannerRoute.pageIdx, returnRoute, navController)
         }
         composable<ScannerRoute> { backStackEntry ->
             val scannerRoute: ScannerRoute = backStackEntry.toRoute()
