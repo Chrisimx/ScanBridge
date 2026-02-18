@@ -5,12 +5,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
@@ -173,9 +170,9 @@ fun CropOverlay(
                         }
                     },
                     onDrag = { pointerInputChange, dragChange ->
-                        val evenType = lastDragEventType
+                        val eventType = lastDragEventType
 
-                        when (evenType) {
+                        when (eventType) {
                             CropDragEvent.DraggedInside -> {
                                 val possibleXChange = if (rect.left + dragChange.x < 0) {
                                     -rect.left
@@ -197,7 +194,7 @@ fun CropOverlay(
                             }
 
                             is CropDragEvent.ResizeHandleDragged -> {
-                                val currentlyDraggedHandle = handles[evenType.idx]
+                                val currentlyDraggedHandle = handles[eventType.idx]
                                 val edgeFlags = currentlyDraggedHandle.edgeFlags
                                 rect = rect.applyResizeDrag(dragChange, size, edgeFlags, density)
                             }
