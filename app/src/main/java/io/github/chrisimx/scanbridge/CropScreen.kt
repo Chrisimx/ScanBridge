@@ -46,14 +46,22 @@ import me.saket.telephoto.zoomable.EnabledZoomGestures
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
+import timber.log.Timber
 
-suspend fun finishCrop(cropRect: Rect, file: String): File = withContext(Dispatchers.IO) {
+suspend fun finishCrop(cropRect: Rect, file: String): File? = withContext(Dispatchers.IO) {
     val sourceBitmap = BitmapFactory.decodeFile(file)
+    if (sourceBitmap == null) {
+        Timber.e("Could not decode source bitmap for cropping")
+        return@withContext null
+    }
+
     val croppedBitmap = sourceBitmap.cropWithRect(cropRect)
+    sourceBitmap.recycle()
 
     val file = File(file)
     val croppedFile = File(file.parent, file.getEditedImageName())
     croppedBitmap.saveAsJPEG(croppedFile)
+    croppedBitmap.recycle()
 
     return@withContext croppedFile
 }
@@ -106,7 +114,8 @@ fun CropScreen(sessionID: String, pageIdx: Int, returnRoute: BaseRoute, navContr
             if (processing) return@launch
 
             processing = true
-            val croppedFile = finishCrop(currentRect, originalImageFile)
+            val croppedFile = finishCrop(currentRect, originalImageFile) ?: return@launch
+
             updateSessionFile(originalSession, pageIdx, croppedFile, originalImageFile, context, sessionID)
             navController.clearAndNavigateTo(returnRoute)
             processing = false
