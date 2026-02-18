@@ -68,7 +68,7 @@ data class ScanningScreenData(
     val stateCurrentScans: SnapshotStateList<ScanMetadata> = mutableStateListOf(),
     val createdTempFiles: MutableList<File> = mutableListOf(),
     val pagerState: PagerState = PagerState {
-        stateCurrentScans.size + if (scanJobRunning.value) 1 else 0
+        (stateCurrentScans.size + if (scanJobRunning.value) 1 else 0).coerceAtLeast(1)
     },
     val sourceFileToSave: MutableState<File?> = mutableStateOf(null),
     val isRotating: MutableState<Boolean> = mutableStateOf(false)

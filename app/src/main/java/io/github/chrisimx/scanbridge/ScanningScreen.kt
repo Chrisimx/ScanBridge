@@ -24,7 +24,6 @@ import android.app.Application
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -106,7 +105,6 @@ import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.data.ui.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
-import io.github.chrisimx.scanbridge.data.ui.toggleRotation
 import io.github.chrisimx.scanbridge.uicomponents.ExportSettingsPopup
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen
@@ -114,10 +112,7 @@ import io.github.chrisimx.scanbridge.uicomponents.dialog.ConfirmCloseDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.DeletionDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
 import io.github.chrisimx.scanbridge.util.clearAndNavigateTo
-import io.github.chrisimx.scanbridge.util.getEditedImageName
 import io.github.chrisimx.scanbridge.util.getMaxResolution
-import io.github.chrisimx.scanbridge.util.rotateBy90
-import io.github.chrisimx.scanbridge.util.saveAsJPEG
 import io.github.chrisimx.scanbridge.util.snackBarError
 import io.github.chrisimx.scanbridge.util.toReadableString
 import io.github.chrisimx.scanbridge.util.zipFiles
@@ -137,7 +132,6 @@ import me.saket.telephoto.zoomable.zoomable
 import timber.log.Timber
 
 private const val TAG = "ScanningScreen"
-
 
 fun doZipExport(
     scanningViewModel: ScanningScreenViewModel,
@@ -788,6 +782,7 @@ fun ScanContent(
 ) {
     val pagerState = scanningViewModel.scanningScreenData.pagerState
     val context = LocalContext.current
+    val currentScans = scanningViewModel.scanningScreenData.currentScansState
 
     Column(
         modifier = Modifier
@@ -807,8 +802,6 @@ fun ScanContent(
                 )
             )
 
-            val currentScans = scanningViewModel.scanningScreenData.currentScansState
-
             if (currentScans.size > pagerState.currentPage) {
                 Text(
                     currentScans[pagerState.currentPage].originalScanSettings.inputSource?.toReadableString(
@@ -824,43 +817,35 @@ fun ScanContent(
             state = pagerState
         ) { page ->
             if (page >= scanningViewModel.scanningScreenData.currentScansState.size) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator()
-                    Text(modifier = Modifier.padding(vertical = 15.dp), text = stringResource(R.string.retrieving_page))
+                if (scanningViewModel.scanningScreenData.scanJobRunning) {
+                    DownloadingPageFullscreen(innerPadding)
+                } else {
+                    FullScreenError(
+                        R.drawable.rounded_document_scanner_24,
+                        stringResource(R.string.no_scans_yet)
+                    )
                 }
                 return@HorizontalPager
             } else {
                 val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
 
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(vertical = 5.dp)
+                        .zoomable(zoomState),
                     contentAlignment = Alignment.Center
                 ) {
-                    val imagePath = scanningViewModel.scanningScreenData.currentScansState[page].filePath
+                    val imagePath = scanningViewModel.scanningScreenData.currentScansState.getOrNull(page)?.filePath
                     AsyncImage(
                         model = imagePath,
                         contentDescription = stringResource(R.string.desc_scanned_page),
                         modifier = Modifier
-                            .zoomable(zoomState)
-                            .padding(vertical = 5.dp)
                             .testTag("scan_page")
                     )
                 }
             }
         }
-    }
-
-    if (scanningViewModel.scanningScreenData.currentScansState.isEmpty() && !scanningViewModel.scanningScreenData.scanJobRunning) {
-        FullScreenError(
-            R.drawable.rounded_document_scanner_24,
-            stringResource(R.string.no_scans_yet)
-        )
     }
 
     if (pagerState.currentPage < scanningViewModel.scanningScreenData.currentScansState.size) {
@@ -961,4 +946,19 @@ fun ScanContent(
             }
         }
     }
+}
+
+@Composable
+private fun DownloadingPageFullscreen(innerPadding: PaddingValues) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator()
+        Text(modifier = Modifier.padding(vertical = 15.dp), text = stringResource(R.string.retrieving_page))
+    }
+    return
 }
