@@ -274,7 +274,8 @@ fun CroppableAsyncImage(
     additionalTouchAreaAround: Dp,
     handleTouchRadius: Dp,
     cropRectChanged: (Rect) -> Unit,
-    onPan: (Offset) -> Unit
+    onPan: (Offset) -> Unit,
+    imageLoader: ImageLoader? = null
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -282,14 +283,16 @@ fun CroppableAsyncImage(
         additionalTouchAreaAround.toPx().toInt()
     }
 
+    val selectedImageLoader = imageLoader ?: ImageLoader.Builder(context)
+        .memoryCachePolicy(CachePolicy.DISABLED)
+        .diskCachePolicy(CachePolicy.DISABLED)
+        .build()
+
     SubcomposeAsyncImage(
         model = imageModel,
         contentDescription = contentDescription,
         modifier = modifier,
-        imageLoader = ImageLoader.Builder(context)
-            .memoryCachePolicy(CachePolicy.DISABLED)
-            .diskCachePolicy(CachePolicy.DISABLED)
-            .build(),
+        imageLoader = selectedImageLoader,
         loading = {
             CircularProgressIndicator()
         },
@@ -315,7 +318,7 @@ fun CroppableAsyncImage(
                 mainContent = {
                     Image(
                         state.painter,
-                        "",
+                        contentDescription,
                         Modifier
                             .requiredWidth(intrinsicWidthDp)
                             .requiredHeight(intrinsicHeightDp),
