@@ -61,7 +61,7 @@ class ScanBridgeScreenshotTest {
             .edit()
             .putBoolean("auto_cleanup", true)
             .apply()
-        composeTestRule.activity.getSharedPreferences("scanbridge", MODE_PRIVATE)
+        composeTestRule.activity.getSharedPreferences("route_store", MODE_PRIVATE)
             .edit()
             .remove("last_route")
             .apply()
