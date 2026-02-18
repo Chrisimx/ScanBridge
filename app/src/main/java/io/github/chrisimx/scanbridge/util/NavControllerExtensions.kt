@@ -1,6 +1,7 @@
 package io.github.chrisimx.scanbridge.util
 
 import androidx.navigation.NavController
+import timber.log.Timber
 
 fun NavController.clearAndNavigateTo(route: Any) {
     val navController = this
@@ -10,8 +11,5 @@ fun NavController.clearAndNavigateTo(route: Any) {
         }
         launchSingleTop = true
     }
-    assert(
-        navController.previousBackStackEntry == null,
-        { "clearAndNavigateTo did not correctly clear backstack! Please report this." }
-    )
+    check(navController.previousBackStackEntry == null, { "clearAndNavigateTo did not correctly clear backstack!" })
 }
