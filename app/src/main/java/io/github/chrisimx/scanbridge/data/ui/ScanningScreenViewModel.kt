@@ -40,8 +40,11 @@ import io.github.chrisimx.scanbridge.data.model.Session
 import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
 import io.github.chrisimx.scanbridge.stores.SessionsStore
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
+import io.github.chrisimx.scanbridge.util.getEditedImageName
 import io.github.chrisimx.scanbridge.util.getInputSourceCaps
 import io.github.chrisimx.scanbridge.util.getInputSourceOptions
+import io.github.chrisimx.scanbridge.util.rotateBy90
+import io.github.chrisimx.scanbridge.util.saveAsJPEG
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.toJobStateString
 import io.ktor.client.HttpClient
@@ -169,6 +172,45 @@ class ScanningScreenViewModel(
     fun setError(value: String?) {
         _scanningScreenData.errorString.value = value
     }
+
+    fun rotateCurrentPage() {
+        if (_scanningScreenData.stateCurrentScans.isEmpty() || _scanningScreenData.isRotating.value) {
+            return
+        }
+        _scanningScreenData.isRotating.value = true
+        setLoadingText(R.string.rotating_page)
+
+        val currentScans = scanningScreenData.currentScansState
+        val currentPagePath =
+            currentScans[scanningScreenData.pagerState.currentPage].filePath
+        val currentPageFile = File(currentPagePath)
+
+        Timber.d("Decoding $currentPagePath")
+        val originalBitmap = BitmapFactory.decodeFile(currentPagePath)
+        Timber.d("Rotating $currentPagePath")
+        val rotatedBitmap = originalBitmap.rotateBy90()
+        originalBitmap.recycle()
+
+        val editedImageName = currentPageFile.getEditedImageName()
+        val newFile = File(application.filesDir, editedImageName)
+
+        Timber.d("Saving rotated $currentPagePath")
+        rotatedBitmap.saveAsJPEG(newFile)
+
+        Timber.d("Finished saving rotated $currentPagePath")
+
+        val index = scanningScreenData.pagerState.currentPage
+        val scanSettings = currentScans[index].originalScanSettings
+        val priorRotation = currentScans[index].rotation
+        Timber.d("Updating UI state after rotation")
+        removeScanAtIndex(index)
+        addTempFile(currentPageFile)
+        addScanAtIndex(newFile.absolutePath, scanSettings, priorRotation.toggleRotation(), index)
+
+        setLoadingText(null)
+        _scanningScreenData.isRotating.value = false
+    }
+
 
     fun setScannerCapabilities(caps: ScannerCapabilities) {
         _scanningScreenData.capabilities.value = caps

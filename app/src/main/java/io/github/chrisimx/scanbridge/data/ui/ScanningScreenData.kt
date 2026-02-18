@@ -70,7 +70,8 @@ data class ScanningScreenData(
     val pagerState: PagerState = PagerState {
         stateCurrentScans.size + if (scanJobRunning.value) 1 else 0
     },
-    val sourceFileToSave: MutableState<File?> = mutableStateOf(null)
+    val sourceFileToSave: MutableState<File?> = mutableStateOf(null),
+    val isRotating: MutableState<Boolean> = mutableStateOf(false)
 ) {
     fun toImmutable() = ImmutableScanningScreenData(
         esclClient,
@@ -89,6 +90,7 @@ data class ScanningScreenData(
         scanJobCancelling,
         stateProgressStringRes,
         sourceFileToSave,
+        isRotating,
         createdTempFiles,
         pagerState,
         stateCurrentScans
@@ -112,6 +114,7 @@ data class ImmutableScanningScreenData(
     private val scanJobCancellingState: State<Boolean>,
     private val progressStringResState: State<Int?>,
     private val sourceFileToSaveState: State<File?>,
+    private val isRotatingState: State<Boolean>,
     val createdTempFiles: List<File>,
     val pagerState: PagerState,
     val currentScansState: SnapshotStateList<ScanMetadata>
@@ -130,4 +133,5 @@ data class ImmutableScanningScreenData(
     val exportOptionsPopupPosition by exportOptionsPopupPositionState
     val saveOptionsPopupPosition by saveOptionsPopupPositionState
     val sourceFileToSave by sourceFileToSaveState
+    val isRotating by isRotatingState
 }

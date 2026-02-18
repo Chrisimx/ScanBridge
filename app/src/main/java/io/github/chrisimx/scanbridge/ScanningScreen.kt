@@ -138,41 +138,6 @@ import timber.log.Timber
 
 private const val TAG = "ScanningScreen"
 
-fun rotate(context: Context, scanningViewModel: ScanningScreenViewModel) {
-    if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
-        return
-    }
-    scanningViewModel.setLoadingText(R.string.rotating_page)
-
-    val currentScans = scanningViewModel.scanningScreenData.currentScansState
-    val currentPagePath =
-        currentScans[scanningViewModel.scanningScreenData.pagerState.currentPage].filePath
-    val currentPageFile = File(currentPagePath)
-
-    Timber.tag(TAG).d("Decoding $currentPagePath")
-    val originalBitmap = BitmapFactory.decodeFile(currentPagePath)
-    Timber.tag(TAG).d("Rotating $currentPagePath")
-    val rotatedBitmap = originalBitmap.rotateBy90()
-    originalBitmap.recycle()
-
-    val editedImageName = currentPageFile.getEditedImageName()
-    val newFile = File(context.filesDir, editedImageName)
-
-    Timber.tag(TAG).d("Saving rotated $currentPagePath")
-    rotatedBitmap.saveAsJPEG(newFile)
-
-    Timber.tag(TAG).d("Finished saving rotated $currentPagePath")
-
-    val index = scanningViewModel.scanningScreenData.pagerState.currentPage
-    val scanSettings = currentScans[index].originalScanSettings
-    val priorRotation = currentScans[index].rotation
-    Timber.tag(TAG).d("Updating UI state after rotation")
-    scanningViewModel.removeScanAtIndex(index)
-    scanningViewModel.addTempFile(currentPageFile)
-    scanningViewModel.addScanAtIndex(newFile.absolutePath, scanSettings, priorRotation.toggleRotation(), index)
-
-    scanningViewModel.setLoadingText(null)
-}
 
 fun doZipExport(
     scanningViewModel: ScanningScreenViewModel,
@@ -982,7 +947,7 @@ fun ScanContent(
                     }
                     IconButton(onClick = {
                         thread {
-                            rotate(context, scanningViewModel)
+                            scanningViewModel.rotateCurrentPage()
                         }
                     }) {
                         Icon(
