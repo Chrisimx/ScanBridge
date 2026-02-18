@@ -5,7 +5,14 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -19,8 +26,10 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,7 +39,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import coil3.compose.AsyncImage
+import coil3.ImageLoader
+import coil3.compose.SubcomposeAsyncImage
+import coil3.request.CachePolicy
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import kotlin.math.max
@@ -82,7 +93,13 @@ sealed class CropDragEvent {
 }
 
 @Composable
-fun CropOverlay(modifier: Modifier, touchPaddingAroundInPx: Int, handleTouchRadius: Dp, onRectChange: (Rect) -> Unit = {}) {
+fun CropOverlay(
+    modifier: Modifier,
+    touchPaddingAroundInPx: Int,
+    handleTouchRadius: Dp,
+    onRectChange: (Rect) -> Unit = {},
+    onPan: (Offset) -> Unit = {}
+) {
     var rect by remember { mutableStateOf(Rect(0f, 0f, 50f, 50f)) }
     var size by remember { mutableStateOf(IntSize.Zero) }
     val relativeRect by remember {
@@ -127,6 +144,7 @@ fun CropOverlay(modifier: Modifier, touchPaddingAroundInPx: Int, handleTouchRadi
                         lastDragEventType = CropDragEvent.DraggedOutside
 
                         if (!rect.inflate(handleTouchRadius.toPx()).contains(offset)) {
+                            onPan(offset)
                             return@detectDragGestures
                         }
 
@@ -180,18 +198,23 @@ fun CropOverlay(modifier: Modifier, touchPaddingAroundInPx: Int, handleTouchRadi
                                 rect = rect.applyResizeDrag(dragChange, size, edgeFlags, density)
                             }
 
-                            CropDragEvent.DraggedOutside -> return@detectDragGestures
+                            CropDragEvent.DraggedOutside -> {
+                                onPan(dragChange)
+                                return@detectDragGestures
+                            }
                         }
 
                         onRectChange(relativeRect)
                         pointerInputChange.consume()
                     }
                 )
-            }.padding(touchErrorClearance)
+            }
+            .padding(touchErrorClearance)
             .onSizeChanged {
                 size = it
                 rect = Rect(Offset.Zero, size.toSize())
-            }.then(modifier)
+            }
+            .then(modifier)
     ) {
         // Inner transparent fill
         drawRect(Color.Cyan, rect.topLeft, rect.size, alpha = 0.1f)
@@ -213,17 +236,20 @@ enum class SlotsEnum { Main, Dependent }
 fun MatchLargestChildBoxWithTouchErrorMargin(
     modifier: Modifier = Modifier,
     dependantAdditionalSpaceInPx: Int,
-    mainContent: @Composable () -> Unit,
+    mainContent: @Composable (Constraints) -> Unit,
     dependentContent: @Composable () -> Unit
 ) {
     SubcomposeLayout(modifier) { constraints ->
-        val mainPlaceables = subcompose(SlotsEnum.Main, mainContent).map { it.measure(constraints) }
+        val mainPlaceables = subcompose(
+            SlotsEnum.Main,
+            { mainContent(Constraints()) }
+        ).map { it.measure(constraints) }
 
         val maxSize =
             mainPlaceables.fold(IntSize.Zero) { currentMax, placeable ->
                 IntSize(
-                    width = maxOf(currentMax.width, placeable.width),
-                    height = maxOf(currentMax.height, placeable.height)
+                    width = maxOf(currentMax.width, placeable.measuredWidth),
+                    height = maxOf(currentMax.height, placeable.measuredHeight)
                 )
             }
 
@@ -239,6 +265,7 @@ fun MatchLargestChildBoxWithTouchErrorMargin(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CroppableAsyncImage(
     modifier: Modifier = Modifier,
@@ -246,32 +273,66 @@ fun CroppableAsyncImage(
     contentDescription: String?,
     additionalTouchAreaAround: Dp,
     handleTouchRadius: Dp,
-    cropRectChanged: (Rect) -> Unit
+    cropRectChanged: (Rect) -> Unit,
+    onPan: (Offset) -> Unit
 ) {
+    val context = LocalContext.current
     val density = LocalDensity.current
     val additionalTouchAreaAroundInPx = with(density) {
         additionalTouchAreaAround.toPx().toInt()
     }
 
-    MatchLargestChildBoxWithTouchErrorMargin(
+    SubcomposeAsyncImage(
+        model = imageModel,
+        contentDescription = contentDescription,
         modifier = modifier,
-        dependantAdditionalSpaceInPx = additionalTouchAreaAroundInPx,
-        mainContent = {
-            AsyncImage(
-                model = imageModel,
-                contentDescription = contentDescription,
-                modifier = Modifier.fillMaxWidth()
-            )
+        imageLoader = ImageLoader.Builder(context)
+            .memoryCachePolicy(CachePolicy.DISABLED)
+            .diskCachePolicy(CachePolicy.DISABLED)
+            .build(),
+        loading = {
+            CircularProgressIndicator()
+        },
+        success = { state ->
+            val localDensity = LocalDensity.current
+
+            val intrinsicWidth = state.painter.intrinsicSize.width
+            val intrinsicHeight = state.painter.intrinsicSize.height
+
+            val intrinsicWidthDp = with(localDensity) {
+                intrinsicWidth.toDp()
+            }
+
+            val intrinsicHeightDp = with(localDensity) {
+                intrinsicHeight.toDp()
+            }
+
+            MatchLargestChildBoxWithTouchErrorMargin(
+                modifier = Modifier
+                    .requiredWidth(intrinsicWidthDp)
+                    .requiredHeight(intrinsicHeightDp),
+                dependantAdditionalSpaceInPx = additionalTouchAreaAroundInPx,
+                mainContent = {
+                    Image(
+                        state.painter,
+                        "",
+                        Modifier
+                            .requiredWidth(intrinsicWidthDp)
+                            .requiredHeight(intrinsicHeightDp),
+                        contentScale = ContentScale.None
+                    )
+                }
+            ) {
+                CropOverlay(
+                    modifier = Modifier,
+                    additionalTouchAreaAroundInPx,
+                    handleTouchRadius,
+                    onRectChange = cropRectChanged,
+                    onPan = onPan
+                )
+            }
         }
-    ) {
-        CropOverlay(
-            modifier = Modifier,
-            additionalTouchAreaAroundInPx,
-            handleTouchRadius
-        ) {
-            cropRectChanged(it)
-        }
-    }
+    )
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -285,7 +346,9 @@ fun PreviewCropOverlay() {
             val density = LocalDensity.current
             var currentRect by remember { mutableStateOf(Rect(0f, 0f, 0f, 0f)) }
             MatchLargestChildBoxWithTouchErrorMargin(
-                modifier = Modifier.padding(innerPadding).padding(top = 200.dp, start = 40.dp, end = 40.dp),
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(top = 200.dp, start = 40.dp, end = 40.dp),
                 dependantAdditionalSpaceInPx = 200,
                 mainContent = {
                     Image(
@@ -295,9 +358,9 @@ fun PreviewCropOverlay() {
                     )
                 }
             ) {
-                CropOverlay(modifier = Modifier, 200, 50.dp) {
+                CropOverlay(modifier = Modifier, 200, 50.dp, onRectChange = {
                     currentRect = it
-                }
+                })
             }
         }
     }

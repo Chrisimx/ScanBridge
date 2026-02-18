@@ -3,14 +3,15 @@ package io.github.chrisimx.scanbridge
 import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +41,7 @@ import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.saket.telephoto.ExperimentalTelephotoApi
 import me.saket.telephoto.zoomable.EnabledZoomGestures
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
@@ -79,12 +81,11 @@ private fun updateSessionFile(
     SessionsStore.saveSession(editedSession, context, sessionID)
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalTelephotoApi::class)
 @Composable
 fun CropScreen(sessionID: String, pageIdx: Int, returnRoute: BaseRoute, navController: NavController) {
     val context = LocalContext.current
 
-    var zoomEnabled by remember { mutableStateOf(false) }
     val zoomableState = rememberZoomableState(ZoomSpec(maxZoomFactor = 5f))
     val coroutineScope = rememberCoroutineScope()
     var currentRect by remember { mutableStateOf(Rect(0f, 0f, 1f, 1f)) }
@@ -100,28 +101,38 @@ fun CropScreen(sessionID: String, pageIdx: Int, returnRoute: BaseRoute, navContr
 
     val originalImageFile = remember { originalSession.scannedPages[pageIdx].filePath }
 
+    val save: () -> Unit = {
+        coroutineScope.launch(Dispatchers.Main) {
+            if (processing) return@launch
+
+            processing = true
+            val croppedFile = finishCrop(currentRect, originalImageFile)
+            updateSessionFile(originalSession, pageIdx, croppedFile, originalImageFile, context, sessionID)
+            navController.clearAndNavigateTo(returnRoute)
+            processing = false
+        }
+    }
+
     BackHandler {
         navController.clearAndNavigateTo(returnRoute)
     }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        bottomBar = {
-            CropScreenBottomBar(
-                zoomEnabled,
-                { zoomEnabled = it }
-            ) {
-                coroutineScope.launch(Dispatchers.Main) {
-                    if (processing) return@launch
-
-                    processing = true
-                    val croppedFile = finishCrop(currentRect, originalImageFile)
-                    updateSessionFile(originalSession, pageIdx, croppedFile, originalImageFile, context, sessionID)
-                    navController.clearAndNavigateTo(returnRoute)
-                    processing = false
-                }
-            }
-        }
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = save,
+                modifier = Modifier.testTag("crop_finish"),
+                icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.outline_crop_24),
+                        contentDescription = stringResource(R.string.crop)
+                    )
+                },
+                text = { Text(stringResource(R.string.crop_button)) }
+            )
+        },
+        floatingActionButtonPosition = FabPosition.Center
 
     ) { innerPadding ->
         if (processing) {
@@ -133,7 +144,7 @@ fun CropScreen(sessionID: String, pageIdx: Int, returnRoute: BaseRoute, navContr
                 .fillMaxSize()
                 .zoomable(
                     zoomableState,
-                    gestures = if (zoomEnabled) EnabledZoomGestures.ZoomAndPan else EnabledZoomGestures.None
+                    gestures = EnabledZoomGestures.ZoomOnly
                 ),
             contentAlignment = Alignment.CenterHorizontally.plus(Alignment.CenterVertically)
         ) {
@@ -144,37 +155,22 @@ fun CropScreen(sessionID: String, pageIdx: Int, returnRoute: BaseRoute, navContr
                 imageModel = originalImageFile,
                 contentDescription = stringResource(R.string.desc_scanned_page),
                 additionalTouchAreaAround = 100.dp,
-                handleTouchRadius = 60.dp
-            ) {
-                currentRect = it
-            }
+                handleTouchRadius = 60.dp,
+                cropRectChanged = { currentRect = it },
+                onPan = {
+                    coroutineScope.launch {
+                        zoomableState.panBy(it, snap())
+                    }
+                }
+            )
         }
     }
 }
 
 @Composable
-fun CropScreenBottomBar(zoomEnabled: Boolean, setZoomEnabled: (Boolean) -> Unit, onSaveRequest: () -> Unit) {
+fun CropScreenBottomBar() {
     BottomAppBar(
         actions = {
-            IconToggleButton(zoomEnabled, onCheckedChange = setZoomEnabled) {
-                Icon(
-                    painterResource(R.drawable.outline_pan_zoom_24),
-                    stringResource(R.string.activate_zoom_gestures)
-                )
-            }
-        },
-        floatingActionButton = @Composable {
-            ExtendedFloatingActionButton(
-                onClick = onSaveRequest,
-                modifier = Modifier.testTag("crop_finish"),
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.outline_crop_24),
-                        contentDescription = stringResource(R.string.crop)
-                    )
-                },
-                text = { Text(stringResource(R.string.crop_button)) }
-            )
         }
     )
 }
