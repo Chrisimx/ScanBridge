@@ -1,7 +1,6 @@
 package io.github.chrisimx.scanbridge.stores
 
 import android.content.Context
-import androidx.lifecycle.application
 import io.github.chrisimx.esclkt.Inches
 import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.Millimeters
