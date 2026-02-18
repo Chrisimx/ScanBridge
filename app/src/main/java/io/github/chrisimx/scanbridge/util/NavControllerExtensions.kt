@@ -10,7 +10,8 @@ fun NavController.clearAndNavigateTo(route: Any) {
         }
         launchSingleTop = true
     }
-    assert(navController.previousBackStackEntry == null,
-        { "clearAndNavigateTo did not correctly clear backstack! Please report this."}
+    assert(
+        navController.previousBackStackEntry == null,
+        { "clearAndNavigateTo did not correctly clear backstack! Please report this." }
     )
 }
