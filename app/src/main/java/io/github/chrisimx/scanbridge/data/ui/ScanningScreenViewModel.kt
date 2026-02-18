@@ -211,7 +211,6 @@ class ScanningScreenViewModel(
         _scanningScreenData.isRotating.value = false
     }
 
-
     fun setScannerCapabilities(caps: ScannerCapabilities) {
         _scanningScreenData.capabilities.value = caps
         val storedSession = loadSessionFile()
