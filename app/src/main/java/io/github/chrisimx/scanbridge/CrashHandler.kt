@@ -20,6 +20,8 @@
 package io.github.chrisimx.scanbridge
 
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
+import androidx.core.content.edit
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -44,6 +46,11 @@ class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {
             }
         }
         File(crashDir, "crash-$dateTime.log").writeText(e.stackTraceToString())
+
+        context.getSharedPreferences("route_store", MODE_PRIVATE)
+            .edit {
+                remove("last_route")
+            }
 
         defaultHandler?.uncaughtException(t, e)
     }
