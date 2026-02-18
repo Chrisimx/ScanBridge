@@ -34,6 +34,8 @@ object SessionsStore {
     }
 
     fun loadSession(application: Context, sessionID: String): Session? {
+        Timber.d("Loading session $sessionID")
+
         val path = application.applicationInfo.dataDir + "/files/" + sessionID + ".session"
         val file = File(path)
 
@@ -49,6 +51,8 @@ object SessionsStore {
 
     @OptIn(ExperimentalSerializationApi::class)
     fun saveSession(session: Session, application: Context, sessionID: String): String {
+        Timber.d("Saving session $sessionID with $session")
+
         val path = application.applicationInfo.dataDir + "/files/" + sessionID + ".session"
         val file = File(path)
 
