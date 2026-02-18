@@ -960,5 +960,4 @@ private fun DownloadingPageFullscreen(innerPadding: PaddingValues) {
         CircularProgressIndicator()
         Text(modifier = Modifier.padding(vertical = 15.dp), text = stringResource(R.string.retrieving_page))
     }
-    return
 }
