@@ -104,12 +104,16 @@ fun CropOverlay(
     var size by remember { mutableStateOf(IntSize.Zero) }
     val relativeRect by remember {
         derivedStateOf {
-            Rect(
-                rect.left / size.width,
-                rect.top / size.height,
-                rect.right / size.width,
-                rect.bottom / size.height
-            )
+            if (size.width == 0 || size.height == 0) {
+                Rect(1f, 1f, 1f, 1f)
+            } else {
+                Rect(
+                    rect.left / size.width,
+                    rect.top / size.height,
+                    rect.right / size.width,
+                    rect.bottom / size.height
+                )
+            }
         }
     }
 
