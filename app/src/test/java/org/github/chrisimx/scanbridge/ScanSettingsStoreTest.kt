@@ -20,6 +20,7 @@
 package org.github.chrisimx.scanbridge
 
 import io.github.chrisimx.esclkt.ColorMode
+import io.github.chrisimx.esclkt.EnumOrRaw
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.scanbridge.data.model.StatelessImmutableESCLScanSettingsState
 import io.github.chrisimx.scanbridge.data.model.StatelessImmutableScanRegion
@@ -39,7 +40,7 @@ class ScanSettingsStoreTest {
             inputSource = InputSource.Feeder,
             xResolution = 300u,
             yResolution = 300u,
-            colorMode = ColorMode.RGB24,
+            colorMode = EnumOrRaw.Known(ColorMode.RGB24),
             colorSpace = null,
             mediaType = null,
             ccdChannel = null,
@@ -97,7 +98,7 @@ class ScanSettingsStoreTest {
             inputSource = InputSource.Feeder,
             xResolution = 300u,
             yResolution = 300u,
-            colorMode = ColorMode.RGB24,
+            colorMode = EnumOrRaw.Known(ColorMode.RGB24),
             colorSpace = null,
             mediaType = null,
             ccdChannel = null,
