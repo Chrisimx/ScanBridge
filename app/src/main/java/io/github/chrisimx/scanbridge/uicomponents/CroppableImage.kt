@@ -16,6 +16,8 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -44,6 +46,20 @@ import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import kotlin.math.max
 import kotlin.math.min
 import timber.log.Timber
+
+val IntSizeSaver = Saver<IntSize, List<Int>>(
+    save = { listOf(it.width, it.height) },
+    restore = { IntSize(it[0], it[1]) }
+)
+
+val RectSaver = Saver<Rect, FloatArray>(
+    save = { rect ->
+        floatArrayOf(rect.left, rect.top, rect.right, rect.bottom)
+    },
+    restore = { values ->
+        Rect(values[0], values[1], values[2], values[3])
+    }
+)
 
 enum class Edge { TOP, LEFT, BOTTOM, RIGHT }
 
@@ -97,12 +113,12 @@ fun CropOverlay(
     onRectChange: (Rect) -> Unit = {},
     onPan: (Offset) -> Unit = {}
 ) {
-    var rect by remember { mutableStateOf(Rect(0f, 0f, 50f, 50f)) }
-    var size by remember { mutableStateOf(IntSize.Zero) }
+    var rect by rememberSaveable(stateSaver = RectSaver) { mutableStateOf(Rect(0f, 0f, 50f, 50f)) }
+    var size by rememberSaveable(stateSaver = IntSizeSaver) { mutableStateOf(IntSize.Zero) }
     val relativeRect by remember {
         derivedStateOf {
             if (size.width == 0 || size.height == 0) {
-                Rect(1f, 1f, 1f, 1f)
+                Rect(0f, 0f, 1f, 1f)
             } else {
                 Rect(
                     rect.left / size.width,
@@ -212,8 +228,16 @@ fun CropOverlay(
             }
             .padding(touchErrorClearance)
             .onSizeChanged {
+                val currentRelativeRect = relativeRect
+                val newAbsoluteRect = Rect(
+                    left = it.width * currentRelativeRect.left,
+                    top = it.height * currentRelativeRect.top,
+                    right = it.width * currentRelativeRect.right,
+                    bottom = it.height * currentRelativeRect.height
+                )
                 size = it
-                rect = Rect(Offset.Zero, size.toSize())
+                rect = newAbsoluteRect
+                onRectChange(relativeRect)
             }
             .then(modifier)
     ) {
