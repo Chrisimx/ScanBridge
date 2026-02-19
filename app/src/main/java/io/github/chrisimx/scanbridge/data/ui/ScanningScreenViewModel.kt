@@ -191,6 +191,12 @@ class ScanningScreenViewModel(
 
             Timber.d("Decoding $currentPagePath")
             val originalBitmap = BitmapFactory.decodeFile(currentPagePath)
+            if (originalBitmap == null) {
+                Timber.e("Failed to decode bitmap for $currentPagePath")
+                setLoadingText(null)
+                _scanningScreenData.isRotating.value = false
+                return
+            }
             Timber.d("Rotating $currentPagePath")
             val rotatedBitmap = originalBitmap.rotateBy90()
             originalBitmap.recycle()
