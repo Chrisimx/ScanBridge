@@ -101,7 +101,7 @@ class CrashActivity : ComponentActivity() {
 
                         Column(modifier = Modifier.verticalScroll(scrollState)) {
                             Text(
-                                stringResource(R.string.crash_occured),
+                                stringResource(R.string.crash_occurred),
                                 modifier = Modifier.padding(bottom = 14.dp),
                                 style = MaterialTheme.typography.bodySmallEmphasized
                             )
