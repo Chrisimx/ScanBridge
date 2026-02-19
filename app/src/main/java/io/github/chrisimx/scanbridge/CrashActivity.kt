@@ -78,7 +78,8 @@ class CrashActivity : ComponentActivity() {
                                 )
                                 Text(
                                     stringResource(R.string.copy),
-                                    Modifier.padding(start = 5.dp, top = 10.dp, bottom = 10.dp, end = 10.dp),)
+                                    Modifier.padding(start = 5.dp, top = 10.dp, bottom = 10.dp, end = 10.dp)
+                                )
                             }
                         }
                     }
@@ -86,7 +87,7 @@ class CrashActivity : ComponentActivity() {
                 { innerPadding ->
                     val scrollState = rememberScrollState()
 
-                    Column (
+                    Column(
                         modifier = Modifier
                             .padding(innerPadding)
                             .padding(horizontal = 20.dp),

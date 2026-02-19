@@ -51,12 +51,7 @@ import io.github.chrisimx.scanbridge.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun FullScreenError(errorIcon: Int,
-                    errorMessage: String,
-                    copyButton: Boolean = false,
-                    fontSize: TextUnit = 18.sp,
-                    title: String? = null
-) {
+fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = false, fontSize: TextUnit = 18.sp, title: String? = null) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
@@ -76,8 +71,10 @@ fun FullScreenError(errorIcon: Int,
         )
 
         if (title != null) {
-            Text(title,
-                style = MaterialTheme.typography.titleMediumEmphasized)
+            Text(
+                title,
+                style = MaterialTheme.typography.titleMediumEmphasized
+            )
         }
 
         Column(

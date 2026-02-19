@@ -538,7 +538,6 @@ fun ScanningScreen(
                 )
             }
 
-
             AnimatedVisibility(
                 isError,
                 enter = fadeIn(animationSpec = tween(1000)),

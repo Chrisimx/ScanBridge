@@ -232,7 +232,7 @@ class ScanningScreenViewModel(
                 it.toString(),
                 R.string.loading_previous_session_failed,
                 R.drawable.rounded_warning_24
-                )
+            )
             return
         }
 

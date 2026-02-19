@@ -37,11 +37,7 @@ enum class ScanRelativeRotation {
     Original
 }
 
-data class ErrorDescription(
-    val pretext: Int?,
-    val icon: Int?,
-    val text: String?
-)
+data class ErrorDescription(val pretext: Int?, val icon: Int?, val text: String?)
 
 fun ScanRelativeRotation.toggleRotation() = when (this) {
     ScanRelativeRotation.Rotated -> ScanRelativeRotation.Original
