@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.toSize
 import coil3.ImageLoader
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.CachePolicy
