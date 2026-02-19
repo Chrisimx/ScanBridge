@@ -119,11 +119,15 @@ fun CropScreen(sessionID: String, pageIdx: Int, returnRoute: BaseRoute, navContr
             if (processing) return@launch
 
             processing = true
-            val croppedFile = finishCrop(currentRect, originalImageFile) ?: return@launch
+            try {
+                val croppedFile = finishCrop(currentRect, originalImageFile) ?: return@launch
 
-            updateSessionFile(originalSession, pageIdx, croppedFile, originalImageFile, context, sessionID)
-            navController.clearAndNavigateTo(returnRoute)
-            processing = false
+                updateSessionFile(originalSession, pageIdx, croppedFile, originalImageFile, context, sessionID)
+                navController.clearAndNavigateTo(returnRoute)
+            } finally {
+                processing = false
+            }
+
         }
     }
 
