@@ -111,7 +111,13 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
         }
         composable<CropImageRoute> { backStackEntry ->
             val scannerRoute: CropImageRoute = backStackEntry.toRoute()
-            val returnRoute = Json.decodeFromString<BaseRoute>(scannerRoute.returnRoute)
+            val returnRoute = try {
+                Json.decodeFromString<BaseRoute>(scannerRoute.returnRoute)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to decode returnRoute: ${scannerRoute.returnRoute}")
+                navController.navigate(StartUpScreenRoute)
+                return@composable
+            }
             CropScreen(scannerRoute.sessionID, scannerRoute.pageIdx, returnRoute, navController)
         }
         composable<ScannerRoute> { backStackEntry ->
