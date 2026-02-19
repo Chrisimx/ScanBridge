@@ -38,24 +38,9 @@ class CrashActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val error = intent.getStringExtra("error") ?: "Unknown error"
-        val crashLog = intent.getStringExtra("crash_file")
+        // val crashLog = intent.getStringExtra("crash_file")
 
         Timber.plant(Timber.DebugTree())
-
-        Timber.e("$crashLog")
-
-        try {
-            CoroutineScope(Dispatchers.IO).launch {
-                crashLog?.let {
-                    val crashLogFile = File(it)
-                    if (crashLogFile.exists()) {
-                        crashLogFile.delete()
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            Timber.e("Error in CrashActivity while trying to remove crash log file: $e")
-        }
 
         setContent {
             ScanBridgeTheme {
