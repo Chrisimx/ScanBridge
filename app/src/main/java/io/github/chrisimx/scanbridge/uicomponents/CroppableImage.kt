@@ -85,8 +85,8 @@ fun Rect.applyResizeDrag(drag: Offset, size: IntSize, flags: EdgeFlags, density:
 
 sealed class CropDragEvent {
     data class ResizeHandleDragged(val idx: Int) : CropDragEvent()
-    object DraggedOutside : CropDragEvent()
-    object DraggedInside : CropDragEvent()
+    data object DraggedOutside : CropDragEvent()
+    data object DraggedInside : CropDragEvent()
 }
 
 @Composable
