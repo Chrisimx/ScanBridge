@@ -30,21 +30,21 @@ import androidx.lifecycle.viewModelScope
 import getTrustAllTM
 import io.github.chrisimx.esclkt.ESCLHttpCallResult
 import io.github.chrisimx.esclkt.ESCLRequestClient
-import io.github.chrisimx.esclkt.Inches
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.JobState
-import io.github.chrisimx.esclkt.LengthUnit
-import io.github.chrisimx.esclkt.Millimeters
 import io.github.chrisimx.esclkt.ScanJob
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
-import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.data.model.Session
 import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
+import io.github.chrisimx.scanbridge.stores.SessionsStore
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
+import io.github.chrisimx.scanbridge.util.getEditedImageName
 import io.github.chrisimx.scanbridge.util.getInputSourceCaps
 import io.github.chrisimx.scanbridge.util.getInputSourceOptions
+import io.github.chrisimx.scanbridge.util.rotateBy90
+import io.github.chrisimx.scanbridge.util.saveAsJPEG
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.toJobStateString
 import io.ktor.client.HttpClient
@@ -64,12 +64,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
-import kotlinx.serialization.json.encodeToStream
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import timber.log.Timber
 
 class ScanningScreenViewModel(
@@ -112,18 +106,6 @@ class ScanningScreenViewModel(
         )
     val scanningScreenData: ImmutableScanningScreenData
         get() = _scanningScreenData.toImmutable()
-
-    val json = Json {
-        serializersModule = SerializersModule {
-            polymorphic(LengthUnit::class) {
-                subclass(Inches::class)
-                subclass(Millimeters::class)
-                subclass(ThreeHundredthsOfInch::class)
-            }
-        }
-        classDiscriminator = "type"
-        prettyPrint = false
-    }
 
     fun addTempFile(file: File) {
         _scanningScreenData.createdTempFiles.add(file)
@@ -187,13 +169,74 @@ class ScanningScreenViewModel(
         _scanningScreenData.scanJobCancelling.value = value
     }
 
-    fun setError(value: String?) {
-        _scanningScreenData.errorString.value = value
+    fun setError(error: String?, titleResource: Int? = null, errorIcon: Int? = null) {
+        _scanningScreenData.error.value = ErrorDescription(
+            titleResource,
+            errorIcon,
+            error
+        )
+    }
+
+    fun rotateCurrentPage() {
+        if (_scanningScreenData.stateCurrentScans.isEmpty() || _scanningScreenData.isRotating.value) {
+            return
+        }
+        _scanningScreenData.isRotating.value = true
+        setLoadingText(R.string.rotating_page)
+        try {
+            val currentScans = scanningScreenData.currentScansState
+            val currentPagePath =
+                currentScans[scanningScreenData.pagerState.currentPage].filePath
+            val currentPageFile = File(currentPagePath)
+
+            Timber.d("Decoding $currentPagePath")
+            val originalBitmap = BitmapFactory.decodeFile(currentPagePath)
+            if (originalBitmap == null) {
+                Timber.e("Failed to decode bitmap for $currentPagePath")
+                setLoadingText(null)
+                _scanningScreenData.isRotating.value = false
+                return
+            }
+            Timber.d("Rotating $currentPagePath")
+            val rotatedBitmap = originalBitmap.rotateBy90()
+            originalBitmap.recycle()
+
+            val editedImageName = currentPageFile.getEditedImageName()
+            val newFile = File(application.filesDir, editedImageName)
+
+            Timber.d("Saving rotated $currentPagePath")
+            rotatedBitmap.saveAsJPEG(newFile)
+            rotatedBitmap.recycle()
+
+            Timber.d("Finished saving rotated $currentPagePath")
+
+            val index = scanningScreenData.pagerState.currentPage
+            val scanSettings = currentScans[index].originalScanSettings
+            val priorRotation = currentScans[index].rotation
+            Timber.d("Updating UI state after rotation")
+            removeScanAtIndex(index)
+            addTempFile(currentPageFile)
+            addScanAtIndex(newFile.absolutePath, scanSettings, priorRotation.toggleRotation(), index)
+        } finally {
+            setLoadingText(null)
+            _scanningScreenData.isRotating.value = false
+        }
     }
 
     fun setScannerCapabilities(caps: ScannerCapabilities) {
         _scanningScreenData.capabilities.value = caps
-        val storedSession = loadSessionFile()
+        val storedSessionResult = loadSessionFile()
+
+        storedSessionResult.onFailure {
+            setError(
+                it.toString(),
+                R.string.loading_previous_session_failed,
+                R.drawable.rounded_warning_24
+            )
+            return
+        }
+
+        val storedSession = storedSessionResult.getOrThrow()
 
         if (storedSession != null) {
             scanningScreenData.currentScansState.addAll(storedSession.scannedPages)
@@ -287,52 +330,28 @@ class ScanningScreenViewModel(
         }
     }
 
-    fun addScan(path: String, settings: ScanSettings) {
-        _scanningScreenData.stateCurrentScans.add(Pair(path, settings))
+    fun addScan(path: String, settings: ScanSettings, rotation: ScanRelativeRotation) {
+        _scanningScreenData.stateCurrentScans.add(ScanMetadata(path, settings, rotation))
         saveSessionFile()
     }
-    fun addScanAtIndex(path: String, settings: ScanSettings, index: Int) {
-        _scanningScreenData.stateCurrentScans.add(index, Pair(path, settings))
+    fun addScanAtIndex(path: String, settings: ScanSettings, rotation: ScanRelativeRotation, index: Int) {
+        _scanningScreenData.stateCurrentScans.add(index, ScanMetadata(path, settings, rotation))
         saveSessionFile()
     }
 
     @OptIn(ExperimentalSerializationApi::class)
     fun saveSessionFile(): String {
-        val path = application.applicationInfo.dataDir + "/files/" + scanningScreenData.sessionID + ".session"
-        val file = File(path)
-
         val currentSessionState = Session(
             scanningScreenData.sessionID,
             scanningScreenData.currentScansState.toList(),
             scanningScreenData.scanSettingsVM?.getMutableScanSettingsComposableData()?.scanSettingsState?.toStateless(),
             scanningScreenData.createdTempFiles.map { it.absolutePath }
         )
-
-        val fos = file.outputStream()
-
-        json.encodeToStream(currentSessionState, fos)
-        fos.close()
-        return path
+        return SessionsStore.saveSession(currentSessionState, application, scanningScreenData.sessionID)
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    fun loadSessionFile(): Session? {
-        val path = application.applicationInfo.dataDir + "/files/" + scanningScreenData.sessionID + ".session"
-        val file = File(path)
-
-        if (!file.exists()) {
-            Timber.d("Could not find session file at $path")
-            return null
-        }
-
-        val inputStream = file.inputStream()
-
-        val storedSession = json.decodeFromStream<Session>(inputStream)
-
-        inputStream.close()
-
-        return storedSession
-    }
+    fun loadSessionFile(): Result<Session?> = SessionsStore.loadSession(application, scanningScreenData.sessionID)
 
     fun swapTwoPages(index1: Int, index2: Int) {
         if (index1 < 0 ||
@@ -614,7 +633,7 @@ class ScanningScreenViewModel(
                 Timber.d("Cancelling job after error while trying to decode received page as bitmap: $deletionResult")
                 return
             }
-            addScan(filePath.toString(), currentScanSettings)
+            addScan(filePath.toString(), currentScanSettings, ScanRelativeRotation.Original)
         }
     }
 

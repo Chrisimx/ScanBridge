@@ -30,11 +30,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
 import io.github.chrisimx.scanbridge.util.doTempFilesExist
 import io.ktor.http.Url
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 
 @Serializable
@@ -48,16 +50,36 @@ object StartUpScreenRoute : BaseRoute
 @SerialName("ScannerRoute")
 data class ScannerRoute(val scannerName: String, val scannerURL: String, val sessionID: String) : BaseRoute
 
+@Serializable
+@SerialName("CropImageRoute")
+data class CropImageRoute(val sessionID: String, val pageIdx: Int, val returnRoute: String) : BaseRoute
+
+@Serializable
+@SerialName("ErrorRoute")
+data class ErrorRoute(val error: String) : BaseRoute
+
 fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
     Timber.d("Route changed to: ${destination.route}")
     return when (destination.route) {
         "StartUpScreenRoute" -> StartUpScreenRoute
+
+        "CropImageRoute/{sessionID}/{pageIdx}/{returnRoute}" -> {
+            val sessionID = arguments?.getString("sessionID") ?: return null
+            val pageIdx = arguments?.getInt("pageIdx") ?: return null
+            val returnRouteString = arguments?.getString("returnRoute") ?: return null
+            CropImageRoute(sessionID, pageIdx, returnRouteString)
+        }
 
         "ScannerRoute/{scannerName}/{scannerURL}/{sessionID}" -> {
             val scannerName = arguments?.getString("scannerName") ?: return null
             val scannerURL = arguments?.getString("scannerURL") ?: return null
             val sessionID = arguments?.getString("sessionID") ?: return null
             ScannerRoute(scannerName, scannerURL, sessionID)
+        }
+
+        "ErrorRoute/{error}" -> {
+            val error = arguments?.getString("error") ?: return null
+            ErrorRoute(error)
         }
 
         else -> null
@@ -74,12 +96,29 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
         navController = navController,
         startDestination = startDestination
     ) {
+        composable<ErrorRoute> { backStackEntry ->
+            val errorRoute: ErrorRoute = backStackEntry.toRoute()
+            val errorMessage = errorRoute.error
+
+            FullScreenError(R.drawable.outline_error_24, errorMessage, true)
+        }
         composable<StartUpScreenRoute> {
             StartupScreen(navController)
 
             if (doTempFilesExist(context.filesDir)) {
                 TemporaryFileHandler()
             }
+        }
+        composable<CropImageRoute> { backStackEntry ->
+            val scannerRoute: CropImageRoute = backStackEntry.toRoute()
+            val returnRoute = try {
+                Json.decodeFromString<BaseRoute>(scannerRoute.returnRoute)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to decode returnRoute: ${scannerRoute.returnRoute}")
+                navController.navigate(StartUpScreenRoute)
+                return@composable
+            }
+            CropScreen(scannerRoute.sessionID, scannerRoute.pageIdx, returnRoute, navController)
         }
         composable<ScannerRoute> { backStackEntry ->
             val scannerRoute: ScannerRoute = backStackEntry.toRoute()

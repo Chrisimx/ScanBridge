@@ -24,8 +24,6 @@ import android.app.Application
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -100,9 +98,12 @@ import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Image
+import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanRegion
+import io.github.chrisimx.esclkt.inches
 import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.esclkt.threeHundredthsOfInch
+import io.github.chrisimx.scanbridge.data.ui.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.uicomponents.ExportSettingsPopup
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
@@ -110,7 +111,8 @@ import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen
 import io.github.chrisimx.scanbridge.uicomponents.dialog.ConfirmCloseDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.DeletionDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
-import io.github.chrisimx.scanbridge.util.rotateBy90
+import io.github.chrisimx.scanbridge.util.clearAndNavigateTo
+import io.github.chrisimx.scanbridge.util.getMaxResolution
 import io.github.chrisimx.scanbridge.util.snackBarError
 import io.github.chrisimx.scanbridge.util.toReadableString
 import io.github.chrisimx.scanbridge.util.zipFiles
@@ -123,55 +125,13 @@ import kotlin.concurrent.thread
 import kotlin.io.path.Path
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 import timber.log.Timber
 
 private const val TAG = "ScanningScreen"
-
-fun String.extractBaseFilename(): String? {
-    val regex = Regex("^scan-[a-f0-9-]+")
-    return regex.find(this)?.value
-}
-
-fun rotate(context: Context, scanningViewModel: ScanningScreenViewModel) {
-    if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
-        return
-    }
-    scanningViewModel.setLoadingText(R.string.rotating_page)
-
-    val currentScans = scanningViewModel.scanningScreenData.currentScansState
-    val currentPagePath =
-        currentScans[scanningViewModel.scanningScreenData.pagerState.currentPage].first
-    val currentPageFile = File(currentPagePath)
-
-    Timber.tag(TAG).d("Decoding $currentPagePath")
-    val originalBitmap = BitmapFactory.decodeFile(currentPagePath)
-    Timber.tag(TAG).d("Rotating $currentPagePath")
-    val rotatedBitmap = originalBitmap.rotateBy90()
-    originalBitmap.recycle()
-
-    val baseFileName = currentPageFile.name.extractBaseFilename()
-
-    val newFile = File(context.filesDir, "$baseFileName edit-${System.currentTimeMillis()}.jpg")
-
-    Timber.tag(TAG).d("Saving rotated $currentPagePath")
-    newFile.outputStream().use {
-        rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
-    }
-
-    Timber.tag(TAG).d("Finished saving rotated $currentPagePath")
-
-    val index = scanningViewModel.scanningScreenData.pagerState.currentPage
-    val scanSettings = currentScans[index].second
-    Timber.tag(TAG).d("Updating UI state after rotation")
-    scanningViewModel.removeScanAtIndex(index)
-    scanningViewModel.addTempFile(currentPageFile)
-    scanningViewModel.addScanAtIndex(newFile.absolutePath, scanSettings, index)
-
-    scanningViewModel.setLoadingText(null)
-}
 
 fun doZipExport(
     scanningViewModel: ScanningScreenViewModel,
@@ -205,7 +165,7 @@ fun doZipExport(
     var counter = 0
     val digitsNeeded = scanningViewModel.scanningScreenData.currentScansState.size.toString().length
     zipFiles(
-        scanningViewModel.scanningScreenData.currentScansState.map { File(it.first) },
+        scanningViewModel.scanningScreenData.currentScansState.map { File(it.filePath) },
         zipOutputFile,
         {
             counter++
@@ -241,6 +201,14 @@ fun doPdfExport(
     onError: (String) -> Unit,
     saveFileLauncher: ActivityResultLauncher<String>? = null
 ) {
+    val scannerCapsNullable = scanningViewModel.scanningScreenData.capabilities
+    val scannerCaps = if (scannerCapsNullable == null) {
+        onError(context.getString(R.string.scannercapabilities_null))
+        return
+    } else {
+        scannerCapsNullable
+    }
+
     if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
         onError(context.getString(R.string.no_scans_yet))
         return
@@ -279,41 +247,41 @@ fun doPdfExport(
                 Document(pdf).use { document ->
                     chunk.forEachIndexed { i, scan ->
                         val scanRegion =
-                            scan.second.scanRegions?.regions?.first() ?: ScanRegion(
+                            scan.originalScanSettings.scanRegions?.regions?.first() ?: ScanRegion(
                                 297.millimeters().toThreeHundredthsOfInch(),
                                 210.millimeters().toThreeHundredthsOfInch(),
                                 0.threeHundredthsOfInch(),
                                 0.threeHundredthsOfInch()
                             )
 
-                        val imageData = ImageDataFactory.create(scan.first)
-                        val scanRegionOrientation = scanRegion.height.value > scanRegion.width.value
-                        val actualImageOrientation = imageData.height > imageData.width
+                        val imageData = ImageDataFactory.create(scan.filePath)
 
-                        var width72thInches =
-                            scanRegion.width.toInches().value * 72.0
-                        var height72thInches =
-                            scanRegion.height.toInches().value * 72.0
+                        val rotated = scan.rotation == ScanRelativeRotation.Rotated
 
-                        if (actualImageOrientation != scanRegionOrientation) {
-                            val tmp = width72thInches
-                            width72thInches = height72thInches
-                        }
+                        val inputSource = scan.originalScanSettings.inputSource ?: InputSource.Platen
 
-                        val aspectRatio = imageData.width / imageData.height
-                        height72thInches = width72thInches / aspectRatio
+                        val fallbackResolution = scannerCaps.getMaxResolution(inputSource)
+                        val scannerXResolution = scan.originalScanSettings.xResolution ?: fallbackResolution.xResolution
+                        val scannerYResolution = scan.originalScanSettings.yResolution ?: fallbackResolution.yResolution
+
+                        val rotationCorrectedXRes = if (rotated) scannerYResolution else scannerXResolution
+                        val rotationCorrectedYRes = if (rotated) scannerXResolution else scannerYResolution
+
+                        // pts are 1/72th inch
+                        val widthPts = (imageData.width / rotationCorrectedXRes.toFloat()).inches().toPoints().value
+                        val heightPts = (imageData.height / rotationCorrectedYRes.toFloat()).inches().toPoints().value
 
                         pdf.addNewPage(
                             PageSize(
-                                width72thInches.toFloat(),
-                                height72thInches.toFloat()
+                                widthPts.toFloat(),
+                                heightPts.toFloat()
                             )
                         )
 
                         val imageElem = Image(imageData)
                         imageElem.setFixedPosition(i + 1, 0f, 0f)
-                        imageElem.setHeight(height72thInches.toFloat())
-                        imageElem.setWidth(width72thInches.toFloat())
+                        imageElem.setHeight(heightPts.toFloat())
+                        imageElem.setWidth(widthPts.toFloat())
 
                         document.add(imageElem)
 
@@ -550,16 +518,13 @@ fun ScanningScreen(
 
     val isError by remember {
         derivedStateOf {
-            scanningViewModel.scanningScreenData.errorString != null
+            scanningViewModel.scanningScreenData.error != null
         }
     }
 
     if (!isLoaded) {
         BackHandler {
-            navController.navigate(StartUpScreenRoute) {
-                popUpTo(0) { inclusive = true }
-                launchSingleTop = true
-            }
+            navController.clearAndNavigateTo(StartUpScreenRoute)
         }
 
         Scaffold { innerPadding ->
@@ -578,11 +543,12 @@ fun ScanningScreen(
                 enter = fadeIn(animationSpec = tween(1000)),
                 exit = fadeOut(animationSpec = tween(1000))
             ) {
+                val errorDescription = scanningViewModel.scanningScreenData.error
                 FullScreenError(
-                    R.drawable.twotone_wifi_find_24,
+                    errorDescription?.icon ?: R.drawable.twotone_wifi_find_24,
                     stringResource(
-                        R.string.scannercapabilities_retrieve_error,
-                        scanningViewModel.scanningScreenData.errorString!!
+                        errorDescription?.pretext ?: R.string.scannercapabilities_retrieve_error,
+                        errorDescription?.text ?: "Error text not found"
                     ),
                     copyButton = true
                 )
@@ -635,7 +601,7 @@ fun ScanningScreen(
     ) { innerPadding ->
 
         if (scanningViewModel.scanningScreenData.capabilities != null) {
-            ScanContent(innerPadding, scannerName, scanningViewModel, scope)
+            ScanContent(innerPadding, scannerName, scanningViewModel, scope, navController)
         }
 
         if (scanningViewModel.scanningScreenData.scanSettingsMenuOpen) {
@@ -786,7 +752,7 @@ fun ScanningScreen(
                 onConfirmed = {
                     Timber.d("Deleting page")
                     val index = scanningViewModel.scanningScreenData.pagerState.currentPage
-                    Files.delete(Path(scanningViewModel.scanningScreenData.currentScansState[index].first))
+                    Files.delete(Path(scanningViewModel.scanningScreenData.currentScansState[index].filePath))
                     scanningViewModel.removeScanAtIndex(index)
                     scanningViewModel.setDeletePageDialogShown(false)
                 }
@@ -802,16 +768,13 @@ fun ScanningScreen(
                 onDismiss = { scanningViewModel.setConfirmDialogShown(false) },
                 onConfirmed = {
                     scanningViewModel.scanningScreenData.currentScansState.forEach {
-                        Files.delete(Path(it.first))
+                        Files.delete(Path(it.filePath))
                     }
                     scanningViewModel.scanningScreenData.createdTempFiles.forEach(File::delete)
 
                     scanningViewModel.scanningScreenData.currentScansState.clear()
                     scanningViewModel.setConfirmDialogShown(false)
-                    navController.navigate(StartUpScreenRoute) {
-                        popUpTo(0) { inclusive = true }
-                        launchSingleTop = true
-                    }
+                    navController.clearAndNavigateTo(StartUpScreenRoute)
                 }
             )
         }
@@ -823,10 +786,12 @@ fun ScanContent(
     innerPadding: PaddingValues,
     scannerName: String,
     scanningViewModel: ScanningScreenViewModel,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    navController: NavHostController? = null
 ) {
     val pagerState = scanningViewModel.scanningScreenData.pagerState
     val context = LocalContext.current
+    val currentScans = scanningViewModel.scanningScreenData.currentScansState
 
     Column(
         modifier = Modifier
@@ -846,9 +811,9 @@ fun ScanContent(
                 )
             )
 
-            if (scanningViewModel.scanningScreenData.currentScansState.size > pagerState.currentPage) {
+            if (currentScans.size > pagerState.currentPage) {
                 Text(
-                    scanningViewModel.scanningScreenData.currentScansState[pagerState.currentPage].second.inputSource?.toReadableString(
+                    currentScans[pagerState.currentPage].originalScanSettings.inputSource?.toReadableString(
                         context
                     ).toString()
                 )
@@ -861,42 +826,35 @@ fun ScanContent(
             state = pagerState
         ) { page ->
             if (page >= scanningViewModel.scanningScreenData.currentScansState.size) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator()
-                    Text(modifier = Modifier.padding(vertical = 15.dp), text = stringResource(R.string.retrieving_page))
+                if (scanningViewModel.scanningScreenData.scanJobRunning) {
+                    DownloadingPageFullscreen(innerPadding)
+                } else {
+                    FullScreenError(
+                        R.drawable.rounded_document_scanner_24,
+                        stringResource(R.string.no_scans_yet)
+                    )
                 }
                 return@HorizontalPager
             } else {
                 val zoomState = rememberZoomableState(zoomSpec = ZoomSpec(5f))
 
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(vertical = 5.dp)
+                        .zoomable(zoomState),
                     contentAlignment = Alignment.Center
                 ) {
+                    val imagePath = scanningViewModel.scanningScreenData.currentScansState.getOrNull(page)?.filePath
                     AsyncImage(
-                        model = scanningViewModel.scanningScreenData.currentScansState[page].first,
+                        model = imagePath,
                         contentDescription = stringResource(R.string.desc_scanned_page),
                         modifier = Modifier
-                            .zoomable(zoomState)
-                            .padding(vertical = 5.dp)
                             .testTag("scan_page")
                     )
                 }
             }
         }
-    }
-
-    if (scanningViewModel.scanningScreenData.currentScansState.isEmpty() && !scanningViewModel.scanningScreenData.scanJobRunning) {
-        FullScreenError(
-            R.drawable.rounded_document_scanner_24,
-            stringResource(R.string.no_scans_yet)
-        )
     }
 
     if (pagerState.currentPage < scanningViewModel.scanningScreenData.currentScansState.size) {
@@ -945,6 +903,27 @@ fun ScanContent(
                         )
                     }
                     IconButton(onClick = {
+                        val currentPageIndex = pagerState.currentPage
+                        navController?.currentBackStackEntry?.toTypedRoute()?.let { currentRoute ->
+                            scanningViewModel.scanningScreenData.currentScansState.getOrNull(currentPageIndex)?.let { currentPage ->
+                                navController.clearAndNavigateTo(
+                                    CropImageRoute(
+                                        scanningViewModel.scanningScreenData.sessionID,
+                                        currentPageIndex,
+                                        Json.encodeToString(currentRoute)
+                                    )
+                                )
+                            }
+                        }
+                    }) {
+                        Icon(
+                            painterResource(R.drawable.outline_crop_24),
+                            contentDescription = stringResource(
+                                R.string.crop
+                            )
+                        )
+                    }
+                    IconButton(onClick = {
                         scanningViewModel.swapTwoPages(
                             pagerState.currentPage,
                             pagerState.currentPage + 1
@@ -962,7 +941,7 @@ fun ScanContent(
                     }
                     IconButton(onClick = {
                         thread {
-                            rotate(context, scanningViewModel)
+                            scanningViewModel.rotateCurrentPage()
                         }
                     }) {
                         Icon(
@@ -975,5 +954,19 @@ fun ScanContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DownloadingPageFullscreen(innerPadding: PaddingValues) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator()
+        Text(modifier = Modifier.padding(vertical = 15.dp), text = stringResource(R.string.retrieving_page))
     }
 }

@@ -156,11 +156,7 @@ class ScannerDiscovery(
     }
 }
 
-private fun ScannerDiscovery.tryParseScannerUrl(
-    address: InetAddress,
-    serviceInfo: NsdServiceInfo,
-    rs: String
-): Url? {
+private fun ScannerDiscovery.tryParseScannerUrl(address: InetAddress, serviceInfo: NsdServiceInfo, rs: String): Url? {
     if (address.isLinkLocalAddress) {
         Timber.tag(TAG).d("Ignoring link local address: ${address.hostAddress}")
         return null

@@ -1,7 +1,6 @@
 package io.github.chrisimx.scanbridge.stores
 
 import android.content.Context
-import androidx.lifecycle.application
 import io.github.chrisimx.esclkt.Inches
 import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.Millimeters
@@ -34,13 +33,15 @@ object SessionsStore {
         prettyPrint = false
     }
 
-    fun loadSession(application: Context, sessionID: String): Session? {
+    fun loadSession(application: Context, sessionID: String): Result<Session?> {
+        Timber.d("Loading session $sessionID")
+
         val path = application.applicationInfo.dataDir + "/files/" + sessionID + ".session"
         val file = File(path)
 
         if (!file.exists()) {
             Timber.d("Could not find session file at $path")
-            return null
+            return Result.success(null)
         }
 
         val sessionFileString = file.readText()
@@ -50,6 +51,8 @@ object SessionsStore {
 
     @OptIn(ExperimentalSerializationApi::class)
     fun saveSession(session: Session, application: Context, sessionID: String): String {
+        Timber.d("Saving session $sessionID with $session")
+
         val path = application.applicationInfo.dataDir + "/files/" + sessionID + ".session"
         val file = File(path)
 

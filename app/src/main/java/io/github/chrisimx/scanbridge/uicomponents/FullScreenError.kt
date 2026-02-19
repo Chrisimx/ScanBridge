@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -43,12 +44,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.chrisimx.scanbridge.R
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = false) {
+fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = false, fontSize: TextUnit = 18.sp, title: String? = null) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
@@ -67,6 +70,13 @@ fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = 
             tint = MaterialTheme.colorScheme.primary
         )
 
+        if (title != null) {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleMediumEmphasized
+            )
+        }
+
         Column(
             modifier = Modifier.verticalScroll(scrollState)
                 .weight(1f, false)
@@ -79,7 +89,7 @@ fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = 
                     .padding(20.dp),
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Light,
-                fontSize = 18.sp
+                fontSize = fontSize
             )
         }
 
