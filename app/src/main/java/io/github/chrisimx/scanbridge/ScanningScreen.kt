@@ -201,6 +201,14 @@ fun doPdfExport(
     onError: (String) -> Unit,
     saveFileLauncher: ActivityResultLauncher<String>? = null
 ) {
+    val scannerCapsNullable = scanningViewModel.scanningScreenData.capabilities
+    val scannerCaps = if (scannerCapsNullable == null) {
+        onError(context.getString(R.string.scannercapabilities_null))
+        return
+    } else {
+        scannerCapsNullable
+    }
+
     if (scanningViewModel.scanningScreenData.currentScansState.isEmpty()) {
         onError(context.getString(R.string.no_scans_yet))
         return
@@ -252,7 +260,7 @@ fun doPdfExport(
 
                         val inputSource = scan.originalScanSettings.inputSource ?: InputSource.Platen
 
-                        val fallbackResolution = scanningViewModel.scanningScreenData.capabilities!!.getMaxResolution(inputSource)
+                        val fallbackResolution = scannerCaps.getMaxResolution(inputSource)
                         val scannerXResolution = scan.originalScanSettings.xResolution ?: fallbackResolution.xResolution
                         val scannerYResolution = scan.originalScanSettings.yResolution ?: fallbackResolution.yResolution
 
