@@ -66,6 +66,9 @@ class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {
             android.os.Process.killProcess(android.os.Process.myPid())
         } catch (newException: Exception) {
             Timber.e(newException, "Uncaught exception in CrashHandler")
+            if (defaultHandler != null) {
+                defaultHandler.uncaughtException(t, e)
+            }
         }
     }
 }
