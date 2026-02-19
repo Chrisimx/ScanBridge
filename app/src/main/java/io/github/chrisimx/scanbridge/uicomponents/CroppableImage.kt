@@ -141,17 +141,17 @@ fun CropOverlay(
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset ->
-                        val offset = offset - Offset(touchPaddingAroundInPx.toFloat(), touchPaddingAroundInPx.toFloat())
+                        val adjustedOffset = offset - Offset(touchPaddingAroundInPx.toFloat(), touchPaddingAroundInPx.toFloat())
                         lastDragEventType = CropDragEvent.DraggedOutside
 
-                        if (!rect.inflate(handleTouchRadius.toPx()).contains(offset)) {
-                            onPan(offset)
+                        if (!rect.inflate(handleTouchRadius.toPx()).contains(adjustedOffset)) {
+                            onPan(adjustedOffset)
                             return@detectDragGestures
                         }
 
                         lastDragEventType = CropDragEvent.DraggedInside
 
-                        if (rect.deflate(rect.width / 4, rect.height / 4).contains(offset)) {
+                        if (rect.deflate(rect.width / 4, rect.height / 4).contains(adjustedOffset)) {
                             return@detectDragGestures
                         }
 
@@ -159,7 +159,7 @@ fun CropOverlay(
                             .mapIndexed { idx, handle ->
                                 Pair(
                                     idx,
-                                    (handle.position - offset).getDistance()
+                                    (handle.position - adjustedOffset).getDistance()
                                 )
                             }
                             .filter { it.second < handleTouchRadius.toPx() }
