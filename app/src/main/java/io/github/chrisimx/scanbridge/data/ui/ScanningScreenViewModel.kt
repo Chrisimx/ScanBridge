@@ -183,36 +183,38 @@ class ScanningScreenViewModel(
         }
         _scanningScreenData.isRotating.value = true
         setLoadingText(R.string.rotating_page)
+        try {
+            val currentScans = scanningScreenData.currentScansState
+            val currentPagePath =
+                currentScans[scanningScreenData.pagerState.currentPage].filePath
+            val currentPageFile = File(currentPagePath)
 
-        val currentScans = scanningScreenData.currentScansState
-        val currentPagePath =
-            currentScans[scanningScreenData.pagerState.currentPage].filePath
-        val currentPageFile = File(currentPagePath)
+            Timber.d("Decoding $currentPagePath")
+            val originalBitmap = BitmapFactory.decodeFile(currentPagePath)
+            Timber.d("Rotating $currentPagePath")
+            val rotatedBitmap = originalBitmap.rotateBy90()
+            originalBitmap.recycle()
 
-        Timber.d("Decoding $currentPagePath")
-        val originalBitmap = BitmapFactory.decodeFile(currentPagePath)
-        Timber.d("Rotating $currentPagePath")
-        val rotatedBitmap = originalBitmap.rotateBy90()
-        originalBitmap.recycle()
+            val editedImageName = currentPageFile.getEditedImageName()
+            val newFile = File(application.filesDir, editedImageName)
 
-        val editedImageName = currentPageFile.getEditedImageName()
-        val newFile = File(application.filesDir, editedImageName)
+            Timber.d("Saving rotated $currentPagePath")
+            rotatedBitmap.saveAsJPEG(newFile)
+            rotatedBitmap.recycle()
 
-        Timber.d("Saving rotated $currentPagePath")
-        rotatedBitmap.saveAsJPEG(newFile)
+            Timber.d("Finished saving rotated $currentPagePath")
 
-        Timber.d("Finished saving rotated $currentPagePath")
-
-        val index = scanningScreenData.pagerState.currentPage
-        val scanSettings = currentScans[index].originalScanSettings
-        val priorRotation = currentScans[index].rotation
-        Timber.d("Updating UI state after rotation")
-        removeScanAtIndex(index)
-        addTempFile(currentPageFile)
-        addScanAtIndex(newFile.absolutePath, scanSettings, priorRotation.toggleRotation(), index)
-
-        setLoadingText(null)
-        _scanningScreenData.isRotating.value = false
+            val index = scanningScreenData.pagerState.currentPage
+            val scanSettings = currentScans[index].originalScanSettings
+            val priorRotation = currentScans[index].rotation
+            Timber.d("Updating UI state after rotation")
+            removeScanAtIndex(index)
+            addTempFile(currentPageFile)
+            addScanAtIndex(newFile.absolutePath, scanSettings, priorRotation.toggleRotation(), index)
+        } finally {
+            setLoadingText(null)
+            _scanningScreenData.isRotating.value = false
+        }
     }
 
     fun setScannerCapabilities(caps: ScannerCapabilities) {
