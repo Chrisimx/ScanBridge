@@ -510,7 +510,7 @@ fun ScanningScreen(
 
     val isError by remember {
         derivedStateOf {
-            scanningViewModel.scanningScreenData.errorString != null
+            scanningViewModel.scanningScreenData.error != null
         }
     }
 
@@ -530,16 +530,18 @@ fun ScanningScreen(
                 )
             }
 
+
             AnimatedVisibility(
                 isError,
                 enter = fadeIn(animationSpec = tween(1000)),
                 exit = fadeOut(animationSpec = tween(1000))
             ) {
+                val errorDescription = scanningViewModel.scanningScreenData.error
                 FullScreenError(
-                    R.drawable.twotone_wifi_find_24,
+                    errorDescription?.icon ?: R.drawable.twotone_wifi_find_24,
                     stringResource(
-                        R.string.scannercapabilities_retrieve_error,
-                        scanningViewModel.scanningScreenData.errorString!!
+                        errorDescription?.pretext ?: R.string.scannercapabilities_retrieve_error,
+                        errorDescription?.text ?: "Error text not found"
                     ),
                     copyButton = true
                 )

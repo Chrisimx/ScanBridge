@@ -33,7 +33,7 @@ object SessionsStore {
         prettyPrint = false
     }
 
-    fun loadSession(application: Context, sessionID: String): Session? {
+    fun loadSession(application: Context, sessionID: String): Result<Session?> {
         Timber.d("Loading session $sessionID")
 
         val path = application.applicationInfo.dataDir + "/files/" + sessionID + ".session"
@@ -41,7 +41,7 @@ object SessionsStore {
 
         if (!file.exists()) {
             Timber.d("Could not find session file at $path")
-            return null
+            return Result.success(null)
         }
 
         val sessionFileString = file.readText()

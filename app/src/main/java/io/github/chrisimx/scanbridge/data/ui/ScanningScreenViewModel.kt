@@ -169,8 +169,12 @@ class ScanningScreenViewModel(
         _scanningScreenData.scanJobCancelling.value = value
     }
 
-    fun setError(value: String?) {
-        _scanningScreenData.errorString.value = value
+    fun setError(error: String?, titleResource: Int? = null, errorIcon: Int? = null) {
+        _scanningScreenData.error.value = ErrorDescription(
+            titleResource,
+            errorIcon,
+            error
+        )
     }
 
     fun rotateCurrentPage() {
@@ -213,7 +217,18 @@ class ScanningScreenViewModel(
 
     fun setScannerCapabilities(caps: ScannerCapabilities) {
         _scanningScreenData.capabilities.value = caps
-        val storedSession = loadSessionFile()
+        val storedSessionResult = loadSessionFile()
+
+        storedSessionResult.onFailure {
+            setError(
+                it.toString(),
+                R.string.loading_previous_session_failed,
+                R.drawable.rounded_warning_24
+                )
+            return
+        }
+
+        val storedSession = storedSessionResult.getOrThrow()
 
         if (storedSession != null) {
             scanningScreenData.currentScansState.addAll(storedSession.scannedPages)
@@ -328,7 +343,7 @@ class ScanningScreenViewModel(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    fun loadSessionFile(): Session? = SessionsStore.loadSession(application, scanningScreenData.sessionID)
+    fun loadSessionFile(): Result<Session?> = SessionsStore.loadSession(application, scanningScreenData.sessionID)
 
     fun swapTwoPages(index1: Int, index2: Int) {
         if (index1 < 0 ||

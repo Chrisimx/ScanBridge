@@ -37,6 +37,12 @@ enum class ScanRelativeRotation {
     Original
 }
 
+data class ErrorDescription(
+    val pretext: Int?,
+    val icon: Int?,
+    val text: String?
+)
+
 fun ScanRelativeRotation.toggleRotation() = when (this) {
     ScanRelativeRotation.Rotated -> ScanRelativeRotation.Original
     ScanRelativeRotation.Original -> ScanRelativeRotation.Rotated
@@ -54,7 +60,7 @@ data class ScanningScreenData(
     val sessionID: String,
     val confirmDialogShown: MutableState<Boolean> = mutableStateOf(false),
     val confirmPageDeleteDialogShown: MutableState<Boolean> = mutableStateOf(false),
-    val errorString: MutableState<String?> = mutableStateOf(null),
+    val error: MutableState<ErrorDescription?> = mutableStateOf(null),
     val scanSettingsVM: MutableState<ScanSettingsComposableViewModel?> = mutableStateOf(null),
     val capabilities: MutableState<ScannerCapabilities?> = mutableStateOf(null),
     val scanSettingsMenuOpen: MutableState<Boolean> = mutableStateOf(false),
@@ -78,7 +84,7 @@ data class ScanningScreenData(
         sessionID,
         confirmDialogShown,
         confirmPageDeleteDialogShown,
-        errorString,
+        error,
         scanSettingsVM,
         capabilities,
         scanSettingsMenuOpen,
@@ -102,7 +108,7 @@ data class ImmutableScanningScreenData(
     val sessionID: String,
     private val confirmDialogShownState: State<Boolean>,
     private val confirmPageDeleteDialogShownState: State<Boolean>,
-    private val errorStringState: State<String?>,
+    private val errorState: State<ErrorDescription?>,
     private val scanSettingsVMState: State<ScanSettingsComposableViewModel?>,
     private val capabilitiesState: State<ScannerCapabilities?>,
     private val scanSettingsMenuOpenState: State<Boolean>,
@@ -127,7 +133,7 @@ data class ImmutableScanningScreenData(
     val scanJobCancelling by scanJobCancellingState
     val progressStringResource by progressStringResState
     val capabilities by capabilitiesState
-    val errorString by errorStringState
+    val error by errorState
     val showExportOptions by showExportOptionsState
     val showSaveOptions by showSaveOptionsState
     val exportOptionsPopupPosition by exportOptionsPopupPositionState

@@ -100,12 +100,17 @@ fun CropScreen(sessionID: String, pageIdx: Int, returnRoute: BaseRoute, navContr
 
     var processing: Boolean by remember { mutableStateOf(false) }
 
-    val originalSession: Session? = remember { SessionsStore.loadSession(context, sessionID) }
+    val originalSessionResult: Result<Session?> = remember {
+        SessionsStore.loadSession(context, sessionID)
+    }
 
-    if (originalSession == null) {
+    if (originalSessionResult.getOrNull() == null) {
+        Timber.e("Could not decode/get session with $sessionID but CropScreen was opened")
         navController.clearAndNavigateTo(StartUpScreenRoute)
         return
     }
+
+    val originalSession = originalSessionResult.getOrThrow()!!
 
     val originalImageFile = remember { originalSession.scannedPages[pageIdx].filePath }
 

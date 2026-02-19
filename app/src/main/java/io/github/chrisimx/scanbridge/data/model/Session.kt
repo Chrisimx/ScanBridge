@@ -4,6 +4,7 @@ import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.scanbridge.data.ui.ScanMetadata
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import timber.log.Timber
 
 @Serializable
 data class Session(
@@ -13,11 +14,16 @@ data class Session(
     val tmpFiles: List<String>
 ) {
     companion object {
-        fun fromString(sessionFileString: String, json: Json): Session = try {
-            json.decodeFromString<Session>(sessionFileString)
+        fun fromString(sessionFileString: String, json: Json): Result<Session> = try {
+            Result.success(json.decodeFromString<Session>(sessionFileString))
         } catch (_: Exception) {
-            val oldSessionVersion = json.decodeFromString<SessionOld>(sessionFileString)
-            oldSessionVersion.migrateToNew()
+            try {
+                Timber.e("Could not decode Session at $sessionFileString. Trying with old format")
+                val oldSessionVersion = json.decodeFromString<SessionOld>(sessionFileString)
+                Result.success(oldSessionVersion.migrateToNew())
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
 }
