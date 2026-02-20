@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        Timber.plant(Timber.DebugTree())
+        LocaleProvider.update()
 
         val sharedPreferences = this.getSharedPreferences("scanbridge", MODE_PRIVATE)
 
