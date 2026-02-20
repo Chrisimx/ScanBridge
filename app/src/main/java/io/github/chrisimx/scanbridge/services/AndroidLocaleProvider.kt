@@ -14,7 +14,7 @@ class AndroidLocaleProvider : LocaleProvider {
 
     internal fun update() {
         val locale = Locale.getDefault()
-        Timber.Forest.d("Locale updated to $locale")
+        Timber.d("Locale updated to $locale")
         _locale.value = locale
     }
 }
