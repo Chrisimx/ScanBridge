@@ -28,6 +28,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import io.github.chrisimx.scanbridge.logs.FileLogger
+import io.github.chrisimx.scanbridge.util.LocaleProvider
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -61,6 +62,12 @@ class MainActivity : ComponentActivity() {
             }
             debugWriter = BufferedWriter(FileWriter(output, true))
             tree = FileLogger(debugWriter!!)
+
+            Timber.forest().filterIsInstance<FileLogger>().forEach {
+                Timber.d("Old tree removed $it")
+                it.output.close()
+                Timber.uproot(it)
+            }
             Timber.plant(tree!!)
         }
 
@@ -92,6 +99,7 @@ class MainActivity : ComponentActivity() {
         Timber.i("ScanBridge stops: onDestroy")
         Timber.i("Cleaning up debug writer")
 
+        tree?.let { Timber.uproot(it) }
         debugWriter?.close()
     }
 
