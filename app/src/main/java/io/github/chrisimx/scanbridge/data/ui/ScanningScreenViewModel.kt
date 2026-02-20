@@ -148,7 +148,7 @@ class ScanningScreenViewModel(
     fun scrollToPage(pageNr: Int, scope: CoroutineScope) {
         scope.launch {
             _scanningScreenData.pagerState.animateScrollToPage(
-                scanningScreenData.currentScansState.size
+                pageNr
             )
         }
     }
@@ -451,7 +451,7 @@ class ScanningScreenViewModel(
         setScanJobCancelling(false)
         scrollToPage(
             scope = snackBarScope,
-            pageNr = scanningScreenData.currentScansState.size + 1
+            pageNr = scanningScreenData.currentScansState.size
         )
 
         if (abortIfCancelling()) return
