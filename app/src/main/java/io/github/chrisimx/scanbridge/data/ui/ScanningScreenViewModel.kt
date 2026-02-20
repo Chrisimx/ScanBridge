@@ -225,7 +225,7 @@ class ScanningScreenViewModel(
 
     fun setScannerCapabilities(caps: ScannerCapabilities) {
         _scanningScreenData.capabilities.value = caps
-        val storedSessionResult = loadSessionFile()
+        val storedSessionResult = loadSessionFile(caps)
 
         storedSessionResult.onFailure {
             setError(
@@ -351,7 +351,7 @@ class ScanningScreenViewModel(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    fun loadSessionFile(): Result<Session?> = SessionsStore.loadSession(application, scanningScreenData.sessionID)
+    fun loadSessionFile(caps: ScannerCapabilities): Result<Session?> = SessionsStore.loadSession(application, scanningScreenData.sessionID, caps)
 
     fun swapTwoPages(index1: Int, index2: Int) {
         if (index1 < 0 ||

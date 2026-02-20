@@ -20,18 +20,20 @@
 package io.github.chrisimx.scanbridge.util
 
 import android.content.Context
+import android.icu.number.NumberFormatter
 import android.icu.text.DecimalFormat
 import androidx.compose.runtime.mutableStateOf
 import io.github.chrisimx.esclkt.ColorModeEnumOrRaw
 import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.EnumOrRaw
 import io.github.chrisimx.esclkt.InputSource
-import io.github.chrisimx.esclkt.InputSourceCaps
 import io.github.chrisimx.esclkt.JobState
+import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
+import io.github.chrisimx.esclkt.getInputSourceCaps
+import io.github.chrisimx.esclkt.getInputSourceOptions
+import io.github.chrisimx.esclkt.scanRegion
 import io.github.chrisimx.scanbridge.R
-import io.github.chrisimx.scanbridge.data.model.MutableESCLScanSettingsState
-import io.github.chrisimx.scanbridge.data.model.MutableScanRegionState
 
 fun JobState?.toJobStateString(context: Context): String = when (this) {
     JobState.Canceled -> context.getString(R.string.job_canceled)
@@ -46,22 +48,6 @@ fun String.toDoubleLocalized(): Double = DecimalFormat.getInstance().parse(this)
 
 fun Double.toStringLocalized(): String = DecimalFormat.getInstance().format(this)
 
-fun ScannerCapabilities.getInputSourceOptions(): List<InputSource> {
-    val tmpInputSourceOptions = mutableListOf<InputSource>()
-    if (this.platen != null) {
-        tmpInputSourceOptions.add(InputSource.Platen)
-    }
-    if (this.adf != null) {
-        tmpInputSourceOptions.add(InputSource.Feeder)
-    }
-    return tmpInputSourceOptions
-}
-
-fun ScannerCapabilities.getInputSourceCaps(inputSource: InputSource, duplex: Boolean = false): InputSourceCaps = when (inputSource) {
-    InputSource.Platen -> this.platen!!.inputSourceCaps
-    InputSource.Feeder -> if (duplex) this.adf!!.duplexCaps!! else this.adf!!.simplexCaps
-    InputSource.Camera -> TODO()
-}
 
 fun InputSource.toReadableString(context: Context): String = when (this) {
     InputSource.Platen -> context.getString(R.string.platen)
@@ -89,25 +75,27 @@ fun ScannerCapabilities.getBestColorMode(inputSource: InputSource): ColorModeEnu
     return chosenColorMode
 }
 
-fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): MutableESCLScanSettingsState {
+fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): ScanSettings {
     val inputSource = this.getInputSourceOptions().firstOrNull() ?: InputSource.Platen
 
     val maxResolution = getMaxResolution(inputSource)
 
-    val maxScanRegion = MutableScanRegionState(
-        heightState = mutableStateOf("max"),
-        widthState = mutableStateOf("max")
-    )
+    val inputSourceCaps = this.getInputSourceCaps(inputSource, false)
+
+    val maxScanRegion = scanRegion(inputSourceCaps) {
+        maxHeight()
+        maxWidth()
+    }
 
     val bestColorMode = getBestColorMode(inputSource)
 
-    return MutableESCLScanSettingsState(
-        versionState = mutableStateOf(this.interfaceVersion),
-        inputSourceState = mutableStateOf(inputSource),
-        scanRegionsState = mutableStateOf(maxScanRegion),
-        xResolutionState = mutableStateOf(maxResolution.xResolution),
-        yResolutionState = mutableStateOf(maxResolution.yResolution),
-        colorModeState = mutableStateOf(bestColorMode),
-        documentFormatExtState = mutableStateOf("image/jpeg")
+    return ScanSettings(
+        version = this.interfaceVersion,
+        inputSource = inputSource,
+        scanRegions = maxScanRegion,
+        xResolution = maxResolution.xResolution,
+        yResolution = maxResolution.yResolution,
+        colorMode = bestColorMode,
+        documentFormatExt = "image/jpeg"
     )
 }

@@ -45,6 +45,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,9 +75,7 @@ private val TAG = "ScanSettings"
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: ScanSettingsComposableViewModel = viewModel()) {
-    val scanSettingsUIState = scanSettingsViewModel.scanSettingsComposableData
-
-    assert(scanSettingsUIState.inputSourceOptions.isNotEmpty()) // The settings are useless if this is the case
+    val vmData = scanSettingsViewModel.uiState.collectAsState()
 
     val scrollState = rememberScrollState()
 
@@ -227,7 +226,7 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                                 .padding(end = 10.dp),
                             stringResource(R.string.width_in_mm),
                             { newText: String ->
-                                scanSettingsViewModel.setWidthTextFieldContent(
+                                scanSettingsViewModel.setCustomWidthTextFieldContent(
                                     newText
                                 )
                             },
@@ -247,7 +246,7 @@ fun ScanSettingsUI(modifier: Modifier, context: Context, scanSettingsViewModel: 
                                 .weight(1f)
                                 .padding(start = 10.dp),
                             stringResource(R.string.height_in_mm),
-                            { scanSettingsViewModel.setHeightTextFieldContent(it) },
+                            { scanSettingsViewModel.setCustomHeightTextFieldContent(it) },
                             {
                                 scanSettingsViewModel.setRegionDimension(
                                     scanSettingsUIState.widthTextFieldString,
