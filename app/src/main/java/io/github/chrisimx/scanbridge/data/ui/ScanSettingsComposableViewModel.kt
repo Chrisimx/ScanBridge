@@ -19,15 +19,11 @@
 
 package io.github.chrisimx.scanbridge.data.ui
 
-import android.content.res.Resources
-import android.icu.number.NumberFormatter
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.InputSourceCaps
-import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.ScanIntentEnumOrRaw
 import io.github.chrisimx.esclkt.ScanRegionLength
 import io.github.chrisimx.esclkt.ScanSettings
@@ -35,12 +31,10 @@ import io.github.chrisimx.esclkt.getInputSourceCaps
 import io.github.chrisimx.esclkt.getInputSourceOptions
 import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.esclkt.scanRegion
-import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.util.derived
 import io.github.chrisimx.scanbridge.util.getMaxResolution
 import io.github.chrisimx.scanbridge.util.toDoubleLocalized
-import java.text.ParseException
-import java.util.Locale
+import java.util.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -165,11 +159,6 @@ class ScanSettingsComposableViewModel(
             it.copy(widthString = width)
         }
     }
-
-    fun getCurrentUserLocale(): Locale {
-        return Resources.getSystem().configuration.locales[0]
-    }
-
 
     fun setCustomHeightTextFieldContent(height: String) {
         check(_uiState.value.customMenuEnabled)
