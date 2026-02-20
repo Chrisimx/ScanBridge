@@ -57,12 +57,11 @@ import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.SupportedResolutions
 import io.github.chrisimx.esclkt.equalsLength
 import io.github.chrisimx.scanbridge.data.ui.NumberValidationResult
-import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableViewModel
+import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsLengthUnit
 import io.github.chrisimx.scanbridge.uicomponents.SizeBasedConditionalView
 import io.github.chrisimx.scanbridge.uicomponents.ValidatedDimensionsTextEdit
 import io.github.chrisimx.scanbridge.util.toReadableString
-import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 
 @OptIn(
@@ -75,24 +74,24 @@ private val TAG = "ScanSettings"
 @Composable
 fun ScanSettingsUI(
     modifier: Modifier,
-    scanSettingsViewModel: ScanSettingsComposableViewModel = koinViewModel<ScanSettingsComposableViewModel>()
+    scanSettingsStateHolder: ScanSettingsComposableStateHolder
 ) {
     val context = LocalContext.current
-    val vmData by scanSettingsViewModel.uiState.collectAsState()
+    val vmData by scanSettingsStateHolder.uiState.collectAsState()
 
-    val currentResolution by scanSettingsViewModel.currentResolution.collectAsState()
-    val currentScanRegion by scanSettingsViewModel.currentScanRegion.collectAsState()
+    val currentResolution by scanSettingsStateHolder.currentResolution.collectAsState()
+    val currentScanRegion by scanSettingsStateHolder.currentScanRegion.collectAsState()
 
-    val duplexCurrentlyAvailable by scanSettingsViewModel.duplexCurrentlyAvailable.collectAsState()
+    val duplexCurrentlyAvailable by scanSettingsStateHolder.duplexCurrentlyAvailable.collectAsState()
 
-    val inputSourceOptions by scanSettingsViewModel.inputSourceOptions.collectAsState()
-    val supportedResolutions by scanSettingsViewModel.supportedScanResolutions.collectAsState()
-    val intentOptions by scanSettingsViewModel.intentOptions.collectAsState()
+    val inputSourceOptions by scanSettingsStateHolder.inputSourceOptions.collectAsState()
+    val supportedResolutions by scanSettingsStateHolder.supportedScanResolutions.collectAsState()
+    val intentOptions by scanSettingsStateHolder.intentOptions.collectAsState()
 
-    val widthValidationResult by scanSettingsViewModel.widthValidationResult.collectAsState(NumberValidationResult.NotANumber)
-    val heightValidationResult by scanSettingsViewModel.heightValidationResult.collectAsState(NumberValidationResult.NotANumber)
+    val widthValidationResult by scanSettingsStateHolder.widthValidationResult.collectAsState(NumberValidationResult.NotANumber)
+    val heightValidationResult by scanSettingsStateHolder.heightValidationResult.collectAsState(NumberValidationResult.NotANumber)
 
-    val userUnitEnum by scanSettingsViewModel.lengthUnit.collectAsState(ScanSettingsLengthUnit.MILLIMETER)
+    val userUnitEnum by scanSettingsStateHolder.lengthUnit.collectAsState(ScanSettingsLengthUnit.MILLIMETER)
 
     val userUnitString = when (userUnitEnum) {
         ScanSettingsLengthUnit.INCH -> stringResource(R.string.inches)
@@ -122,7 +121,7 @@ fun ScanSettingsUI(
                             index = index,
                             count = inputSourceOptions.size
                         ),
-                        onClick = { scanSettingsViewModel.setInputSource(inputSource) },
+                        onClick = { scanSettingsStateHolder.setInputSource(inputSource) },
                         selected = vmData.scanSettings.inputSource == inputSource
                     ) {
                         Text(inputSource.toReadableString(context))
@@ -132,7 +131,7 @@ fun ScanSettingsUI(
             ToggleButton(
                 enabled = duplexCurrentlyAvailable,
                 checked = vmData.scanSettings.duplex == true,
-                onCheckedChange = { scanSettingsViewModel.setDuplex(it) }
+                onCheckedChange = { scanSettingsStateHolder.setDuplex(it) }
             ) { Text(stringResource(R.string.setting_duplex)) }
         }
 
@@ -142,12 +141,12 @@ fun ScanSettingsUI(
             modifier = Modifier,
             largeView = {
                 ResolutionSettingButtonRowVersion(supportedResolutions, currentResolution) { x, y ->
-                    scanSettingsViewModel.setResolution(x, y)
+                    scanSettingsStateHolder.setResolution(x, y)
                 }
             },
             smallView = {
                 ResolutionSettingCardVersion(supportedResolutions, currentResolution) { x, y ->
-                    scanSettingsViewModel.setResolution(x, y)
+                    scanSettingsStateHolder.setResolution(x, y)
                 }
             },
             onViewChosen = { fitsRowVersion = it }
@@ -174,7 +173,7 @@ fun ScanSettingsUI(
                         val name = intentData.asString()
                         InputChip(
                             onClick = {
-                                scanSettingsViewModel.setIntent(intentData)
+                                scanSettingsStateHolder.setIntent(intentData)
                             },
                             label = { Text(name) },
                             selected = vmData.scanSettings.intent == intentData
@@ -182,7 +181,7 @@ fun ScanSettingsUI(
                     }
                     InputChip(
                         onClick = {
-                            scanSettingsViewModel.setIntent(null)
+                            scanSettingsStateHolder.setIntent(null)
                         },
                         label = { Text(stringResource(R.string.intent_none)) },
                         selected = vmData.scanSettings.intent == null
@@ -209,8 +208,8 @@ fun ScanSettingsUI(
                     vmData.paperFormats.forEach { paperFormat ->
                         InputChip(
                             onClick = {
-                                scanSettingsViewModel.setCustomMenuEnabled(false)
-                                scanSettingsViewModel.setRegionDimension(
+                                scanSettingsStateHolder.setCustomMenuEnabled(false)
+                                scanSettingsStateHolder.setRegionDimension(
                                     paperFormat.width,
                                     paperFormat.height
                                 )
@@ -224,8 +223,8 @@ fun ScanSettingsUI(
                     }
                     InputChip(
                         onClick = {
-                            scanSettingsViewModel.setCustomMenuEnabled(false)
-                            scanSettingsViewModel.selectMaxRegion()
+                            scanSettingsStateHolder.setCustomMenuEnabled(false)
+                            scanSettingsStateHolder.selectMaxRegion()
                         },
                         label = { Text(stringResource(R.string.maximum_size)) },
                         selected =
@@ -233,7 +232,7 @@ fun ScanSettingsUI(
                     )
                     InputChip(
                         selected = vmData.customMenuEnabled,
-                        onClick = { scanSettingsViewModel.setCustomMenuEnabled(true) },
+                        onClick = { scanSettingsStateHolder.setCustomMenuEnabled(true) },
                         label = { Text(stringResource(R.string.custom)) }
                     )
                 }
@@ -247,7 +246,7 @@ fun ScanSettingsUI(
                                 .padding(end = 10.dp),
                             stringResource(R.string.width_in_unit, userUnitString),
                             { newText: String ->
-                                scanSettingsViewModel.setCustomWidthTextFieldContent(
+                                scanSettingsStateHolder.setCustomWidthTextFieldContent(
                                     newText
                                 )
                             },
@@ -260,7 +259,7 @@ fun ScanSettingsUI(
                                 .weight(1f)
                                 .padding(start = 10.dp),
                             stringResource(R.string.height_in_unit, userUnitString),
-                            { scanSettingsViewModel.setCustomHeightTextFieldContent(it) },
+                            { scanSettingsStateHolder.setCustomHeightTextFieldContent(it) },
                             heightValidationResult
                         )
                     }
@@ -269,7 +268,7 @@ fun ScanSettingsUI(
         }
         Button(
             modifier = Modifier.padding(horizontal = 15.dp).testTag("copyesclkt"),
-            onClick = { scanSettingsViewModel.copySettingsToClipboard() }
+            onClick = { scanSettingsStateHolder.copySettingsToClipboard() }
         ) {
             Text(
                 stringResource(R.string.copy_current_scanner_options_in_esclkt_format),

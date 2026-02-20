@@ -23,8 +23,6 @@ import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context.CLIPBOARD_SERVICE
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.InputSourceCaps
@@ -44,6 +42,7 @@ import io.github.chrisimx.scanbridge.util.derived
 import io.github.chrisimx.scanbridge.util.getMaxResolution
 import io.github.chrisimx.scanbridge.util.toDoubleLocalized
 import java.util.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -64,43 +63,45 @@ enum class ScanSettingsLengthUnit {
     MILLIMETER
 }
 
-class ScanSettingsComposableViewModel(
+class ScanSettingsComposableStateHolder(
     @InjectedParam
     private val initialScanSettingsData: ScanSettingsComposableData,
     @InjectedParam
     private val onSettingsChanged: (() -> Unit)? = null,
+    @InjectedParam
+    private val coroutineScope: CoroutineScope,
     private val localeProvider: LocaleProvider,
     private val context: Application
-) : ViewModel() {
+) {
 
     private val _uiState = MutableStateFlow(initialScanSettingsData)
     val uiState: StateFlow<ScanSettingsComposableData> = _uiState.asStateFlow()
 
-    val inputSourceOptions: StateFlow<List<InputSource>> = _uiState.derived(viewModelScope) {
+    val inputSourceOptions: StateFlow<List<InputSource>> = _uiState.derived(coroutineScope) {
         it.capabilities.getInputSourceOptions()
     }
 
-    val duplexAdfSupported: StateFlow<Boolean> = _uiState.derived(viewModelScope) {
+    val duplexAdfSupported: StateFlow<Boolean> = _uiState.derived(coroutineScope) {
         it.capabilities.adf?.duplexCaps != null
     }
 
     val duplexCurrentlyAvailable: StateFlow<Boolean> = combine(duplexAdfSupported, _uiState) { duplexSupport, uiState ->
         duplexSupport && uiState.scanSettings.inputSource == InputSource.Feeder
-    }.stateIn(viewModelScope, SharingStarted.Lazily, false)
+    }.stateIn(coroutineScope, SharingStarted.Lazily, false)
 
-    private val selectedInputSourceCaps: StateFlow<InputSourceCaps> = _uiState.derived(viewModelScope) {
+    private val selectedInputSourceCaps: StateFlow<InputSourceCaps> = _uiState.derived(coroutineScope) {
         it.capabilities.getInputSourceCaps(it.scanSettings.inputSource, it.scanSettings.duplex ?: false)
     }
 
-    val intentOptions = selectedInputSourceCaps.derived(viewModelScope) {
+    val intentOptions = selectedInputSourceCaps.derived(coroutineScope) {
         it.supportedIntents
     }
 
-    val supportedScanResolutions = selectedInputSourceCaps.derived(viewModelScope) {
+    val supportedScanResolutions = selectedInputSourceCaps.derived(coroutineScope) {
         it.settingProfiles[0].supportedResolutions
     }
 
-    val currentResolution: StateFlow<DiscreteResolution?> = uiState.derived(viewModelScope) {
+    val currentResolution: StateFlow<DiscreteResolution?> = uiState.derived(coroutineScope) {
         val settings = it.scanSettings
         val x = settings.xResolution
         val y = settings.yResolution
@@ -108,31 +109,31 @@ class ScanSettingsComposableViewModel(
         if (x != null && y != null) DiscreteResolution(x, y) else null
     }
 
-    val lengthUnit = localeProvider.locale.derived(viewModelScope) {
+    val lengthUnit = localeProvider.locale.derived(coroutineScope) {
         unitByLocale(it)
     }
 
-    val currentWidthText = _uiState.derived(viewModelScope) {
+    val currentWidthText = _uiState.derived(coroutineScope) {
         it.widthString
     }
 
-    val currentHeightText = _uiState.derived(viewModelScope) {
+    val currentHeightText = _uiState.derived(coroutineScope) {
         it.heightString
     }
 
-    val currentScanRegion = _uiState.derived(viewModelScope) {
+    val currentScanRegion = _uiState.derived(coroutineScope) {
         it.scanSettings.scanRegions?.regions?.firstOrNull()
     }
 
     val heightValidationResult = combine(currentHeightText, lengthUnit, selectedInputSourceCaps)
         { heightText, unit, inputSourceCaps ->
             return@combine validateCustomLengthInput(heightText, unit, inputSourceCaps.maxHeight, inputSourceCaps.minHeight)
-        }
+        }.stateIn(coroutineScope, SharingStarted.Lazily, NumberValidationResult.NotANumber)
 
     val widthValidationResult = combine(currentWidthText, lengthUnit, selectedInputSourceCaps)
         { widthText, unit, inputSourceCaps ->
             return@combine validateCustomLengthInput(widthText, unit, inputSourceCaps.maxWidth, inputSourceCaps.minWidth)
-        }
+        }.stateIn(coroutineScope, SharingStarted.Lazily, NumberValidationResult.NotANumber)
 
     private fun validateCustomLengthInput(
         lengthText: String,
@@ -183,7 +184,7 @@ class ScanSettingsComposableViewModel(
             .map { it.scanSettings }
             .distinctUntilChanged()
             .onEach { onSettingsChanged?.invoke() }
-            .launchIn(viewModelScope)
+            .launchIn(coroutineScope)
 
         observeHeightValidation()
         observeWidthValidation()
@@ -204,7 +205,7 @@ class ScanSettingsComposableViewModel(
                         }
                     )
                 }
-            }.launchIn(viewModelScope)
+            }.launchIn(coroutineScope)
     }
 
     private fun observeWidthValidation() {
@@ -237,7 +238,7 @@ class ScanSettingsComposableViewModel(
                     }
                 }
             }
-            .launchIn(viewModelScope)
+            .launchIn(coroutineScope)
     }
 
     private fun observeHeightValidation() {
@@ -270,7 +271,7 @@ class ScanSettingsComposableViewModel(
                     }
                 }
             }
-            .launchIn(viewModelScope)
+            .launchIn(coroutineScope)
     }
 
     fun setDuplex(duplex: Boolean) {

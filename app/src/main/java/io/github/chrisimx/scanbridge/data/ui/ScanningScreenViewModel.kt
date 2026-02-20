@@ -66,7 +66,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.koin.core.parameter.parametersOf
-import org.koin.core.qualifier.named
+import org.koin.java.KoinJavaComponent.get
 import org.koin.mp.KoinPlatform.getKoin
 import timber.log.Timber
 
@@ -110,16 +110,6 @@ class ScanningScreenViewModel(
         )
     val scanningScreenData: ImmutableScanningScreenData
         get() = _scanningScreenData.toImmutable()
-
-    private val childScope = getKoin().createScope(
-        "scanSettingsScope",
-        named("ScanSettingsScope")
-    )
-
-    override fun onCleared() {
-        childScope.close()
-        super.onCleared()
-    }
 
     fun addTempFile(file: File) {
         _scanningScreenData.createdTempFiles.add(file)
@@ -255,7 +245,7 @@ class ScanningScreenViewModel(
         if (storedSession != null) {
             scanningScreenData.currentScansState.addAll(storedSession.scannedPages)
             _scanningScreenData.createdTempFiles.addAll(storedSession.tmpFiles.map { File(it) })
-            _scanningScreenData.scanSettingsVM.value = childScope.get {
+            _scanningScreenData.scanSettingsVM.value = getKoin().get{
                 parametersOf(
                     ScanSettingsComposableData(
                         storedSession.scanSettings ?: caps.calculateDefaultESCLScanSettingsState(),
@@ -264,7 +254,8 @@ class ScanningScreenViewModel(
                     {
                         saveScanSettings()
                         saveSessionFile()
-                    }
+                    },
+                    viewModelScope
                 )
             }
         } else {
@@ -353,7 +344,7 @@ class ScanningScreenViewModel(
                 caps.calculateDefaultESCLScanSettingsState()
             }
 
-            _scanningScreenData.scanSettingsVM.value = childScope.get {
+            _scanningScreenData.scanSettingsVM.value = getKoin().get {
                 parametersOf(
                     ScanSettingsComposableData(
                         initialSettings,
@@ -362,7 +353,8 @@ class ScanningScreenViewModel(
                     {
                         saveScanSettings()
                         saveSessionFile()
-                    }
+                    },
+                    viewModelScope
                 )
             }
             val sessionFile = application.applicationInfo.dataDir + "/files/" + scanningScreenData.sessionID + ".session"
