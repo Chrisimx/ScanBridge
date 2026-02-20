@@ -289,10 +289,10 @@ class ScanSettingsComposableViewModel(
             val xRes = currentScanSettings.xResolution
             val yRes = currentScanSettings.yResolution
 
-            val validResolutionSetting = xRes != null && yRes != null &&
+            val invalidResolutionSetting = xRes != null && yRes != null &&
                 !supportedResolutions.contains(DiscreteResolution(xRes, yRes))
 
-            val replacementResolution = if (validResolutionSetting) {
+            val replacementResolution = if (invalidResolutionSetting) {
                 val highestScanResolution = it.capabilities.getMaxResolution(inputSource)
 
                 Pair(highestScanResolution.xResolution, highestScanResolution.yResolution)
