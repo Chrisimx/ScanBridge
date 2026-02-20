@@ -287,8 +287,8 @@ class ScanningScreenViewModel(
                     }
 
                     val selectedInputSourceCaps = caps.getInputSourceCaps(
-                        savedSettings.inputSource ?: InputSource.Platen,
-                        savedSettings.duplex ?: false
+                        validatedInputSource ?: caps.getInputSourceOptions().first(),
+                        duplex ?: false
                     )
 
                     val intent = if (!selectedInputSourceCaps.supportedIntents.contains(savedSettings.intent)) {
