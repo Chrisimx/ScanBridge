@@ -459,7 +459,7 @@ class ScanningScreenViewModel(
         setScanJobCancelling(false)
         scrollToPage(
             scope = snackBarScope,
-            pageNr = scanningScreenData.currentScansState.size
+            pageNr = scanningScreenData.currentScansState.size + 1
         )
 
         if (abortIfCancelling()) return
