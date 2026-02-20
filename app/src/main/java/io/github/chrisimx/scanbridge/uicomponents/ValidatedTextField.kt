@@ -31,72 +31,41 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import io.github.chrisimx.scanbridge.R
+import io.github.chrisimx.scanbridge.data.ui.NumberValidationResult
 import io.github.chrisimx.scanbridge.util.toDoubleLocalized
 import timber.log.Timber
-
-enum class ErrorState {
-    NOT_WITHIN_ALLOWED_RANGE,
-    NOT_VALID_NUMBER,
-    NO_ERROR
-}
-
-fun ErrorState.toHumanString(context: Context): String = when (this) {
-    ErrorState.NOT_WITHIN_ALLOWED_RANGE -> context.getString(R.string.error_state_not_in_allowed_range)
-    ErrorState.NOT_VALID_NUMBER -> context.getString(R.string.error_state_not_a_valid_number)
-    ErrorState.NO_ERROR -> context.getString(R.string.error_state_valid)
+fun NumberValidationResult.toHumanString(context: Context): String = when (this) {
+    is NumberValidationResult.OutOfRange -> context.getString(R.string.error_state_not_in_allowed_range)
+    NumberValidationResult.NotANumber -> context.getString(R.string.error_state_not_a_valid_number)
+    is NumberValidationResult.Success -> context.getString(R.string.error_state_valid)
 }
 
 @Composable
 fun ValidatedDimensionsTextEdit(
-    localContent: String,
+    text: String,
     context: Context,
     modifier: Modifier = Modifier,
     label: String,
     updateContent: (String) -> Unit,
-    updateDimensionState: (String) -> Unit,
-    min: Double,
-    max: Double
+    validationResult: NumberValidationResult
 ) {
-    val errorState = remember { mutableStateOf(ErrorState.NO_ERROR) }
-
-    val decimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator
-    val decimalNumberRegex =
-        "^[+]?\\d*(${Regex.escape(decimalSeparator.toString())})?\\d+\$".toRegex()
-
     OutlinedTextField(
         modifier = modifier,
-        value = localContent,
+        value = text,
         onValueChange = { newValue: String ->
             updateContent(newValue)
-
-            val isValidNumber = newValue.matches(decimalNumberRegex)
-            if (isValidNumber) {
-                val newNumber = newValue.toDoubleLocalized()
-                if (newNumber > max || newNumber < min) {
-                    errorState.value = ErrorState.NOT_WITHIN_ALLOWED_RANGE
-                    return@OutlinedTextField
-                }
-                errorState.value = ErrorState.NO_ERROR
-                updateDimensionState(newValue)
-
-                return@OutlinedTextField
-            } else {
-                errorState.value = ErrorState.NOT_VALID_NUMBER
-                Timber.tag("ScanSettings").d("Invalid Number")
-                return@OutlinedTextField
-            }
         },
         supportingText = {
-            if (errorState.value != ErrorState.NO_ERROR) {
+            if (validationResult !is NumberValidationResult.Success) {
                 Text(
-                    errorState.value.toHumanString(
+                    validationResult.toHumanString(
                         context
                     ),
                     style = MaterialTheme.typography.labelSmall
                 )
             }
         },
-        isError = errorState.value != ErrorState.NO_ERROR,
+        isError = validationResult !is NumberValidationResult.Success,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Decimal
         ),

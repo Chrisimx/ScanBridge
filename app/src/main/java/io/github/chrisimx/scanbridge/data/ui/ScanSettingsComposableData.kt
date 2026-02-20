@@ -27,9 +27,10 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-sealed class NumberValidationError {
-    data class OutOfRange(val min: Double, val max: Double) : NumberValidationError()
-    data object NotANumber : NumberValidationError()
+sealed class NumberValidationResult {
+    data class Success(val value: Double) : NumberValidationResult()
+    data class OutOfRange(val min: Double, val max: Double) : NumberValidationResult()
+    data object NotANumber : NumberValidationResult()
 }
 
 @Serializable
@@ -37,9 +38,8 @@ data class ScanSettingsComposableData(
     val scanSettings: ScanSettings,
     val capabilities: ScannerCapabilities,
     val paperFormats: List<PaperFormat> = loadDefaultFormats(),
-    val customMenuEnabled: Boolean,
-    val widthString: String,
-    val widthError: NumberValidationError?,
-    val heightString: String,
-    val heightError: NumberValidationError?
+    val customMenuEnabled: Boolean = false,
+    val widthString: String = "",
+    val heightString: String = "",
+    val maximumSize: Boolean = true
 )

@@ -35,14 +35,15 @@ import io.github.chrisimx.esclkt.JobState
 import io.github.chrisimx.esclkt.ScanJob
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
+import io.github.chrisimx.esclkt.getInputSourceCaps
+import io.github.chrisimx.esclkt.getInputSourceOptions
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.data.model.Session
+import io.github.chrisimx.scanbridge.data.model.StatelessImmutableScanRegion
 import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
 import io.github.chrisimx.scanbridge.stores.SessionsStore
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
 import io.github.chrisimx.scanbridge.util.getEditedImageName
-import io.github.chrisimx.scanbridge.util.getInputSourceCaps
-import io.github.chrisimx.scanbridge.util.getInputSourceOptions
 import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.saveAsJPEG
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
@@ -64,6 +65,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
+import org.koin.core.parameter.parametersOf
+import org.koin.core.qualifier.named
+import org.koin.mp.KoinPlatform.getKoin
 import timber.log.Timber
 
 class ScanningScreenViewModel(
@@ -106,6 +110,16 @@ class ScanningScreenViewModel(
         )
     val scanningScreenData: ImmutableScanningScreenData
         get() = _scanningScreenData.toImmutable()
+
+    private val childScope = getKoin().createScope(
+        "scanSettingsScope",
+        named("ScanSettingsScope")
+    )
+
+    override fun onCleared() {
+        childScope.close()
+        super.onCleared()
+    }
 
     fun addTempFile(file: File) {
         _scanningScreenData.createdTempFiles.add(file)
@@ -241,51 +255,60 @@ class ScanningScreenViewModel(
         if (storedSession != null) {
             scanningScreenData.currentScansState.addAll(storedSession.scannedPages)
             _scanningScreenData.createdTempFiles.addAll(storedSession.tmpFiles.map { File(it) })
-            _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
-                ScanSettingsComposableData(storedSession.scanSettings?.toMutable() ?: caps.calculateDefaultESCLScanSettingsState(), caps),
-                onSettingsChanged = {
-                    saveScanSettings()
-                    saveSessionFile()
-                }
-            )
+            _scanningScreenData.scanSettingsVM.value = childScope.get {
+                parametersOf(
+                    ScanSettingsComposableData(
+                        storedSession.scanSettings ?: caps.calculateDefaultESCLScanSettingsState(),
+                        caps,
+                    ),
+                    {
+                        saveScanSettings()
+                        saveSessionFile()
+                    }
+                )
+            }
         } else {
             // Try to load saved scan settings first, fallback to defaults if none exist
             val savedSettings = DefaultScanSettingsStore.load(application.applicationContext)
             val initialSettings = if (savedSettings != null) {
                 try {
-                    val mutableSettings = savedSettings.toMutable()
-
                     // Validate that the saved input source is still supported
                     val supportedInputSources = caps.getInputSourceOptions()
-                    if (mutableSettings.inputSource != null &&
-                        !supportedInputSources.contains(mutableSettings.inputSource)
+                    val validatedInputSource = if (savedSettings.inputSource != null &&
+                        !supportedInputSources.contains(savedSettings.inputSource)
                     ) {
                         Timber.w(
-                            "Saved input source ${mutableSettings.inputSource} not supported by current scanner, falling back to default"
+                            "Saved input source ${savedSettings.inputSource} not supported by current scanner, falling back to default"
                         )
-                        mutableSettings.inputSource = supportedInputSources.firstOrNull() ?: InputSource.Platen
+                        supportedInputSources.firstOrNull() ?: InputSource.Platen
+                    } else {
+                        savedSettings.inputSource
                     }
 
                     // Validate duplex setting - only allow if ADF supports duplex
-                    if (mutableSettings.duplex == true &&
-                        (mutableSettings.inputSource != InputSource.Feeder || caps.adf?.duplexCaps == null)
+                    val duplex = if (savedSettings.duplex == true &&
+                        (savedSettings.inputSource != InputSource.Feeder || caps.adf?.duplexCaps == null)
                     ) {
                         Timber.w("Duplex not supported with current input source, disabling duplex")
-                        mutableSettings.duplex = false
+                        false
+                    } else {
+                        savedSettings.duplex
                     }
 
                     val selectedInputSourceCaps = caps.getInputSourceCaps(
-                        mutableSettings.inputSource ?: InputSource.Platen,
-                        mutableSettings.duplex ?: false
+                        savedSettings.inputSource ?: InputSource.Platen,
+                        savedSettings.duplex ?: false
                     )
 
-                    if (!selectedInputSourceCaps.supportedIntents.contains(mutableSettings.intent)) {
-                        mutableSettings.intent = selectedInputSourceCaps.supportedIntents.first()
+                    val intent = if (!selectedInputSourceCaps.supportedIntents.contains(savedSettings.intent)) {
+                        selectedInputSourceCaps.supportedIntents.first()
+                    } else {
+                        savedSettings.intent
                     }
 
-                    if (mutableSettings.scanRegions != null) {
-                        val storedWidthThreeHOfInch = mutableSettings.scanRegions!!.width.toDoubleOrNull()
-                        val storedHeightThreeHOfInch = mutableSettings.scanRegions!!.height.toDoubleOrNull()
+                    val scanRegion = if (savedSettings.scanRegions != null) {
+                        val storedWidthThreeHOfInch = savedSettings.scanRegions.width.toDoubleOrNull()
+                        val storedHeightThreeHOfInch = savedSettings.scanRegions.height.toDoubleOrNull()
 
                         val maxWidth = selectedInputSourceCaps.maxWidth.toMillimeters().value
                         val minWidth = selectedInputSourceCaps.minWidth.toMillimeters().value
@@ -293,19 +316,35 @@ class ScanningScreenViewModel(
                         val maxHeight = selectedInputSourceCaps.maxHeight.toMillimeters().value
                         val minHeight = selectedInputSourceCaps.minHeight.toMillimeters().value
 
-                        if (storedWidthThreeHOfInch != null &&
+                        val width = if (storedWidthThreeHOfInch != null &&
                             (storedWidthThreeHOfInch > maxWidth || storedWidthThreeHOfInch < minWidth)
                         ) {
-                            mutableSettings.scanRegions!!.width = "max"
+                            "max"
+                        } else {
+                            savedSettings.scanRegions.width
                         }
-                        if (storedHeightThreeHOfInch != null &&
+                        val height = if (storedHeightThreeHOfInch != null &&
                             (storedHeightThreeHOfInch > maxHeight || storedHeightThreeHOfInch < minHeight)
                         ) {
-                            mutableSettings.scanRegions!!.height = "max"
+                            "max"
+                        } else {
+                            savedSettings.scanRegions.height
                         }
+                        val xOffset = savedSettings.scanRegions.xOffset
+                        val yOffset = savedSettings.scanRegions.yOffset
+                        StatelessImmutableScanRegion(height, width, xOffset,yOffset)
+                    } else {
+                        null
                     }
 
-                    mutableSettings
+                    val validatedSettings = savedSettings.copy(
+                        inputSource = validatedInputSource,
+                        duplex = duplex,
+                        intent = intent,
+                        scanRegions = scanRegion
+                    )
+
+                    validatedSettings.toESCLKtScanSettings(selectedInputSourceCaps)
                 } catch (e: Exception) {
                     Timber.e(e, "Error applying saved settings, using defaults")
                     caps.calculateDefaultESCLScanSettingsState()
@@ -314,16 +353,18 @@ class ScanningScreenViewModel(
                 caps.calculateDefaultESCLScanSettingsState()
             }
 
-            _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableViewModel(
-                ScanSettingsComposableData(
-                    initialSettings,
-                    caps
-                ),
-                onSettingsChanged = {
-                    saveScanSettings()
-                    saveSessionFile()
-                }
-            )
+            _scanningScreenData.scanSettingsVM.value = childScope.get {
+                parametersOf(
+                    ScanSettingsComposableData(
+                        initialSettings,
+                        caps,
+                    ),
+                    {
+                        saveScanSettings()
+                        saveSessionFile()
+                    }
+                )
+            }
             val sessionFile = application.applicationInfo.dataDir + "/files/" + scanningScreenData.sessionID + ".session"
             addTempFile(File(sessionFile))
             saveSessionFile()
@@ -344,7 +385,7 @@ class ScanningScreenViewModel(
         val currentSessionState = Session(
             scanningScreenData.sessionID,
             scanningScreenData.currentScansState.toList(),
-            scanningScreenData.scanSettingsVM?.getMutableScanSettingsComposableData()?.scanSettingsState?.toStateless(),
+            scanningScreenData.scanSettingsVM?.uiState?.value?.scanSettings,
             scanningScreenData.createdTempFiles.map { it.absolutePath }
         )
         return SessionsStore.saveSession(currentSessionState, application, scanningScreenData.sessionID)
@@ -377,7 +418,7 @@ class ScanningScreenViewModel(
     }
 
     fun saveScanSettings() {
-        scanningScreenData.scanSettingsVM?.getMutableScanSettingsComposableData()?.scanSettingsState?.toStateless()?.let { settings ->
+        scanningScreenData.scanSettingsVM?.uiState?.value?.scanSettings?.let { settings ->
             DefaultScanSettingsStore.save(application.applicationContext, settings)
             Timber.d("Scan settings saved to persistent storage")
         }
@@ -408,12 +449,8 @@ class ScanningScreenViewModel(
             return
         }
 
-        val scanSettingsData =
-            scanningScreenData.scanSettingsVM!!.scanSettingsComposableData
-
-        val currentScanSettings = scanSettingsData.scanSettingsState.toESCLKtScanSettings(
-            scanSettingsData.selectedInputSourceCapabilities
-        )
+        val currentScanSettings =
+            scanningScreenData.scanSettingsVM!!.uiState.value.scanSettings
 
         val esclRequestClient = _scanningScreenData.esclClient
 

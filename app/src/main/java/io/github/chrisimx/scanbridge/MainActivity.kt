@@ -28,13 +28,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import io.github.chrisimx.scanbridge.logs.FileLogger
-import io.github.chrisimx.scanbridge.util.LocaleProvider
+import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import timber.log.Timber
 
 class MainActivity : ComponentActivity() {
@@ -42,12 +43,14 @@ class MainActivity : ComponentActivity() {
     var tree: Timber.Tree? = null
     var saveDebugFileLauncher: ActivityResultLauncher<Intent>? = null
 
+    private val localeProvider: AndroidLocaleProvider by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this))
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        LocaleProvider.update()
+        localeProvider.update()
 
         val sharedPreferences = this.getSharedPreferences("scanbridge", MODE_PRIVATE)
 

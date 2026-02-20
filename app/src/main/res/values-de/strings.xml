@@ -39,8 +39,8 @@
     <string name="resolution_dpi">Auflösung (DPI):</string>
     <string name="setting_duplex">Duplex</string>
     <string name="intent_none">Standard</string>
-    <string name="width_in_mm">Breite (in mm)</string>
-    <string name="height_in_mm">Höhe (in mm)</string>
+    <string name="width_in_unit">Breite (in mm)</string>
+    <string name="height_in_unit">Höhe (in mm)</string>
     <string name="maximum_size">Maximum</string>
     <string name="custom">Benutzerdefiniert</string>
     <string name="job_still_running">Ein Scanauftrag läuft bereits</string>

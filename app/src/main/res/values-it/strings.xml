@@ -37,8 +37,8 @@
     <string name="resolution_dpi">Risoluzione utilizzata (dpi):</string>
     <string name="setting_duplex">Duplex</string>
     <string name="intent_none">Predefinito</string>
-    <string name="width_in_mm">Larghezza (in mm)</string>
-    <string name="height_in_mm">Altezza (in mm)</string>
+    <string name="width_in_unit">Larghezza (in mm)</string>
+    <string name="height_in_unit">Altezza (in mm)</string>
     <string name="maximum_size">Dimensione massima</string>
     <string name="custom">Personalizzato</string>
     <string name="job_still_running">Attività ancora in esecuzione</string>

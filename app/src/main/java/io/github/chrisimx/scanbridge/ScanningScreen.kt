@@ -611,7 +611,6 @@ fun ScanningScreen(
             ModalBottomSheet({ scanningViewModel.setScanSettingsMenuOpen(false) }) {
                 ScanSettingsUI(
                     Modifier.heightIn(max = screenHeight * 0.8f),
-                    context,
                     scanningViewModel.scanningScreenData.scanSettingsVM!!
                 )
             }

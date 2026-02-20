@@ -39,8 +39,8 @@
     <string name="resolution_dpi">Used Resolution (dpi):</string>
     <string name="setting_duplex">Duplex</string>
     <string name="intent_none">Default</string>
-    <string name="width_in_mm">Width (in mm)</string>
-    <string name="height_in_mm">Height (in mm)</string>
+    <string name="width_in_unit">Width (in %1$s)</string>
+    <string name="height_in_unit">Height (in %1$s)</string>
     <string name="maximum_size">Maximum size</string>
     <string name="custom">Custom</string>
     <string name="job_still_running">Job still running</string>
@@ -111,4 +111,6 @@
     <string name="crash_occurred">"We are sorry. ScanBridge has crashed. Please report this issue and attach the following stacktrace (you can copy it with the button at the bottom)"</string>
     <string name="loading_previous_session_failed">Loading previous session failed…\n\n%1$s</string>
     <string name="scannercapabilities_null">The scanner capabilities should be retrieved at this point, but they weren\'t.</string>
+    <string name="mm">millimeter_unit_abreviation</string>
+    <string name="inches">Inches</string>
 </resources>

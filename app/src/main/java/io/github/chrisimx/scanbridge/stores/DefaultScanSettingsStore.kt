@@ -21,6 +21,7 @@ package io.github.chrisimx.scanbridge.stores
 
 import android.content.Context
 import androidx.core.content.edit
+import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.scanbridge.data.model.StatelessImmutableESCLScanSettingsState
 import kotlinx.serialization.json.Json
 import timber.log.Timber
@@ -33,7 +34,7 @@ object DefaultScanSettingsStore {
         return appPreferences.getBoolean("remember_scan_settings", true)
     }
 
-    fun save(context: Context, scanSettings: StatelessImmutableESCLScanSettingsState) {
+    fun save(context: Context, scanSettings: ScanSettings) {
         if (!isRememberSettingsEnabled(context)) {
             Timber.d("Scan settings persistence is disabled, skipping save")
             return
