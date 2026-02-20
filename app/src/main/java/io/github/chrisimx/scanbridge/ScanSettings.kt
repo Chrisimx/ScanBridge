@@ -96,7 +96,7 @@ fun ScanSettingsUI(
 
     val userUnitString = when (userUnitEnum) {
         ScanSettingsLengthUnit.INCH -> stringResource(R.string.inches)
-        ScanSettingsLengthUnit.MILLIMETER -> stringResource(R.string.mm)
+        ScanSettingsLengthUnit.MILLIMETER -> stringResource(R.string.millimeter_unit_abbreviation)
     }
 
     val scrollState = rememberScrollState()
