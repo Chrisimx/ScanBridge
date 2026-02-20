@@ -282,7 +282,7 @@ class ScanSettingsComposableViewModel(
     fun setInputSource(inputSource: InputSource) {
         _uiState.update {
             val currentScanSettings = it.scanSettings
-            val inputSourceCaps = it.capabilities.getInputSourceCaps(inputSource)
+            val inputSourceCaps = it.capabilities.getInputSourceCaps(inputSource, currentScanSettings.duplex == true)
 
             val supportedResolutions = inputSourceCaps.settingProfiles[0].supportedResolutions.discreteResolutions
 
