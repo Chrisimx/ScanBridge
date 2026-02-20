@@ -245,7 +245,7 @@ class ScanningScreenViewModel(
         if (storedSession != null) {
             scanningScreenData.currentScansState.addAll(storedSession.scannedPages)
             _scanningScreenData.createdTempFiles.addAll(storedSession.tmpFiles.map { File(it) })
-            _scanningScreenData.scanSettingsVM.value = getKoin().get{
+            _scanningScreenData.scanSettingsVM.value = getKoin().get {
                 parametersOf(
                     ScanSettingsComposableData(
                         storedSession.scanSettings ?: caps.calculateDefaultESCLScanSettingsState(),

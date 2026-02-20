@@ -72,10 +72,7 @@ private val TAG = "ScanSettings"
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ScanSettingsUI(
-    modifier: Modifier,
-    scanSettingsStateHolder: ScanSettingsComposableStateHolder
-) {
+fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComposableStateHolder) {
     val context = LocalContext.current
     val vmData by scanSettingsStateHolder.uiState.collectAsState()
 
