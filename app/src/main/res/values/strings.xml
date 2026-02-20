@@ -111,6 +111,6 @@
     <string name="crash_occurred">"We are sorry. ScanBridge has crashed. Please report this issue and attach the following stacktrace (you can copy it with the button at the bottom)"</string>
     <string name="loading_previous_session_failed">Loading previous session failed…\n\n%1$s</string>
     <string name="scannercapabilities_null">The scanner capabilities should be retrieved at this point, but they weren\'t.</string>
-    <string name="mm">millimeter_unit_abreviation</string>
+    <string name="millimeter_unit_abbreviation">mm</string>
     <string name="inches">Inches</string>
 </resources>
