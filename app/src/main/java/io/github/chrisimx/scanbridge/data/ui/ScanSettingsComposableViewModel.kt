@@ -365,9 +365,9 @@ class ScanSettingsComposableViewModel(
 
     private fun unitByLocale(locale: Locale = Locale.getDefault()): ScanSettingsLengthUnit =
         if (locale.country in setOf("US", "LR", "MM")) {
-            INCH
+            ScanSettingsLengthUnit.INCH
         } else {
-            MILLIMETER
+            ScanSettingsLengthUnit.MILLIMETER
         }
 
     fun selectMaxRegion() {
