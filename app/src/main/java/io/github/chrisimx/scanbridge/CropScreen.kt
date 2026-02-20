@@ -100,7 +100,8 @@ fun CropScreen(sessionID: String, pageIdx: Int, returnRoute: BaseRoute, navContr
     var processing: Boolean by remember { mutableStateOf(false) }
 
     val originalSessionResult: Result<Session?> = remember {
-        SessionsStore.loadSession(context, sessionID)
+        // We don't need to load scan regions so we can set caps to null:
+        SessionsStore.loadSession(context, sessionID, null)
     }
 
     if (originalSessionResult.getOrNull() == null) {

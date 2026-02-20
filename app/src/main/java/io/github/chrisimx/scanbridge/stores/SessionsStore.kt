@@ -5,6 +5,7 @@ import io.github.chrisimx.esclkt.Inches
 import io.github.chrisimx.esclkt.LengthUnit
 import io.github.chrisimx.esclkt.Millimeters
 import io.github.chrisimx.esclkt.Points
+import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
 import io.github.chrisimx.scanbridge.data.model.Session
 import io.github.chrisimx.scanbridge.data.model.Session.Companion.fromString
@@ -33,7 +34,7 @@ object SessionsStore {
         prettyPrint = false
     }
 
-    fun loadSession(application: Context, sessionID: String): Result<Session?> {
+    fun loadSession(application: Context, sessionID: String, caps: ScannerCapabilities?): Result<Session?> {
         Timber.d("Loading session $sessionID")
 
         val path = application.applicationInfo.dataDir + "/files/" + sessionID + ".session"
@@ -46,7 +47,7 @@ object SessionsStore {
 
         val sessionFileString = file.readText()
 
-        return fromString(sessionFileString, json)
+        return fromString(sessionFileString, json, caps)
     }
 
     @OptIn(ExperimentalSerializationApi::class)
