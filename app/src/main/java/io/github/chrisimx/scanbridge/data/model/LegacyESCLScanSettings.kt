@@ -16,7 +16,6 @@ import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.scanbridge.util.toDoubleLocalized
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class StatelessImmutableScanRegion(
     // These are to be given in millimeters!
@@ -43,7 +42,6 @@ data class StatelessImmutableScanRegion(
             yOffset.toDoubleLocalized().millimeters().toThreeHundredthsOfInch()
         )
     }
-
 }
 
 @Serializable

@@ -1,11 +1,11 @@
 package io.github.chrisimx.scanbridge.services
 
 import android.annotation.SuppressLint
+import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import timber.log.Timber
-import java.util.Locale
 
 class AndroidLocaleProvider : LocaleProvider {
     @SuppressLint("ConstantLocale")

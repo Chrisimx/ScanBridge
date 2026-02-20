@@ -20,9 +20,7 @@
 package io.github.chrisimx.scanbridge.util
 
 import android.content.Context
-import android.icu.number.NumberFormatter
 import android.icu.text.DecimalFormat
-import androidx.compose.runtime.mutableStateOf
 import io.github.chrisimx.esclkt.ColorModeEnumOrRaw
 import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.EnumOrRaw
@@ -47,7 +45,6 @@ fun JobState?.toJobStateString(context: Context): String = when (this) {
 fun String.toDoubleLocalized(): Double = DecimalFormat.getInstance().parse(this).toDouble()
 
 fun Double.toStringLocalized(): String = DecimalFormat.getInstance().format(this)
-
 
 fun InputSource.toReadableString(context: Context): String = when (this) {
     InputSource.Platen -> context.getString(R.string.platen)

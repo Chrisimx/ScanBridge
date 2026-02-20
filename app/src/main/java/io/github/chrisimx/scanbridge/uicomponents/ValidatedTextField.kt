@@ -20,20 +20,15 @@
 package io.github.chrisimx.scanbridge.uicomponents
 
 import android.content.Context
-import android.icu.text.DecimalFormatSymbols
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.data.ui.NumberValidationResult
-import io.github.chrisimx.scanbridge.util.toDoubleLocalized
-import timber.log.Timber
 fun NumberValidationResult.toHumanString(context: Context): String = when (this) {
     is NumberValidationResult.OutOfRange -> context.getString(R.string.error_state_not_in_allowed_range)
     NumberValidationResult.NotANumber -> context.getString(R.string.error_state_not_a_valid_number)

@@ -259,7 +259,7 @@ class ScanningScreenViewModel(
                 parametersOf(
                     ScanSettingsComposableData(
                         storedSession.scanSettings ?: caps.calculateDefaultESCLScanSettingsState(),
-                        caps,
+                        caps
                     ),
                     {
                         saveScanSettings()
@@ -332,7 +332,7 @@ class ScanningScreenViewModel(
                         }
                         val xOffset = savedSettings.scanRegions.xOffset
                         val yOffset = savedSettings.scanRegions.yOffset
-                        StatelessImmutableScanRegion(height, width, xOffset,yOffset)
+                        StatelessImmutableScanRegion(height, width, xOffset, yOffset)
                     } else {
                         null
                     }
@@ -357,7 +357,7 @@ class ScanningScreenViewModel(
                 parametersOf(
                     ScanSettingsComposableData(
                         initialSettings,
-                        caps,
+                        caps
                     ),
                     {
                         saveScanSettings()
@@ -392,7 +392,8 @@ class ScanningScreenViewModel(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    fun loadSessionFile(caps: ScannerCapabilities): Result<Session?> = SessionsStore.loadSession(application, scanningScreenData.sessionID, caps)
+    fun loadSessionFile(caps: ScannerCapabilities): Result<Session?> =
+        SessionsStore.loadSession(application, scanningScreenData.sessionID, caps)
 
     fun swapTwoPages(index1: Int, index2: Int) {
         if (index1 < 0 ||

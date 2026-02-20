@@ -71,11 +71,11 @@ import timber.log.Timber
 )
 private val TAG = "ScanSettings"
 
-
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ScanSettingsUI(modifier: Modifier,
-                   scanSettingsViewModel: ScanSettingsComposableViewModel = koinViewModel<ScanSettingsComposableViewModel>()
+fun ScanSettingsUI(
+    modifier: Modifier,
+    scanSettingsViewModel: ScanSettingsComposableViewModel = koinViewModel<ScanSettingsComposableViewModel>()
 ) {
     val context = LocalContext.current
     val vmData by scanSettingsViewModel.uiState.collectAsState()
@@ -211,14 +211,15 @@ fun ScanSettingsUI(modifier: Modifier,
                             onClick = {
                                 scanSettingsViewModel.setCustomMenuEnabled(false)
                                 scanSettingsViewModel.setRegionDimension(
-                                    paperFormat.width, paperFormat.height
+                                    paperFormat.width,
+                                    paperFormat.height
                                 )
                                 Timber.tag(TAG).d("New region state: ${vmData.scanSettings.scanRegions}")
                             },
                             label = { Text(paperFormat.name) },
-                            selected = !vmData.customMenuEnabled && !vmData.maximumSize
-                                && currentScanRegion?.width?.equalsLength(paperFormat.width) == true
-                                && currentScanRegion?.height?.equalsLength(paperFormat.height) == true
+                            selected = !vmData.customMenuEnabled && !vmData.maximumSize &&
+                                currentScanRegion?.width?.equalsLength(paperFormat.width) == true &&
+                                currentScanRegion?.height?.equalsLength(paperFormat.height) == true
                         )
                     }
                     InputChip(

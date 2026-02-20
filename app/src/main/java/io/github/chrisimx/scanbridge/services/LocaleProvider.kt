@@ -6,4 +6,3 @@ import kotlinx.coroutines.flow.StateFlow
 interface LocaleProvider {
     val locale: StateFlow<Locale>
 }
-

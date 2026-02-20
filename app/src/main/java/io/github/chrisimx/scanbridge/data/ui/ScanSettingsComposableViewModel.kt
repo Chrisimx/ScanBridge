@@ -39,7 +39,6 @@ import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.esclkt.scanRegion
 import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.R
-import io.github.chrisimx.scanbridge.data.ui.ScanSettingsLengthUnit.*
 import io.github.chrisimx.scanbridge.services.LocaleProvider
 import io.github.chrisimx.scanbridge.util.derived
 import io.github.chrisimx.scanbridge.util.getMaxResolution
@@ -126,14 +125,14 @@ class ScanSettingsComposableViewModel(
     }
 
     val heightValidationResult = combine(currentHeightText, lengthUnit, selectedInputSourceCaps)
-    { heightText, unit, inputSourceCaps ->
-        return@combine validateCustomLengthInput(heightText, unit, inputSourceCaps.maxHeight, inputSourceCaps.minHeight)
-    }
+        { heightText, unit, inputSourceCaps ->
+            return@combine validateCustomLengthInput(heightText, unit, inputSourceCaps.maxHeight, inputSourceCaps.minHeight)
+        }
 
     val widthValidationResult = combine(currentWidthText, lengthUnit, selectedInputSourceCaps)
-    { widthText, unit, inputSourceCaps ->
-        return@combine validateCustomLengthInput(widthText, unit, inputSourceCaps.maxWidth, inputSourceCaps.minWidth)
-    }
+        { widthText, unit, inputSourceCaps ->
+            return@combine validateCustomLengthInput(widthText, unit, inputSourceCaps.maxWidth, inputSourceCaps.minWidth)
+        }
 
     private fun validateCustomLengthInput(
         lengthText: String,
@@ -150,8 +149,8 @@ class ScanSettingsComposableViewModel(
         }
 
         val lengthInUnit = when (unit) {
-            INCH -> parsedLength.inches()
-            MILLIMETER -> parsedLength.millimeters()
+            ScanSettingsLengthUnit.INCH -> parsedLength.inches()
+            ScanSettingsLengthUnit.MILLIMETER -> parsedLength.millimeters()
         }
 
         val inputLengthInT300 = lengthInUnit.toThreeHundredthsOfInch().value
@@ -166,12 +165,9 @@ class ScanSettingsComposableViewModel(
         }
     }
 
-    private fun toUserUnit(
-        unit: ScanSettingsLengthUnit,
-        length: LengthUnit
-    ): Double = when (unit) {
-        INCH -> length.toInches().value
-        MILLIMETER -> length.toMillimeters().value
+    private fun toUserUnit(unit: ScanSettingsLengthUnit, length: LengthUnit): Double = when (unit) {
+        ScanSettingsLengthUnit.INCH -> length.toInches().value
+        ScanSettingsLengthUnit.MILLIMETER -> length.toMillimeters().value
     }
 
     private inline fun ScanSettingsComposableData.updateScanSettings(update: ScanSettings.() -> ScanSettings) =
@@ -195,7 +191,7 @@ class ScanSettingsComposableViewModel(
         _uiState
             .map { it.maximumSize }
             .distinctUntilChanged()
-            .combine(selectedInputSourceCaps) { maxSize, inputSourceCaps -> Pair(maxSize, inputSourceCaps)}
+            .combine(selectedInputSourceCaps) { maxSize, inputSourceCaps -> Pair(maxSize, inputSourceCaps) }
             .filter { it.first }
             .onEach { (maxSize, inputSourceCaps) ->
                 _uiState.updateScanSettings {
@@ -226,7 +222,8 @@ class ScanSettingsComposableViewModel(
                                     maxHeight()
                                     width = widthValidationResult.value.threeHundredthsOfInch()
                                 }
-                            ))
+                            )
+                        )
                     } else {
                         val currentHeight = currentScanRegion.height
                         return@update it.copy(
@@ -235,7 +232,8 @@ class ScanSettingsComposableViewModel(
                                     width = widthValidationResult.value.threeHundredthsOfInch()
                                     height = currentHeight
                                 }
-                            ))
+                            )
+                        )
                     }
                 }
             }
@@ -257,7 +255,8 @@ class ScanSettingsComposableViewModel(
                                     maxWidth()
                                     height = heightValidationResult.value.threeHundredthsOfInch()
                                 }
-                            ))
+                            )
+                        )
                     } else {
                         val currentWidth = currentScanRegion.width
                         return@update it.copy(
@@ -266,7 +265,8 @@ class ScanSettingsComposableViewModel(
                                     width = currentWidth
                                     height = heightValidationResult.value.threeHundredthsOfInch()
                                 }
-                            ))
+                            )
+                        )
                     }
                 }
             }
@@ -289,8 +289,8 @@ class ScanSettingsComposableViewModel(
             val xRes = currentScanSettings.xResolution
             val yRes = currentScanSettings.yResolution
 
-            val validResolutionSetting = xRes != null && yRes != null
-                && !supportedResolutions.contains(DiscreteResolution(xRes, yRes))
+            val validResolutionSetting = xRes != null && yRes != null &&
+                !supportedResolutions.contains(DiscreteResolution(xRes, yRes))
 
             val replacementResolution = if (validResolutionSetting) {
                 val highestScanResolution = it.capabilities.getMaxResolution(inputSource)
@@ -363,13 +363,12 @@ class ScanSettingsComposableViewModel(
         }
     }
 
-    private fun unitByLocale(locale: Locale = Locale.getDefault()): ScanSettingsLengthUnit {
-        return if (locale.country in setOf("US", "LR", "MM")) {
+    private fun unitByLocale(locale: Locale = Locale.getDefault()): ScanSettingsLengthUnit =
+        if (locale.country in setOf("US", "LR", "MM")) {
             INCH
         } else {
             MILLIMETER
         }
-    }
 
     fun selectMaxRegion() {
         _uiState.update {

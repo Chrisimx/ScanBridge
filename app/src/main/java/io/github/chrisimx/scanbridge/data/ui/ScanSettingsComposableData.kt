@@ -25,7 +25,6 @@ import io.github.chrisimx.scanbridge.data.model.PaperFormat
 import io.github.chrisimx.scanbridge.data.model.loadDefaultFormats
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 sealed class NumberValidationResult {
     data class Success(val value: Double) : NumberValidationResult()
