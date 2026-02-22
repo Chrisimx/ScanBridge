@@ -37,6 +37,8 @@ import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.esclkt.getInputSourceCaps
 import io.github.chrisimx.esclkt.getInputSourceOptions
+import io.github.chrisimx.esclkt.scanRegion
+import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.data.model.Session
 import io.github.chrisimx.scanbridge.data.model.StatelessImmutableScanRegion
@@ -227,7 +229,7 @@ class ScanningScreenViewModel(
         }
     }
 
-    fun setScannerCapabilities(caps: ScannerCapabilities) {
+    suspend fun setScannerCapabilities(caps: ScannerCapabilities) {
         _scanningScreenData.capabilities.value = caps
         val storedSessionResult = loadSessionFile(caps)
 
@@ -251,7 +253,7 @@ class ScanningScreenViewModel(
                         storedSession.scanSettings ?: caps.calculateDefaultESCLScanSettingsState(),
                         caps
                     ),
-                    {
+                    suspend {
                         saveScanSettings()
                         saveSessionFile()
                     },
@@ -297,33 +299,28 @@ class ScanningScreenViewModel(
                         savedSettings.intent
                     }
 
-                    val scanRegion = if (savedSettings.scanRegions != null) {
-                        val storedWidthThreeHOfInch = savedSettings.scanRegions.width.toDoubleOrNull()
-                        val storedHeightThreeHOfInch = savedSettings.scanRegions.height.toDoubleOrNull()
+                    val savedScanRegion = savedSettings.scanRegions?.regions?.firstOrNull()
+                    val scanRegion = if (savedScanRegion != null) {
+                        val storedWidthThreeHOfInch = savedScanRegion.width.value
+                        val storedHeightThreeHOfInch = savedScanRegion.height.value
 
-                        val maxWidth = selectedInputSourceCaps.maxWidth.toMillimeters().value
-                        val minWidth = selectedInputSourceCaps.minWidth.toMillimeters().value
+                        val maxWidth = selectedInputSourceCaps.maxWidth.toThreeHundredthsOfInch().value
+                        val minWidth = selectedInputSourceCaps.minWidth.toThreeHundredthsOfInch().value
 
-                        val maxHeight = selectedInputSourceCaps.maxHeight.toMillimeters().value
-                        val minHeight = selectedInputSourceCaps.minHeight.toMillimeters().value
+                        val maxHeight = selectedInputSourceCaps.maxHeight.toThreeHundredthsOfInch().value
+                        val minHeight = selectedInputSourceCaps.minHeight.toThreeHundredthsOfInch().value
 
-                        val width = if (storedWidthThreeHOfInch != null &&
-                            (storedWidthThreeHOfInch > maxWidth || storedWidthThreeHOfInch < minWidth)
-                        ) {
-                            "max"
-                        } else {
-                            savedSettings.scanRegions.width
+                        val width = storedWidthThreeHOfInch.coerceIn(minWidth..maxWidth)
+                        val height = storedHeightThreeHOfInch.coerceIn(minHeight..maxHeight)
+
+                        val xOffset = savedScanRegion.xOffset
+                        val yOffset = savedScanRegion.yOffset
+                        scanRegion(selectedInputSourceCaps) {
+                            this.width = width.threeHundredthsOfInch()
+                            this.height = height.threeHundredthsOfInch()
+                            this.xOffset = xOffset
+                            this.yOffset = yOffset
                         }
-                        val height = if (storedHeightThreeHOfInch != null &&
-                            (storedHeightThreeHOfInch > maxHeight || storedHeightThreeHOfInch < minHeight)
-                        ) {
-                            "max"
-                        } else {
-                            savedSettings.scanRegions.height
-                        }
-                        val xOffset = savedSettings.scanRegions.xOffset
-                        val yOffset = savedSettings.scanRegions.yOffset
-                        StatelessImmutableScanRegion(height, width, xOffset, yOffset)
                     } else {
                         null
                     }
@@ -335,7 +332,7 @@ class ScanningScreenViewModel(
                         scanRegions = scanRegion
                     )
 
-                    validatedSettings.toESCLKtScanSettings(selectedInputSourceCaps)
+                    validatedSettings
                 } catch (e: Exception) {
                     Timber.e(e, "Error applying saved settings, using defaults")
                     caps.calculateDefaultESCLScanSettingsState()
@@ -350,7 +347,7 @@ class ScanningScreenViewModel(
                         initialSettings,
                         caps
                     ),
-                    {
+                    suspend {
                         saveScanSettings()
                         saveSessionFile()
                     },
@@ -410,14 +407,14 @@ class ScanningScreenViewModel(
         saveSessionFile()
     }
 
-    fun saveScanSettings() {
+    suspend fun saveScanSettings() {
         scanningScreenData.scanSettingsVM?.uiState?.value?.scanSettings?.let { settings ->
             DefaultScanSettingsStore.save(application.applicationContext, settings)
             Timber.d("Scan settings saved to persistent storage")
         }
     }
 
-    fun clearSavedScanSettings() {
+    suspend fun clearSavedScanSettings() {
         DefaultScanSettingsStore.clear(application.applicationContext)
         Timber.d("Saved scan settings cleared")
     }

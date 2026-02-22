@@ -67,7 +67,7 @@ class ScanSettingsComposableStateHolder(
     @InjectedParam
     private val initialScanSettingsData: ScanSettingsComposableData,
     @InjectedParam
-    private val onSettingsChanged: (() -> Unit)? = null,
+    private val onSettingsChanged: (suspend () -> Unit)? = null,
     @InjectedParam
     private val coroutineScope: CoroutineScope,
     private val localeProvider: LocaleProvider,

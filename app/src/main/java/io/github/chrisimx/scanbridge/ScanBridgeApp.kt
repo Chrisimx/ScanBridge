@@ -22,6 +22,7 @@ package io.github.chrisimx.scanbridge
 import android.content.Context.MODE_PRIVATE
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,8 +31,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.edit
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.protobuf.StringValue
+import io.github.chrisimx.scanbridge.datastore.lastRouteStore
+import io.github.chrisimx.scanbridge.proto.copy
+import io.github.chrisimx.scanbridge.proto.lastRouteOrNull
 import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import io.github.chrisimx.scanbridge.uicomponents.CrashFileHandler
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 
@@ -45,15 +51,13 @@ fun ScanBridgeApp() {
         val currentBackStackEntry by navController.currentBackStackEntryAsState()
         val typedRoute = currentBackStackEntry?.toTypedRoute()
 
-        val sharedPreferences = context.getSharedPreferences("route_store", MODE_PRIVATE)
-
         LaunchedEffect(Unit) {
             Timber.d("Loading last route from shared preferences")
-            val savedJson = sharedPreferences.getString("last_route", null)
-            if (savedJson != null) {
+            val lastRoute = context.lastRouteStore.data.firstOrNull()?.lastRouteOrNull?.value
+            if (lastRoute != null) {
                 try {
-                    Timber.d("Last route found: $savedJson")
-                    val savedRoute = Json.decodeFromString<BaseRoute>(savedJson)
+                    Timber.d("Last route found: $lastRoute")
+                    val savedRoute = Json.decodeFromString<BaseRoute>(lastRoute)
                     startDestination = savedRoute
                     return@LaunchedEffect
                 } catch (e: Exception) {
@@ -68,12 +72,14 @@ fun ScanBridgeApp() {
         }
 
         LaunchedEffect(typedRoute) {
-            typedRoute?.let {
-                val json = Json.encodeToString(it)
+            typedRoute?.let { route ->
+                val json = Json.encodeToString(route)
                 Timber.d("Route saved as: $json")
 
-                sharedPreferences.edit {
-                    putString("last_route", json)
+                context.lastRouteStore.updateData {
+                    it.copy {
+                        lastRoute = StringValue.of(json)
+                    }
                 }
             }
         }

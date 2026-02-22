@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option java_package = "io.github.chrisimx.scanbridge.proto";
+option java_multiple_files = true;
+
+import "google/protobuf/wrappers.proto";
+
+message LastRoute {
+  google.protobuf.StringValue last_route = 1;
+}

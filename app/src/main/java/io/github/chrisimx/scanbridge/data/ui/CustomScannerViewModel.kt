@@ -20,30 +20,32 @@
 package io.github.chrisimx.scanbridge.data.ui
 
 import android.app.Application
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
-import io.github.chrisimx.scanbridge.data.model.CustomScanner
-import io.github.chrisimx.scanbridge.stores.CustomScannerStore
+import androidx.lifecycle.viewModelScope
+import io.github.chrisimx.scanbridge.db.ScanBridgeDb
+import io.github.chrisimx.scanbridge.db.entities.CustomScanner
 import kotlin.uuid.ExperimentalUuidApi
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class CustomScannerViewModel(application: Application) : AndroidViewModel(application) {
-    private val context = getApplication<Application>()
-
-    val customScanners = mutableStateListOf<CustomScanner>()
-
-    init {
-        val loadedScanners = CustomScannerStore.load(context)
-        customScanners.addAll(loadedScanners)
-    }
+class CustomScannerViewModel(application: Application, appDb: ScanBridgeDb) : AndroidViewModel(application) {
+    private val customScannerDao = appDb.customScannerDao()
+    private val _customScannersFlow = customScannerDao.getAllFlow()
+    val customScanners: StateFlow<List<CustomScanner>> = _customScannersFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf())
 
     fun addScanner(scanner: CustomScanner) {
-        customScanners.add(scanner)
-        CustomScannerStore.save(context, customScanners)
+        viewModelScope.launch {
+            customScannerDao.insertAll(scanner)
+        }
     }
 
     @OptIn(ExperimentalUuidApi::class)
     fun deleteScanner(scanner: CustomScanner) {
-        customScanners.removeIf { it.uuid == scanner.uuid }
-        CustomScannerStore.save(context, customScanners)
+        viewModelScope.launch {
+            customScannerDao.delete(scanner)
+        }
     }
 }

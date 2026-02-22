@@ -19,10 +19,15 @@
 
 package io.github.chrisimx.scanbridge
 
-import android.content.Context.MODE_PRIVATE
+import android.app.Activity
+import android.app.Activity.RESULT_OK
+import android.app.Application
+import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import androidx.activity.compose.LocalActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,9 +50,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,66 +66,47 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.core.content.edit
 import androidx.core.net.toUri
-import io.github.chrisimx.scanbridge.logs.FileLogger
+import io.github.chrisimx.scanbridge.datastore.*
+import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
+import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
+import io.github.chrisimx.scanbridge.proto.rememberScanSettingsOrNull
+import io.github.chrisimx.scanbridge.proto.scanningResponseTimeoutOrNull
+import io.github.chrisimx.scanbridge.services.DebugLogService
+import io.github.chrisimx.scanbridge.services.FileDebugLogService
 import io.github.chrisimx.scanbridge.uicomponents.TitledCard
 import io.github.chrisimx.scanbridge.uicomponents.dialog.SimpleTextDialog
 import io.github.chrisimx.scanbridge.uicomponents.settings.CheckboxSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.MoreInformationButton
 import io.github.chrisimx.scanbridge.uicomponents.settings.UIntSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
-import java.io.BufferedWriter
 import java.io.File
-import java.io.FileWriter
-import timber.log.Timber
+import kotlinx.coroutines.launch
+import org.koin.compose.activity.koinActivityInject
+import org.koin.compose.koinInject
+import org.koin.core.qualifier.named
+import org.koin.mp.KoinPlatform.getKoin
 
 @Composable
-fun DisableCertChecksSetting(onInformationRequested: (String) -> Unit) {
+fun DisableCertChecksSetting(
+    onInformationRequested: (Int) -> Unit,
+    checked: Boolean,
+    setChecked: (Boolean) -> Unit,
+) {
     CheckboxSetting(
-        "disable_cert_checks",
         stringResource(R.string.disable_cert_checks),
-        stringResource(R.string.disable_cert_checks_desc)
+        R.string.disable_cert_checks_desc,
+        checked,
+        setChecked
     ) {
         onInformationRequested(it)
     }
 }
 
-fun clearDebugLog(activity: MainActivity, sharedPreferences: SharedPreferences) {
-    Timber.d("Clearing debug log")
-    activity.tree?.let {
-        Timber.uproot(it)
-        activity.tree = null
-    }
-    activity.debugWriter?.close()
-    activity.debugWriter = null
+fun exportDebugLog(context: Context, debugLogService: DebugLogService, saveDebugLogLauncher: ActivityResultLauncher<Intent>) {
+    debugLogService.flush()
 
-    val debugDir = File(activity.filesDir, "debug")
-    if (debugDir.exists()) {
-        val debugFile = File(debugDir, "debug.txt")
-        if (debugFile.exists()) {
-            debugFile.delete()
-        }
-    }
-
-    if (sharedPreferences.getBoolean("write_debug", false)) {
-        val output = File(debugDir, "debug.txt")
-        if (!output.exists()) {
-            output.createNewFile()
-        }
-        activity.debugWriter = BufferedWriter(FileWriter(output, true))
-        activity.tree = FileLogger(activity.debugWriter!!)
-        Timber.plant(activity.tree!!)
-        Timber.i(
-            "Debug logging starts with ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE}, ${BuildConfig.FLAVOR})"
-        )
-    }
-}
-
-fun exportDebugLog(activity: MainActivity) {
-    activity.debugWriter?.flush()
-
-    val debugDir = File(activity.filesDir, "debug")
+    val debugDir = File(context.filesDir, "debug")
     val debugFile = File(debugDir, "debug.txt")
 
     if (debugFile.exists()) {
@@ -127,18 +115,30 @@ fun exportDebugLog(activity: MainActivity) {
         intent.type = "text/plain"
         intent.putExtra(Intent.EXTRA_TITLE, "debug_log.txt") // Suggested file name
 
-        activity.saveDebugFileLauncher?.launch(intent)
+        saveDebugLogLauncher.launch(intent)
     }
 }
 
 @Composable
 fun DebugOptions(
-    sharedPreferences: SharedPreferences,
     debugLog: Boolean,
-    onInformationRequested: (String) -> Unit,
+    onInformationRequested: (Int) -> Unit,
     setWriteDebugLog: (Boolean) -> Unit
 ) {
-    val activity = LocalActivity.current as MainActivity
+    val context = LocalContext.current
+    val debugLogService: DebugLogService = koinInject()
+
+    val debugFileSaveLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {  result ->
+        if (result.resultCode == RESULT_OK) {
+            val uri = result.data?.data
+            uri?.let {
+                debugLogService.saveToFile(it)
+            }
+        }
+    }
+
     ConstraintLayout(
         Modifier
             .fillMaxWidth()
@@ -146,38 +146,7 @@ fun DebugOptions(
             .toggleable(
                 value = debugLog,
                 onValueChange = {
-                    sharedPreferences
-                        .edit {
-                            putBoolean("write_debug", it)
-                        }
                     setWriteDebugLog(it)
-
-                    if (it) {
-                        val debugDir = File(activity.filesDir, "debug")
-                        if (!debugDir.exists()) {
-                            debugDir.mkdir()
-                        }
-                        val output = File(debugDir, "debug.txt")
-                        if (!output.exists()) {
-                            output.createNewFile()
-                        }
-                        activity.debugWriter = BufferedWriter(FileWriter(output, true))
-                        activity.tree = FileLogger(activity.debugWriter!!)
-                        Timber.plant(activity.tree!!)
-                        Timber.i(
-                            "Debug logging starts with ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE}, ${BuildConfig.FLAVOR})"
-                        )
-                    } else {
-                        Timber.i(
-                            "Debug logging stops with ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE}, ${BuildConfig.FLAVOR})"
-                        )
-                        activity.tree?.let {
-                            Timber.uproot(it)
-                            activity.tree = null
-                        }
-                        activity.debugWriter?.close()
-                        activity.debugWriter = null
-                    }
                 },
                 role = Role.Checkbox
             )
@@ -216,22 +185,18 @@ fun DebugOptions(
                 }
         ) {
             MoreInformationButton {
-                onInformationRequested(
-                    context.getString(
-                        R.string.debug_log_explanation
-                    )
-                )
+                onInformationRequested(R.string.debug_log_explanation)
             }
         }
     }
     OutlinedButton(
-        onClick = { clearDebugLog(activity, sharedPreferences) }
+        onClick = { debugLogService.clear() }
     ) {
         Text(stringResource(R.string.clear_debug_log))
     }
 
     OutlinedButton(
-        onClick = { exportDebugLog(activity) }
+        onClick = { exportDebugLog(context, debugLogService, debugFileSaveLauncher) }
     ) {
         Text(stringResource(R.string.export_debug_log))
     }
@@ -242,20 +207,18 @@ fun DebugOptions(
 fun AppSettingsScreen(innerPadding: PaddingValues) {
     val context = LocalContext.current
 
-    val sharedPreferences = remember {
-        context.getSharedPreferences("scanbridge", MODE_PRIVATE)
+    val appSettingsStore = context.appSettingsStore
+    val appSettings by appSettingsStore.data.collectAsState(
+        ScanBridgeSettings.getDefaultInstance()
+    )
+    var information: Int? by remember {
+        mutableStateOf(null)
     }
-
-    var debugLog by remember {
-        mutableStateOf(
-            sharedPreferences.getBoolean(
-                "write_debug",
-                false
-            )
-        )
-    }
+    val setInformationRequested = { it: Int -> information = it }
 
     val scrollState = rememberScrollState()
+
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -302,45 +265,43 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
 
         HorizontalDivider(modifier = Modifier.padding(14.dp))
 
-        var information: String? by remember {
-            mutableStateOf(null)
-        }
-
         FlowRow {
             TitledCard(
                 title = stringResource(R.string.settings)
             ) {
-                DisableCertChecksSetting {
-                    information = it
-                }
+                DisableCertChecksSetting(
+                    setInformationRequested,
+                    appSettings.disableCertChecks,
+                    { coroutineScope.launch { appSettingsStore.setDisableCertCheck(it)}  }
+                )
 
                 CheckboxSetting(
-                    "remember_scan_settings",
                     stringResource(R.string.remember_scan_settings),
-                    stringResource(R.string.remember_scan_settings_desc),
-                    default = true
+                    R.string.remember_scan_settings_desc,
+                    appSettings.rememberScanSettingsOrNull?.value ?: true,
+                    { coroutineScope.launch { appSettingsStore.setRememberScanSettings(it) } }
                 ) {
                     information = it
                 }
 
                 // Timeout setting
                 UIntSetting(
+                    appSettings.scanningResponseTimeoutOrNull?.value?.toUInt(),
+                    25u,
                     stringResource(R.string.timeout),
-                    default = 25u,
-                    stringResource(R.string.timeout_info),
-                    { information = it },
-                    sharedPreferences,
-                    sharedPrefsName = "scanning_response_timeout"
+                    R.string.timeout_info,
+                    setInformationRequested,
+                    { coroutineScope.launch { appSettingsStore.setTimeoutSetting(it) } },
                 )
 
                 // PDF chunk size setting
                 UIntSetting(
-                    stringResource(R.string.pdf_export_max_pages_per_pdf),
+                    appSettings.chunkSizePdfExportOrNull?.value?.toUInt(),
                     50u,
-                    stringResource(R.string.pdf_export_setting_info),
-                    { information = it },
-                    sharedPreferences,
-                    sharedPrefsName = "chunk_size_pdf_export",
+                    stringResource(R.string.pdf_export_max_pages_per_pdf),
+                    R.string.pdf_export_setting_info,
+                    setInformationRequested,
+                    { coroutineScope.launch { appSettingsStore.setChunkSize(it) } },
                     min = 1u,
                     max = UInt.MAX_VALUE
                 )
@@ -350,17 +311,17 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 title = stringResource(R.string.advanced)
             ) {
                 DebugOptions(
-                    sharedPreferences,
-                    debugLog,
-                    { information = it },
-                    { debugLog = it }
+                    appSettings.writeDebug,
+                    setInformationRequested,
+                    { coroutineScope.launch { appSettingsStore.setWriteDebugLog(it) }}
                 )
             }
         }
 
-        if (information != null) {
+        val currentInfo = information
+        if (currentInfo != null) {
             SimpleTextDialog(
-                information!!,
+                stringResource(currentInfo),
                 { information = null }
             )
         }

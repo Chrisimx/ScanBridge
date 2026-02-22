@@ -23,9 +23,12 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import androidx.core.content.edit
+import io.github.chrisimx.scanbridge.datastore.lastRouteStore
+import io.github.chrisimx.scanbridge.proto.copy
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {
@@ -49,10 +52,7 @@ class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {
             }
             File(crashDir, "crash-$dateTime.log").writeText(e.stackTraceToString())
 
-            context.getSharedPreferences("route_store", MODE_PRIVATE)
-                .edit {
-                    remove("last_route")
-                }
+            runBlocking { deleteStoredRoute() }
 
             // Try to show an error activity
             val intent = Intent(context, CrashActivity::class.java).apply {
@@ -68,6 +68,14 @@ class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {
             Timber.e(newException, "Uncaught exception in CrashHandler")
             if (defaultHandler != null) {
                 defaultHandler.uncaughtException(t, e)
+            }
+        }
+    }
+
+    suspend fun deleteStoredRoute() {
+        context.lastRouteStore.updateData {
+            it.copy {
+                clearLastRoute()
             }
         }
     }

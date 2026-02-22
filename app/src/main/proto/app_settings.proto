@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option java_package = "io.github.chrisimx.scanbridge.proto";
+option java_multiple_files = true;
+
+import "google/protobuf/wrappers.proto";
+
+message ScanBridgeSettings {
+  bool auto_cleanup = 1;
+  bool write_debug = 2;
+  bool disable_cert_checks = 3;
+  google.protobuf.UInt32Value scanning_response_timeout = 4;
+  google.protobuf.UInt32Value chunk_size_pdf_export = 5;
+  google.protobuf.BoolValue remember_scan_settings = 6;
+  google.protobuf.StringValue last_used_scan_settings = 7;
+}

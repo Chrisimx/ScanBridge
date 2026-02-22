@@ -12,9 +12,14 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.chrisimx.scanbridge.MainActivity
+import io.github.chrisimx.scanbridge.datastore.appSettingsStore
+import io.github.chrisimx.scanbridge.datastore.lastRouteStore
+import io.github.chrisimx.scanbridge.datastore.updateSettings
+import io.github.chrisimx.scanbridge.proto.copy
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -57,14 +62,17 @@ class ScanBridgeScreenshotTest {
 
     @Before
     fun cleanupForTest() {
-        composeTestRule.activity.getSharedPreferences("scanbridge", MODE_PRIVATE)
-            .edit()
-            .putBoolean("auto_cleanup", true)
-            .apply()
-        composeTestRule.activity.getSharedPreferences("route_store", MODE_PRIVATE)
-            .edit()
-            .remove("last_route")
-            .apply()
+        runBlocking {
+            composeTestRule.activity.lastRouteStore.updateData {
+                it.copy {
+                    clearLastRoute()
+                }
+            }
+            composeTestRule.activity.appSettingsStore.updateSettings {
+                clearLastUsedScanSettings()
+                autoCleanup = true
+            }
+        }
     }
 
     @Test

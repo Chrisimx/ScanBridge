@@ -23,15 +23,12 @@ import androidx.core.content.edit
 
 @Composable
 fun CheckboxSetting(
-    settingsName: String,
     settingsText: String,
-    helpText: String,
-    default: Boolean = false,
-    onInformationRequested: (String) -> Unit
+    helpText: Int,
+    checked: Boolean,
+    setChecked: (Boolean) -> Unit,
+    onInformationRequested: (Int) -> Unit
 ) {
-    val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("scanbridge", MODE_PRIVATE)
-    var checked by remember { mutableStateOf(sharedPreferences.getBoolean(settingsName, default)) }
 
     ConstraintLayout(
         Modifier
@@ -39,13 +36,7 @@ fun CheckboxSetting(
             .padding(vertical = 10.dp)
             .toggleable(
                 value = checked,
-                onValueChange = {
-                    sharedPreferences
-                        .edit {
-                            putBoolean(settingsName, it)
-                        }
-                    checked = it
-                },
+                onValueChange = setChecked,
                 role = Role.Checkbox
             )
     ) {

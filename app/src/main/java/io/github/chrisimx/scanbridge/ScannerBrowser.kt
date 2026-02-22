@@ -33,6 +33,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,8 +45,8 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import io.github.chrisimx.scanbridge.data.model.CustomScanner
 import io.github.chrisimx.scanbridge.data.ui.CustomScannerViewModel
+import io.github.chrisimx.scanbridge.db.entities.CustomScanner
 import io.github.chrisimx.scanbridge.uicomponents.FoundScannerItem
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.dialog.CustomScannerDialog
@@ -52,6 +54,7 @@ import io.ktor.http.Url
 import java.util.*
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 
 fun startScannerDiscovery(
@@ -80,6 +83,8 @@ fun ScannerList(
     statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>,
     customScannerViewModel: CustomScannerViewModel
 ) {
+    val customScanners by customScannerViewModel.customScanners.collectAsState()
+
     LazyColumn(
         modifier = Modifier
             .padding(innerPadding)
@@ -106,7 +111,7 @@ fun ScannerList(
             }
         }
 
-        if (customScannerViewModel.customScanners.isNotEmpty() && statefulScannerMap.isNotEmpty()) {
+        if (customScanners.isNotEmpty() && statefulScannerMap.isNotEmpty()) {
             item {
                 Text(
                     stringResource(R.string.discovered_scanners),
@@ -120,7 +125,7 @@ fun ScannerList(
             }
         }
 
-        customScannerViewModel.customScanners.forEach { customScanner ->
+        customScanners.forEach { customScanner ->
             item {
                 FoundScannerItem(
                     customScanner.name,
@@ -133,7 +138,7 @@ fun ScannerList(
             }
         }
 
-        if (customScannerViewModel.customScanners.isNotEmpty() && statefulScannerMap.isNotEmpty()) {
+        if (customScanners.isNotEmpty() && statefulScannerMap.isNotEmpty()) {
             item {
                 Text(
                     stringResource(R.string.saved_scanners),
@@ -155,12 +160,11 @@ fun ScannerBrowser(
     statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
     statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>
 ) {
-    val customScannerViewModel: CustomScannerViewModel = viewModel(
-        factory = ViewModelProvider.AndroidViewModelFactory(LocalContext.current.applicationContext as Application)
-    )
+    val customScannerViewModel: CustomScannerViewModel = koinViewModel()
+    val customScanners by customScannerViewModel.customScanners.collectAsState()
 
     AnimatedContent(
-        targetState = statefulScannerMap.isNotEmpty() || customScannerViewModel.customScanners.isNotEmpty(),
+        targetState = statefulScannerMap.isNotEmpty() || customScanners.isNotEmpty(),
         label = "ScannerList"
     ) {
         if (it) {

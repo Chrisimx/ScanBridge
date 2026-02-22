@@ -22,6 +22,8 @@ package io.github.chrisimx.scanbridge
 import android.app.Application
 import android.content.Context.MODE_PRIVATE
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -30,6 +32,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import io.github.chrisimx.scanbridge.datastore.appSettingsStore
+import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
+import io.github.chrisimx.scanbridge.proto.scanningResponseTimeoutOrNull
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
 import io.github.chrisimx.scanbridge.util.doTempFilesExist
@@ -89,7 +94,7 @@ fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
 @Composable
 fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
     val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("scanbridge", MODE_PRIVATE)
+    val appSettings by context.appSettingsStore.data.collectAsState(ScanBridgeSettings.getDefaultInstance())
 
     NavHost(
         modifier = Modifier.testTag("root_node"),
@@ -122,9 +127,9 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
         }
         composable<ScannerRoute> { backStackEntry ->
             val scannerRoute: ScannerRoute = backStackEntry.toRoute()
-            val debug = sharedPreferences.getBoolean("write_debug", false)
-            val certValidationDisabled = sharedPreferences.getBoolean("disable_cert_checks", false)
-            val timeout = sharedPreferences.getInt("scanning_response_timeout", 25).toUInt()
+            val debug = appSettings.writeDebug
+            val certValidationDisabled = appSettings.disableCertChecks
+            val timeout = appSettings.scanningResponseTimeoutOrNull?.value?.toUInt() ?: 25u
             Timber.tag("ScanBridgeNavHost")
                 .d(
                     "Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerURL}. Timeout is $timeout seconds, Debug is $debug. Disabling of cert checks is $certValidationDisabled. Session id is ${scannerRoute.sessionID}"

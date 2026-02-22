@@ -89,6 +89,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
@@ -105,6 +106,8 @@ import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.data.ui.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
+import io.github.chrisimx.scanbridge.datastore.appSettingsStore
+import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
 import io.github.chrisimx.scanbridge.uicomponents.ExportSettingsPopup
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen
@@ -124,6 +127,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.concurrent.thread
 import kotlin.io.path.Path
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import me.saket.telephoto.zoomable.ZoomSpec
@@ -195,7 +199,7 @@ fun doZipExport(
     }
 }
 
-fun doPdfExport(
+suspend fun doPdfExport(
     scanningViewModel: ScanningScreenViewModel,
     context: Context,
     onError: (String) -> Unit,
@@ -232,8 +236,12 @@ fun doPdfExport(
 
     var pageCounter = 0
 
-    val sharedPrefs = context.getSharedPreferences("scanbridge", MODE_PRIVATE)
-    val chunkSize = sharedPrefs.getInt("chunk_size_pdf_export", 50)
+    val chunkSize = try {
+        context.appSettingsStore.data.first().chunkSizePdfExportOrNull?.value ?: 50
+    } catch (exception: Exception) {
+        Timber.e("doPdfExport couldn't access app settings. Returning default value: $exception")
+        50
+    }
 
     val chunks = scanningViewModel.scanningScreenData.currentScansState.chunked(chunkSize)
 
@@ -294,7 +302,7 @@ fun doPdfExport(
     }
 
     val digitsNeeded = chunks.size.toString().length
-    val tempPdfFiles = chunks.mapIndexed { index, _ ->
+    val tempPdfFiles = List(chunks.size) { index ->
         File(parentDir, "$nameRoot-${index.toString().padStart(digitsNeeded, '0')}.pdf")
     }
 
@@ -660,19 +668,21 @@ fun ScanningScreen(
                     onExportPdf = {
                         scanningViewModel.setShowExportOptionsPopup(false)
                         thread {
-                            doPdfExport(
-                                scanningViewModel,
-                                context,
-                                { error ->
-                                    snackBarError(
-                                        error,
-                                        scope,
-                                        context,
-                                        snackbarHostState,
-                                        false
-                                    )
-                                }
-                            )
+                            scanningViewModel.viewModelScope.launch {
+                                doPdfExport(
+                                    scanningViewModel,
+                                    context,
+                                    { error ->
+                                        snackBarError(
+                                            error,
+                                            scope,
+                                            context,
+                                            snackbarHostState,
+                                            false
+                                        )
+                                    }
+                                )
+                            }
                         }
                     },
                     onExportArchive = {
@@ -706,20 +716,22 @@ fun ScanningScreen(
                     onExportPdf = {
                         scanningViewModel.setShowSaveOptionsPopup(false)
                         thread {
-                            doPdfExport(
-                                scanningViewModel,
-                                context,
-                                { error ->
-                                    snackBarError(
-                                        error,
-                                        scope,
-                                        context,
-                                        snackbarHostState,
-                                        false
-                                    )
-                                },
-                                saveFileLauncher
-                            )
+                            scanningViewModel.viewModelScope.launch {
+                                doPdfExport(
+                                    scanningViewModel,
+                                    context,
+                                    { error ->
+                                        snackBarError(
+                                            error,
+                                            scope,
+                                            context,
+                                            snackbarHostState,
+                                            false
+                                        )
+                                    },
+                                    saveFileLauncher
+                                )
+                            }
                         }
                     },
                     onExportArchive = {

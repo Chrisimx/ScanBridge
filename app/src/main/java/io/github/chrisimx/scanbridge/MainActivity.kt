@@ -27,6 +27,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.collectAsState
+import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.logs.FileLogger
 import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
 import java.io.BufferedWriter
@@ -34,58 +36,30 @@ import java.io.File
 import java.io.FileWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
+import org.koin.android.scope.AndroidScopeComponent
+import org.koin.androidx.scope.activityScope
 import timber.log.Timber
+import org.koin.core.scope.Scope
 
-class MainActivity : ComponentActivity() {
-    var debugWriter: BufferedWriter? = null
-    var tree: Timber.Tree? = null
-    var saveDebugFileLauncher: ActivityResultLauncher<Intent>? = null
-
+class MainActivity : ComponentActivity(), AndroidScopeComponent {
     private val localeProvider: AndroidLocaleProvider by inject()
 
+    override val scope: Scope by activityScope()
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this))
+        Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this.applicationContext))
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         localeProvider.update()
 
-        val sharedPreferences = this.getSharedPreferences("scanbridge", MODE_PRIVATE)
-
-        if (sharedPreferences.getBoolean("write_debug", false)) {
-            val debugDir = File(filesDir, "debug")
-            if (!debugDir.exists()) {
-                debugDir.mkdir()
-            }
-            val output = File(debugDir, "debug.txt")
-            if (!output.exists()) {
-                output.createNewFile()
-            }
-            debugWriter = BufferedWriter(FileWriter(output, true))
-            tree = FileLogger(debugWriter!!)
-
-            Timber.forest().filterIsInstance<FileLogger>().forEach {
-                Timber.d("Old tree removed $it")
-                it.output.close()
-                Timber.uproot(it)
-            }
-            Timber.plant(tree!!)
-        }
-
         Timber.i(
             "ScanBridge (${BuildConfig.VERSION_NAME}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH}, ${BuildConfig.BUILD_TYPE}) starts"
         )
-
-        saveDebugFileLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val uri = result.data?.data
-                saveDebugFileTo(uri)
-            }
-        }
 
         CoroutineScope(Dispatchers.IO).launch {
             cleanUpCacheFiles()
@@ -94,16 +68,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             ScanBridgeApp()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        Timber.i("ScanBridge stops: onDestroy")
-        Timber.i("Cleaning up debug writer")
-
-        tree?.let { Timber.uproot(it) }
-        debugWriter?.close()
     }
 
     private fun cleanUpCacheFiles() {
@@ -129,19 +93,6 @@ class MainActivity : ComponentActivity() {
         File(filesDir, "exports").listFiles()?.forEach { file ->
             if (file.name.startsWith("pdfexport") || file.name.startsWith("zipexport")) {
                 file.delete()
-            }
-        }
-    }
-
-    private fun saveDebugFileTo(uri: Uri?) {
-        val debugDir = File(filesDir, "debug")
-        val debugFile = File(debugDir, "debug.txt")
-
-        if (uri != null) {
-            contentResolver.openOutputStream(uri)?.use { outputStream ->
-                debugFile.inputStream().use { inputStream ->
-                    inputStream.copyTo(outputStream)
-                }
             }
         }
     }

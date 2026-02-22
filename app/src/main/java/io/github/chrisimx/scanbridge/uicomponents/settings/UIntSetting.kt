@@ -19,15 +19,12 @@
 
 package io.github.chrisimx.scanbridge.uicomponents.settings
 
-import android.annotation.SuppressLint
-import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,23 +33,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.content.edit
-import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import timber.log.Timber
 
 @Composable
 fun UIntSettingBase(
+    initialTimeout: UInt,
     settingName: String,
     placeholder: String,
-    help: String,
-    onHelpRequested: (String) -> Unit,
-    changeSetting: (UInt?) -> Unit,
+    help: Int,
+    onHelpRequested: (Int) -> Unit,
+    changeSetting: (UInt) -> Unit,
     min: UInt,
     max: UInt,
-    initialTimeout: UInt = 25u
 ) {
     ConstraintLayout(
         Modifier
@@ -74,14 +68,10 @@ fun UIntSettingBase(
                             changeSetting(value)
                         } else {
                             Timber.w("Value out of range: $value. Ignored")
-                            changeSetting(null)
                         }
                     } catch (_: NumberFormatException) {
                         Timber.w("Invalid setting value. Ignored")
-                        changeSetting(null)
                     }
-                } else {
-                    changeSetting(null)
                 }
             },
             label = {
@@ -120,34 +110,28 @@ fun UIntSettingBase(
 
 @Composable
 fun UIntSetting(
-    settingName: String,
+    initialTimeout: UInt?,
     default: UInt,
-    help: String,
-    onHelpRequested: (String) -> Unit,
-    sharedPreferences: SharedPreferences,
-    sharedPrefsName: String,
+    settingName: String,
+    help: Int,
+    onHelpRequested: (Int) -> Unit,
+    setSetting: (UInt) -> Unit,
     min: UInt = 0u,
     max: UInt = UInt.MAX_VALUE
 ) {
     UIntSettingBase(
+        initialTimeout ?: default,
         settingName,
         default.toString(),
         help,
-        { onHelpRequested(it) },
-        {
-            if (it != null) {
-                sharedPreferences.edit { putInt(sharedPrefsName, it.toInt()) }
-            } else {
-                sharedPreferences.edit { remove(sharedPrefsName) }
-            }
-        },
+        onHelpRequested,
+        setSetting,
         min,
         max,
-        sharedPreferences.getInt(sharedPrefsName, default.toInt()).toUInt()
     )
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+/*@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
 @Composable
 fun TimeoutOptionPreview() {
@@ -157,3 +141,4 @@ fun TimeoutOptionPreview() {
         }
     }
 }
+*/

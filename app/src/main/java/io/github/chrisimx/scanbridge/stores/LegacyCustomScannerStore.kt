@@ -21,31 +21,22 @@ package io.github.chrisimx.scanbridge.stores
 
 import android.content.Context
 import androidx.core.content.edit
-import io.github.chrisimx.scanbridge.data.model.CustomScanner
+import io.github.chrisimx.scanbridge.db.ScanBridgeDb
+import io.github.chrisimx.scanbridge.db.entities.CustomScanner
 import io.ktor.http.Url
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
-object CustomScannerStore {
+object LegacyCustomScannerStore {
     private const val PREF_NAME = "custom_scanner_store"
 
     @OptIn(ExperimentalUuidApi::class)
-    fun save(context: Context, scanners: List<CustomScanner>) {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        sharedPreferences.edit {
-            clear()
-            for (i in scanners.indices) {
-                val scanner = scanners[i]
-                putString("$i.name", scanner.name)
-                putString("$i.url", scanner.url.toString())
-                putString("$i.uuid", scanner.uuid.toString())
-            }
-            putInt("count", scanners.size)
-        }
-    }
-
-    @OptIn(ExperimentalUuidApi::class)
+    @Deprecated("Was replaced by Room DB access")
     fun load(context: Context): List<CustomScanner> {
         val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         val scannerList = mutableListOf<CustomScanner>()
@@ -75,5 +66,26 @@ object CustomScannerStore {
             }
         }
         return scannerList
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
+    fun clear(context: Context) {
+        val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        sharedPreferences.edit {
+            clear()
+        }
+    }
+
+    // Room migration
+    fun ScanBridgeDb.migrateLegacyCustomScanners(context: Context): ScanBridgeDb {
+        val db = this
+        val legacyData = load(context)
+        if (legacyData.isNotEmpty()) {
+            CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+                db.customScannerDao().insertAll(*legacyData.toTypedArray())
+                clear(context)
+            }
+        }
+        return this
     }
 }
