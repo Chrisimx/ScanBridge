@@ -90,7 +90,10 @@ object LegacySessionsStore {
                 val migrationDone =
                     context.appSettingsStore.data.firstOrNull()?.migratedSessionFiles ?: false
 
-                if (migrationDone) return@launch
+                if (migrationDone) {
+                    Timber.i("Migrating legacy sessions already done. Skipping!")
+                    return@launch
+                }
 
                 Timber.i("Migrating legacy sessions")
 
