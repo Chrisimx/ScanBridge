@@ -7,18 +7,16 @@ import io.github.chrisimx.esclkt.Millimeters
 import io.github.chrisimx.esclkt.Points
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
-import io.github.chrisimx.scanbridge.data.model.Session
-import io.github.chrisimx.scanbridge.data.model.Session.Companion.fromString
+import io.github.chrisimx.scanbridge.data.model.LegacySessionV2
+import io.github.chrisimx.scanbridge.data.model.LegacySessionV2.Companion.fromString
 import java.io.File
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToStream
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import timber.log.Timber
 
-object SessionsStore {
+object LegacySessionsStore {
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -34,7 +32,8 @@ object SessionsStore {
         prettyPrint = false
     }
 
-    fun loadSession(application: Context, sessionID: String, caps: ScannerCapabilities?): Result<Session?> {
+    @Deprecated("Replaced with Room database")
+    fun loadSession(application: Context, sessionID: String, caps: ScannerCapabilities?): Result<LegacySessionV2?> {
         Timber.d("Loading session $sessionID")
 
         val path = application.applicationInfo.dataDir + "/files/" + sessionID + ".session"
@@ -48,19 +47,5 @@ object SessionsStore {
         val sessionFileString = file.readText()
 
         return fromString(sessionFileString, json, caps)
-    }
-
-    @OptIn(ExperimentalSerializationApi::class)
-    fun saveSession(session: Session, application: Context, sessionID: String): String {
-        Timber.d("Saving session $sessionID with $session")
-
-        val path = application.applicationInfo.dataDir + "/files/" + sessionID + ".session"
-        val file = File(path)
-
-        file.outputStream().use {
-            json.encodeToStream(session, it)
-        }
-
-        return path
     }
 }

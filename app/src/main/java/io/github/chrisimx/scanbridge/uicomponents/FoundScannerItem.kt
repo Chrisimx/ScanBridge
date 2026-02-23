@@ -45,6 +45,7 @@ import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.ScannerRoute
 import java.util.*
+import kotlin.uuid.Uuid
 import timber.log.Timber
 
 @Composable
@@ -55,8 +56,8 @@ fun FoundScannerItem(name: String, address: String, navController: NavController
             .widthIn(max = 700.dp)
             .padding(10.dp),
         onClick = {
-            val sessionID = UUID.randomUUID().toString()
-            navController.navigate(route = ScannerRoute(name, address, sessionID))
+            val sessionID = Uuid.random()
+            navController.navigate(route = ScannerRoute(name, address, sessionID.toString()))
         }
     ) {
         Row(

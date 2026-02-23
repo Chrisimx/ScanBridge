@@ -15,6 +15,7 @@ import io.github.chrisimx.scanbridge.services.DebugLogService
 import io.github.chrisimx.scanbridge.services.FileDebugLogService
 import io.github.chrisimx.scanbridge.services.LocaleProvider
 import io.github.chrisimx.scanbridge.stores.LegacyCustomScannerStore.migrateLegacyCustomScanners
+import java.util.concurrent.Executors
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.bind
@@ -34,7 +35,13 @@ val appModule = module {
         Room.databaseBuilder(
             get(),
             ScanBridgeDb::class.java, "scanbridge"
-        ).build()
+        ).setQueryCallback(
+            { sqlQuery, bindArgs ->
+                Timber.tag("RoomDebug").d("SQL: $sqlQuery, args: $bindArgs")
+            },
+            Executors.newSingleThreadExecutor() // callback runs here
+        )
+            .build()
             .migrateLegacyCustomScanners(get())
     }
     factory<ScanSettingsComposableStateHolder>()

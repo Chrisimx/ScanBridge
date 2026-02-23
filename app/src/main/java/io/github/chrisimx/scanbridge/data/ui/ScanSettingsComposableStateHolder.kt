@@ -56,7 +56,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.koin.core.annotation.InjectedParam
+import timber.log.Timber
 
 enum class ScanSettingsLengthUnit {
     INCH,
@@ -65,9 +67,11 @@ enum class ScanSettingsLengthUnit {
 
 class ScanSettingsComposableStateHolder(
     @InjectedParam
-    private val initialScanSettingsData: ScanSettingsComposableData,
+    val scanSettings: StateFlow<ScanSettings>,
     @InjectedParam
-    private val onSettingsChanged: (suspend () -> Unit)? = null,
+    private val initialScanSettingsData: ScanSettingsStateData,
+    @InjectedParam
+    private val updateSettings: suspend (ScanSettings.() -> ScanSettings) -> Unit,
     @InjectedParam
     private val coroutineScope: CoroutineScope,
     private val localeProvider: LocaleProvider,
@@ -75,7 +79,7 @@ class ScanSettingsComposableStateHolder(
 ) {
 
     private val _uiState = MutableStateFlow(initialScanSettingsData)
-    val uiState: StateFlow<ScanSettingsComposableData> = _uiState.asStateFlow()
+    val uiState: StateFlow<ScanSettingsStateData> = _uiState.asStateFlow()
 
     val inputSourceOptions: StateFlow<List<InputSource>> = _uiState.derived(coroutineScope) {
         it.capabilities.getInputSourceOptions()
@@ -85,13 +89,15 @@ class ScanSettingsComposableStateHolder(
         it.capabilities.adf?.duplexCaps != null
     }
 
-    val duplexCurrentlyAvailable: StateFlow<Boolean> = combine(duplexAdfSupported, _uiState) { duplexSupport, uiState ->
-        duplexSupport && uiState.scanSettings.inputSource == InputSource.Feeder
+    val duplexCurrentlyAvailable: StateFlow<Boolean> = combine(duplexAdfSupported, scanSettings) { duplexSupport, scanSettings ->
+        duplexSupport && scanSettings.inputSource == InputSource.Feeder
     }.stateIn(coroutineScope, SharingStarted.Lazily, false)
 
-    private val selectedInputSourceCaps: StateFlow<InputSourceCaps> = _uiState.derived(coroutineScope) {
-        it.capabilities.getInputSourceCaps(it.scanSettings.inputSource, it.scanSettings.duplex ?: false)
-    }
+    private val selectedInputSourceCaps: StateFlow<InputSourceCaps> = combine(scanSettings, _uiState) { settings, uiState ->
+        uiState.capabilities.getInputSourceCaps(settings.inputSource, settings.duplex ?: false)
+    }.stateIn(coroutineScope, SharingStarted.Lazily, uiState.value.capabilities.getInputSourceOptions().first().let {
+        uiState.value.capabilities.getInputSourceCaps(it, scanSettings.value.duplex == true)
+    })
 
     val intentOptions = selectedInputSourceCaps.derived(coroutineScope) {
         it.supportedIntents
@@ -101,10 +107,9 @@ class ScanSettingsComposableStateHolder(
         it.settingProfiles[0].supportedResolutions
     }
 
-    val currentResolution: StateFlow<DiscreteResolution?> = uiState.derived(coroutineScope) {
-        val settings = it.scanSettings
-        val x = settings.xResolution
-        val y = settings.yResolution
+    val currentResolution: StateFlow<DiscreteResolution?> = scanSettings.derived(coroutineScope) {
+        val x = it.xResolution
+        val y = it.yResolution
 
         if (x != null && y != null) DiscreteResolution(x, y) else null
     }
@@ -121,8 +126,8 @@ class ScanSettingsComposableStateHolder(
         it.heightString
     }
 
-    val currentScanRegion = _uiState.derived(coroutineScope) {
-        it.scanSettings.scanRegions?.regions?.firstOrNull()
+    val currentScanRegion = scanSettings.derived(coroutineScope) {
+        it.scanRegions?.regions?.firstOrNull()
     }
 
     val heightValidationResult = combine(currentHeightText, lengthUnit, selectedInputSourceCaps)
@@ -171,31 +176,17 @@ class ScanSettingsComposableStateHolder(
         ScanSettingsLengthUnit.MILLIMETER -> length.toMillimeters().value
     }
 
-    private inline fun ScanSettingsComposableData.updateScanSettings(update: ScanSettings.() -> ScanSettings) =
-        copy(scanSettings = scanSettings.update())
-
-    private inline fun MutableStateFlow<ScanSettingsComposableData>.updateScanSettings(updateLambda: ScanSettings.() -> ScanSettings) =
-        this.update {
-            it.updateScanSettings(updateLambda)
-        }
-
     init {
-        _uiState
-            .map { it.scanSettings }
-            .distinctUntilChanged()
-            .onEach { onSettingsChanged?.invoke() }
-            .launchIn(coroutineScope)
+        //observeHeightValidation()
+        //observeWidthValidation()
 
-        observeHeightValidation()
-        observeWidthValidation()
-
-        _uiState
+        /*_uiState
             .map { it.maximumSize }
             .distinctUntilChanged()
             .combine(selectedInputSourceCaps) { maxSize, inputSourceCaps -> Pair(maxSize, inputSourceCaps) }
             .filter { it.first }
             .onEach { (maxSize, inputSourceCaps) ->
-                _uiState.updateScanSettings {
+                updateSettings {
                     copy(
                         scanRegions = scanRegion {
                             width = inputSourceCaps.maxWidth
@@ -205,7 +196,7 @@ class ScanSettingsComposableStateHolder(
                         }
                     )
                 }
-            }.launchIn(coroutineScope)
+            }.launchIn(coroutineScope)*/
     }
 
     private fun observeWidthValidation() {
@@ -213,28 +204,24 @@ class ScanSettingsComposableStateHolder(
             .filterIsInstance<NumberValidationResult.Success>()
             .distinctUntilChanged()
             .onEach { widthValidationResult ->
-                _uiState.update {
-                    val currentScanRegion = it.scanSettings.scanRegions?.regions?.firstOrNull()
+                updateSettings {
+                    val currentScanRegion = scanRegions?.regions?.firstOrNull()
 
                     if (currentScanRegion == null) {
-                        return@update it.copy(
-                            scanSettings = it.scanSettings.copy(
+                        return@updateSettings copy(
                                 scanRegions = scanRegion {
                                     maxHeight()
                                     width = widthValidationResult.value.threeHundredthsOfInch()
                                 }
                             )
-                        )
                     } else {
                         val currentHeight = currentScanRegion.height
-                        return@update it.copy(
-                            scanSettings = it.scanSettings.copy(
+                        return@updateSettings copy(
                                 scanRegions = scanRegion {
                                     width = widthValidationResult.value.threeHundredthsOfInch()
                                     height = currentHeight
                                 }
                             )
-                        )
                     }
                 }
             }
@@ -243,31 +230,31 @@ class ScanSettingsComposableStateHolder(
 
     private fun observeHeightValidation() {
         heightValidationResult
+            .onEach {
+                Timber.d("Height Validation result $it")
+            }
             .filterIsInstance<NumberValidationResult.Success>()
             .distinctUntilChanged()
             .onEach { heightValidationResult ->
-                _uiState.update {
-                    val currentScanRegion = it.scanSettings.scanRegions?.regions?.firstOrNull()
+                Timber.d("Height validation success result received: $heightValidationResult")
+                updateSettings {
+                    val currentScanRegion = scanRegions?.regions?.firstOrNull()
 
                     if (currentScanRegion == null) {
-                        return@update it.copy(
-                            scanSettings = it.scanSettings.copy(
+                        return@updateSettings copy(
                                 scanRegions = scanRegion {
                                     maxWidth()
                                     height = heightValidationResult.value.threeHundredthsOfInch()
                                 }
                             )
-                        )
                     } else {
                         val currentWidth = currentScanRegion.width
-                        return@update it.copy(
-                            scanSettings = it.scanSettings.copy(
+                        return@updateSettings copy(
                                 scanRegions = scanRegion {
                                     width = currentWidth
                                     height = heightValidationResult.value.threeHundredthsOfInch()
                                 }
                             )
-                        )
                     }
                 }
             }
@@ -275,63 +262,70 @@ class ScanSettingsComposableStateHolder(
     }
 
     fun setDuplex(duplex: Boolean) {
-        _uiState.updateScanSettings {
-            copy(duplex = duplex)
+        coroutineScope.launch {
+            updateSettings {
+                copy(duplex = duplex)
+            }
         }
     }
 
     fun setInputSource(inputSource: InputSource) {
-        _uiState.update {
-            val currentScanSettings = it.scanSettings
-            val inputSourceCaps = it.capabilities.getInputSourceCaps(inputSource, currentScanSettings.duplex == true)
+        coroutineScope.launch {
+            updateSettings {
+                val currentScanSettings = scanSettings.value
+                val uiState = uiState.value
+                val inputSourceCaps = uiState.capabilities.getInputSourceCaps(inputSource, currentScanSettings.duplex == true)
 
-            val supportedResolutions = inputSourceCaps.settingProfiles[0].supportedResolutions.discreteResolutions
+                val supportedResolutions = inputSourceCaps.settingProfiles[0].supportedResolutions.discreteResolutions
 
-            val xRes = currentScanSettings.xResolution
-            val yRes = currentScanSettings.yResolution
+                val xRes = currentScanSettings.xResolution
+                val yRes = currentScanSettings.yResolution
 
-            val invalidResolutionSetting = xRes != null && yRes != null &&
-                !supportedResolutions.contains(DiscreteResolution(xRes, yRes))
+                val invalidResolutionSetting = xRes != null && yRes != null &&
+                    !supportedResolutions.contains(DiscreteResolution(xRes, yRes))
 
-            val replacementResolution = if (invalidResolutionSetting) {
-                val highestScanResolution = it.capabilities.getMaxResolution(inputSource)
+                val replacementResolution = if (invalidResolutionSetting) {
+                    val highestScanResolution = uiState.capabilities.getMaxResolution(inputSource)
 
-                Pair(highestScanResolution.xResolution, highestScanResolution.yResolution)
-            } else {
-                Pair(xRes, yRes)
-            }
+                    Pair(highestScanResolution.xResolution, highestScanResolution.yResolution)
+                } else {
+                    Pair(xRes, yRes)
+                }
 
-            val intentSupported = currentScanSettings.intent?.let { inputSourceCaps.supportedIntents.contains(it) } ?: true
+                val intentSupported = currentScanSettings.intent?.let { inputSourceCaps.supportedIntents.contains(it) } ?: true
 
-            val replacementIntent = if (intentSupported) {
-                currentScanSettings.intent
-            } else {
-                null
-            }
+                val replacementIntent = if (intentSupported) {
+                    currentScanSettings.intent
+                } else {
+                    null
+                }
 
-            it.copy(
-                scanSettings = it.scanSettings.copy(
+                copy(
                     inputSource = inputSource,
                     xResolution = replacementResolution.first,
                     yResolution = replacementResolution.second,
                     intent = replacementIntent
                 )
-            )
+            }
         }
     }
 
     fun setResolution(xResolution: UInt, yResolution: UInt) {
-        _uiState.updateScanSettings {
-            copy(
-                xResolution = xResolution,
-                yResolution = yResolution
-            )
+        coroutineScope.launch {
+            updateSettings {
+                copy(
+                    xResolution = xResolution,
+                    yResolution = yResolution
+                )
+            }
         }
     }
 
     fun setIntent(intent: ScanIntentEnumOrRaw?) {
-        _uiState.updateScanSettings {
-            copy(intent = intent)
+        coroutineScope.launch {
+            updateSettings {
+                copy(intent = intent)
+            }
         }
     }
 
@@ -379,25 +373,28 @@ class ScanSettingsComposableStateHolder(
 
     fun setRegionDimension(newWidth: LengthUnit, newHeight: LengthUnit) {
         _uiState.update {
-            val scanSettings = it.scanSettings.copy(
-                scanRegions = scanRegion {
-                    width = newWidth
-                    height = newHeight
-                    xOffset = 0.millimeters()
-                    yOffset = 0.millimeters()
-                }
-            )
             it.copy(
-                scanSettings = scanSettings,
                 maximumSize = false
             )
+        }
+        coroutineScope.launch {
+            updateSettings {
+                copy(
+                    scanRegions = scanRegion {
+                        width = newWidth
+                        height = newHeight
+                        xOffset = 0.millimeters()
+                        yOffset = 0.millimeters()
+                    }
+                )
+            }
         }
     }
 
     fun copySettingsToClipboard() {
         val systemClipboard =
             context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-        val scanSettingsString = uiState.value.scanSettings.toString()
+        val scanSettingsString = scanSettings.toString()
         systemClipboard.setPrimaryClip(
             ClipData.newPlainText(
                 context.getString(R.string.scan_settings),

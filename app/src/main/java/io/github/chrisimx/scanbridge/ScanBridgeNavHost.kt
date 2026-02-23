@@ -39,6 +39,9 @@ import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
 import io.github.chrisimx.scanbridge.util.doTempFilesExist
 import io.ktor.http.Url
+import kotlin.uuid.Uuid
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -57,7 +60,7 @@ data class ScannerRoute(val scannerName: String, val scannerURL: String, val ses
 
 @Serializable
 @SerialName("CropImageRoute")
-data class CropImageRoute(val sessionID: String, val pageIdx: Int, val returnRoute: String) : BaseRoute
+data class CropImageRoute(val scanId: String, val returnRoute: String) : BaseRoute
 
 @Serializable
 @SerialName("ErrorRoute")
@@ -68,11 +71,10 @@ fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
     return when (destination.route) {
         "StartUpScreenRoute" -> StartUpScreenRoute
 
-        "CropImageRoute/{sessionID}/{pageIdx}/{returnRoute}" -> {
-            val sessionID = arguments?.getString("sessionID") ?: return null
-            val pageIdx = arguments?.getInt("pageIdx") ?: return null
+        "CropImageRoute/{scanId}/{pageIdx}/{returnRoute}" -> {
+            val scanId = arguments?.getString("scanId") ?: return null
             val returnRouteString = arguments?.getString("returnRoute") ?: return null
-            CropImageRoute(sessionID, pageIdx, returnRouteString)
+            CropImageRoute(scanId, returnRouteString)
         }
 
         "ScannerRoute/{scannerName}/{scannerURL}/{sessionID}" -> {
@@ -94,7 +96,7 @@ fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
 @Composable
 fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
     val context = LocalContext.current
-    val appSettings by context.appSettingsStore.data.collectAsState(ScanBridgeSettings.getDefaultInstance())
+    val appSettings = context.appSettingsStore.data
 
     NavHost(
         modifier = Modifier.testTag("root_node"),
@@ -123,13 +125,14 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
                 navController.navigate(StartUpScreenRoute)
                 return@composable
             }
-            CropScreen(scannerRoute.sessionID, scannerRoute.pageIdx, returnRoute, navController)
+            CropScreen(Uuid.parse(scannerRoute.scanId), returnRoute, navController)
         }
         composable<ScannerRoute> { backStackEntry ->
             val scannerRoute: ScannerRoute = backStackEntry.toRoute()
-            val debug = appSettings.writeDebug
-            val certValidationDisabled = appSettings.disableCertChecks
-            val timeout = appSettings.scanningResponseTimeoutOrNull?.value?.toUInt() ?: 25u
+            val appSettingsCurrent = runBlocking { appSettings.first() }
+            val debug = appSettingsCurrent.writeDebug
+            val certValidationDisabled = appSettingsCurrent.disableCertChecks
+            val timeout = appSettingsCurrent.scanningResponseTimeoutOrNull?.value?.toUInt() ?: 25u
             Timber.tag("ScanBridgeNavHost")
                 .d(
                     "Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerURL}. Timeout is $timeout seconds, Debug is $debug. Disabling of cert checks is $certValidationDisabled. Session id is ${scannerRoute.sessionID}"
@@ -141,7 +144,7 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
                 timeout,
                 debug,
                 certValidationDisabled,
-                scannerRoute.sessionID,
+                Uuid.parse(scannerRoute.sessionID),
                 context.applicationContext as Application
             )
         }

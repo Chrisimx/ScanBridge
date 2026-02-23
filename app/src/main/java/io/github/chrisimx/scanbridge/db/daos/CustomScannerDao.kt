@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 @OptIn(ExperimentalUuidApi::class)
 interface CustomScannerDao {
-    @Query("SELECT * FROM customscanner")
+    @Query("SELECT * FROM customscanners")
     fun getAllFlow(): Flow<List<CustomScanner>>
 
-    @Query("SELECT * FROM customscanner")
+    @Query("SELECT * FROM customscanners")
     suspend fun getAll(): List<CustomScanner>
 
     @Insert

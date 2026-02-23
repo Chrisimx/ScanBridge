@@ -23,6 +23,7 @@ import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.scanbridge.data.model.PaperFormat
 import io.github.chrisimx.scanbridge.data.model.loadDefaultFormats
+import kotlin.uuid.Uuid
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -33,8 +34,7 @@ sealed class NumberValidationResult {
 }
 
 @Serializable
-data class ScanSettingsComposableData(
-    val scanSettings: ScanSettings,
+data class ScanSettingsStateData(
     val capabilities: ScannerCapabilities,
     val paperFormats: List<PaperFormat> = loadDefaultFormats(),
     val customMenuEnabled: Boolean = false,

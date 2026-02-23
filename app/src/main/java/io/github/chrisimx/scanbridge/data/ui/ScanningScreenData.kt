@@ -30,6 +30,7 @@ import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import java.io.File
+import kotlin.uuid.Uuid
 import kotlinx.serialization.Serializable
 
 enum class ScanRelativeRotation {
@@ -44,16 +45,11 @@ fun ScanRelativeRotation.toggleRotation() = when (this) {
     ScanRelativeRotation.Original -> ScanRelativeRotation.Rotated
 }
 
-@Serializable
-data class ScanMetadata(
-    val filePath: String,
-    val originalScanSettings: ScanSettings,
-    val rotation: ScanRelativeRotation = ScanRelativeRotation.Original
-)
+
 
 data class ScanningScreenData(
     val esclClient: ESCLRequestClient,
-    val sessionID: String,
+    val sessionID: Uuid,
     val confirmDialogShown: MutableState<Boolean> = mutableStateOf(false),
     val confirmPageDeleteDialogShown: MutableState<Boolean> = mutableStateOf(false),
     val error: MutableState<ErrorDescription?> = mutableStateOf(null),
@@ -67,11 +63,6 @@ data class ScanningScreenData(
     val exportOptionsPopupPosition: MutableState<Triple<Int, Int, Int>?> = mutableStateOf(null),
     val savePopupPosition: MutableState<Triple<Int, Int, Int>?> = mutableStateOf(null),
     val stateProgressStringRes: MutableState<Int?> = mutableStateOf(null),
-    val stateCurrentScans: SnapshotStateList<ScanMetadata> = mutableStateListOf(),
-    val createdTempFiles: MutableList<File> = mutableListOf(),
-    val pagerState: PagerState = PagerState {
-        (stateCurrentScans.size + if (scanJobRunning.value) 1 else 0).coerceAtLeast(1)
-    },
     val sourceFileToSave: MutableState<File?> = mutableStateOf(null),
     val isRotating: MutableState<Boolean> = mutableStateOf(false)
 ) {
@@ -93,15 +84,12 @@ data class ScanningScreenData(
         stateProgressStringRes,
         sourceFileToSave,
         isRotating,
-        createdTempFiles,
-        pagerState,
-        stateCurrentScans
     )
 }
 
 data class ImmutableScanningScreenData(
     val esclClient: ESCLRequestClient,
-    val sessionID: String,
+    val sessionID: Uuid,
     private val confirmDialogShownState: State<Boolean>,
     private val confirmPageDeleteDialogShownState: State<Boolean>,
     private val errorState: State<ErrorDescription?>,
@@ -117,9 +105,6 @@ data class ImmutableScanningScreenData(
     private val progressStringResState: State<Int?>,
     private val sourceFileToSaveState: State<File?>,
     private val isRotatingState: State<Boolean>,
-    val createdTempFiles: List<File>,
-    val pagerState: PagerState,
-    val currentScansState: SnapshotStateList<ScanMetadata>
 ) {
     val confirmDialogShown by confirmDialogShownState
     val confirmPageDeleteDialogShown by confirmPageDeleteDialogShownState

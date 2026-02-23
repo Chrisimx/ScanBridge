@@ -184,7 +184,7 @@ fun ScannerBrowser(
             onConnectClicked = { name, url, save ->
                 val name = name.ifEmpty { context.getString(R.string.custom_scanner) }
                 val url = if (url.toString().endsWith("/")) url.toString() else "$url/"
-                val sessionID = Uuid.random().toString()
+                val sessionID = Uuid.random()
                 if (save) {
                     customScannerViewModel.addScanner(CustomScanner(Uuid.random(), name, Url(url)))
                 }
@@ -193,7 +193,7 @@ fun ScannerBrowser(
                     ScannerRoute(
                         name,
                         url,
-                        sessionID
+                        sessionID.toString()
                     )
                 )
             }

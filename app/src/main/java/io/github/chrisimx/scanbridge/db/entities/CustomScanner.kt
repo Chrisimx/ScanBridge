@@ -7,7 +7,7 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
-@Entity
+@Entity(tableName = "customscanners")
 data class CustomScanner(
     @PrimaryKey
     val uuid: Uuid,

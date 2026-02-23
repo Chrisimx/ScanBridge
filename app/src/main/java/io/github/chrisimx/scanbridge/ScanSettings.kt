@@ -95,6 +95,8 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
         ScanSettingsLengthUnit.MILLIMETER -> stringResource(R.string.millimeter_unit_abbreviation)
     }
 
+    val scanSettings by scanSettingsStateHolder.scanSettings.collectAsState()
+
     val scrollState = rememberScrollState()
 
     Column(
@@ -119,7 +121,7 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
                             count = inputSourceOptions.size
                         ),
                         onClick = { scanSettingsStateHolder.setInputSource(inputSource) },
-                        selected = vmData.scanSettings.inputSource == inputSource
+                        selected = scanSettings.inputSource == inputSource
                     ) {
                         Text(inputSource.toReadableString(context))
                     }
@@ -127,7 +129,7 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
             }
             ToggleButton(
                 enabled = duplexCurrentlyAvailable,
-                checked = vmData.scanSettings.duplex == true,
+                checked = scanSettings.duplex == true,
                 onCheckedChange = { scanSettingsStateHolder.setDuplex(it) }
             ) { Text(stringResource(R.string.setting_duplex)) }
         }
@@ -173,7 +175,7 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
                                 scanSettingsStateHolder.setIntent(intentData)
                             },
                             label = { Text(name) },
-                            selected = vmData.scanSettings.intent == intentData
+                            selected = scanSettings.intent == intentData
                         )
                     }
                     InputChip(
@@ -181,7 +183,7 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
                             scanSettingsStateHolder.setIntent(null)
                         },
                         label = { Text(stringResource(R.string.intent_none)) },
-                        selected = vmData.scanSettings.intent == null
+                        selected = scanSettings.intent == null
                     )
                 }
             }
@@ -210,7 +212,7 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
                                     paperFormat.width,
                                     paperFormat.height
                                 )
-                                Timber.tag(TAG).d("New region state: ${vmData.scanSettings.scanRegions}")
+                                Timber.tag(TAG).d("New region state: ${scanSettings.scanRegions}")
                             },
                             label = { Text(paperFormat.name) },
                             selected = !vmData.customMenuEnabled && !vmData.maximumSize &&
