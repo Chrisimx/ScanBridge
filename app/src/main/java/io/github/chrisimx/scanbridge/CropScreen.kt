@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
+import io.github.chrisimx.scanbridge.db.entities.TempFile
 import io.github.chrisimx.scanbridge.uicomponents.CroppableAsyncImage
 import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
 import io.github.chrisimx.scanbridge.util.clearAndNavigateTo
@@ -37,6 +38,8 @@ import io.github.chrisimx.scanbridge.util.cropWithRect
 import io.github.chrisimx.scanbridge.util.getEditedImageName
 import io.github.chrisimx.scanbridge.util.saveAsJPEG
 import java.io.File
+import java.nio.file.Files
+import kotlin.io.path.Path
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -90,6 +93,9 @@ fun CropScreen(scanId: Uuid, returnRoute: BaseRoute, navController: NavControlle
             processing = true
             try {
                 val croppedFile = finishCrop(currentRect, pageMetadata.filePath) ?: return@launch
+                withContext(Dispatchers.IO) {
+                    Files.deleteIfExists(Path(pageMetadata.filePath))
+                }
                 db.scannedPageDao().update(
                     pageMetadata.copy(
                         filePath = croppedFile.absolutePath
@@ -140,7 +146,7 @@ fun CropScreen(scanId: Uuid, returnRoute: BaseRoute, navController: NavControlle
             CroppableAsyncImage(
                 modifier = Modifier
                     .padding(innerPadding)
-                    .padding(40.dp),
+                    .padding(start = 40.dp, end = 40.dp, bottom = 100.dp, top = 15.dp),
                 imageModel = currentPageMetadata?.filePath,
                 contentDescription = stringResource(R.string.desc_scanned_page),
                 additionalTouchAreaAround = 100.dp,

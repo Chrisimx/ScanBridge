@@ -113,4 +113,6 @@
     <string name="scannercapabilities_null">The scanner capabilities should be retrieved at this point, but they weren\'t.</string>
     <string name="millimeter_unit_abbreviation">mm</string>
     <string name="inches">Inches</string>
+    <string name="scan_job_running">Scan job running...</string>
+    <string name="scanned_pages_received_in_bg">Scanned pages are received in the background.</string>
 </resources>

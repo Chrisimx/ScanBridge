@@ -10,5 +10,6 @@ data class Session(
     @PrimaryKey
     val sessionId: Uuid,
     val currentScanSettings: ScanSettings?,
+    val currentPage: Int = 0
 )
 

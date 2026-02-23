@@ -20,12 +20,10 @@
 package io.github.chrisimx.scanbridge.data.ui
 
 import android.app.Application
-import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
@@ -38,11 +36,8 @@ import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Image
 import getTrustAllTM
-import io.github.chrisimx.esclkt.ESCLHttpCallResult
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.InputSource
-import io.github.chrisimx.esclkt.JobState
-import io.github.chrisimx.esclkt.ScanJob
 import io.github.chrisimx.esclkt.ScanRegion
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
@@ -53,12 +48,14 @@ import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.esclkt.scanRegion
 import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.R
+import io.github.chrisimx.scanbridge.androidservice.ScanJobForegroundService
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
 import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
+import io.github.chrisimx.scanbridge.services.ScanJobRepository
 import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
 import io.github.chrisimx.scanbridge.util.getEditedImageName
@@ -66,7 +63,6 @@ import io.github.chrisimx.scanbridge.util.getMaxResolution
 import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.saveAsJPEG
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
-import io.github.chrisimx.scanbridge.util.toJobStateString
 import io.github.chrisimx.scanbridge.util.zipFiles
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -76,15 +72,12 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.Url
 import java.io.File
 import java.nio.file.Files
-import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.io.path.Path
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -92,6 +85,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -123,6 +118,7 @@ class ScanningScreenViewModel(
     val sessionID: Uuid,
     val db: ScanBridgeDb,
     application: Application,
+    val scanJobRepo: ScanJobRepository
 ) : AndroidViewModel(application) {
     private val _scanningScreenData =
         ScanningScreenData(
@@ -163,41 +159,55 @@ class ScanningScreenViewModel(
 
     val tempFiles: StateFlow<List<TempFile>> = tmpFileDao.getFilesFlowBySessionId(sessionID)
         .onEach { Timber.d( "Temp files changed: $it") }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000),  listOf())
+        .stateIn(viewModelScope, SharingStarted.Eagerly,  listOf())
 
     val scannedPages: StateFlow<List<ScannedPage>> = scannedPageDao.getAllForSessionFlow(sessionID)
         .onEach { Timber.d( "Scanned pages changed: $it") }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
-    val session: StateFlow<List<Session>> = sessionDao.getSessionFlowById(sessionID)
+    val session: StateFlow<Session?> = sessionDao.getSessionFlowById(sessionID)
         .onEach { Timber.d( "Session data changed: $it") }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val _events = MutableSharedFlow<ScanningScreenEvent>()
-    val events = _events.asSharedFlow()
+    val isScanJobRunning = scanJobRepo.isJobRunning
+    val isScanJobCancelling = scanJobRepo.shouldCancel
 
-    private val _currentPageIdx = MutableStateFlow(0)
-    val currentPageIdx = _currentPageIdx.asStateFlow()
+    val currentPageIdx = session.map {
+        it?.currentPage ?: 0
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
 
     val currentPage = combine(currentPageIdx, scannedPages) { pageIdx, pages ->
         pages.getOrNull(pageIdx)
-    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
-
-    init {
-
-        sessionDao.getSessionFlowById(sessionID).onEach {
-            Timber.d("SESSION FLOW $it")
-        }.launchIn(viewModelScope)
-    }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     suspend fun addTempFile(file: File) {
         val tmpFile = TempFile(Uuid.generateV4(), sessionID, file.absolutePath)
         tmpFileDao.insertAll(tmpFile)
     }
 
+    suspend fun getPageIdx(): Int {
+        return sessionDao.getSessionById(sessionID)?.currentPage ?: 0
+    }
+
+    fun setCancelling(value: Boolean) {
+        scanJobRepo.setCancel(value)
+    }
+
+    init {
+        session
+            .map { it?.currentScanSettings }
+            .distinctUntilChanged()
+            .filterNotNull()
+            .onEach {
+                DefaultScanSettingsStore.save(application, it)
+            }
+            .launchIn(viewModelScope)
+
+    }
+
     fun setPageIdx(idx: Int) {
-        _currentPageIdx.update {
-            idx
+        viewModelScope.launch {
+            sessionDao.updateCurrentPage(sessionID, idx)
         }
     }
 
@@ -237,14 +247,6 @@ class ScanningScreenViewModel(
         _scanningScreenData.confirmPageDeleteDialogShown.value = value
     }
 
-    fun setScanJobRunning(value: Boolean) {
-        _scanningScreenData.scanJobRunning.value = value
-    }
-
-    fun setScanJobCancelling(value: Boolean) {
-        _scanningScreenData.scanJobCancelling.value = value
-    }
-
     fun setError(error: String?, titleResource: Int? = null, errorIcon: Int? = null) {
         _scanningScreenData.error.value = ErrorDescription(
             titleResource,
@@ -272,7 +274,7 @@ class ScanningScreenViewModel(
             val pageFile = File(pagePath)
 
             Timber.d("Decoding $pagePath")
-            val originalBitmap = BitmapFactory.decodeFile(pagePath)
+            val originalBitmap = withContext(Dispatchers.IO) { BitmapFactory.decodeFile(pagePath) }
             if (originalBitmap == null) {
                 Timber.e("Failed to decode bitmap for $pagePath")
                 setLoadingText(null)
@@ -280,15 +282,21 @@ class ScanningScreenViewModel(
                 return
             }
             Timber.d("Rotating $pagePath")
-            val rotatedBitmap = originalBitmap.rotateBy90()
+            val rotatedBitmap = withContext(Dispatchers.IO) { originalBitmap.rotateBy90() }
             originalBitmap.recycle()
 
             val editedImageName = pageFile.getEditedImageName()
             val newFile = File(application.filesDir, editedImageName)
 
             Timber.d("Saving rotated $pagePath")
-            rotatedBitmap.saveAsJPEG(newFile)
+            withContext(Dispatchers.IO) {
+                rotatedBitmap.saveAsJPEG(newFile)
+            }
             rotatedBitmap.recycle()
+            tmpFileDao.insertAll(TempFile(
+                ownerSessionId = sessionID,
+                path = pagePath
+            ))
 
             Timber.d("Finished saving rotated $pagePath")
 
@@ -428,22 +436,6 @@ class ScanningScreenViewModel(
         }
     }
 
-    suspend fun addScan(path: String, settings: ScanSettings, rotation: ScanRelativeRotation) {
-        Timber.d("Adding scan: $path, $rotation")
-        db.withTransaction {
-            val highestIdx = scannedPageDao.getHighestIdxForSession(sessionID) ?: return@withTransaction
-
-            Timber.d("Inserting scan")
-            scannedPageDao.insertAll(ScannedPage(Uuid.generateV4(),
-                sessionID,
-                path,
-                settings,
-                rotation,
-                highestIdx
-                ))
-        }
-    }
-
     fun swapTwoPages(page1: ScannedPage, page2: ScannedPage) {
         viewModelScope.launch {
             scannedPageDao.swapPages(page1, page2)
@@ -461,7 +453,33 @@ class ScanningScreenViewModel(
 
     fun scan(snackBarScope: CoroutineScope, snackBarHostState: SnackbarHostState) {
         viewModelScope.launch {
-            doScan(snackBarScope, snackBarHostState)
+            val currentSettings = session.value?.currentScanSettings
+
+            if (currentSettings == null) {
+                Timber.e("Could not start scan job. Current scan setttings null")
+                return@launch
+            }
+
+            if (isScanJobRunning.value) {
+                Timber.e("Job still running")
+                snackbarErrorRetrievingPage(
+                    application.getString(R.string.job_still_running),
+                    snackBarScope,
+                    application,
+                    snackBarHostState,
+                    false
+                )
+                return@launch
+            }
+
+            val scanJob = io.github.chrisimx.scanbridge.data.model.ScanJob(
+                Uuid.generateV4(),
+                sessionID,
+                currentSettings,
+                _scanningScreenData.esclClient
+            )
+            scanJobRepo.enqueue(scanJob)
+            ScanJobForegroundService.startService(application)
         }
     }
 
@@ -493,233 +511,7 @@ class ScanningScreenViewModel(
         }
     }
 
-    @OptIn(ExperimentalUuidApi::class)
-    private suspend fun doScan(snackBarScope: CoroutineScope, snackBarHostState: SnackbarHostState) {
-        if (scanningScreenData.scanJobRunning) {
-            Timber.e("Job still running")
-            snackbarErrorRetrievingPage(
-                application.getString(R.string.job_still_running),
-                snackBarScope,
-                application,
-                snackBarHostState,
-                false
-            )
-            return
-        }
 
-        val currentScanSettings = session.value?.currentScanSettings
-
-        if (currentScanSettings == null) {
-            Timber.e("Could not doScan! Current scan settings null")
-            return
-        }
-
-        val esclRequestClient = _scanningScreenData.esclClient
-
-        setScanJobRunning(true)
-        setScanJobCancelling(false)
-        _events.emit(ScanningScreenEvent.SCAN_STARTED)
-
-        if (abortIfCancelling()) return
-
-        Timber.d("Creating scan job. eSCLKt scan settings: $currentScanSettings")
-        val job =
-            esclRequestClient.createJob(currentScanSettings)
-        Timber.d("Creation request done. Result: $job")
-        if (job !is ESCLRequestClient.ScannerCreateJobResult.Success) {
-            Timber.e("Job creation failed. Result: $job")
-            setScanJobRunning(false)
-            snackbarErrorRetrievingPage(job.toString(), snackBarScope, application, snackBarHostState)
-            return
-        }
-        val jobResult = job.scanJob
-
-        if (abortIfCancelling(jobResult)) return
-
-        var polling = false
-
-        while (true) {
-            if (polling) {
-                for (retries in 0..60) {
-                    if (abortIfCancelling(jobResult)) return
-                    val status = jobResult.getJobStatus()
-                    val isRunning = status?.jobState == JobState.Processing || status?.jobState == JobState.Pending
-                    val imagesToTransfer = status?.imagesToTransfer
-                    Timber.d(
-                        "Polling job status. Retry: $retries Result: $status imagesToTransfer: $imagesToTransfer isRunning: $isRunning"
-                    )
-                    if (!isRunning) {
-                        Timber.d("Job is reported to be not running anymore. jobRunning = false")
-
-                        val deleteResult = jobResult.cancel()
-                        Timber.d("Cancelling job after (a likely) failure: $deleteResult")
-
-                        setScanJobRunning(false)
-                        _events.emit(ScanningScreenEvent.SCAN_FINISHED)
-                        if (status?.jobState != JobState.Completed) {
-                            val jobStateString = status?.jobState.toJobStateString(application)
-                            Timber.w("Job info doesn't indicate completion: $jobStateString")
-                            snackBarScope.launch {
-                                snackBarHostState.showSnackbar(
-                                    application.getString(
-                                        R.string.no_further_pages,
-                                        jobStateString
-                                    ),
-                                    withDismissAction = true
-                                )
-                            }
-                        }
-                        return
-                    }
-                    if (imagesToTransfer != null && imagesToTransfer > 0u) {
-                        Timber.d("There seem to be images to transfer. Breaking out of polling loop")
-                        break
-                    }
-                    delay(1000)
-                }
-            }
-
-            if (abortIfCancelling(jobResult)) return
-
-            Timber.d("Retrieving next page")
-            val nextPage = jobResult.retrieveNextPage()
-            Timber.d("Next page result: $nextPage")
-            val status = jobResult.getJobStatus()
-            Timber.d("Retrieved job info: $status")
-            val jobStateString = status?.jobState.toJobStateString(application)
-            Timber.d("Job info as human readable: $jobStateString")
-            when (nextPage) {
-                is ESCLRequestClient.ScannerNextPageResult.NoFurtherPages -> {
-                    Timber.d("Next page result is seen as no further pages. jobRunning = false")
-                    setScanJobRunning(false)
-                    _events.emit(ScanningScreenEvent.SCAN_FINISHED)
-                    if (status?.jobState != JobState.Completed) {
-                        Timber.w("Job info doesn't indicate completion: $jobStateString")
-                        snackBarScope.launch {
-                            snackBarHostState.showSnackbar(
-                                application.getString(
-                                    R.string.no_further_pages,
-                                    jobStateString
-                                ),
-                                withDismissAction = true
-                            )
-                        }
-                    }
-                    val deletionResult = jobResult.cancel()
-                    Timber.d("Cancelling job after no further pages is reported: $deletionResult")
-                    return
-                }
-
-                is ESCLRequestClient.ScannerNextPageResult.RequestFailure -> {
-                    if (nextPage.exception !is ESCLHttpCallResult.Error.HttpError) {
-                        reportErrorWhileScanning(nextPage, snackBarScope, application, snackBarHostState, jobResult)
-                        return
-                    }
-                    val error = nextPage.exception as ESCLHttpCallResult.Error.HttpError
-
-                    if (status?.jobState == JobState.Completed) {
-                        Timber.d("Job info indicates completion but response was not 404: $jobStateString")
-                        setScanJobRunning(false)
-                        _events.emit(ScanningScreenEvent.SCAN_FINISHED)
-                        snackBarScope.launch {
-                            snackBarHostState.showSnackbar(
-                                application.getString(
-                                    R.string.no_further_pages,
-                                    jobStateString
-                                ),
-                                withDismissAction = true
-                            )
-                        }
-                        val deletionResult = jobResult.cancel()
-                        Timber.d("Cancelling job after non-standard completion: $deletionResult")
-                        return
-                    } else {
-                        Timber.e("Not successful code while retrieving next page: $nextPage")
-                        if (error.code == 503) {
-                            // Retry with polling
-                            Timber.d("503 error received. Retrying with polling")
-                            polling = true
-                            continue
-                        } else {
-                            setScanJobRunning(false)
-                            _events.emit(ScanningScreenEvent.SCAN_FINISHED)
-                            snackbarErrorRetrievingPage(
-                                nextPage.toString(),
-                                snackBarScope,
-                                application,
-                                snackBarHostState
-                            )
-                            val deletionResult = jobResult.cancel()
-                            Timber.d("Cancelling job after not successful response while trying to retrieve page: $deletionResult")
-                            return
-                        }
-                    }
-                }
-
-                is ESCLRequestClient.ScannerNextPageResult.Success -> {
-                }
-
-                else -> {
-                    reportErrorWhileScanning(nextPage, snackBarScope, application, snackBarHostState, jobResult)
-                    return
-                }
-            }
-            Timber.d("Received page. Copying to file")
-            var filePath: Path
-            while (true) {
-                val scanPageFile = "scan-" + Uuid.random().toString() + ".jpg"
-                val file = File(application.filesDir, scanPageFile)
-                file.exists().let {
-                    if (!it) {
-                        filePath = file.toPath()
-                        break
-                    }
-                }
-            }
-
-            Timber.d("Scan page file created: $filePath")
-
-            try {
-                withContext(Dispatchers.IO) {
-                    Files.copy(nextPage.page.data.inputStream(), filePath)
-                }
-            } catch (e: Exception) {
-                Timber.e(e, "Error while copying received image to file. Aborting!")
-                setScanJobRunning(false)
-                snackbarErrorRetrievingPage(
-                    application.getString(
-                        R.string.error_while_copying_received_image_to_file,
-                        e.message
-                    ),
-                    snackBarScope,
-                    application,
-                    snackBarHostState
-                )
-                val deletionResult = jobResult.cancel()
-                Timber.d("Cancelling job after error while trying to copy received page to file: $deletionResult")
-                return
-            }
-
-            val imageBitmap = withContext(Dispatchers.IO) {
-                BitmapFactory.decodeFile(filePath.toString())?.asImageBitmap()
-            }
-
-            if (imageBitmap == null) {
-                Timber.e("Couldn't decode received image as Bitmap. Aborting!")
-                snackbarErrorRetrievingPage(
-                    application.getString(R.string.couldn_t_decode_received_image, jobStateString),
-                    snackBarScope,
-                    application,
-                    snackBarHostState
-                )
-                filePath.toFile().delete()
-                val deletionResult = jobResult.cancel()
-                Timber.d("Cancelling job after error while trying to decode received page as bitmap: $deletionResult")
-                return
-            }
-            addScan(filePath.toString(), currentScanSettings, ScanRelativeRotation.Original)
-        }
-    }
 
     fun doPdfExport(
         onError: (String) -> Unit,
@@ -747,7 +539,7 @@ class ScanningScreenViewModel(
             onError(application.getString(R.string.no_scans_yet))
             return
         }
-        if (scanningScreenData.scanJobRunning) {
+        if (isScanJobRunning.value) {
             onError(application.getString(R.string.job_still_running))
             return
         }
@@ -892,7 +684,7 @@ class ScanningScreenViewModel(
             onError(application.getString(R.string.no_scans_yet))
             return
         }
-        if (scanningScreenData.scanJobRunning) {
+        if (isScanJobRunning.value) {
             onError(application.getString(R.string.job_still_running))
             return
         }
@@ -957,34 +749,5 @@ class ScanningScreenViewModel(
         }
 
         setScannerCapabilities(scannerCapabilitiesResult.scannerCapabilities)
-    }
-
-    private suspend fun abortIfCancelling(scanJob: ScanJob? = null): Boolean = if (scanningScreenData.scanJobCancelling) {
-        Timber.d("Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob")
-        scanJob?.cancel()
-        setScanJobRunning(false)
-        setScanJobCancelling(false)
-        true
-    } else {
-        false
-    }
-
-    private suspend fun reportErrorWhileScanning(
-        nextPage: ESCLRequestClient.ScannerNextPageResult,
-        scope: CoroutineScope,
-        context: Context,
-        snackbarHostState: SnackbarHostState,
-        jobResult: ScanJob
-    ) {
-        Timber.e("Error while retrieving next page: $nextPage")
-        snackbarErrorRetrievingPage(
-            nextPage.toString(),
-            scope,
-            context,
-            snackbarHostState
-        )
-        setScanJobRunning(false)
-        val deletionResult = jobResult.cancel()
-        Timber.d("Cancelling job after error while trying to retrieve page: $deletionResult")
     }
 }

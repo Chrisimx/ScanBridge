@@ -3,6 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!--  Request the general foreground service permission for the scan job executor  -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
 
     <application
         android:name=".ScanBridgeApplication"
@@ -41,6 +47,11 @@
             android:exported="false"
             android:theme="@style/Theme.ScanBridge">
         </activity>
+        <service
+            android:name=".androidservice.ScanJobForegroundService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

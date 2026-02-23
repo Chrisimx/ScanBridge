@@ -44,14 +44,19 @@ interface ScannedPageDao {
             return
         }
 
-        update(
-            page1.copy(orderIndex = page2.orderIndex),
-                page2.copy(orderIndex = page1.orderIndex)
-        )
+        updateOrderIndex(page1.scanId, -1)
+        updateOrderIndex(page2.scanId, page1.orderIndex)
+        updateOrderIndex(page1.scanId, page2.orderIndex)
     }
+
+    @Query("UPDATE scannedpages SET orderIndex = :newIndex WHERE scanId = :scanId")
+    suspend fun updateOrderIndex(scanId: Uuid, newIndex: Int)
 
     @Insert
     suspend fun insertAll(vararg pages: ScannedPage)
+
+    @Insert
+    suspend fun insertAllList(pages: List<ScannedPage>)
 
     @Update
     suspend fun update(vararg pages: ScannedPage)

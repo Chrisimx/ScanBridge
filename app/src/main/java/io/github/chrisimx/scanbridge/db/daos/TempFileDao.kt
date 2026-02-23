@@ -26,6 +26,9 @@ interface TempFileDao {
     @Insert
     suspend fun insertAll(vararg files: TempFile)
 
+    @Insert
+    suspend fun insertAllList(files: List<TempFile>)
+
     @Update
     suspend fun update(vararg files: TempFile)
 

@@ -20,7 +20,7 @@ import kotlin.uuid.Uuid
 )
 data class TempFile(
     @PrimaryKey
-    val tempFileId: Uuid,
+    val tempFileId: Uuid = Uuid.generateV4(),
     val ownerSessionId: Uuid,
     val path: String
 )

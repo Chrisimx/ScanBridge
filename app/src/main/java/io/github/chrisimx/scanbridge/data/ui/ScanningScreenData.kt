@@ -45,8 +45,6 @@ fun ScanRelativeRotation.toggleRotation() = when (this) {
     ScanRelativeRotation.Original -> ScanRelativeRotation.Rotated
 }
 
-
-
 data class ScanningScreenData(
     val esclClient: ESCLRequestClient,
     val sessionID: Uuid,
@@ -56,8 +54,6 @@ data class ScanningScreenData(
     val scanSettingsVM: MutableState<ScanSettingsComposableStateHolder?> = mutableStateOf(null),
     val capabilities: MutableState<ScannerCapabilities?> = mutableStateOf(null),
     val scanSettingsMenuOpen: MutableState<Boolean> = mutableStateOf(false),
-    val scanJobRunning: MutableState<Boolean> = mutableStateOf(false),
-    val scanJobCancelling: MutableState<Boolean> = mutableStateOf(false),
     val showExportOptions: MutableState<Boolean> = mutableStateOf(false),
     val showSaveOptions: MutableState<Boolean> = mutableStateOf(false),
     val exportOptionsPopupPosition: MutableState<Triple<Int, Int, Int>?> = mutableStateOf(null),
@@ -79,8 +75,6 @@ data class ScanningScreenData(
         showSaveOptions,
         exportOptionsPopupPosition,
         savePopupPosition,
-        scanJobRunning,
-        scanJobCancelling,
         stateProgressStringRes,
         sourceFileToSave,
         isRotating,
@@ -100,8 +94,6 @@ data class ImmutableScanningScreenData(
     private val showSaveOptionsState: State<Boolean>,
     private val exportOptionsPopupPositionState: State<Triple<Int, Int, Int>?>,
     private val saveOptionsPopupPositionState: State<Triple<Int, Int, Int>?>,
-    private val scanJobRunningState: State<Boolean>,
-    private val scanJobCancellingState: State<Boolean>,
     private val progressStringResState: State<Int?>,
     private val sourceFileToSaveState: State<File?>,
     private val isRotatingState: State<Boolean>,
@@ -110,8 +102,6 @@ data class ImmutableScanningScreenData(
     val confirmPageDeleteDialogShown by confirmPageDeleteDialogShownState
     val scanSettingsVM by scanSettingsVMState
     val scanSettingsMenuOpen by scanSettingsMenuOpenState
-    val scanJobRunning by scanJobRunningState
-    val scanJobCancelling by scanJobCancellingState
     val progressStringResource by progressStringResState
     val capabilities by capabilitiesState
     val error by errorState

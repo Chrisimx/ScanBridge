@@ -18,16 +18,23 @@ interface SessionDao {
     suspend fun getAll(): List<Session>
 
     @Query("SELECT * FROM sessions WHERE sessionId = :id")
-    fun getSessionFlowById(id: Uuid): Flow<List<Session>>
+    fun getSessionFlowById(id: Uuid): Flow<Session?>
 
     @Query("SELECT * FROM sessions WHERE sessionId = :id")
     suspend fun getSessionById(id: Uuid): Session?
+
+    @Query("SELECT * FROM sessions WHERE sessionId = :id")
+    fun getSessionByIdBlocking(id: Uuid): Session?
+
 
     @Insert
     suspend fun insertAll(vararg sessions: Session)
 
     @Update
     suspend fun update(vararg sessions: Session)
+
+    @Query("UPDATE sessions SET currentPage = :pageIdx WHERE sessionId = :sessionId")
+    suspend fun updateCurrentPage(sessionId: Uuid, pageIdx: Int)
 
     @Delete
     suspend fun delete(session: Session)

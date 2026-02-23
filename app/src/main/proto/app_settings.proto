@@ -13,4 +13,5 @@ message ScanBridgeSettings {
   google.protobuf.UInt32Value chunk_size_pdf_export = 5;
   google.protobuf.BoolValue remember_scan_settings = 6;
   google.protobuf.StringValue last_used_scan_settings = 7;
+  bool migrated_session_files = 8;
 }

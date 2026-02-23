@@ -177,10 +177,10 @@ class ScanSettingsComposableStateHolder(
     }
 
     init {
-        //observeHeightValidation()
-        //observeWidthValidation()
+        observeHeightValidation()
+        observeWidthValidation()
 
-        /*_uiState
+        _uiState
             .map { it.maximumSize }
             .distinctUntilChanged()
             .combine(selectedInputSourceCaps) { maxSize, inputSourceCaps -> Pair(maxSize, inputSourceCaps) }
@@ -196,7 +196,7 @@ class ScanSettingsComposableStateHolder(
                         }
                     )
                 }
-            }.launchIn(coroutineScope)*/
+            }.launchIn(coroutineScope)
     }
 
     private fun observeWidthValidation() {

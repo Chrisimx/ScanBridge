@@ -21,6 +21,7 @@ package io.github.chrisimx.scanbridge
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,6 +29,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.collectAsState
+import androidx.core.content.ContextCompat
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.logs.FileLogger
 import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
@@ -50,6 +52,13 @@ class MainActivity : ComponentActivity(), AndroidScopeComponent {
 
     override val scope: Scope by activityScope()
 
+    private val notificationPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) {
+            // if permission was denied, the scan job executor can still run. Only the notification won't be visible
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this.applicationContext))
         enableEdgeToEdge()
@@ -68,6 +77,8 @@ class MainActivity : ComponentActivity(), AndroidScopeComponent {
         setContent {
             ScanBridgeApp()
         }
+
+        checkAndRequestNotificationPermission()
     }
 
     private fun cleanUpCacheFiles() {
@@ -80,6 +91,26 @@ class MainActivity : ComponentActivity(), AndroidScopeComponent {
         }
         File(filesDir, "exportTempFiles").listFiles()?.forEach { file ->
             file.delete()
+        }
+    }
+
+    /**
+     * Check for notification permission before starting the service so that the notification is visible
+     */
+    private fun checkAndRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            )) {
+                android.content.pm.PackageManager.PERMISSION_GRANTED -> {
+                    // permission already granted
+                }
+
+                else -> {
+                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
         }
     }
 

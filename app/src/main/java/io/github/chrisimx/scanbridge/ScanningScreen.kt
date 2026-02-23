@@ -92,6 +92,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
+import io.github.chrisimx.scanbridge.services.ScanJobEvent
 import io.github.chrisimx.scanbridge.uicomponents.ExportSettingsPopup
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen
@@ -100,11 +101,10 @@ import io.github.chrisimx.scanbridge.uicomponents.dialog.DeletionDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
 import io.github.chrisimx.scanbridge.util.clearAndNavigateTo
 import io.github.chrisimx.scanbridge.util.snackBarError
+import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.toReadableString
 import io.ktor.http.Url
 import java.io.File
-import java.nio.file.Files
-import kotlin.io.path.Path
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -178,11 +178,12 @@ fun ScanningScreenBottomBar(
             }
         },
         floatingActionButton = {
+            val isScanJobRunning by scanningViewModel.isScanJobRunning.collectAsState()
+            val isCancelling by scanningViewModel.isScanJobCancelling.collectAsState()
             AnimatedContent(
-                scanningViewModel.scanningScreenData.scanJobRunning
+                isScanJobRunning
             ) {
                 if (it) {
-                    val isCancelling = scanningViewModel.scanningScreenData.scanJobCancelling
                     val containerColor by animateColorAsState(
                         targetValue = if (isCancelling) {
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
@@ -205,7 +206,7 @@ fun ScanningScreenBottomBar(
                     ExtendedFloatingActionButton(
                         onClick = {
                             if (!isCancelling) {
-                                scanningViewModel.setScanJobCancelling(true)
+                                scanningViewModel.setCancelling(true)
                             }
                         },
                         containerColor = containerColor,
@@ -213,7 +214,7 @@ fun ScanningScreenBottomBar(
                         icon = {
                             Icon(
                                 painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
-                                contentDescription = if (scanningViewModel.scanningScreenData.scanJobCancelling) {
+                                contentDescription = if (isCancelling) {
                                     stringResource(R.string.cancelling_scan)
                                 } else {
                                     stringResource(R.string.cancel_scan)
@@ -312,7 +313,7 @@ fun ScanningScreen(
     val currentPage by scanningViewModel.currentPage.collectAsState()
 
     val currentPageIdx by scanningViewModel.currentPageIdx.collectAsState()
-    val scanJobRunning = scanningViewModel.scanningScreenData.scanJobRunning
+    val scanJobRunning by scanningViewModel.isScanJobRunning.collectAsState()
 
     val pagerState = rememberPagerState(
         initialPage = currentPageIdx,
@@ -320,6 +321,21 @@ fun ScanningScreen(
             (scannedPages.size + if (scanJobRunning) 1 else 0).coerceAtLeast(1)
         }
     )
+
+    LaunchedEffect(scanningViewModel.scanJobRepo.events) {
+        scanningViewModel.scanJobRepo.events.collect { event ->
+            when (event) {
+                is ScanJobEvent.Completed -> scope.launch { pagerState.animateScrollToPage(scannedPages.size - 1) }
+                is ScanJobEvent.Failed -> snackbarErrorRetrievingPage(event.reason, scope, context, snackbarHostState)
+                is ScanJobEvent.Started -> scope.launch { pagerState.animateScrollToPage(scannedPages.size) }
+            }
+        }
+    }
+
+    // Load stored page idx
+    LaunchedEffect(Unit) {
+         pagerState.scrollToPage(scanningViewModel.getPageIdx())
+    }
 
     LaunchedEffect(pagerState.currentPage) {
         scanningViewModel.setPageIdx(pagerState.currentPage)
@@ -411,7 +427,8 @@ fun ScanningScreen(
                 scope,
                 navController, currentPage,
                 scannedPages,
-                pagerState)
+                pagerState,
+                scanJobRunning)
         }
 
         if (scanningViewModel.scanningScreenData.scanSettingsMenuOpen) {
@@ -582,7 +599,8 @@ fun ScanContent(
     navController: NavHostController? = null,
     currentPage: ScannedPage?,
     currentPages: List<ScannedPage>,
-    pagerState: PagerState
+    pagerState: PagerState,
+    scanJobRunning: Boolean
 ) {
     val context = LocalContext.current
 
@@ -600,7 +618,7 @@ fun ScanContent(
                     R.string.page_x_of_y,
                     pagerState.currentPage + 1,
                     currentPages.size +
-                        if (scanningViewModel.scanningScreenData.scanJobRunning) 1 else 0
+                        if (scanJobRunning) 1 else 0
                 )
             )
 
@@ -619,7 +637,7 @@ fun ScanContent(
             state = pagerState
         ) { page ->
             if (page >= currentPages.size) {
-                if (scanningViewModel.scanningScreenData.scanJobRunning) {
+                if (scanJobRunning) {
                     DownloadingPageFullscreen(innerPadding)
                 } else {
                     FullScreenError(
