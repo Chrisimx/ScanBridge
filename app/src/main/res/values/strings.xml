@@ -115,4 +115,6 @@
     <string name="inches">Inches</string>
     <string name="scan_job_running">Scan job running...</string>
     <string name="scanned_pages_received_in_bg">Scanned pages are received in the background.</string>
+    <string name="thank_message_play_one">If you need help or want to provide feedback, contact us anytime at support@fireamp.eu. We will get back to you as quickly as possible!</string>
+    <string name="thank_message_play_one_title">Thank you for purchasing ScanBridge!</string>
 </resources>

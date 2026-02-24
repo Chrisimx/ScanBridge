@@ -9,7 +9,7 @@ import com.google.protobuf.StringValue
 import com.google.protobuf.UInt32Value
 import io.github.chrisimx.scanbridge.proto.LastRoute
 import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
-import io.github.chrisimx.scanbridge.proto.lastRouteOrNull
+import io.github.chrisimx.scanbridge.proto.ShownMessages
 
 val Context.appSettingsStore: DataStore<ScanBridgeSettings> by dataStore(
     fileName = "settings.pb",
@@ -55,4 +55,9 @@ val Context.lastRouteStore: DataStore<LastRoute> by dataStore(
             }
         )
     }
+)
+
+val Context.shownMessagesStore: DataStore<ShownMessages> by dataStore(
+    fileName = "shown_messages.pb",
+    serializer = ShownMessagesSerializer
 )
