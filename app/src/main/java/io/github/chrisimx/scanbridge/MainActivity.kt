@@ -19,35 +19,27 @@
 
 package io.github.chrisimx.scanbridge
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.collectAsState
 import androidx.core.content.ContextCompat
-import io.github.chrisimx.scanbridge.datastore.appSettingsStore
-import io.github.chrisimx.scanbridge.logs.FileLogger
 import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
-import java.io.BufferedWriter
 import java.io.File
-import java.io.FileWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.activityScope
-import timber.log.Timber
 import org.koin.core.scope.Scope
+import timber.log.Timber
 
-class MainActivity : ComponentActivity(), AndroidScopeComponent {
+class MainActivity :
+    ComponentActivity(),
+    AndroidScopeComponent {
     private val localeProvider: AndroidLocaleProvider by inject()
 
     override val scope: Scope by activityScope()
@@ -99,10 +91,12 @@ class MainActivity : ComponentActivity(), AndroidScopeComponent {
      */
     private fun checkAndRequestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            when (ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.POST_NOTIFICATIONS
-            )) {
+            when (
+                ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                )
+            ) {
                 android.content.pm.PackageManager.PERMISSION_GRANTED -> {
                     // permission already granted
                 }

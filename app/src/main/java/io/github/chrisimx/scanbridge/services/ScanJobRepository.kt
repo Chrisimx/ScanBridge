@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-
 sealed class ScanJobEvent {
     data class Completed(val job: ScanJob) : ScanJobEvent()
     data class Failed(val job: ScanJob, val reason: String) : ScanJobEvent()
@@ -100,9 +99,7 @@ class ScanJobRepository {
     /**
      * Consume the next job
      */
-    fun nextJob(): ScanJob? {
-        return jobChannel.tryReceive().getOrNull()
-    }
+    fun nextJob(): ScanJob? = jobChannel.tryReceive().getOrNull()
 
     /**
      * Clear the queue

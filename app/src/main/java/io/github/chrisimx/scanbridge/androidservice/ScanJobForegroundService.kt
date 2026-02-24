@@ -8,9 +8,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.os.Build
 import android.os.IBinder
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.application
@@ -23,12 +21,10 @@ import io.github.chrisimx.scanbridge.MainActivity
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.data.model.ScanJob
 import io.github.chrisimx.scanbridge.data.ui.ScanRelativeRotation
-import io.github.chrisimx.scanbridge.data.ui.ScanningScreenEvent
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.daos.ScannedPageDao
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
-import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.toJobStateString
 import java.io.File
 import java.nio.file.Files
@@ -67,6 +63,7 @@ class ScanJobForegroundService : Service() {
     private val scanJobs: ScanJobRepository by inject()
     private val db: ScanBridgeDb by inject()
     private val scannedPageDao: ScannedPageDao = db.scannedPageDao()
+
     @Volatile
     private var isRunning = false
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -111,9 +108,7 @@ class ScanJobForegroundService : Service() {
         return START_NOT_STICKY
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         Timber.d("Foreground service destroyed")
@@ -138,9 +133,11 @@ class ScanJobForegroundService : Service() {
             .setContentText(this.applicationContext.getString(R.string.scanned_pages_received_in_bg))
             .setSmallIcon(R.drawable.icon_about_dialog)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-            .setContentIntent(Intent(this, MainActivity::class.java).let { notificationIntent ->
-                PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
-            })
+            .setContentIntent(
+                Intent(this, MainActivity::class.java).let { notificationIntent ->
+                    PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+                }
+            )
             .addAction(
                 android.R.drawable.ic_menu_close_clear_cancel,
                 getString(R.string.cancel_scan),
@@ -234,10 +231,13 @@ class ScanJobForegroundService : Service() {
 
                     if (status?.jobState != JobState.Completed) {
                         Timber.w("Job info doesn't indicate completion: $jobStateString")
-                        scanJobs.notifyFailed(scanJob,application.getString(
-                            R.string.no_further_pages,
-                            jobStateString
-                        ))
+                        scanJobs.notifyFailed(
+                            scanJob,
+                            application.getString(
+                                R.string.no_further_pages,
+                                jobStateString
+                            )
+                        )
                     } else {
                         scanJobs.notifyCompleted(scanJob)
                     }
@@ -255,10 +255,13 @@ class ScanJobForegroundService : Service() {
 
                     if (status?.jobState == JobState.Completed) {
                         Timber.d("Job info indicates completion but response was not 404: $jobStateString")
-                        scanJobs.notifyFailed(scanJob, application.getString(
-                            R.string.no_further_pages,
-                            jobStateString
-                        ))
+                        scanJobs.notifyFailed(
+                            scanJob,
+                            application.getString(
+                                R.string.no_further_pages,
+                                jobStateString
+                            )
+                        )
                         val deletionResult = jobResult.cancel()
                         Timber.d("Cancelling job after non-standard completion: $deletionResult")
                         return
@@ -307,10 +310,13 @@ class ScanJobForegroundService : Service() {
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Error while copying received image to file. Aborting!")
-                scanJobs.notifyFailed(scanJob, application.getString(
-                    R.string.error_while_copying_received_image_to_file,
-                    e.message
-                ))
+                scanJobs.notifyFailed(
+                    scanJob,
+                    application.getString(
+                        R.string.error_while_copying_received_image_to_file,
+                        e.message
+                    )
+                )
                 val deletionResult = jobResult.cancel()
                 Timber.d("Cancelling job after error while trying to copy received page to file: $deletionResult")
                 return
@@ -322,7 +328,8 @@ class ScanJobForegroundService : Service() {
 
             if (imageBitmap == null) {
                 Timber.e("Couldn't decode received image as Bitmap. Aborting!")
-                scanJobs.notifyFailed(scanJob,
+                scanJobs.notifyFailed(
+                    scanJob,
                     application.getString(R.string.couldn_t_decode_received_image, jobStateString)
                 )
                 filePath.toFile().delete()
@@ -340,13 +347,16 @@ class ScanJobForegroundService : Service() {
             val highestIdx = scannedPageDao.getHighestIdxForSession(sessionID) ?: -1
 
             Timber.d("Inserting scan with index ${highestIdx + 1}")
-            scannedPageDao.insertAll(ScannedPage(Uuid.generateV4(),
-                sessionID,
-                path,
-                settings,
-                rotation,
-                highestIdx + 1
-            ))
+            scannedPageDao.insertAll(
+                ScannedPage(
+                    Uuid.generateV4(),
+                    sessionID,
+                    path,
+                    settings,
+                    rotation,
+                    highestIdx + 1
+                )
+            )
         }
     }
 

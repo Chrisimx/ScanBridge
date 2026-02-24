@@ -1,8 +1,6 @@
 package io.github.chrisimx.scanbridge.stores
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.room.util.copy
 import androidx.room.withTransaction
 import io.github.chrisimx.esclkt.Inches
@@ -14,30 +12,23 @@ import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
 import io.github.chrisimx.scanbridge.data.model.LegacySessionV2
 import io.github.chrisimx.scanbridge.data.model.LegacySessionV2.Companion.fromString
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
-import io.github.chrisimx.scanbridge.datastore.updateSettings
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
 import io.github.chrisimx.scanbridge.proto.copy
-import io.github.chrisimx.scanbridge.stores.LegacyCustomScannerStore.load
 import java.io.File
 import java.nio.file.Files
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.io.path.Path
-import kotlin.io.path.absolute
 import kotlin.io.path.extension
-import kotlin.io.path.isRegularFile
 import kotlin.io.path.nameWithoutExtension
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -116,7 +107,6 @@ object LegacySessionsStore {
                     val sessionId = Uuid.parse(legacySession.sessionID)
 
                     db.withTransaction {
-
                         sessionDao().insertAll(
                             Session(sessionId, legacySession.scanSettings)
                         )

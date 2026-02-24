@@ -49,9 +49,8 @@ fun UIntSettingBase(
     onHelpRequested: (Int) -> Unit,
     changeSetting: (UInt) -> Unit,
     min: UInt,
-    max: UInt,
+    max: UInt
 ) {
-
     var timeoutValue by remember { mutableStateOf(placeholder) }
 
     LaunchedEffect(Unit) {
@@ -138,7 +137,7 @@ fun UIntSetting(
         onHelpRequested,
         setSetting,
         min,
-        max,
+        max
     )
 }
 

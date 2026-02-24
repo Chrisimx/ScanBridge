@@ -7,7 +7,6 @@ import io.github.chrisimx.esclkt.Millimeters
 import io.github.chrisimx.esclkt.Points
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
-import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -29,13 +28,12 @@ class ScanSettingsTypeConverter {
     }
 
     @TypeConverter
-    fun fromScanSettingsString(scanSettings: String): ScanSettings? {
-        return if (scanSettings == "null") {
-            null
-        } else {
-            json.decodeFromString<ScanSettings>(scanSettings)
-        }
+    fun fromScanSettingsString(scanSettings: String): ScanSettings? = if (scanSettings == "null") {
+        null
+    } else {
+        json.decodeFromString<ScanSettings>(scanSettings)
     }
+
     @TypeConverter
     fun toScanSettingsString(scanSettings: ScanSettings?): String {
         return if (scanSettings == null) {

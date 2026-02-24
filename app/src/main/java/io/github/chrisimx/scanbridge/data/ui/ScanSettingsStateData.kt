@@ -19,11 +19,9 @@
 
 package io.github.chrisimx.scanbridge.data.ui
 
-import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.scanbridge.data.model.PaperFormat
 import io.github.chrisimx.scanbridge.data.model.loadDefaultFormats
-import kotlin.uuid.Uuid
 import kotlinx.serialization.Serializable
 
 @Serializable

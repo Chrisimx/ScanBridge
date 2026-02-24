@@ -1,6 +1,5 @@
 package io.github.chrisimx.scanbridge.screenshot
 
-import android.content.Context.MODE_PRIVATE
 import android.util.Log
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag

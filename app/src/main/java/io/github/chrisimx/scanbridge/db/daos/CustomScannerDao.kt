@@ -9,7 +9,6 @@ import io.github.chrisimx.scanbridge.db.entities.CustomScanner
 import kotlin.uuid.ExperimentalUuidApi
 import kotlinx.coroutines.flow.Flow
 
-
 @Dao
 @OptIn(ExperimentalUuidApi::class)
 interface CustomScannerDao {

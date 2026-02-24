@@ -78,12 +78,8 @@ import kotlin.io.path.Path
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -158,15 +154,15 @@ class ScanningScreenViewModel(
     private val sessionDao = db.sessionDao()
 
     val tempFiles: StateFlow<List<TempFile>> = tmpFileDao.getFilesFlowBySessionId(sessionID)
-        .onEach { Timber.d( "Temp files changed: $it") }
-        .stateIn(viewModelScope, SharingStarted.Eagerly,  listOf())
+        .onEach { Timber.d("Temp files changed: $it") }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
     val scannedPages: StateFlow<List<ScannedPage>> = scannedPageDao.getAllForSessionFlow(sessionID)
-        .onEach { Timber.d( "Scanned pages changed: $it") }
+        .onEach { Timber.d("Scanned pages changed: $it") }
         .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
     val session: StateFlow<Session?> = sessionDao.getSessionFlowById(sessionID)
-        .onEach { Timber.d( "Session data changed: $it") }
+        .onEach { Timber.d("Session data changed: $it") }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val isScanJobRunning = scanJobRepo.isJobRunning
@@ -185,9 +181,7 @@ class ScanningScreenViewModel(
         tmpFileDao.insertAll(tmpFile)
     }
 
-    suspend fun getPageIdx(): Int {
-        return sessionDao.getSessionById(sessionID)?.currentPage ?: 0
-    }
+    suspend fun getPageIdx(): Int = sessionDao.getSessionById(sessionID)?.currentPage ?: 0
 
     fun setCancelling(value: Boolean) {
         scanJobRepo.setCancel(value)
@@ -202,7 +196,6 @@ class ScanningScreenViewModel(
                 DefaultScanSettingsStore.save(application, it)
             }
             .launchIn(viewModelScope)
-
     }
 
     fun setPageIdx(idx: Int) {
@@ -293,18 +286,22 @@ class ScanningScreenViewModel(
                 rotatedBitmap.saveAsJPEG(newFile)
             }
             rotatedBitmap.recycle()
-            tmpFileDao.insertAll(TempFile(
-                ownerSessionId = sessionID,
-                path = pagePath
-            ))
+            tmpFileDao.insertAll(
+                TempFile(
+                    ownerSessionId = sessionID,
+                    path = pagePath
+                )
+            )
 
             Timber.d("Finished saving rotated $pagePath")
 
             Timber.d("Updating DB state after rotation")
-            scannedPageDao.update(scannedPage.copy(
-                rotation = scannedPage.rotation.toggleRotation(),
-                filePath = newFile.absolutePath
-            ))
+            scannedPageDao.update(
+                scannedPage.copy(
+                    rotation = scannedPage.rotation.toggleRotation(),
+                    filePath = newFile.absolutePath
+                )
+            )
         } finally {
             setLoadingText(null)
             _scanningScreenData.isRotating.value = false
@@ -511,21 +508,13 @@ class ScanningScreenViewModel(
         }
     }
 
-
-
-    fun doPdfExport(
-        onError: (String) -> Unit,
-        saveFileLauncher: ActivityResultLauncher<String>? = null
-    ) {
+    fun doPdfExport(onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
         viewModelScope.launch {
             doPdfExportInternal(onError, saveFileLauncher)
         }
     }
 
-    private suspend fun doPdfExportInternal(
-        onError: (String) -> Unit,
-        saveFileLauncher: ActivityResultLauncher<String>? = null
-    ) {
+    private suspend fun doPdfExportInternal(onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
         val currentScans = scannedPages.value
         val scannerCapsNullable = scanningScreenData.capabilities
         val scannerCaps = if (scannerCapsNullable == null) {
@@ -661,11 +650,7 @@ class ScanningScreenViewModel(
         }
     }
 
-
-    fun doZipExport(
-        onError: (String) -> Unit,
-        saveFileLauncher: ActivityResultLauncher<String>? = null
-    ) {
+    fun doZipExport(onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
         viewModelScope.launch {
             doZipExportInternal(
                 onError,
@@ -674,11 +659,7 @@ class ScanningScreenViewModel(
         }
     }
 
-
-    private suspend fun doZipExportInternal(
-        onError: (String) -> Unit,
-        saveFileLauncher: ActivityResultLauncher<String>? = null
-    ) {
+    private suspend fun doZipExportInternal(onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
         val currentScans = scannedPages.value
         if (currentScans.isEmpty()) {
             onError(application.getString(R.string.no_scans_yet))
@@ -735,7 +716,6 @@ class ScanningScreenViewModel(
             saveFileLauncher.launch(zipOutputFile.name)
         }
     }
-
 
     fun retrieveScannerCapabilities() = viewModelScope.launch {
         val esclClient = scanningScreenData.esclClient

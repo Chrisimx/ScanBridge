@@ -32,8 +32,8 @@ import kotlinx.coroutines.launch
 
 class CustomScannerViewModel(application: Application, appDb: ScanBridgeDb) : AndroidViewModel(application) {
     private val customScannerDao = appDb.customScannerDao()
-    private val _customScannersFlow = customScannerDao.getAllFlow()
-    val customScanners: StateFlow<List<CustomScanner>> = _customScannersFlow
+    private val _customScanners = customScannerDao.getAllFlow()
+    val customScanners: StateFlow<List<CustomScanner>> = _customScanners
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf())
 
     fun addScanner(scanner: CustomScanner) {

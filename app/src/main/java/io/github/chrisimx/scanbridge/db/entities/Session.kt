@@ -12,4 +12,3 @@ data class Session(
     val currentScanSettings: ScanSettings?,
     val currentPage: Int = 0
 )
-

@@ -41,15 +41,11 @@ suspend fun DataStore<ScanBridgeSettings>.setWriteDebugLog(value: Boolean) {
     }
 }
 
-
 fun DataStore<ScanBridgeSettings>.chunkSizeFlow(): Flow<UInt> = this.data.map { settings ->
     settings.chunkSizePdfExportOrNull?.value?.toUInt() ?: 50u
 }.distinctUntilChanged()
 
-
-suspend fun DataStore<ScanBridgeSettings>.updateSettings(
-    set: ScanBridgeSettingsKt.Dsl.() -> Unit
-) {
+suspend fun DataStore<ScanBridgeSettings>.updateSettings(set: ScanBridgeSettingsKt.Dsl.() -> Unit) {
     this.updateData { current ->
         current.copy(set)
     }

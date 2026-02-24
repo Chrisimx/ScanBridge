@@ -334,7 +334,7 @@ fun ScanningScreen(
 
     // Load stored page idx
     LaunchedEffect(Unit) {
-         pagerState.scrollToPage(scanningViewModel.getPageIdx())
+        pagerState.scrollToPage(scanningViewModel.getPageIdx())
     }
 
     LaunchedEffect(pagerState.currentPage) {
@@ -428,7 +428,8 @@ fun ScanningScreen(
                 navController, currentPage,
                 scannedPages,
                 pagerState,
-                scanJobRunning)
+                scanJobRunning
+            )
         }
 
         if (scanningViewModel.scanningScreenData.scanSettingsMenuOpen) {
@@ -487,30 +488,30 @@ fun ScanningScreen(
                     onExportPdf = {
                         scanningViewModel.setShowExportOptionsPopup(false)
                         scanningViewModel.doPdfExport(
-                                    { error ->
-                                        snackBarError(
-                                            error,
-                                            scope,
-                                            context,
-                                            snackbarHostState,
-                                            false
-                                        )
-                                    }
+                            { error ->
+                                snackBarError(
+                                    error,
+                                    scope,
+                                    context,
+                                    snackbarHostState,
+                                    false
                                 )
+                            }
+                        )
                     },
                     onExportArchive = {
                         scanningViewModel.setShowExportOptionsPopup(false)
                         scanningViewModel.doZipExport(
-                                { error ->
-                                    snackBarError(
-                                        error,
-                                        scope,
-                                        context,
-                                        snackbarHostState,
-                                        false
-                                    )
-                                }
-                            )
+                            { error ->
+                                snackBarError(
+                                    error,
+                                    scope,
+                                    context,
+                                    snackbarHostState,
+                                    false
+                                )
+                            }
+                        )
                     }
                 )
             }
@@ -525,32 +526,32 @@ fun ScanningScreen(
                     onExportPdf = {
                         scanningViewModel.setShowSaveOptionsPopup(false)
                         scanningViewModel.doPdfExport(
-                                    { error ->
-                                        snackBarError(
-                                            error,
-                                            scope,
-                                            context,
-                                            snackbarHostState,
-                                            false
-                                        )
-                                    },
-                                    saveFileLauncher
+                            { error ->
+                                snackBarError(
+                                    error,
+                                    scope,
+                                    context,
+                                    snackbarHostState,
+                                    false
                                 )
+                            },
+                            saveFileLauncher
+                        )
                     },
                     onExportArchive = {
                         scanningViewModel.setShowSaveOptionsPopup(false)
                         scanningViewModel.doZipExport(
-                                { error ->
-                                    snackBarError(
-                                        error,
-                                        scope,
-                                        context,
-                                        snackbarHostState,
-                                        false
-                                    )
-                                },
-                                saveFileLauncher
-                            )
+                            { error ->
+                                snackBarError(
+                                    error,
+                                    scope,
+                                    context,
+                                    snackbarHostState,
+                                    false
+                                )
+                            },
+                            saveFileLauncher
+                        )
                     }
                 )
             }
@@ -567,7 +568,6 @@ fun ScanningScreen(
                     }
 
                     scanningViewModel.setDeletePageDialogShown(false)
-
                 }
             )
         }
@@ -720,7 +720,6 @@ fun ScanContent(
                         )
                     }
                     IconButton(onClick = {
-
                         navController?.currentBackStackEntry?.toTypedRoute()?.let { currentRoute ->
                             currentPage?.let { currentPage ->
                                 navController.clearAndNavigateTo(

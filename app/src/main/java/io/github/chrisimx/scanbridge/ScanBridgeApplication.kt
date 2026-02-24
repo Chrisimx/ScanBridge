@@ -36,19 +36,21 @@ val appModule = module {
     single<AndroidLocaleProvider>() bind LocaleProvider::class
     single<FileDebugLogService>() bind DebugLogService::class
     single<ScanJobRepository>()
-    single<ScanBridgeDb>() {
+    single<ScanBridgeDb> {
         val context = get<Application>()
         val writeDebug = runBlocking { context.appSettingsStore.data.firstOrNull()?.writeDebug ?: false }
         val builder = Room.databaseBuilder(
             get(),
-            ScanBridgeDb::class.java, "scanbridge"
+            ScanBridgeDb::class.java,
+            "scanbridge"
         )
         if (writeDebug) {
             builder.setQueryCallback(
                 { sqlQuery, bindArgs ->
                     Timber.tag("RoomDebug").d("SQL: $sqlQuery, args: $bindArgs")
                 },
-                Executors.newSingleThreadExecutor())
+                Executors.newSingleThreadExecutor()
+            )
         }
         builder.build()
             .migrateLegacyCustomScanners(get())

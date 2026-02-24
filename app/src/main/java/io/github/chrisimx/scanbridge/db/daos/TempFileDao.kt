@@ -35,4 +35,3 @@ interface TempFileDao {
     @Delete
     suspend fun delete(session: TempFile)
 }
-

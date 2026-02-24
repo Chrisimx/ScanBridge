@@ -19,7 +19,6 @@
 
 package io.github.chrisimx.scanbridge
 
-import android.app.Application
 import android.content.Context
 import android.net.nsd.NsdManager
 import androidx.compose.animation.AnimatedContent
@@ -42,8 +41,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getSystemService
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.data.ui.CustomScannerViewModel
 import io.github.chrisimx.scanbridge.db.entities.CustomScanner

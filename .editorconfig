@@ -20,3 +20,4 @@ ktlint_function_signature_rule_force_multiline_when_parameter_count_greater_or_e
 ktlint_ignore_back_ticked_identifier = false
 ktlint_standard_no-unused-imports = enabled
 max_line_length = 140
+ktlint_standard_no-wildcard-imports = disabled

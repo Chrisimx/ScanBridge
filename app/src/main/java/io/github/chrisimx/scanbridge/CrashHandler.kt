@@ -20,9 +20,7 @@
 package io.github.chrisimx.scanbridge
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.content.Intent
-import androidx.core.content.edit
 import io.github.chrisimx.scanbridge.datastore.lastRouteStore
 import io.github.chrisimx.scanbridge.proto.copy
 import java.io.File

@@ -95,9 +95,13 @@ class ScanSettingsComposableStateHolder(
 
     private val selectedInputSourceCaps: StateFlow<InputSourceCaps> = combine(scanSettings, _uiState) { settings, uiState ->
         uiState.capabilities.getInputSourceCaps(settings.inputSource, settings.duplex ?: false)
-    }.stateIn(coroutineScope, SharingStarted.Lazily, uiState.value.capabilities.getInputSourceOptions().first().let {
-        uiState.value.capabilities.getInputSourceCaps(it, scanSettings.value.duplex == true)
-    })
+    }.stateIn(
+        coroutineScope,
+        SharingStarted.Lazily,
+        uiState.value.capabilities.getInputSourceOptions().first().let {
+            uiState.value.capabilities.getInputSourceCaps(it, scanSettings.value.duplex == true)
+        }
+    )
 
     val intentOptions = selectedInputSourceCaps.derived(coroutineScope) {
         it.supportedIntents
@@ -209,19 +213,19 @@ class ScanSettingsComposableStateHolder(
 
                     if (currentScanRegion == null) {
                         return@updateSettings copy(
-                                scanRegions = scanRegion {
-                                    maxHeight()
-                                    width = widthValidationResult.value.threeHundredthsOfInch()
-                                }
-                            )
+                            scanRegions = scanRegion {
+                                maxHeight()
+                                width = widthValidationResult.value.threeHundredthsOfInch()
+                            }
+                        )
                     } else {
                         val currentHeight = currentScanRegion.height
                         return@updateSettings copy(
-                                scanRegions = scanRegion {
-                                    width = widthValidationResult.value.threeHundredthsOfInch()
-                                    height = currentHeight
-                                }
-                            )
+                            scanRegions = scanRegion {
+                                width = widthValidationResult.value.threeHundredthsOfInch()
+                                height = currentHeight
+                            }
+                        )
                     }
                 }
             }
@@ -242,19 +246,19 @@ class ScanSettingsComposableStateHolder(
 
                     if (currentScanRegion == null) {
                         return@updateSettings copy(
-                                scanRegions = scanRegion {
-                                    maxWidth()
-                                    height = heightValidationResult.value.threeHundredthsOfInch()
-                                }
-                            )
+                            scanRegions = scanRegion {
+                                maxWidth()
+                                height = heightValidationResult.value.threeHundredthsOfInch()
+                            }
+                        )
                     } else {
                         val currentWidth = currentScanRegion.width
                         return@updateSettings copy(
-                                scanRegions = scanRegion {
-                                    width = currentWidth
-                                    height = heightValidationResult.value.threeHundredthsOfInch()
-                                }
-                            )
+                            scanRegions = scanRegion {
+                                width = currentWidth
+                                height = heightValidationResult.value.threeHundredthsOfInch()
+                            }
+                        )
                     }
                 }
             }

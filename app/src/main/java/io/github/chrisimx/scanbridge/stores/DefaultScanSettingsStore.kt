@@ -20,14 +20,10 @@
 package io.github.chrisimx.scanbridge.stores
 
 import android.content.Context
-import androidx.core.content.edit
 import com.google.protobuf.StringValue
 import io.github.chrisimx.esclkt.ScanSettings
-import io.github.chrisimx.scanbridge.data.model.StatelessImmutableESCLScanSettingsState
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
-import io.github.chrisimx.scanbridge.datastore.lastRouteStore
 import io.github.chrisimx.scanbridge.datastore.updateSettings
-import io.github.chrisimx.scanbridge.proto.copy
 import io.github.chrisimx.scanbridge.proto.lastUsedScanSettingsOrNull
 import io.github.chrisimx.scanbridge.proto.rememberScanSettingsOrNull
 import kotlinx.coroutines.flow.first

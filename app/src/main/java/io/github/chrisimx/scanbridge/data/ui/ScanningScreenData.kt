@@ -19,19 +19,14 @@
 
 package io.github.chrisimx.scanbridge.data.ui
 
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import io.github.chrisimx.esclkt.ESCLRequestClient
-import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import java.io.File
 import kotlin.uuid.Uuid
-import kotlinx.serialization.Serializable
 
 enum class ScanRelativeRotation {
     Rotated,
@@ -77,7 +72,7 @@ data class ScanningScreenData(
         savePopupPosition,
         stateProgressStringRes,
         sourceFileToSave,
-        isRotating,
+        isRotating
     )
 }
 
@@ -96,7 +91,7 @@ data class ImmutableScanningScreenData(
     private val saveOptionsPopupPositionState: State<Triple<Int, Int, Int>?>,
     private val progressStringResState: State<Int?>,
     private val sourceFileToSaveState: State<File?>,
-    private val isRotatingState: State<Boolean>,
+    private val isRotatingState: State<Boolean>
 ) {
     val confirmDialogShown by confirmDialogShownState
     val confirmPageDeleteDialogShown by confirmPageDeleteDialogShownState

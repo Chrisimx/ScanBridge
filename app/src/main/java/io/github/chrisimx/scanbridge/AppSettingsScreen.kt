@@ -19,12 +19,9 @@
 
 package io.github.chrisimx.scanbridge
 
-import android.app.Activity
 import android.app.Activity.RESULT_OK
-import android.app.Application
 import android.content.Context
 import android.content.Intent
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -50,7 +47,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,11 +66,8 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.core.net.toUri
 import io.github.chrisimx.scanbridge.datastore.*
 import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
-import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
 import io.github.chrisimx.scanbridge.proto.rememberScanSettingsOrNull
-import io.github.chrisimx.scanbridge.proto.scanningResponseTimeoutOrNull
 import io.github.chrisimx.scanbridge.services.DebugLogService
-import io.github.chrisimx.scanbridge.services.FileDebugLogService
 import io.github.chrisimx.scanbridge.uicomponents.TitledCard
 import io.github.chrisimx.scanbridge.uicomponents.dialog.SimpleTextDialog
 import io.github.chrisimx.scanbridge.uicomponents.settings.CheckboxSetting
@@ -84,17 +77,10 @@ import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
 import java.io.File
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import org.koin.compose.activity.koinActivityInject
 import org.koin.compose.koinInject
-import org.koin.core.qualifier.named
-import org.koin.mp.KoinPlatform.getKoin
 
 @Composable
-fun DisableCertChecksSetting(
-    onInformationRequested: (Int) -> Unit,
-    checked: Boolean,
-    setChecked: (Boolean) -> Unit,
-) {
+fun DisableCertChecksSetting(onInformationRequested: (Int) -> Unit, checked: Boolean, setChecked: (Boolean) -> Unit) {
     CheckboxSetting(
         stringResource(R.string.disable_cert_checks),
         R.string.disable_cert_checks_desc,
@@ -122,17 +108,13 @@ fun exportDebugLog(context: Context, debugLogService: DebugLogService, saveDebug
 }
 
 @Composable
-fun DebugOptions(
-    debugLog: Boolean,
-    onInformationRequested: (Int) -> Unit,
-    setWriteDebugLog: (Boolean) -> Unit
-) {
+fun DebugOptions(debugLog: Boolean, onInformationRequested: (Int) -> Unit, setWriteDebugLog: (Boolean) -> Unit) {
     val context = LocalContext.current
     val debugLogService: DebugLogService = koinInject()
 
     val debugFileSaveLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) {  result ->
+    ) { result ->
         if (result.resultCode == RESULT_OK) {
             val uri = result.data?.data
             uri?.let {
@@ -273,7 +255,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 DisableCertChecksSetting(
                     setInformationRequested,
                     appSettings.disableCertChecks,
-                    { coroutineScope.launch { appSettingsStore.setDisableCertCheck(it)}  }
+                    { coroutineScope.launch { appSettingsStore.setDisableCertCheck(it) } }
                 )
 
                 CheckboxSetting(
@@ -294,7 +276,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                     stringResource(R.string.timeout),
                     R.string.timeout_info,
                     setInformationRequested,
-                    { coroutineScope.launch { appSettingsStore.setTimeoutSetting(it) } },
+                    { coroutineScope.launch { appSettingsStore.setTimeoutSetting(it) } }
                 )
 
                 // PDF chunk size setting
@@ -318,7 +300,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 DebugOptions(
                     appSettings.writeDebug,
                     setInformationRequested,
-                    { coroutineScope.launch { appSettingsStore.setWriteDebugLog(it) }}
+                    { coroutineScope.launch { appSettingsStore.setWriteDebugLog(it) } }
                 )
             }
         }

@@ -12,10 +12,10 @@ import java.io.OutputStream
 
 object ScanBridgeSettingsSerializer : Serializer<ScanBridgeSettings> {
     override val defaultValue: ScanBridgeSettings = scanBridgeSettings {
-            scanningResponseTimeout = UInt32Value.of(25)
-            rememberScanSettings = BoolValue.of(true)
-            chunkSizePdfExport = UInt32Value.of(50)
-        }
+        scanningResponseTimeout = UInt32Value.of(25)
+        rememberScanSettings = BoolValue.of(true)
+        chunkSizePdfExport = UInt32Value.of(50)
+    }
 
     override suspend fun readFrom(input: InputStream): ScanBridgeSettings {
         try {
@@ -25,7 +25,5 @@ object ScanBridgeSettingsSerializer : Serializer<ScanBridgeSettings> {
         }
     }
 
-    override suspend fun writeTo(t: ScanBridgeSettings, output: OutputStream) {
-        return t.writeTo(output)
-    }
+    override suspend fun writeTo(t: ScanBridgeSettings, output: OutputStream) = t.writeTo(output)
 }

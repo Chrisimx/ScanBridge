@@ -19,7 +19,5 @@ object LastRouteStoreSerializer : Serializer<LastRoute> {
         }
     }
 
-    override suspend fun writeTo(t: LastRoute, output: OutputStream) {
-        return t.writeTo(output)
-    }
+    override suspend fun writeTo(t: LastRoute, output: OutputStream) = t.writeTo(output)
 }

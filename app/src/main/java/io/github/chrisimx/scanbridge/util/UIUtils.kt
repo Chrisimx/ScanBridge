@@ -29,9 +29,11 @@ import io.github.chrisimx.scanbridge.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-fun String.truncate(maxLength: Int): String =
-    if (this.length <= maxLength) this
-    else this.take(maxLength.coerceAtLeast(1) - 1) + "…"
+fun String.truncate(maxLength: Int): String = if (this.length <= maxLength) {
+    this
+} else {
+    this.take(maxLength.coerceAtLeast(1) - 1) + "…"
+}
 
 fun snackbarErrorRetrievingPage(
     error: String,
