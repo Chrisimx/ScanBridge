@@ -163,19 +163,6 @@ fun SignupScreen(modifier: Modifier, onBack: () -> Unit, onSuccess: () -> Unit) 
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-            SnackbarHost(snackbarHostState) { data ->
-                Snackbar(
-                    data,
-                    containerColor = if (data.visuals.message.contains(stringResource(R.string.error))) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        SnackbarDefaults.color
-                    }
-                )
-            }
-        }
-
         Card(modifier = Modifier.padding(30.dp)) {
             Column(
                 verticalArrangement = Arrangement.Center,
@@ -248,6 +235,18 @@ fun SignupScreen(modifier: Modifier, onBack: () -> Unit, onSuccess: () -> Unit) 
                         Text(stringResource(R.string.back))
                     }
                 }
+            }
+        }
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    data,
+                    containerColor = if (data.visuals.message.contains(stringResource(R.string.error))) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        SnackbarDefaults.color
+                    }
+                )
             }
         }
     }
