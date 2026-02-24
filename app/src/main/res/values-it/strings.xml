@@ -99,4 +99,19 @@
     <string name="source_code">Codice sorgente</string>
     <string name="cancel_scan">Annulla</string>
     <string name="save_to_file">Salva in file</string>
+    <string name="loading_image">Caricamento dell’immagine…</string>
+    <string name="loading_previous_session_failed">La sessione precedente non può essere caricata… %1$s</string>
+    <string name="scannercapabilities_null">Le proprietà dello scanner dovrebbero essere già state recuperate, ma non sono state trovate.</string>
+    <string name="millimeter_unit_abbreviation">mm</string>
+    <string name="crop">Ritaglia pagina</string>
+    <string name="crop_button">Ritaglia</string>
+    <string name="cropping">La pagina viene ritagliata…</string>
+    <string name="activate_zoom_gestures">Attiva i gesti di zoom</string>
+    <string name="crash">ScanBridge si è bloccato :(</string>
+    <string name="crash_occurred">Ci dispiace. ScanBridge si è bloccato. Si prega di segnalare questo problema e di allegare il seguente messaggio di errore (puoi copiarlo con il pulsante in basso).</string>
+    <string name="inches">pollice</string>
+    <string name="thank_message_play_one">Se hai bisogno di aiuto o vuoi inviarci un feedback, puoi contattarci liberamente all’indirizzo support@fireamp.eu . Ti risponderemo il prima possibile!</string>
+    <string name="thank_message_play_one_title">Grazie per aver acquistato ScanBridge!</string>
+    <string name="scan_job_running">Scansione in corso…</string>
+    <string name="scanned_pages_received_in_bg">Le pagine scansionate vengono recuperate in background.</string>
 </resources>

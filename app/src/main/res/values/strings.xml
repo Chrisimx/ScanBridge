@@ -109,12 +109,12 @@
     <string name="activate_zoom_gestures">Activate zoom gestures</string>
     <string name="crash">ScanBridge crashed :(</string>
     <string name="crash_occurred">"We are sorry. ScanBridge has crashed. Please report this issue and attach the following stacktrace (you can copy it with the button at the bottom)"</string>
-    <string name="loading_previous_session_failed">Loading previous session failed…\n\n%1$s</string>
+    <string name="loading_previous_session_failed">Loading previous session failed…  %1$s</string>
     <string name="scannercapabilities_null">The scanner capabilities should be retrieved at this point, but they weren\'t.</string>
     <string name="millimeter_unit_abbreviation">mm</string>
     <string name="inches">Inches</string>
-    <string name="scan_job_running">Scan job running...</string>
     <string name="scanned_pages_received_in_bg">Scanned pages are received in the background.</string>
     <string name="thank_message_play_one">If you need help or want to provide feedback, contact us anytime at support@fireamp.eu. We will get back to you as quickly as possible!</string>
     <string name="thank_message_play_one_title">Thank you for purchasing ScanBridge!</string>
+    <string name="scan_job_running">Scan job running…</string>
 </resources>

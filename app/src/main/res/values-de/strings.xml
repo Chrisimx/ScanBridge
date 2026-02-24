@@ -100,4 +100,19 @@
     <string name="donate">Für ScanBridge spenden</string>
     <string name="source_code">Den Quellcode anschauen</string>
     <string name="save_to_file">In Datei speichern</string>
+    <string name="loading_image">Bild wird geladen…</string>
+    <string name="crop">Seite zuschneiden</string>
+    <string name="crop_button">Zuschneiden</string>
+    <string name="cropping">Seite wird zugeschnitten…</string>
+    <string name="activate_zoom_gestures">Zoom-Gesten aktivieren</string>
+    <string name="crash">ScanBridge ist abgestürzt :(</string>
+    <string name="scannercapabilities_null">Die Eigenschaften des Scanners sollten bereits abgerufen sein wurden jedoch nicht gefunden.</string>
+    <string name="millimeter_unit_abbreviation">mm</string>
+    <string name="inches">Zoll</string>
+    <string name="crash_occurred">Es tut uns leid. ScanBridge ist abgestürzt. Bitte melde dieses Problem und füge die folgende Fehlermeldung bei (du kannst sie mit der Schaltfläche unten kopieren).</string>
+    <string name="loading_previous_session_failed">Vorherige Sitzung konnte nicht geladen werden… %1$s</string>
+    <string name="thank_message_play_one">Falls du Hilfe brauchst oder Feedback geben willst, kannst du uns gerne über die E-Mail support@fireamp.eu kontaktieren. Wir werden uns sobald wie möglich bei dir melden!</string>
+    <string name="thank_message_play_one_title">Danke für deinen Kauf von ScanBridge!</string>
+    <string name="scan_job_running">Scan läuft…</string>
+    <string name="scanned_pages_received_in_bg">Gescannte Seiten werden im Hintergrund abgerufen.</string>
 </resources>
