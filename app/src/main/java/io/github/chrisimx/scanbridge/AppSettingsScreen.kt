@@ -50,6 +50,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -81,6 +82,7 @@ import io.github.chrisimx.scanbridge.uicomponents.settings.MoreInformationButton
 import io.github.chrisimx.scanbridge.uicomponents.settings.UIntSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
 import java.io.File
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.koin.compose.activity.koinActivityInject
 import org.koin.compose.koinInject
@@ -217,7 +219,6 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
     val setInformationRequested = { it: Int -> information = it }
 
     val scrollState = rememberScrollState()
-
     val coroutineScope = rememberCoroutineScope()
 
     Column(
@@ -286,7 +287,9 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
 
                 // Timeout setting
                 UIntSetting(
-                    appSettings.scanningResponseTimeoutOrNull?.value?.toUInt(),
+                    {
+                        appSettingsStore.data.firstOrNull()?.scanningResponseTimeout?.value?.toUInt() ?: 25u
+                    },
                     25u,
                     stringResource(R.string.timeout),
                     R.string.timeout_info,
@@ -296,7 +299,9 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
 
                 // PDF chunk size setting
                 UIntSetting(
-                    appSettings.chunkSizePdfExportOrNull?.value?.toUInt(),
+                    {
+                        appSettingsStore.data.firstOrNull()?.chunkSizePdfExport?.value?.toUInt() ?: 50u
+                    },
                     50u,
                     stringResource(R.string.pdf_export_max_pages_per_pdf),
                     R.string.pdf_export_setting_info,

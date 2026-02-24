@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,11 +36,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 @Composable
 fun UIntSettingBase(
-    initialTimeout: UInt,
+    initialTimeout: suspend () -> UInt,
     settingName: String,
     placeholder: String,
     help: Int,
@@ -48,14 +51,22 @@ fun UIntSettingBase(
     min: UInt,
     max: UInt,
 ) {
+
+    var timeoutValue by remember { mutableStateOf(placeholder) }
+
+    LaunchedEffect(Unit) {
+        val initial = withContext(Dispatchers.IO) {
+            initialTimeout()
+        }
+        timeoutValue = initial.toString()
+    }
+
     ConstraintLayout(
         Modifier
             .fillMaxWidth()
             .padding(vertical = 10.dp)
     ) {
         val (checkbox, informationButton) = createRefs()
-
-        var timeoutValue by remember { mutableStateOf(initialTimeout.toString()) }
 
         OutlinedTextField(
             value = timeoutValue,
@@ -110,7 +121,7 @@ fun UIntSettingBase(
 
 @Composable
 fun UIntSetting(
-    initialTimeout: UInt?,
+    initialTimeout: suspend () -> UInt,
     default: UInt,
     settingName: String,
     help: Int,
@@ -120,7 +131,7 @@ fun UIntSetting(
     max: UInt = UInt.MAX_VALUE
 ) {
     UIntSettingBase(
-        initialTimeout ?: default,
+        initialTimeout,
         settingName,
         default.toString(),
         help,

@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -29,7 +30,7 @@ class FileDebugLogService(
     private var debugWriter: BufferedWriter? = null
     private var tree: Timber.Tree? = null
 
-    private val debugLogActive = appSettings.data.map { it.writeDebug }
+    private val debugLogActive = appSettings.data.map { it.writeDebug }.distinctUntilChanged()
 
     init {
         debugLogActive.onEach {
