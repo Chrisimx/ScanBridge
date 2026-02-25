@@ -400,7 +400,7 @@ fun ScanningScreen(
                         ) {
                             Icon(Icons.Default.Close, contentDescription = "Dismiss")
                         }
-                    },
+                    }
                 ) {
                     Text(data.visuals.message)
                 }

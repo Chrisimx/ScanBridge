@@ -33,12 +33,9 @@ import androidx.navigation.toRoute
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.proto.scanningResponseTimeoutOrNull
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
-import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
-import io.github.chrisimx.scanbridge.util.doTempFilesExist
 import io.ktor.http.Url
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
