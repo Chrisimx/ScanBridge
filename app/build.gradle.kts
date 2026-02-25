@@ -59,8 +59,8 @@ android {
         applicationId = "io.github.chrisimx.scanbridge"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1_006_002 // format is MAJ_MIN_PAT with always 3 digits
-        versionName = "1.6.2"
+        versionCode = 2_000_000 // format is MAJ_MIN_PAT with always 3 digits
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments["escl_server_url"] =
@@ -170,6 +170,7 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.screengrab)
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.rules)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
@@ -204,13 +205,14 @@ fun calculateChecksum(file: File): String {
 
 fun verifyChecksum(file: File, expectedChecksum: String): Boolean {
     val actualChecksum = calculateChecksum(file)
+    println(actualChecksum)
     return actualChecksum == expectedChecksum
 }
 
 val checksums = mapOf(
-    "x86_64" to "a7c6cf413b8963017212a3c59530ac7d0a48379c7d3dd7128babf2937f6c0a97",
-    "armeabi-v7a" to "8de29fd1aff02d24c1adff34a0f83e686fae6024cfdb25b5d6647eb0916399d5",
-    "arm64-v8a" to "10e843da28ff9b1089a9130ee60ba45d57b6c3bc218e5fa044c8e6d86b88991b"
+    "x86_64" to "8033882837462e80fd8e9cd72954956fb8c6f5770ea879f80f3c71bb678dc5db",
+    "armeabi-v7a" to "a0683ddfce8c0b0fcf95bd1d5403e3581fc5141fa0ebe64399ed58e90cafaf8d",
+    "arm64-v8a" to "12fd7c8d1348327efad466da31e6a71a4a7aa0b5928448e740209742073e1fa7"
 )
 
 fun downloadESCLMockServer(archName: String, archPath: String, client: OkHttpClient) {

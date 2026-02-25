@@ -1,0 +1,3 @@
+* Aggiunta la funzione di ritaglio delle pagine direttamente in ScanBridge
+* Migliorata la compatibilità dello scanner
+* Le scansioni continuano ora in background

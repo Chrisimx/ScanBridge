@@ -1,0 +1,16 @@
+Tired of slow, buggy scanner apps from manufacturers that ruin the experience?
+ScanBridge is a fast and reliable Android scanning app that connects to almost any network scanner using the AirScan / eSCL standard — no drivers or extra software required. One app, one clean experience, working seamlessly across devices.
+ScanBridge makes using scanners fun again. What once felt old and clunky is now effortless, modern, and intuitive — exactly as it should be.
+Features:
+- Discover scanners supporting eSCL on your network
+- Scan multiple pages and arrange them however you like
+- Use your scanner to its full potential by adjusting settings such as by input source, resolution, duplex scan, scanning dimensions, and more
+- Crop scans directly in-app
+- Save your scans as PDF or images & directly share them with other apps
+- Beautiful Material You design
+- Simple and easy-to-use interface
+- Access to prioritized support and feature requests
+- 30-day refund guarantee if it does not work with your scanner (just reach out to our support at support@fireamp.eu)
+ScanBridge is available for free on F-Droid.
+By purchasing it here on the Play Store, you receive access to prioritized support and feature requests and help to support ongoing development so ScanBridge can continue to improve.
+ScanBridge is open-source, with no ads or tracking. It is designed to be privacy-friendly and does not require any permissions, except the Internet permission to access the network scanner and to provide the support functions. No data/telemetry is collected.

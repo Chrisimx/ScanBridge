@@ -61,7 +61,7 @@ following:
 We will then take care of the issue as soon as possible.
 
 <!--
-You might want to create a separate issue tag for questions and include it in this description. People should then tag their issues accordingly.
+You might want to create a separate issue tag for questions and include it-IT in this description. People should then tag their issues accordingly.
 
 Depending on how large the project is, you may want to outsource the questioning, e.g. to Stack Overflow or Gitter. You may add additional contact and information possibilities:
 - IRC
@@ -138,7 +138,7 @@ Once it's filed:
   other tags (such as `critical`), and the issue will be left to
   be [implemented by someone](#your-first-code-contribution).
 
-<!-- You might want to create an issue template for bugs and errors that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
+<!-- You might want to create an issue template for bugs and errors that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it-IT here in the description. -->
 
 ### Suggesting Enhancements
 

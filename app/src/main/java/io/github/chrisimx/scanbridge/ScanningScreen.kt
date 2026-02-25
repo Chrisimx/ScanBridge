@@ -50,6 +50,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Delete
@@ -386,13 +387,23 @@ fun ScanningScreen(
         snackbarHost = {
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
-                    data,
+                    modifier = Modifier.padding(20.dp),
                     containerColor = if (data.visuals.message.contains("Error")) {
                         MaterialTheme.colorScheme.error
                     } else {
                         SnackbarDefaults.color
-                    }
-                )
+                    },
+                    action = {
+                        IconButton(
+                            onClick = { data.dismiss() },
+                            modifier = Modifier.testTag("snackbar_dismiss")
+                        ) {
+                            Icon(Icons.Default.Close, contentDescription = "Dismiss")
+                        }
+                    },
+                ) {
+                    Text(data.visuals.message)
+                }
             }
         },
         topBar = { },

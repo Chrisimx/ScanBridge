@@ -1,0 +1,3 @@
+* Zuschneiden von Seiten direkt in ScanBridge
+* Scannerkompatibilität verbessert
+* Scans werden nun im Hintergrund fortgesetzt

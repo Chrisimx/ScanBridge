@@ -12,8 +12,11 @@
 
 # Uncomment the line if you want fastlane to automatically update itself
 # update_fastlane
+opt_out_usage
 
 default_platform(:android)
+
+$playMetadata = "fastlane/playMetadata"
 
 platform :android do
   desc "Runs all the tests"
@@ -27,18 +30,101 @@ platform :android do
     screengrab
   end
 
-  desc "Submit a new Beta Build to Crashlytics Beta"
-  lane :beta do
-    gradle(task: "clean assembleRelease")
-    crashlytics
-  
-    # sh "your_script.sh"
-    # You can also use other beta testing services here
-  end
-
   desc "Deploy a new version to the Google Play"
   lane :deploy do
-    gradle(task: "clean assembleRelease")
-    upload_to_play_store
+    upload_to_play_store(
+      metadata_path: $playMetadata,
+      changes_not_sent_for_review: true,
+      aab: "app/play/release/app-play-release.aab"
+    )
   end
+
+  desc "Deploy metadata to the Google Play"
+  lane :deploy_metadata  do |options|
+      version_code = options[:vcode] || "1000000"
+    upload_to_play_store(
+      metadata_path: $playMetadata,
+      changes_not_sent_for_review: true,
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_changelogs: true,
+      version_code: version_code
+    )
+  end
+
+  desc "Download metadata from Google Play"
+  lane :init_play_store do
+      download_from_play_store(
+        metadata_path: $playMetadata,
+      )
+  end
+
+
+  def do_screenshot_on_device(device_name, device_type, rotation)
+        # close all simulators
+        sh('adb devices | grep emulator | cut -f1 | while read line; do adb -s $line emu kill; done')
+        while true
+            adb_output = adb(command: 'devices')
+            puts('output of command' + adb_output)
+            if !adb_output.match(/emulator-([0-9]*)\tdevice/)
+                break
+                sh('sleep 3')
+            end
+            sh('sleep 3')
+        end
+
+        # open simulator
+        sh('emulator -avd %s > /dev/null 2>&1 &' % device_name)
+        while true
+            adb_output = adb(command: 'devices')
+            puts('output of command' + adb_output)
+            if adb_output.match(/emulator-([0-9]*)\tdevice/)
+                break
+                sh('sleep 3')
+            end
+            sh('sleep 3')
+        end
+
+
+      UI.message("Waiting for emulator to fully boot...")
+      sh <<~BASH
+        until adb shell getprop sys.boot_completed | tr -d '\r' | grep -q "1"; do
+          sleep 2
+        done
+      BASH
+       sh('sleep 3')
+
+      sh("adb shell settings put system accelerometer_rotation 0")
+      sh("adb shell wm user-rotation lock #{rotation}")
+
+      screengrab(
+        tests_apk_path: "app/build/outputs/apk/androidTest/play/debug/app-play-debug-androidTest.apk",
+        app_apk_path: "app/build/outputs/apk/play/debug/app-play-debug.apk",
+        output_directory: $playMetadata,
+        device_type: device_type,
+        tests_package_name: "io.github.chrisimx.scanbridge.play.test",
+        app_package_name: "io.github.chrisimx.scanbridge.play",
+        use_tests_in_packages: ['io.github.chrisimx.scanbridge.screenshot']
+      )
+
+      screengrab(
+        tests_apk_path: "app/build/outputs/apk/androidTest/fdroid/debug/app-fdroid-debug-androidTest.apk",
+        app_apk_path: "app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk",
+        output_directory: "fastlane/metadata/android",
+        device_type: device_type,
+        tests_package_name: "io.github.chrisimx.scanbridge.test",
+        app_package_name: "io.github.chrisimx.scanbridge",
+        use_tests_in_packages: ['io.github.chrisimx.scanbridge.screenshot']
+      )
+  end
+
+  lane :screenshots do
+      gradle(task: "assembleDebug assembleAndroidTest")
+      do_screenshot_on_device('Medium_Phone', 'phone', 0)
+      do_screenshot_on_device('Medium_Tablet', 'tenInch', 0)
+      do_screenshot_on_device('Small_Tablet', 'sevenInch', 0)
+      do_screenshot_on_device('Medium_Desktop', 'tv', 0)
+  end
+
+
 end

@@ -12,8 +12,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.rule.GrantPermissionRule
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.datastore.lastRouteStore
+import io.github.chrisimx.scanbridge.datastore.shownMessagesStore
 import io.github.chrisimx.scanbridge.datastore.updateSettings
 import io.github.chrisimx.scanbridge.proto.copy
 import java.io.BufferedReader
@@ -28,6 +30,11 @@ import org.junit.Test
 class ScanBridgeTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(
+        android.Manifest.permission.POST_NOTIFICATIONS
+    )
 
     fun startServer(vararg args: String): Process {
         val context = InstrumentationRegistry.getInstrumentation().context
@@ -60,6 +67,11 @@ class ScanBridgeTest {
     @After
     fun cleanupForTest() {
         runBlocking {
+            composeTestRule.activity.shownMessagesStore.updateData {
+                it.copy {
+                    thankPlayOne = true
+                }
+            }
             composeTestRule.activity.lastRouteStore.updateData {
                 it.copy {
                     clearLastRoute()

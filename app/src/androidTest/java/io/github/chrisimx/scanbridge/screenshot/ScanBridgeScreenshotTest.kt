@@ -1,5 +1,6 @@
 package io.github.chrisimx.scanbridge.screenshot
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
@@ -10,9 +11,12 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.rule.GrantPermissionRule
+import io.github.chrisimx.scanbridge.BuildConfig
 import io.github.chrisimx.scanbridge.MainActivity
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.datastore.lastRouteStore
+import io.github.chrisimx.scanbridge.datastore.shownMessagesStore
 import io.github.chrisimx.scanbridge.datastore.updateSettings
 import io.github.chrisimx.scanbridge.proto.copy
 import java.io.BufferedReader
@@ -29,18 +33,25 @@ class ScanBridgeScreenshotTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
+    @get:Rule
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(
+        android.Manifest.permission.POST_NOTIFICATIONS
+    )
+
     @Rule @JvmField
     val localeTestRule = LocaleTestRule()
 
-    fun startServer(vararg args: String): Process {
+    fun startServer(): Process {
         val context = InstrumentationRegistry.getInstrumentation().context
+
+        val imageFile = copyAssetToFile(composeTestRule.activity, context, "scan-1.jpg")
 
         val mockServer = File(context.applicationInfo.nativeLibraryDir, "lib_escl_mock.so")
 
-        Log.d("ScanBridgeTest", "ESCL mock server: ${mockServer.absolutePath}")
+        Log.d("ScanBridgeTest", "ESCL mock server: ${mockServer.absolutePath} ${imageFile.absolutePath}")
 
         val process = ProcessBuilder()
-            .command(mockServer.absolutePath, *args)
+            .command(mockServer.absolutePath, "-i", imageFile.absolutePath)
             .start()
 
         Thread {
@@ -59,9 +70,27 @@ class ScanBridgeScreenshotTest {
         return process
     }
 
+    fun copyAssetToFile(context: Context, testContext: Context, assetName: String): File {
+        val outFile = File(context.filesDir, assetName)
+
+        if (!outFile.exists()) {
+            testContext.assets.open(assetName).use { input ->
+                outFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+        }
+        return outFile
+    }
+
     @Before
     fun cleanupForTest() {
         runBlocking {
+            composeTestRule.activity.shownMessagesStore.updateData {
+                it.copy {
+                    thankPlayOne = true
+                }
+            }
             composeTestRule.activity.lastRouteStore.updateData {
                 it.copy {
                     clearLastRoute()
@@ -78,7 +107,7 @@ class ScanBridgeScreenshotTest {
     fun discovery() {
         composeTestRule.waitForIdle()
 
-        Screengrab.screenshot("discoveryScreen")
+        Screengrab.screenshot("03-discoveryScreen")
 
         cleanupForTest()
     }
@@ -89,20 +118,25 @@ class ScanBridgeScreenshotTest {
 
         composeTestRule.waitForIdle()
 
-        Screengrab.screenshot("settingsScreen")
+        Screengrab.screenshot("05-settingsScreen")
 
         cleanupForTest()
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test
     fun support() {
-        composeTestRule.onNodeWithTag("bottombutton2").performClick()
+        if (BuildConfig.FLAVOR == "play") {
+            composeTestRule.waitUntilAtLeastOneExists(hasTestTag("bottombutton2"), 30000)
+            composeTestRule.waitForIdle()
+            composeTestRule.onNodeWithTag("bottombutton2").performClick()
 
-        composeTestRule.waitForIdle()
+            composeTestRule.waitForIdle()
 
-        Screengrab.screenshot("supportScreen")
+            Screengrab.screenshot("06-supportScreen")
 
-        cleanupForTest()
+            cleanupForTest()
+        }
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -110,18 +144,24 @@ class ScanBridgeScreenshotTest {
     fun scan() {
         val server = startServer()
 
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("custom_scanner_fab"), 30000)
         composeTestRule.onNodeWithTag("custom_scanner_fab").performClick()
 
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("name_input"), 30000)
         composeTestRule.onNodeWithTag("name_input")
             .performTextInput("Brother MFC-L8690CDW series")
         composeTestRule.onNodeWithTag("url_input")
-            .performTextInput("http://192.168.178.122/eSCL")
+            .performTextInput("http://127.0.0.1:8080/eSCL")
         composeTestRule.onNodeWithTag("justconnect").performClick()
 
         composeTestRule.waitUntilExactlyOneExists(hasTestTag("full_screen_error_message"), 30000)
-        Screengrab.screenshot("emptyScanScreen")
+        Screengrab.screenshot("04-emptyScanScreen")
 
         composeTestRule.onNodeWithTag("scanbtn").performClick()
+
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("snackbar_dismiss"), 30000)
+
+        composeTestRule.onNodeWithTag("snackbar_dismiss").performClick()
 
         composeTestRule.waitUntilAtLeastOneExists(hasTestTag("scanbtn"), 30000)
 
@@ -135,7 +175,13 @@ class ScanBridgeScreenshotTest {
 
         composeTestRule.waitForIdle()
 
-        Screengrab.screenshot("scannedPageScreen")
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("snackbar_dismiss"), 30000)
+
+        composeTestRule.onNodeWithTag("snackbar_dismiss").performClick()
+
+        composeTestRule.waitForIdle()
+
+        Screengrab.screenshot("01-scannedPageScreen")
 
         server.destroy()
 
@@ -153,12 +199,13 @@ class ScanBridgeScreenshotTest {
     fun scanSettings() {
         val server = startServer()
 
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag("custom_scanner_fab"), 30000)
         composeTestRule.onNodeWithTag("custom_scanner_fab").performClick()
 
         composeTestRule.onNodeWithTag("name_input")
             .performTextInput("Brother MFC-L8690CDW series")
         composeTestRule.onNodeWithTag("url_input")
-            .performTextInput("http://192.168.178.122/eSCL")
+            .performTextInput("http://127.0.0.1:8080/eSCL")
         composeTestRule.onNodeWithTag("justconnect").performClick()
 
         composeTestRule.waitUntilExactlyOneExists(hasTestTag("full_screen_error_message"), 30000)
@@ -175,7 +222,7 @@ class ScanBridgeScreenshotTest {
 
         composeTestRule.waitUntilAtLeastOneExists(hasTestTag("copyesclkt"), 30000)
 
-        Screengrab.screenshot("scanSettings")
+        Screengrab.screenshot("02-scanSettings")
 
         server.destroy()
 

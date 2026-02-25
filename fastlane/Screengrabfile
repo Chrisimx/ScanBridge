@@ -1,7 +1,3 @@
-locales ['en-US', 'de', 'it']
+locales ['en-US', 'de-DE', 'it-IT']
 clear_previous_screenshots true
-tests_apk_path 'app/build/outputs/apk/androidTest/play/debug/app-play-debug-androidTest.apk'
-app_apk_path 'app/build/outputs/apk/play/debug/app-play-debug.apk'
-output_directory 'fastlane/justScreenshots'
 test_instrumentation_runner 'androidx.test.runner.AndroidJUnitRunner'
-use_tests_in_packages(['io.github.chrisimx.scanbridge.screenshot'])

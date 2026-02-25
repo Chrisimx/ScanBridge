@@ -1,0 +1,3 @@
+- Added crop feature
+- Improve scanner compatibility
+- Continue scanning in the background

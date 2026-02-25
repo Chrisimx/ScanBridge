@@ -28,6 +28,7 @@ koin = "4.2.0-RC1"
 koin-plugin = "0.3.0"
 protobuf-plugin = "0.9.6"
 protobuf-kotlin-lite = "4.33.5"
+rules = "1.7.0"
 
 [libraries]
 
@@ -84,6 +85,7 @@ screengrab = { module = "tools.fastlane:screengrab", version.ref = "screengrab" 
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 zoomable = { module = "me.saket.telephoto:zoomable", version.ref = "zoomable" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf-kotlin-lite"}
+androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

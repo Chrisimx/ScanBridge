@@ -1,0 +1,1 @@
+Dieser Release behebt ein Kompatibilitätsproblem mit dem Brother DS 940dw.

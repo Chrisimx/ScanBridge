@@ -39,7 +39,7 @@
 #
 #   Important for patching:
 #
-#   (2) This script targets any POSIX shell, so it avoids extensions provided
+#   (2) This script targets any POSIX shell, so it-IT avoids extensions provided
 #       by Bash, Ksh, etc; in particular arrays are avoided.
 #
 #       The "traditional" practice of packing multiple parameters into a
@@ -182,10 +182,10 @@ if "$cygwin" || "$msys" ; then
             arg=$( cygpath --path --ignore --mixed "$arg" )
         fi
         # Roll the args list around exactly as many times as the number of
-        # args, so each arg winds up back in the position where it started, but
+        # args, so each arg winds up back in the position where it-IT started, but
         # possibly modified.
         #
-        # NB: a `for` loop captures its iteration list before it begins, so
+        # NB: a `for` loop captures its iteration list before it-IT begins, so
         # changing the positional parameters here affects neither the number of
         # iterations, nor the values presented in `arg`.
         shift                   # remove old arg
@@ -197,7 +197,7 @@ fi
 #   * $DEFAULT_JVM_OPTS, $JAVA_OPTS, and $GRADLE_OPTS can contain fragments of
 #     shell script including quotes and variable substitutions, so put them in
 #     double quotes to make sure that they get re-expanded; and
-#   * put everything else in single quotes, so that it's not re-expanded.
+#   * put everything else in single quotes, so that it-IT's not re-expanded.
 
 set -- \
         "-Dorg.gradle.appname=$APP_BASE_NAME" \
@@ -207,7 +207,7 @@ set -- \
 
 # Use "xargs" to parse quoted args.
 #
-# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+# With -n1 it-IT outputs one arg per line, with the quotes and backslashes removed.
 #
 # In Bash we could simply go:
 #
