@@ -499,6 +499,7 @@ fun ScanningScreen(
                     onExportPdf = {
                         scanningViewModel.setShowExportOptionsPopup(false)
                         scanningViewModel.doPdfExport(
+                            context,
                             { error ->
                                 snackBarError(
                                     error,
@@ -513,6 +514,7 @@ fun ScanningScreen(
                     onExportArchive = {
                         scanningViewModel.setShowExportOptionsPopup(false)
                         scanningViewModel.doZipExport(
+                            context,
                             { error ->
                                 snackBarError(
                                     error,
@@ -537,6 +539,7 @@ fun ScanningScreen(
                     onExportPdf = {
                         scanningViewModel.setShowSaveOptionsPopup(false)
                         scanningViewModel.doPdfExport(
+                            context,
                             { error ->
                                 snackBarError(
                                     error,
@@ -552,6 +555,7 @@ fun ScanningScreen(
                     onExportArchive = {
                         scanningViewModel.setShowSaveOptionsPopup(false)
                         scanningViewModel.doZipExport(
+                            context,
                             { error ->
                                 snackBarError(
                                     error,

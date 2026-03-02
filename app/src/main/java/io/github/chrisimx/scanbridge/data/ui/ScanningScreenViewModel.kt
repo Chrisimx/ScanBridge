@@ -20,6 +20,7 @@
 package io.github.chrisimx.scanbridge.data.ui
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import androidx.activity.result.ActivityResultLauncher
@@ -508,13 +509,13 @@ class ScanningScreenViewModel(
         }
     }
 
-    fun doPdfExport(onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
+    fun doPdfExport(context: Context, onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
         viewModelScope.launch {
-            doPdfExportInternal(onError, saveFileLauncher)
+            doPdfExportInternal(context, onError, saveFileLauncher)
         }
     }
 
-    private suspend fun doPdfExportInternal(onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
+    private suspend fun doPdfExportInternal(context: Context, onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
         val currentScans = scannedPages.value
         val scannerCapsNullable = scanningScreenData.capabilities
         val scannerCaps = if (scannerCapsNullable == null) {
@@ -643,23 +644,24 @@ class ScanningScreenViewModel(
                     outputFile
                 )
             )
-            application.startActivity(share)
+            context.startActivity(share)
         } else {
             setFileToSave(outputFile)
             saveFileLauncher.launch(outputFile.name)
         }
     }
 
-    fun doZipExport(onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
+    fun doZipExport(context: Context, onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
         viewModelScope.launch {
             doZipExportInternal(
+                context,
                 onError,
                 saveFileLauncher
             )
         }
     }
 
-    private suspend fun doZipExportInternal(onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
+    private suspend fun doZipExportInternal(context: Context, onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
         val currentScans = scannedPages.value
         if (currentScans.isEmpty()) {
             onError(application.getString(R.string.no_scans_yet))
@@ -710,7 +712,7 @@ class ScanningScreenViewModel(
                     zipOutputFile
                 )
             )
-            application.startActivity(share)
+            context.startActivity(share)
         } else {
             setFileToSave(zipOutputFile)
             saveFileLauncher.launch(zipOutputFile.name)
