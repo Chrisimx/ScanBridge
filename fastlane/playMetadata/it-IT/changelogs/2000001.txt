@@ -1,0 +1,4 @@
+Questa release include alcune correzioni di bug:
+
+* Risolto il crash durante la condivisione delle scansioni con altre app
+* La funzione “Ricorda le ultime impostazioni di scansione utilizzate” ora funziona di nuovo

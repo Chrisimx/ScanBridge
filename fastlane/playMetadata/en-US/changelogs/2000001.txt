@@ -1,0 +1,4 @@
+This release includes a few bug fixes:
+
+* Fixed a crash when sharing scans with other apps
+* The “Remember last used scan settings” feature now works again

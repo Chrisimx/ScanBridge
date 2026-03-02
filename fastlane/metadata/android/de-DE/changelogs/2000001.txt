@@ -1,0 +1,4 @@
+Dieser Release enthält einige Bugfixes:
+
+* Absturz beim Teilen von Scans mit anderen Apps behoben
+* Das Feature „Zuletzt verwendete Scaneinstellungen speichern“ funktioniert jetzt wieder
