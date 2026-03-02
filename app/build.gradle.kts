@@ -17,6 +17,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.koin)
     alias(libs.plugins.protobuf)
+    alias(libs.plugins.room)
     id("com.google.devtools.ksp") version "2.3.6"
 }
 
@@ -53,6 +54,10 @@ android {
 
     androidResources {
         generateLocaleConfig = true
+    }
+
+    room {
+        schemaDirectory("$projectDir/schemas")
     }
 
     defaultConfig {

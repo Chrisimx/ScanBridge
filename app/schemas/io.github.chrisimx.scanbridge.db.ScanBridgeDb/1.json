@@ -1,0 +1,208 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "d64f1fceeaf8ce84958c8814c7216cb9",
+    "entities": [
+      {
+        "tableName": "customscanners",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` TEXT NOT NULL, `name` TEXT NOT NULL, `url` TEXT NOT NULL, PRIMARY KEY(`uuid`))",
+        "fields": [
+          {
+            "fieldPath": "uuid",
+            "columnName": "uuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "uuid"
+          ]
+        }
+      },
+      {
+        "tableName": "scannedpages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scanId` TEXT NOT NULL, `ownerSessionId` TEXT NOT NULL, `filePath` TEXT NOT NULL, `originalScanSettings` TEXT NOT NULL, `rotation` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, PRIMARY KEY(`scanId`), FOREIGN KEY(`ownerSessionId`) REFERENCES `sessions`(`sessionId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "scanId",
+            "columnName": "scanId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerSessionId",
+            "columnName": "ownerSessionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filePath",
+            "columnName": "filePath",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originalScanSettings",
+            "columnName": "originalScanSettings",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rotation",
+            "columnName": "rotation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orderIndex",
+            "columnName": "orderIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "scanId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_scannedpages_ownerSessionId",
+            "unique": false,
+            "columnNames": [
+              "ownerSessionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_scannedpages_ownerSessionId` ON `${TABLE_NAME}` (`ownerSessionId`)"
+          },
+          {
+            "name": "index_scannedpages_ownerSessionId_orderIndex",
+            "unique": true,
+            "columnNames": [
+              "ownerSessionId",
+              "orderIndex"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_scannedpages_ownerSessionId_orderIndex` ON `${TABLE_NAME}` (`ownerSessionId`, `orderIndex`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "ownerSessionId"
+            ],
+            "referencedColumns": [
+              "sessionId"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sessionId` TEXT NOT NULL, `currentScanSettings` TEXT, `currentPage` INTEGER NOT NULL, PRIMARY KEY(`sessionId`))",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentScanSettings",
+            "columnName": "currentScanSettings",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "currentPage",
+            "columnName": "currentPage",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sessionId"
+          ]
+        }
+      },
+      {
+        "tableName": "tempfiles",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tempFileId` TEXT NOT NULL, `ownerSessionId` TEXT NOT NULL, `path` TEXT NOT NULL, PRIMARY KEY(`tempFileId`), FOREIGN KEY(`ownerSessionId`) REFERENCES `sessions`(`sessionId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "tempFileId",
+            "columnName": "tempFileId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerSessionId",
+            "columnName": "ownerSessionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "path",
+            "columnName": "path",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "tempFileId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tempfiles_ownerSessionId",
+            "unique": false,
+            "columnNames": [
+              "ownerSessionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tempfiles_ownerSessionId` ON `${TABLE_NAME}` (`ownerSessionId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "ownerSessionId"
+            ],
+            "referencedColumns": [
+              "sessionId"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd64f1fceeaf8ce84958c8814c7216cb9')"
+    ]
+  }
+}

@@ -83,7 +83,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -163,7 +163,6 @@ class ScanningScreenViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
     val session: StateFlow<Session?> = sessionDao.getSessionFlowById(sessionID)
-        .onEach { Timber.d("Session data changed: $it") }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val isScanJobRunning = scanJobRepo.isJobRunning
@@ -190,11 +189,11 @@ class ScanningScreenViewModel(
 
     init {
         session
-            .map { it?.currentScanSettings }
+            .map { it?.currentScanSettings to it?.currentSettingsUIData }
             .distinctUntilChanged()
-            .filterNotNull()
-            .onEach {
-                DefaultScanSettingsStore.save(application, it)
+            .filter { it.first != null }
+            .onEach { (scanSettings, settingsUiState) ->
+                DefaultScanSettingsStore.save(application, scanSettings!!, settingsUiState)
             }
             .launchIn(viewModelScope)
     }
@@ -309,6 +308,11 @@ class ScanningScreenViewModel(
         }
     }
 
+    suspend fun saveUpdatedScanSettingsUiData(newData: ScanSettingsStateData?) {
+        Timber.d("Settings ui data updated $newData")
+        sessionDao.updateScanSettingsUiData(sessionID, newData)
+    }
+
     suspend fun setScannerCapabilities(caps: ScannerCapabilities) {
         _scanningScreenData.capabilities.value = caps
         val storedSession = sessionDao.getSessionById(sessionID)
@@ -321,26 +325,29 @@ class ScanningScreenViewModel(
                 val newSession = oldSession.copy(
                     currentScanSettings = oldSession.currentScanSettings?.lambda()
                 )
-                Timber.d("Settings updated $newSession")
+                Timber.d("Settings updated ${newSession.currentScanSettings}")
                 sessionDao.update(newSession)
             }
         }
+
+        val defaultScanSettingsUIData = ScanSettingsStateData(
+            caps
+        )
 
         if (storedSession != null) {
             _scanningScreenData.scanSettingsVM.value = getKoin().get {
                 parametersOf(
                     session.map { it?.currentScanSettings ?: storedSession.currentScanSettings }
                         .stateIn(viewModelScope, SharingStarted.Lazily, storedSession.currentScanSettings),
-                    ScanSettingsStateData(
-                        caps
-                    ),
+                    storedSession.currentSettingsUIData?.copy(capabilities = caps) ?: defaultScanSettingsUIData,
                     updateSettings,
                     viewModelScope
                 )
             }
         } else {
             // Try to load saved scan settings first, fallback to defaults if none exist
-            val savedSettings = DefaultScanSettingsStore.load(application.applicationContext)
+            val savedSettingsPair = DefaultScanSettingsStore.load(application.applicationContext)
+            val (savedSettings, savedSettingsUiState) = savedSettingsPair
             val initialSettings = if (savedSettings != null) {
                 try {
                     // Validate that the saved input source is still supported
@@ -419,20 +426,23 @@ class ScanningScreenViewModel(
                 caps.calculateDefaultESCLScanSettingsState()
             }
 
-            sessionDao.insertAll(Session(sessionID, initialSettings))
+            sessionDao.insertAll(Session(sessionID, initialSettings, savedSettingsUiState))
 
             _scanningScreenData.scanSettingsVM.value = getKoin().get {
                 parametersOf(
                     session.map { it?.currentScanSettings ?: initialSettings }
                         .stateIn(viewModelScope, SharingStarted.Lazily, initialSettings),
-                    ScanSettingsStateData(
-                        caps
-                    ),
+                    savedSettingsUiState ?: defaultScanSettingsUIData,
                     updateSettings,
                     viewModelScope
                 )
             }
         }
+
+        // Subscribe to scan settings ui data changes so that we can save them to the database
+        _scanningScreenData.scanSettingsVM.value?.uiState?.onEach {
+            saveUpdatedScanSettingsUiData(it)
+        }?.launchIn(viewModelScope)
     }
 
     fun swapTwoPages(page1: ScannedPage, page2: ScannedPage) {
@@ -516,7 +526,11 @@ class ScanningScreenViewModel(
         }
     }
 
-    private suspend fun doPdfExportInternal(context: Context, onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
+    private suspend fun doPdfExportInternal(
+        context: Context,
+        onError: (String) -> Unit,
+        saveFileLauncher: ActivityResultLauncher<String>? = null
+    ) {
         val currentScans = scannedPages.value
         val scannerCapsNullable = scanningScreenData.capabilities
         val scannerCaps = if (scannerCapsNullable == null) {
@@ -662,7 +676,11 @@ class ScanningScreenViewModel(
         }
     }
 
-    private suspend fun doZipExportInternal(context: Context, onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
+    private suspend fun doZipExportInternal(
+        context: Context,
+        onError: (String) -> Unit,
+        saveFileLauncher: ActivityResultLauncher<String>? = null
+    ) {
         val currentScans = scannedPages.value
         if (currentScans.isEmpty()) {
             onError(application.getString(R.string.no_scans_yet))

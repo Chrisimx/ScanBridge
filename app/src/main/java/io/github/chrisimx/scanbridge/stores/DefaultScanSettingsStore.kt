@@ -22,54 +22,71 @@ package io.github.chrisimx.scanbridge.stores
 import android.content.Context
 import com.google.protobuf.StringValue
 import io.github.chrisimx.esclkt.ScanSettings
+import io.github.chrisimx.scanbridge.data.ui.ScanSettingsStateData
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.datastore.updateSettings
 import io.github.chrisimx.scanbridge.proto.lastUsedScanSettingsOrNull
+import io.github.chrisimx.scanbridge.proto.lastUsedScanSettingsUiStateOrNull
 import io.github.chrisimx.scanbridge.proto.rememberScanSettingsOrNull
+import io.github.chrisimx.scanbridge.util.ScanSettingsJson
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.json.Json
 import timber.log.Timber
 
 object DefaultScanSettingsStore {
-    private const val APP_PREF_NAME = "scanbridge"
-
     private suspend fun isRememberSettingsEnabled(context: Context): Boolean {
         val appPreferences = context.appSettingsStore.data.first()
         return appPreferences.rememberScanSettingsOrNull?.value ?: true
     }
 
-    suspend fun save(context: Context, scanSettings: ScanSettings) {
+    suspend fun save(context: Context, scanSettings: ScanSettings, uiStateData: ScanSettingsStateData?) {
         if (!isRememberSettingsEnabled(context)) {
             Timber.d("Scan settings persistence is disabled, skipping save")
             return
         }
 
-        val serializedSettings = Json.encodeToString(scanSettings)
+        val serializedSettings = ScanSettingsJson.json.encodeToString(scanSettings)
+        val serializedUiState = runCatching {
+            uiStateData.let {
+                ScanSettingsJson.json.encodeToString(uiStateData)
+            }
+        }.getOrNull()
+        Timber.d("Saving default scan settings: $serializedSettings, $serializedUiState")
         context.appSettingsStore.updateSettings {
             lastUsedScanSettings = StringValue.of(serializedSettings)
+            if (serializedUiState != null) {
+                lastUsedScanSettingsUiState = StringValue.of(serializedUiState)
+            } else {
+                clearLastUsedScanSettingsUiState()
+            }
         }
     }
 
-    suspend fun load(context: Context): ScanSettings? {
+    suspend fun load(context: Context): Pair<ScanSettings?, ScanSettingsStateData?> {
         if (!isRememberSettingsEnabled(context)) {
             Timber.d("Scan settings persistence is disabled, returning null")
-            return null
+            return null to null
         }
 
-        val appSettings = context.appSettingsStore.data
-        val lastUsedScanSettings = appSettings.first().lastUsedScanSettingsOrNull?.value
+        val appSettings = context.appSettingsStore.data.first()
+        val lastUsedScanSettings = appSettings.lastUsedScanSettingsOrNull?.value
+        val lastUsedScanSettingsUiState = appSettings.lastUsedScanSettingsUiStateOrNull?.value
 
         if (lastUsedScanSettings == null) {
             Timber.d("No saved scan settings found")
-            return null
+            return null to null
         }
 
         try {
-            val json = Json { ignoreUnknownKeys = true }
-            return json.decodeFromString<ScanSettings>(lastUsedScanSettings)
+            val json = ScanSettingsJson.json
+            val lastUsedScanSettingsDecoded = json.decodeFromString<ScanSettings>(lastUsedScanSettings)
+            val lastUsedScanSettingsUIStateDecoded = lastUsedScanSettingsUiState?.let {
+                json.decodeFromString<ScanSettingsStateData>(it)
+            }
+            Timber.d("Loaded default scan settings $lastUsedScanSettings, $lastUsedScanSettingsUIStateDecoded")
+            return lastUsedScanSettingsDecoded to lastUsedScanSettingsUIStateDecoded
         } catch (_: Exception) {
             Timber.e("JSON in last_used_scan_settings is invalid. Not used!")
-            return null
+            return null to null
         }
     }
 

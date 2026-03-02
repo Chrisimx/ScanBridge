@@ -95,3 +95,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 versions = { id = "com.github.ben-manes.versions", version.ref = "versionsPlugin" }
 koin = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
+room = { id = "androidx.room", version.ref = "room"}
