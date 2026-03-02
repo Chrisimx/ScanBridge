@@ -35,6 +35,7 @@ platform :android do
     upload_to_play_store(
       metadata_path: $playMetadata,
       changes_not_sent_for_review: true,
+      sync_image_upload: true,
       aab: "app/play/release/app-play-release.aab"
     )
   end
