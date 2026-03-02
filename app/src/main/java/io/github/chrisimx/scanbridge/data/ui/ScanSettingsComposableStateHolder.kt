@@ -190,6 +190,7 @@ class ScanSettingsComposableStateHolder(
             .combine(selectedInputSourceCaps) { maxSize, inputSourceCaps -> Pair(maxSize, inputSourceCaps) }
             .filter { it.first }
             .onEach { (maxSize, inputSourceCaps) ->
+                Timber.d("Maximum size flag set to $maxSize: This means we should set scanRegion to maximum")
                 updateSettings {
                     copy(
                         scanRegions = scanRegion {
@@ -210,8 +211,10 @@ class ScanSettingsComposableStateHolder(
             .onEach { widthValidationResult ->
                 updateSettings {
                     val currentScanRegion = scanRegions?.regions?.firstOrNull()
+                    Timber.d("Width validation success result received: $widthValidationResult")
 
                     if (currentScanRegion == null) {
+                        Timber.d("Width validation success and current scanRegion null, replacing!")
                         return@updateSettings copy(
                             scanRegions = scanRegion {
                                 maxHeight()
@@ -219,6 +222,7 @@ class ScanSettingsComposableStateHolder(
                             }
                         )
                     } else {
+                        Timber.d("Width validation success and current scanRegion not null, reusing!")
                         val currentHeight = currentScanRegion.height
                         return@updateSettings copy(
                             scanRegions = scanRegion {
@@ -245,6 +249,7 @@ class ScanSettingsComposableStateHolder(
                     val currentScanRegion = scanRegions?.regions?.firstOrNull()
 
                     if (currentScanRegion == null) {
+                        Timber.d("Height validation success and current scanRegion null, replacing!")
                         return@updateSettings copy(
                             scanRegions = scanRegion {
                                 maxWidth()
@@ -252,6 +257,7 @@ class ScanSettingsComposableStateHolder(
                             }
                         )
                     } else {
+                        Timber.d("Height validation success and current scanRegion not null, reusing!")
                         val currentWidth = currentScanRegion.width
                         return@updateSettings copy(
                             scanRegions = scanRegion {

@@ -321,6 +321,7 @@ class ScanningScreenViewModel(
                 val newSession = oldSession.copy(
                     currentScanSettings = oldSession.currentScanSettings?.lambda()
                 )
+                Timber.d("Settings updated $newSession")
                 sessionDao.update(newSession)
             }
         }
