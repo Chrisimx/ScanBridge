@@ -280,6 +280,7 @@ class ScanSettingsComposableStateHolder(
     }
 
     fun setInputSource(inputSource: InputSource) {
+        Timber.d("Input Source being set to $inputSource. Validating existing settings.")
         coroutineScope.launch {
             updateSettings {
                 val currentScanSettings = scanSettings.value
@@ -290,6 +291,8 @@ class ScanSettingsComposableStateHolder(
 
                 val xRes = currentScanSettings.xResolution
                 val yRes = currentScanSettings.yResolution
+
+                Timber.d("Input source being set. Current Resolution is: $xRes x $yRes")
 
                 val invalidResolutionSetting = xRes != null && yRes != null &&
                     !supportedResolutions.contains(DiscreteResolution(xRes, yRes))
@@ -310,6 +313,8 @@ class ScanSettingsComposableStateHolder(
                     null
                 }
 
+                Timber.d("Input Source being set to $inputSource. " +
+                    "Validated existing settings to: Res: ${replacementResolution.first} x ${replacementResolution.second}, Intent: $replacementIntent")
                 copy(
                     inputSource = inputSource,
                     xResolution = replacementResolution.first,

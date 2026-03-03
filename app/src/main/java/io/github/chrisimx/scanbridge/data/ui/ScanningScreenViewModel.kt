@@ -355,10 +355,12 @@ class ScanningScreenViewModel(
                     val validatedInputSource = if (savedSettings.inputSource != null &&
                         !supportedInputSources.contains(savedSettings.inputSource)
                     ) {
+                        val fallbackInputSource = supportedInputSources.firstOrNull() ?: InputSource.Platen
                         Timber.w(
-                            "Saved input source ${savedSettings.inputSource} not supported by current scanner, falling back to default"
+                            "Saved input source ${savedSettings.inputSource} not supported by current scanner," +
+                                " falling back to default $fallbackInputSource"
                         )
-                        supportedInputSources.firstOrNull() ?: InputSource.Platen
+                        fallbackInputSource
                     } else {
                         savedSettings.inputSource
                     }
@@ -379,13 +381,17 @@ class ScanningScreenViewModel(
                     )
 
                     val intent = if (!selectedInputSourceCaps.supportedIntents.contains(savedSettings.intent)) {
-                        selectedInputSourceCaps.supportedIntents.first()
+                        val firstSupportedIntent = selectedInputSourceCaps.supportedIntents.first()
+                        Timber.w("Intent not supported with current input source," +
+                            " using first supported intent: $firstSupportedIntent")
+                        firstSupportedIntent
                     } else {
                         savedSettings.intent
                     }
 
                     val savedScanRegion = savedSettings.scanRegions?.regions?.firstOrNull()
                     val scanRegion = if (savedScanRegion != null) {
+                        Timber.d("There is a saved scan region: $savedScanRegion")
                         val storedWidthThreeHOfInch = savedScanRegion.width.value
                         val storedHeightThreeHOfInch = savedScanRegion.height.value
 
@@ -400,12 +406,15 @@ class ScanningScreenViewModel(
 
                         val xOffset = savedScanRegion.xOffset
                         val yOffset = savedScanRegion.yOffset
-                        scanRegion(selectedInputSourceCaps) {
+                        val coercedScanRegion = scanRegion(selectedInputSourceCaps) {
                             this.width = width.threeHundredthsOfInch()
                             this.height = height.threeHundredthsOfInch()
                             this.xOffset = xOffset
                             this.yOffset = yOffset
                         }
+                        Timber.d("After coercing we have the scan region: $coercedScanRegion " +
+                            "(maxWidth: $maxWidth, minWidth: $minWidth, maxHeight: $maxHeight, minHeight: $minHeight)")
+                        coercedScanRegion
                     } else {
                         null
                     }
