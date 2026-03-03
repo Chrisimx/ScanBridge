@@ -1,0 +1,3 @@
+* Farbeinstellung hinzugefügt
+* Erhöhte Toleranz beim Validieren vom Scanformat beim Laden von Scaneinstellungen
+* Behebe Zurücksetzen auf falsches Scanpreset beim Laden vorheriger Scaneinstellungen, wenn "Standard" ausgewählt war

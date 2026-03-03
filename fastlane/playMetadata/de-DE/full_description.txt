@@ -5,7 +5,7 @@ ScanBridge macht das Arbeiten mit Scannern endlich angenehm, mühelos, modern un
 Funktionen:
 - Automatische Erkennung von Scannern: Finde eSCL-kompatible Scanner in deinem Netzwerk
 - Mehrseitige Scans: Scanne mehrere Seiten und ordne sie beliebig an.
-- Einstellungsvielfalt: Nutze die Möglichkeiten deines Scanners optimal, indem du Einstellungen wie Eingabequelle, Auflösung, Duplex-Scan, Scan-Bereich anpasst.
+- Einstellungsvielfalt: Nutze die Möglichkeiten deines Scanners optimal, indem du Einstellungen wie Eingabequelle, Auflösung, Duplex-Scan, Scan-Bereich, Farbmodus anpasst.
 - Scans zuschneiden: Bearbeite deine Scans direkt in ScanBridge
 - Exportieren & Teile: Speichere deine Scans als PDF oder Bilddateien oder sende sie direkt an andere Apps
 - Modernes Design: Ansprechendes Material-You-Design

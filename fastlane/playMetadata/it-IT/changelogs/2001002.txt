@@ -1,0 +1,2 @@
+* Nuova impostazione modalità colore
+* Maggiore tolleranza nella convalida del formato di scansione durante il caricamento delle impostazioni di scansione

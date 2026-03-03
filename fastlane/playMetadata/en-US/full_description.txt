@@ -4,7 +4,7 @@ ScanBridge makes using scanners fun again. What once felt old and clunky is now 
 Features:
 - Discover scanners supporting eSCL on your network
 - Scan multiple pages and arrange them however you like
-- Use your scanner to its full potential by adjusting settings such as by input source, resolution, duplex scan, scanning dimensions, and more
+- Use your scanner to its full potential by adjusting settings such as by input source, resolution, duplex scan, scanning dimensions, color mode and more
 - Crop scans directly in-app
 - Save your scans as PDF or images & directly share them with other apps
 - Beautiful Material You design

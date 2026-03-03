@@ -1,0 +1,3 @@
+* Color mode setting added
+* Increased tolerance when validating the scan format while loading scan settings
+* Fix resetting to the wrong scan preset when loading previous scan settings if "Default" was selected

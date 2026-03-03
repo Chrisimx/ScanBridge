@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.0] - 2026-03-03
+
+### Added
+- Color mode setting
+
+### Fixed
+- Increased tolerance when validating saved scan settings
+- Resetting to Document when Default was selected while loading scan settings
+
 ## [2.0.1] - 2026-03-02
 
 ### Fixed
@@ -24,7 +33,7 @@ And multiple other improvements...
 ## [1.6.2] - 2026-01-20
 
 ### Fixed
-- Hopefully Brother Brother DS‑940DW support is fixed with ab064bc1
+- Hopefully Brother DS‑940DW support is fixed with ab064bc1
 
 ## [1.6.1] - 2026-01-17
 
