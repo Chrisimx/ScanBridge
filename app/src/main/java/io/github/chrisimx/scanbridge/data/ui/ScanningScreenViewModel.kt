@@ -379,11 +379,14 @@ class ScanningScreenViewModel(
                         duplex ?: false
                     )
 
-                    val intent = if (savedSettings.intent != null
-                        && !selectedInputSourceCaps.supportedIntents.contains(savedSettings.intent)) {
+                    val intent = if (savedSettings.intent != null &&
+                        !selectedInputSourceCaps.supportedIntents.contains(savedSettings.intent)
+                    ) {
                         val firstSupportedIntent = selectedInputSourceCaps.supportedIntents.first()
-                        Timber.w("Intent not supported with current input source," +
-                            " using first supported intent: $firstSupportedIntent")
+                        Timber.w(
+                            "Intent not supported with current input source," +
+                                " using first supported intent: $firstSupportedIntent"
+                        )
                         firstSupportedIntent
                     } else {
                         savedSettings.intent
@@ -425,8 +428,10 @@ class ScanningScreenViewModel(
                             this.xOffset = xOffset
                             this.yOffset = yOffset
                         }
-                        Timber.d("After coercing we have the scan region: $coercedScanRegion " +
-                            "(maxWidth: $maxWidth, minWidth: $minWidth, maxHeight: $maxHeight, minHeight: $minHeight)")
+                        Timber.d(
+                            "After coercing we have the scan region: $coercedScanRegion " +
+                                "(maxWidth: $maxWidth, minWidth: $minWidth, maxHeight: $maxHeight, minHeight: $minHeight)"
+                        )
                         coercedScanRegion
                     } else {
                         null

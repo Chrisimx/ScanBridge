@@ -340,8 +340,10 @@ class ScanSettingsComposableStateHolder(
                     null
                 }
 
-                Timber.d("Input Source being set to $inputSource. " +
-                    "Validated existing settings to: Res: ${replacementResolution.first} x ${replacementResolution.second}, Intent: $replacementIntent")
+                Timber.d(
+                    "Input Source being set to $inputSource. " +
+                        "Validated existing settings to: Res: ${replacementResolution.first} x ${replacementResolution.second}, Intent: $replacementIntent"
+                )
                 copy(
                     inputSource = inputSource,
                     xResolution = replacementResolution.first,

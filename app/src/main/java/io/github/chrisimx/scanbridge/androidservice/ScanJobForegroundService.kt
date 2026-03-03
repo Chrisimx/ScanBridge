@@ -31,7 +31,6 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
-import kotlin.io.path.appendText
 import kotlin.jvm.java
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid

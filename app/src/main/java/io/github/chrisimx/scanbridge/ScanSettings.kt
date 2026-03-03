@@ -81,7 +81,7 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
     val currentScanRegion by scanSettingsStateHolder.currentScanRegion.collectAsState()
 
     val duplexCurrentlyAvailable by scanSettingsStateHolder.duplexCurrentlyAvailable.collectAsState()
-    
+
     val currentColorMode by scanSettingsStateHolder.currentColorMode.collectAsState()
 
     val inputSourceOptions by scanSettingsStateHolder.inputSourceOptions.collectAsState()
@@ -173,7 +173,7 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
                 scanSettingsStateHolder.setColorMode(it)
             },
             { this.localizedString(context) },
-            currentColorMode,
+            currentColorMode
         )
 
         OutlinedCard(
@@ -273,7 +273,7 @@ private fun <T> SelectionCardWithDefault(
     onSet: (T?) -> Unit,
     stringify: T.() -> String,
     value: T?,
-    isSmallRowAbove: Boolean = false,
+    isSmallRowAbove: Boolean = false
 ) {
     OutlinedCard(
         modifier = Modifier

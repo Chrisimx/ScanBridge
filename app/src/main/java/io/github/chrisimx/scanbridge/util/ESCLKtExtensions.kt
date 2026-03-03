@@ -55,8 +55,8 @@ fun InputSource.toReadableString(context: Context): String = when (this) {
     InputSource.Camera -> context.getString(R.string.camera)
 }
 
-fun ColorModeEnumOrRaw.localizedString(context: Context): String = when(this) {
-    is EnumOrRaw.Known<ColorMode> -> when(this.value) {
+fun ColorModeEnumOrRaw.localizedString(context: Context): String = when (this) {
+    is EnumOrRaw.Known<ColorMode> -> when (this.value) {
         ColorMode.BlackAndWhite1 -> context.getString(R.string.black_and_white)
         ColorMode.RGB24 -> context.getString(FormattedResources.color_scan("24"))
         ColorMode.RGB48 -> context.getString(FormattedResources.color_scan("48"))
@@ -64,6 +64,7 @@ fun ColorModeEnumOrRaw.localizedString(context: Context): String = when(this) {
         ColorMode.Grayscale8 -> context.getString(FormattedResources.grayscale("8"))
         ColorMode.Grayscale16 -> context.getString(FormattedResources.grayscale("16"))
     }
+
     is EnumOrRaw.Unknown<ColorMode> -> this.asString()
 }
 
