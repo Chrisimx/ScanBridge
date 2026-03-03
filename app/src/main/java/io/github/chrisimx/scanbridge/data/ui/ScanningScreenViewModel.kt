@@ -89,7 +89,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.InjectedParam
@@ -395,14 +394,27 @@ class ScanningScreenViewModel(
                         val storedWidthThreeHOfInch = savedScanRegion.width.value
                         val storedHeightThreeHOfInch = savedScanRegion.height.value
 
-                        val maxWidth = selectedInputSourceCaps.maxWidth.toThreeHundredthsOfInch().value
-                        val minWidth = selectedInputSourceCaps.minWidth.toThreeHundredthsOfInch().value
+                        // Calculate max/min lengths with tolerances
+                        val tolerance = 1
 
-                        val maxHeight = selectedInputSourceCaps.maxHeight.toThreeHundredthsOfInch().value
-                        val minHeight = selectedInputSourceCaps.minHeight.toThreeHundredthsOfInch().value
+                        val realMaxWidth = selectedInputSourceCaps.maxWidth.toThreeHundredthsOfInch().value.toInt()
+                        val realMinWidth = selectedInputSourceCaps.minWidth.toThreeHundredthsOfInch().value.toInt()
+                        val realMaxHeight = selectedInputSourceCaps.maxHeight.toThreeHundredthsOfInch().value.toInt()
+                        val realMinHeight = selectedInputSourceCaps.minHeight.toThreeHundredthsOfInch().value.toInt()
 
-                        val width = storedWidthThreeHOfInch.coerceIn(minWidth..maxWidth)
-                        val height = storedHeightThreeHOfInch.coerceIn(minHeight..maxHeight)
+                        val minWidth = (realMinWidth - tolerance).coerceAtLeast(0)
+                        val maxWidth = realMaxWidth + tolerance
+
+                        val minHeight = (realMinHeight - tolerance).coerceAtLeast(0)
+                        val maxHeight = realMaxHeight + tolerance
+
+                        val width = storedWidthThreeHOfInch.toInt()
+                            .coerceIn(minWidth..maxWidth)
+                            .toUInt()
+
+                        val height = storedHeightThreeHOfInch.toInt()
+                            .coerceIn(minHeight..maxHeight)
+                            .toUInt()
 
                         val xOffset = savedScanRegion.xOffset
                         val yOffset = savedScanRegion.yOffset
