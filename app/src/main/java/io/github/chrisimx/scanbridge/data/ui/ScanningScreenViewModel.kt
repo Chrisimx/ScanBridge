@@ -379,7 +379,8 @@ class ScanningScreenViewModel(
                         duplex ?: false
                     )
 
-                    val intent = if (!selectedInputSourceCaps.supportedIntents.contains(savedSettings.intent)) {
+                    val intent = if (savedSettings.intent != null
+                        && !selectedInputSourceCaps.supportedIntents.contains(savedSettings.intent)) {
                         val firstSupportedIntent = selectedInputSourceCaps.supportedIntents.first()
                         Timber.w("Intent not supported with current input source," +
                             " using first supported intent: $firstSupportedIntent")
@@ -395,7 +396,7 @@ class ScanningScreenViewModel(
                         val storedHeightThreeHOfInch = savedScanRegion.height.value
 
                         // Calculate max/min lengths with tolerances
-                        val tolerance = 1
+                        val tolerance = 3
 
                         val realMaxWidth = selectedInputSourceCaps.maxWidth.toThreeHundredthsOfInch().value.toInt()
                         val realMinWidth = selectedInputSourceCaps.minWidth.toThreeHundredthsOfInch().value.toInt()
