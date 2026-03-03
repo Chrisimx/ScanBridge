@@ -61,6 +61,7 @@ import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsLengthUnit
 import io.github.chrisimx.scanbridge.uicomponents.SizeBasedConditionalView
 import io.github.chrisimx.scanbridge.uicomponents.ValidatedDimensionsTextEdit
+import io.github.chrisimx.scanbridge.util.localizedString
 import io.github.chrisimx.scanbridge.util.toReadableString
 import timber.log.Timber
 
@@ -80,10 +81,13 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
     val currentScanRegion by scanSettingsStateHolder.currentScanRegion.collectAsState()
 
     val duplexCurrentlyAvailable by scanSettingsStateHolder.duplexCurrentlyAvailable.collectAsState()
+    
+    val currentColorMode by scanSettingsStateHolder.currentColorMode.collectAsState()
 
     val inputSourceOptions by scanSettingsStateHolder.inputSourceOptions.collectAsState()
     val supportedResolutions by scanSettingsStateHolder.supportedScanResolutions.collectAsState()
     val intentOptions by scanSettingsStateHolder.intentOptions.collectAsState()
+    val supportedColorModes by scanSettingsStateHolder.supportedColorModes.collectAsState()
 
     val widthValidationResult by scanSettingsStateHolder.widthValidationResult.collectAsState(NumberValidationResult.NotANumber)
     val heightValidationResult by scanSettingsStateHolder.heightValidationResult.collectAsState(NumberValidationResult.NotANumber)
@@ -151,43 +155,27 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
             onViewChosen = { fitsRowVersion = it }
         )
 
-        OutlinedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = if (fitsRowVersion) 30.dp else 15.dp, bottom = 15.dp)
-        ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(
-                    stringResource(R.string.intent),
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
+        SelectionCardWithDefault(
+            stringResource(R.string.intent),
+            intentOptions,
+            {
+                scanSettingsStateHolder.setIntent(it)
+            },
+            { this.asString() },
+            scanSettings.intent,
+            fitsRowVersion
+        )
 
-                FlowRow(
-                    Modifier.fillMaxWidth(),
+        SelectionCardWithDefault(
+            stringResource(R.string.color_mode),
+            supportedColorModes,
+            {
+                scanSettingsStateHolder.setColorMode(it)
+            },
+            { this.localizedString(context) },
+            currentColorMode,
+        )
 
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    intentOptions.forEach { intentData ->
-                        val name = intentData.asString()
-                        InputChip(
-                            onClick = {
-                                scanSettingsStateHolder.setIntent(intentData)
-                            },
-                            label = { Text(name) },
-                            selected = scanSettings.intent == intentData
-                        )
-                    }
-                    InputChip(
-                        onClick = {
-                            scanSettingsStateHolder.setIntent(null)
-                        },
-                        label = { Text(stringResource(R.string.intent_none)) },
-                        selected = scanSettings.intent == null
-                    )
-                }
-            }
-        }
         OutlinedCard(
             modifier = Modifier
                 .fillMaxWidth()
@@ -274,6 +262,54 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
                 style = MaterialTheme.typography.labelMedium,
                 textAlign = TextAlign.Center
             )
+        }
+    }
+}
+
+@Composable
+private fun <T> SelectionCardWithDefault(
+    title: String,
+    options: List<T>,
+    onSet: (T?) -> Unit,
+    stringify: T.() -> String,
+    value: T?,
+    isSmallRowAbove: Boolean = false,
+) {
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp, top = if (isSmallRowAbove) 30.dp else 15.dp, bottom = 15.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                title,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+
+            FlowRow(
+                Modifier.fillMaxWidth(),
+
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                options.forEach { option ->
+                    val name = option.stringify()
+                    InputChip(
+                        onClick = {
+                            onSet(option)
+                        },
+                        label = { Text(name) },
+                        selected = value == option
+                    )
+                }
+                InputChip(
+                    onClick = {
+                        onSet(null)
+                    },
+                    label = { Text(stringResource(R.string.default_string)) },
+                    selected = value == null
+                )
+            }
         }
     }
 }

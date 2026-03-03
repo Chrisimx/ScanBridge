@@ -38,7 +38,7 @@
     <string name="input_source">Input source:</string>
     <string name="resolution_dpi">Used Resolution (dpi):</string>
     <string name="setting_duplex">Duplex</string>
-    <string name="intent_none">Default</string>
+    <string name="default_string">Default</string>
     <string name="width_in_unit">Width (in %1$s)</string>
     <string name="height_in_unit">Height (in %1$s)</string>
     <string name="maximum_size">Maximum size</string>
@@ -117,4 +117,9 @@
     <string name="thank_message_play_one">If you need help or want to provide feedback, contact us anytime at support@fireamp.eu. We will get back to you as quickly as possible!</string>
     <string name="thank_message_play_one_title">Thank you for purchasing ScanBridge!</string>
     <string name="scan_job_running">Scan job running…</string>
+    <string name="color_mode">Color Mode:</string>
+    <string name="black_and_white"><![CDATA[Black & White]]></string>
+    <string name="color_scan">Color ({bitdepth} bit)</string>
+    <string name="auto_detect">Automatic detection</string>
+    <string name="grayscale">Grayscale ({bitdepth} bit)</string>
 </resources>

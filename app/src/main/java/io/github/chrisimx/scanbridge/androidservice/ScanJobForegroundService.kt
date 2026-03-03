@@ -25,10 +25,13 @@ import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.daos.ScannedPageDao
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
+import io.github.chrisimx.scanbridge.util.extractPdfImages
 import io.github.chrisimx.scanbridge.util.toJobStateString
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.appendText
 import kotlin.jvm.java
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -292,7 +295,7 @@ class ScanJobForegroundService : Service() {
             Timber.d("Received page. Copying to file")
             var filePath: Path
             while (true) {
-                val scanPageFile = "scan-" + Uuid.random().toString() + ".jpg"
+                val scanPageFile = "scan-" + Uuid.random().toString()
                 val file = File(application.filesDir, scanPageFile)
                 file.exists().let {
                     if (!it) {
@@ -322,22 +325,42 @@ class ScanJobForegroundService : Service() {
                 return
             }
 
-            val imageBitmap = withContext(Dispatchers.IO) {
-                BitmapFactory.decodeFile(filePath.toString())?.asImageBitmap()
+            val images = if (scanJob.scanSettings.documentFormatExt == "application/pdf") {
+                extractPdfImages(
+                    filePath.absolutePathString(),
+                    filePath.parent.toFile()
+                )
+            } else {
+                val imageBitmap = withContext(Dispatchers.IO) {
+                    BitmapFactory.decodeFile(filePath.toString())?.asImageBitmap()
+                }
+
+                if (imageBitmap == null) {
+                    Timber.e("Couldn't decode received image as Bitmap. Aborting!")
+                    scanJobs.notifyFailed(
+                        scanJob,
+                        application.getString(R.string.couldn_t_decode_received_image, jobStateString)
+                    )
+                    filePath.toFile().delete()
+                    val deletionResult = jobResult.cancel()
+                    Timber.d("Cancelling job after error while trying to decode received page as bitmap: $deletionResult")
+                    return
+                }
+
+                val renamedPath = File("$filePath.jpg").toPath()
+                withContext(Dispatchers.IO) {
+                    Files.move(
+                        filePath.toAbsolutePath(),
+                        renamedPath
+                    )
+                }
+
+                listOf(renamedPath.toString())
             }
 
-            if (imageBitmap == null) {
-                Timber.e("Couldn't decode received image as Bitmap. Aborting!")
-                scanJobs.notifyFailed(
-                    scanJob,
-                    application.getString(R.string.couldn_t_decode_received_image, jobStateString)
-                )
-                filePath.toFile().delete()
-                val deletionResult = jobResult.cancel()
-                Timber.d("Cancelling job after error while trying to decode received page as bitmap: $deletionResult")
-                return
+            images.forEach {
+                addScan(scanJob.ownerSessionId, it, currentScanSettings, ScanRelativeRotation.Original)
             }
-            addScan(scanJob.ownerSessionId, filePath.toString(), currentScanSettings, ScanRelativeRotation.Original)
         }
     }
 

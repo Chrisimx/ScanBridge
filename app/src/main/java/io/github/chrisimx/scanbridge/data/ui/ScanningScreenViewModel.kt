@@ -728,14 +728,16 @@ class ScanningScreenViewModel(
 
         var counter = 0
         val digitsNeeded = currentScans.size.toString().length
-        zipFiles(
-            currentScans.map { File(it.filePath) },
-            zipOutputFile,
-            {
-                counter++
-                "scan-${counter.toString().padStart(digitsNeeded, '0')}.jpg"
-            }
-        )
+        withContext(Dispatchers.IO) {
+            zipFiles(
+                currentScans.map { File(it.filePath) },
+                zipOutputFile,
+                {
+                    counter++
+                    "scan-${counter.toString().padStart(digitsNeeded, '0')}.${it.extension}"
+                }
+            )
+        }
 
         setLoadingText(null)
 

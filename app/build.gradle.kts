@@ -19,6 +19,7 @@ plugins {
     alias(libs.plugins.protobuf)
     alias(libs.plugins.room)
     id("com.google.devtools.ksp") version "2.3.6"
+    id("app.cash.paraphrase") version "0.4.1"
 }
 
 fun getGitCommitHash(): String {

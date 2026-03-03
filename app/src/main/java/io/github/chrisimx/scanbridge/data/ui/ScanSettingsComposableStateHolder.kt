@@ -23,7 +23,10 @@ import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context.CLIPBOARD_SERVICE
+import io.github.chrisimx.esclkt.ColorMode
+import io.github.chrisimx.esclkt.ColorModeEnumOrRaw
 import io.github.chrisimx.esclkt.DiscreteResolution
+import io.github.chrisimx.esclkt.EnumOrRaw
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.InputSourceCaps
 import io.github.chrisimx.esclkt.LengthUnit
@@ -109,6 +112,14 @@ class ScanSettingsComposableStateHolder(
 
     val supportedScanResolutions = selectedInputSourceCaps.derived(coroutineScope) {
         it.settingProfiles[0].supportedResolutions
+    }
+
+    val supportedColorModes = selectedInputSourceCaps.derived(coroutineScope) {
+        it.settingProfiles.firstOrNull()?.colorModes ?: listOf()
+    }
+
+    val currentColorMode = scanSettings.derived(coroutineScope) {
+        it.colorMode
     }
 
     val currentResolution: StateFlow<DiscreteResolution?> = scanSettings.derived(coroutineScope) {
@@ -275,6 +286,22 @@ class ScanSettingsComposableStateHolder(
         coroutineScope.launch {
             updateSettings {
                 copy(duplex = duplex)
+            }
+        }
+    }
+
+    fun setColorMode(colorMode: ColorModeEnumOrRaw?) {
+        coroutineScope.launch {
+            if (colorMode is EnumOrRaw.Known && colorMode.value == ColorMode.BlackAndWhite1) {
+                Timber.d("Selecting b&w. Switching to PDF format")
+                updateSettings {
+                    copy(colorMode = colorMode, documentFormat = "application/pdf", documentFormatExt = "application/pdf")
+                }
+            } else {
+                Timber.d("Selecting a color mode not b&w. Using jpeg again")
+                updateSettings {
+                    copy(colorMode = colorMode, documentFormat = "image/jpeg", documentFormatExt = "image/jpeg")
+                }
             }
         }
     }

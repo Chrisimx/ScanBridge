@@ -36,7 +36,7 @@
     <string name="input_source">Sorgente di input:</string>
     <string name="resolution_dpi">Risoluzione utilizzata (dpi):</string>
     <string name="setting_duplex">Duplex</string>
-    <string name="intent_none">Predefinito</string>
+    <string name="default_string">Predefinito</string>
     <string name="width_in_unit">Larghezza (in %1$s)</string>
     <string name="height_in_unit">Altezza (in %1$s)</string>
     <string name="maximum_size">Dimensione massima</string>
@@ -114,4 +114,9 @@
     <string name="thank_message_play_one_title">Grazie per aver acquistato ScanBridge!</string>
     <string name="scan_job_running">Scansione in corso…</string>
     <string name="scanned_pages_received_in_bg">Le pagine scansionate vengono recuperate in background.</string>
+    <string name="color_mode">Modalità colore:</string>
+    <string name="black_and_white">Bianco e nero</string>
+    <string name="color_scan">Colore ({bitdepth} bit)</string>
+    <string name="auto_detect">Rilevamento automatico</string>
+    <string name="grayscale">Scala di grigi ({bitdepth} bit)</string>
 </resources>
