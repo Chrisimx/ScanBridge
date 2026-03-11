@@ -13,6 +13,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import io.github.chrisimx.esclmockserver.EsclMockServer
+import io.github.chrisimx.esclmockserver.EsclMockServerArgs
+import io.github.chrisimx.esclmockserver.esclMockServerArgs
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.datastore.lastRouteStore
 import io.github.chrisimx.scanbridge.datastore.shownMessagesStore
@@ -35,33 +38,6 @@ class ScanBridgeTest {
     val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(
         android.Manifest.permission.POST_NOTIFICATIONS
     )
-
-    fun startServer(vararg args: String): Process {
-        val context = InstrumentationRegistry.getInstrumentation().context
-
-        val mockServer = File(context.applicationInfo.nativeLibraryDir, "lib_escl_mock.so")
-
-        Log.d("ScanBridgeTest", "ESCL mock server: ${mockServer.absolutePath}")
-
-        val process = ProcessBuilder()
-            .command(mockServer.absolutePath, *args)
-            .start()
-
-        Thread {
-            try {
-                BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-                    var line: String?
-                    while (reader.readLine().also { line = it } != null) {
-                        Log.d("ESCLMockServer", line!!) // Log each line from the process
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("ESCLMockServer", "Error reading output", e)
-            }
-        }.start()
-
-        return process
-    }
 
     @Before
     @After
@@ -96,17 +72,17 @@ class ScanBridgeTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun scanningInterface() {
-        val server = startServer()
+        val server = EsclMockServer {}
 
-        composeTestRule.onNodeWithTag("custom_scanner_fab").performClick()
+        server.use {
+            composeTestRule.onNodeWithTag("custom_scanner_fab").performClick()
 
-        composeTestRule.onNodeWithTag("url_input")
-            .performTextInput("http://127.0.0.1:8080/eSCL")
-        composeTestRule.onNodeWithText("Just connect").performClick()
+            composeTestRule.onNodeWithTag("url_input")
+                .performTextInput("http://127.0.0.1:8080/eSCL")
+            composeTestRule.onNodeWithText("Just connect").performClick()
 
-        composeTestRule.waitUntilExactlyOneExists(hasText("No pages", substring = true), 1000)
-
-        server.destroy()
+            composeTestRule.waitUntilExactlyOneExists(hasText("No pages", substring = true), 1000)
+        }
 
         pressBack()
 
@@ -118,14 +94,14 @@ class ScanBridgeTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun scan() {
-        val server = startServer()
+        val server = EsclMockServer {}
 
-        val url = InstrumentationRegistry.getArguments()
-            .getString("escl_server_url") ?: "http://127.0.0.1:8080/eSCL"
+        server.use {
+            val url = InstrumentationRegistry.getArguments()
+                .getString("escl_server_url") ?: "http://127.0.0.1:8080/eSCL"
 
-        testConnectToScanner(url)
-
-        server.destroy()
+            testConnectToScanner(url)
+        }
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -151,10 +127,12 @@ class ScanBridgeTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testRootURLFix() {
-        val server = startServer("-s", "")
+        val server = EsclMockServer {
+            resourcePath = ""
+        }
 
-        testConnectToScanner("http://127.0.0.1:8080")
-
-        server.destroy()
+        server.use {
+            testConnectToScanner("http://127.0.0.1:8080")
+        }
     }
 }

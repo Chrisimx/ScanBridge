@@ -4,6 +4,7 @@ coilCompose = "3.3.0"
 constraintlayoutCompose = "1.1.1"
 datastore = "1.2.0"
 esclkt = "2.0.6"
+escl-mock-server = "1.0.1"
 itextCore = "9.3.0"
 kotlin = "2.3.20-Beta1"
 coreKtx = "1.17.0"
@@ -86,6 +87,8 @@ timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 zoomable = { module = "me.saket.telephoto:zoomable", version.ref = "zoomable" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf-kotlin-lite"}
 androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
+
+escl-mock-server = { module = "io.github.chrisimx:escl-mock-server", version.ref = "escl-mock-server"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

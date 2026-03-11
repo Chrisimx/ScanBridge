@@ -171,6 +171,8 @@ dependencies {
     "playImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     testImplementation(libs.junit)
+
+    androidTestImplementation(libs.escl.mock.server)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -197,115 +199,8 @@ protobuf {
     }
 }
 
-fun calculateChecksum(file: File): String {
-    val digest = MessageDigest.getInstance("SHA-256")
-    file.inputStream().use { input ->
-        val buffer = ByteArray(8192)
-        var bytesRead: Int
-        while (input.read(buffer).also { bytesRead = it } != -1) {
-            digest.update(buffer, 0, bytesRead)
-        }
-    }
-    return digest.digest().joinToString("") { "%02x".format(it) }
-}
-
-fun verifyChecksum(file: File, expectedChecksum: String): Boolean {
-    val actualChecksum = calculateChecksum(file)
-    println(actualChecksum)
-    return actualChecksum == expectedChecksum
-}
-
-val checksums = mapOf(
-    "x86_64" to "8033882837462e80fd8e9cd72954956fb8c6f5770ea879f80f3c71bb678dc5db",
-    "armeabi-v7a" to "a0683ddfce8c0b0fcf95bd1d5403e3581fc5141fa0ebe64399ed58e90cafaf8d",
-    "arm64-v8a" to "12fd7c8d1348327efad466da31e6a71a4a7aa0b5928448e740209742073e1fa7"
-)
-
-fun downloadESCLMockServer(archName: String, archPath: String, client: OkHttpClient) {
-    val request = Request.Builder()
-        .url("https://chrisimx.github.io/escl-mock-server/$archPath/escl-mock-server").get().build()
-    client.newCall(request).execute().use { response ->
-        File("./cache/escl-mock-server/$archName").mkdirs()
-
-        val f = File("./cache/escl-mock-server/$archName/escl-mock-server")
-
-        f.createNewFile()
-
-        f.outputStream().use {
-            val stream = response.body!!.byteStream()
-            stream.copyTo(it)
-        }
-
-        if (!verifyChecksum(f, checksums[archName]!!)) {
-            throw IllegalStateException("Checksum verification failed for $archName")
-        }
-    }
-}
-
-tasks.register("downloadEsclMockServer") {
-    description = "Build the eSCL dummy server"
-
-    outputs.dirs("../cache/escl-mock-server")
-
-    doLast {
-        val client = OkHttpClient()
-
-        downloadESCLMockServer("x86_64", "android-x86-64", client)
-        downloadESCLMockServer("armeabi-v7a", "android-armv7", client)
-        downloadESCLMockServer("arm64-v8a", "android-arm64-v8a", client)
-    }
-}
-
-val architectures = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
-
-architectures.forEach { arch ->
-    tasks.register<Copy>("copyEsclMockServer$arch") {
-        description =
-            "Copy the eSCL dummy server to the androidTest native-libs folder for the $arch ABI"
-
-        dependsOn("downloadEsclMockServer") // Ensure the files are downloaded before copying
-
-        duplicatesStrategy = DuplicatesStrategy.FAIL
-
-        from("../cache/escl-mock-server/$arch/escl-mock-server") {
-            rename { "lib_escl_mock.so" }
-        }
-
-        into("src/androidTest/native-libs/$arch/")
-
-        outputs.files(
-            file("src/androidTest/native-libs/$arch/lib_escl_mock.so")
-        )
-    }
-}
-
-val taskNamesCopyESCL = architectures.map { "copyEsclMockServer$it" }
-
-tasks.register("copyEsclMockServerAll") {
-    description =
-        "Copy the eSCL dummy server for all ABIs/archs to the androidTest native-libs folder"
-
-    dependsOn(taskNamesCopyESCL)
-}
 
 afterEvaluate {
-
-    tasks.named("connectedFdroidDebugAndroidTest") {
-        dependsOn("copyEsclMockServerAll")
-    }
-
-    tasks.named("mergeFdroidDebugAndroidTestJniLibFolders") {
-        dependsOn("copyEsclMockServerAll")
-    }
-
-    tasks.named("connectedPlayDebugAndroidTest") {
-        dependsOn("copyEsclMockServerAll")
-    }
-
-    tasks.named("mergePlayDebugAndroidTestJniLibFolders") {
-        dependsOn("copyEsclMockServerAll")
-    }
-
     tasks.named("clean") {
         doLast {
             delete(file("src/androidTest/native-libs"), file("../cache"))

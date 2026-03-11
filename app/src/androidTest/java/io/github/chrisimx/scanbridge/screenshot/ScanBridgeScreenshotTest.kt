@@ -12,6 +12,8 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import io.github.chrisimx.esclmockserver.EsclMockServer
+import io.github.chrisimx.esclmockserver.esclMockServerArgs
 import io.github.chrisimx.scanbridge.BuildConfig
 import io.github.chrisimx.scanbridge.MainActivity
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
@@ -41,47 +43,23 @@ class ScanBridgeScreenshotTest {
     @Rule @JvmField
     val localeTestRule = LocaleTestRule()
 
-    fun startServer(): Process {
+    fun startServer(): EsclMockServer {
         val context = InstrumentationRegistry.getInstrumentation().context
 
-        val imageFile = copyAssetToFile(composeTestRule.activity, context, "scan-1.jpg")
+        val imageFile = copyAssetToByteArray( context, "scan-1.jpg")
 
-        val mockServer = File(context.applicationInfo.nativeLibraryDir, "lib_escl_mock.so")
 
-        Log.d("ScanBridgeTest", "ESCL mock server: ${mockServer.absolutePath} ${imageFile.absolutePath}")
-
-        val process = ProcessBuilder()
-            .command(mockServer.absolutePath, "-i", imageFile.absolutePath)
-            .start()
-
-        Thread {
-            try {
-                BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-                    var line: String?
-                    while (reader.readLine().also { line = it } != null) {
-                        Log.d("ESCLMockServer", line!!) // Log each line from the process
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("ESCLMockServer", "Error reading output", e)
-            }
-        }.start()
-
-        return process
-    }
-
-    fun copyAssetToFile(context: Context, testContext: Context, assetName: String): File {
-        val outFile = File(context.filesDir, assetName)
-
-        if (!outFile.exists()) {
-            testContext.assets.open(assetName).use { input ->
-                outFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
+        val server = EsclMockServer {
+            servedImage = imageFile
         }
-        return outFile
+
+        return server
     }
+
+    fun copyAssetToByteArray(testContext: Context, assetName: String): ByteArray =
+        testContext.assets.open(assetName).use {
+            it.readBytes()
+        }
 
     @Before
     fun cleanupForTest() {
@@ -183,7 +161,7 @@ class ScanBridgeScreenshotTest {
 
         Screengrab.screenshot("01-scannedPageScreen")
 
-        server.destroy()
+        server.close()
 
         // pressBack()
 
@@ -224,7 +202,7 @@ class ScanBridgeScreenshotTest {
 
         Screengrab.screenshot("02-scanSettings")
 
-        server.destroy()
+        server.close()
 
         // composeTestRule.waitUntilAtLeastOneExists(hasTestTag("leave_diag_button"), 20000)
 
