@@ -21,7 +21,7 @@ interface CustomScannerDao {
     suspend fun getAll(): List<CustomScanner>
 
     @Query("SELECT * FROM customscanners WHERE uuid = :id")
-    suspend fun getByScanId(id: Uuid): CustomScanner?
+    suspend fun getById(id: Uuid): CustomScanner?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(vararg scanners: CustomScanner)

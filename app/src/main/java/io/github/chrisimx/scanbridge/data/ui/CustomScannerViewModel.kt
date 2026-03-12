@@ -43,7 +43,7 @@ class CustomScannerViewModel(application: Application, appDb: ScanBridgeDb) : An
         }
     }
 
-    suspend fun loadScannerByUuid(scanner: Uuid): CustomScanner? = customScannerDao.getByScanId(scanner)
+    suspend fun loadScannerByUuid(scanner: Uuid): CustomScanner? = customScannerDao.getById(scanner)
 
     @OptIn(ExperimentalUuidApi::class)
     fun deleteScanner(scanner: CustomScanner) {
