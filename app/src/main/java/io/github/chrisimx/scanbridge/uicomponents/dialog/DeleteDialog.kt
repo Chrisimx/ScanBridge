@@ -19,6 +19,7 @@
 
 package io.github.chrisimx.scanbridge.uicomponents.dialog
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
@@ -35,21 +36,27 @@ import androidx.compose.ui.unit.dp
 import io.github.chrisimx.scanbridge.R
 
 @Composable
-fun DeletionDialog(title: Int, confirmationQuestion: Int, onDismiss: () -> Unit, onConfirmed: () -> Unit) {
+fun DeletionDialog(
+    @StringRes
+    titleRes: Int,
+    @StringRes
+    confirmationQuestionRes: Int,
+    onDismiss: () -> Unit,
+    onConfirmed: () -> Unit) {
     AlertDialog(
         icon = {
             Icon(
                 imageVector = Icons.Rounded.Delete,
-                contentDescription = stringResource(title),
+                contentDescription = stringResource(titleRes),
                 modifier = Modifier.size(48.dp),
                 tint = MaterialTheme.colorScheme.error
             )
         },
         title = {
-            Text(text = stringResource(title))
+            Text(text = stringResource(titleRes))
         },
         text = {
-            Text(text = stringResource(confirmationQuestion))
+            Text(text = stringResource(confirmationQuestionRes))
         },
         onDismissRequest = {
             onDismiss()
