@@ -97,11 +97,11 @@ fun FoundScannerItem(
                     style = MaterialTheme.typography.labelLarge
                 )
             }
-            if (deleteScanner != null) {
+            if (deleteScanner != null && editScanner != null) {
                 IconButton(
                     modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
                     onClick = {
-                        editScanner!!.invoke()
+                        editScanner.invoke()
                         Timber.i("Edit button clicked for custom scanner: $name at $address")
                     }
                 ) {
