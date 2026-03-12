@@ -108,7 +108,7 @@ fun FoundScannerItem(
                     Icon(
                         painter = painterResource(R.drawable.outline_edit_24),
                         tint = MaterialTheme.colorScheme.surfaceTint,
-                        contentDescription = stringResource(id = R.string.custom)
+                        contentDescription = stringResource(id = R.string.edit_custom_scanner)
                     )
                 }
                 IconButton(
