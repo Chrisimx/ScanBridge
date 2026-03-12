@@ -42,7 +42,8 @@ fun DeletionDialog(
     @StringRes
     confirmationQuestionRes: Int,
     onDismiss: () -> Unit,
-    onConfirmed: () -> Unit) {
+    onConfirmed: () -> Unit
+) {
     AlertDialog(
         icon = {
             Icon(
