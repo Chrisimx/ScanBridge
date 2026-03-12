@@ -34,6 +34,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,11 +45,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.navigation.NavController
+import io.github.chrisimx.scanbridge.data.model.EditedCustomScanner
 import io.github.chrisimx.scanbridge.data.ui.CustomScannerViewModel
 import io.github.chrisimx.scanbridge.db.entities.CustomScanner
 import io.github.chrisimx.scanbridge.uicomponents.FoundScannerItem
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.dialog.CustomScannerDialog
+import io.github.chrisimx.scanbridge.uicomponents.dialog.DeletionDialog
 import io.ktor.http.Url
 import java.util.*
 import kotlin.uuid.ExperimentalUuidApi
@@ -78,7 +83,9 @@ fun ScannerList(
     navController: NavController,
     statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
     statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>,
-    customScannerViewModel: CustomScannerViewModel
+    customScannerViewModel: CustomScannerViewModel,
+    setScannerToDelete: (Uuid?) -> Unit,
+    setScannerToEdit: (EditedCustomScanner?) -> Unit
 ) {
     val customScanners by customScannerViewModel.customScanners.collectAsState()
 
@@ -129,7 +136,12 @@ fun ScannerList(
                     customScanner.url.toString(),
                     navController,
                     {
-                        customScannerViewModel.deleteScanner(customScanner)
+                        setScannerToDelete(customScanner.uuid)
+                    },
+                    {
+                        setScannerToEdit(
+                            EditedCustomScanner.EditingOld(customScanner)
+                        )
                     }
                 )
             }
@@ -152,20 +164,24 @@ fun ScannerList(
 fun ScannerBrowser(
     innerPadding: PaddingValues,
     navController: NavController,
-    showCustomDialog: Boolean,
-    setShowCustomDialog: (Boolean) -> Unit,
+    currentlyEditedScanner: EditedCustomScanner?,
+    setEditedCustomDialog: (EditedCustomScanner?) -> Unit,
     statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
     statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>
 ) {
     val customScannerViewModel: CustomScannerViewModel = koinViewModel()
     val customScanners by customScannerViewModel.customScanners.collectAsState()
 
+    var deletionScheduledScanner: Uuid? by remember { mutableStateOf(null) }
+
     AnimatedContent(
         targetState = statefulScannerMap.isNotEmpty() || customScanners.isNotEmpty(),
         label = "ScannerList"
     ) {
         if (it) {
-            ScannerList(innerPadding, navController, statefulScannerMap, statefulScannerMapSecure, customScannerViewModel)
+            ScannerList(innerPadding, navController, statefulScannerMap, statefulScannerMapSecure, customScannerViewModel, {
+                deletionScheduledScanner = it
+            }, setEditedCustomDialog)
         } else {
             FullScreenError(
                 R.drawable.twotone_wifi_find_24,
@@ -174,26 +190,47 @@ fun ScannerBrowser(
         }
     }
 
-    if (showCustomDialog) {
+    val deletionScheduledScannerImmutable = deletionScheduledScanner
+    if (deletionScheduledScannerImmutable != null) {
+        DeletionDialog(
+            R.string.custom_scanner_deletion,
+            R.string.custom_scanner_deletion_confirmation,
+            onDismiss = { deletionScheduledScanner = null },
+            onConfirmed = {
+                customScannerViewModel.deleteScannerByUuid(deletionScheduledScannerImmutable)
+                deletionScheduledScanner = null
+            }
+        )
+    }
+
+    if (currentlyEditedScanner != null) {
         val context = LocalContext.current
+
         CustomScannerDialog(
-            onDismiss = { setShowCustomDialog(false) },
-            onConnectClicked = { name, url, save ->
+            onDismiss = { setEditedCustomDialog(null) },
+            onConnectClicked = { name, url, save, navigate ->
                 val name = name.ifEmpty { context.getString(R.string.custom_scanner) }
                 val url = if (url.toString().endsWith("/")) url.toString() else "$url/"
                 val sessionID = Uuid.random()
-                if (save) {
-                    customScannerViewModel.addScanner(CustomScanner(Uuid.random(), name, Url(url)))
+                val uuid = when (currentlyEditedScanner) {
+                    is EditedCustomScanner.EditingOld -> currentlyEditedScanner.scanner.uuid
+                    EditedCustomScanner.New -> Uuid.random()
                 }
-                setShowCustomDialog(false)
-                navController.navigate(
-                    ScannerRoute(
-                        name,
-                        url,
-                        sessionID.toString()
+                if (save) {
+                    customScannerViewModel.addScanner(CustomScanner(uuid, name, Url(url)))
+                }
+                setEditedCustomDialog(null)
+                if (navigate) {
+                    navController.navigate(
+                        ScannerRoute(
+                            name,
+                            url,
+                            sessionID.toString()
+                        )
                     )
-                )
-            }
+                }
+            },
+            currentlyEditedScanner
         )
     }
 }

@@ -21,7 +21,6 @@ package io.github.chrisimx.scanbridge.uicomponents
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -49,7 +48,13 @@ import kotlin.uuid.Uuid
 import timber.log.Timber
 
 @Composable
-fun FoundScannerItem(name: String, address: String, navController: NavController, deleteScanner: (() -> Unit)? = null) {
+fun FoundScannerItem(
+    name: String,
+    address: String,
+    navController: NavController,
+    deleteScanner: (() -> Unit)? = null,
+    editScanner: (() -> Unit)? = null
+) {
     ElevatedCard(
         modifier = Modifier
             .defaultMinSize(minHeight = 60.dp)
@@ -74,7 +79,11 @@ fun FoundScannerItem(name: String, address: String, navController: NavController
                 tint = MaterialTheme.colorScheme.surfaceTint,
                 contentDescription = stringResource(id = R.string.print_symbol_desc)
             )
-            Column {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(vertical = 10.dp)
+            ) {
                 Row {
                     Text(
                         name,
@@ -82,14 +91,6 @@ fun FoundScannerItem(name: String, address: String, navController: NavController
                         fontSize = 18.sp,
                         style = MaterialTheme.typography.labelLarge
                     )
-                    if (deleteScanner != null) {
-                        Icon(
-                            painter = painterResource(R.drawable.outline_edit_24),
-                            tint = MaterialTheme.colorScheme.surfaceTint,
-                            modifier = Modifier.padding(start = 8.dp),
-                            contentDescription = stringResource(id = R.string.custom)
-                        )
-                    }
                 }
                 Text(
                     address,
@@ -97,16 +98,30 @@ fun FoundScannerItem(name: String, address: String, navController: NavController
                 )
             }
             if (deleteScanner != null) {
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = {
-                    deleteScanner.invoke()
-                    Timber.i("Delete button clicked for custom scanner: $name at $address")
-                }) {
+                IconButton(
+                    modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
+                    onClick = {
+                        editScanner!!.invoke()
+                        Timber.i("Edit button clicked for custom scanner: $name at $address")
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.outline_edit_24),
+                        tint = MaterialTheme.colorScheme.surfaceTint,
+                        contentDescription = stringResource(id = R.string.custom)
+                    )
+                }
+                IconButton(
+                    modifier = Modifier.padding(end = 8.dp, top = 8.dp, bottom = 8.dp),
+                    onClick = {
+                        deleteScanner.invoke()
+                        Timber.i("Delete button clicked for custom scanner: $name at $address")
+                    }
+                ) {
                     Icon(
                         imageVector = Icons.Rounded.Delete,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        contentDescription = stringResource(id = R.string.delete),
-                        modifier = Modifier.padding(8.dp)
+                        tint = MaterialTheme.colorScheme.error,
+                        contentDescription = stringResource(id = R.string.delete)
                     )
                 }
             }

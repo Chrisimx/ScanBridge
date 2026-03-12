@@ -1,7 +1,4 @@
-import java.security.MessageDigest
 import java.util.*
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 val testConfig = Properties()
@@ -198,7 +195,6 @@ protobuf {
         }
     }
 }
-
 
 afterEvaluate {
     tasks.named("clean") {

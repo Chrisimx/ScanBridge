@@ -574,6 +574,8 @@ fun ScanningScreen(
 
         if (scanningViewModel.scanningScreenData.confirmPageDeleteDialogShown) {
             DeletionDialog(
+                R.string.delete_current_page,
+                R.string.page_deletion_confirmation,
                 onDismiss = { scanningViewModel.setDeletePageDialogShown(false) },
                 onConfirmed = {
                     Timber.d("Deleting page")

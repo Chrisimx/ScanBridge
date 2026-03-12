@@ -67,7 +67,7 @@
     <string name="custom_scanner_desc">Access custom scanner</string>
     <string name="connect">Just connect</string>
     <string name="url_escl_resource">URL (eSCL resource)</string>
-    <string name="custom_scanner_dialog_title">Connect to a custom scanner</string>
+    <string name="new_custom_scanner_dialog_title">Connect to a custom scanner</string>
     <string name="invalid_url">Invalid URL</string>
     <string name="error_state_please_enter_an_url">Please enter an URL</string>
     <string name="custom_scanner">Custom scanner</string>
@@ -122,4 +122,8 @@
     <string name="color_scan">Color ({bitdepth} bit)</string>
     <string name="auto_detect">Automatic detection</string>
     <string name="grayscale">Grayscale ({bitdepth} bit)</string>
+    <string name="save">Save</string>
+    <string name="edit_custom_scanner">Edit custom scanner</string>
+    <string name="custom_scanner_deletion_confirmation">Do you really want to delete this custom scanner? This action cannot be undone.</string>
+    <string name="custom_scanner_deletion">Delete custom scanner</string>
 </resources>

@@ -24,16 +24,29 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.github.chrisimx.scanbridge.R
+import io.github.chrisimx.scanbridge.data.model.EditedCustomScanner
 import io.ktor.http.Url
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (String, Url, Boolean) -> Unit) {
+fun CustomScannerDialog(
+    onDismiss: () -> Unit,
+    onConnectClicked: (name: String, url: Url, save: Boolean, navigate: Boolean) -> Unit,
+    editingType: EditedCustomScanner
+) {
     var urlErrorState: String? by remember { mutableStateOf(null) }
-    var urlText: String by remember { mutableStateOf("") }
-    var nameText: String by remember { mutableStateOf("") }
+    val initializeWith = when (editingType) {
+        is EditedCustomScanner.EditingOld -> editingType.scanner
+        EditedCustomScanner.New -> null
+    }
+    var urlText: String by remember {
+        mutableStateOf(initializeWith?.url?.toString() ?: "")
+    }
+    var nameText: String by remember { mutableStateOf(initializeWith?.name ?: "") }
 
     val context = LocalContext.current
+
+    val isNewScanner = editingType is EditedCustomScanner.New
 
     val validateUrl = fun(): Url? {
         if (urlText.isEmpty()) {
@@ -63,8 +76,14 @@ fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (String, Url, B
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val title = if (isNewScanner) {
+                    R.string.new_custom_scanner_dialog_title
+                } else {
+                    R.string.edit_custom_scanner
+                }
+
                 Text(
-                    stringResource(R.string.custom_scanner_dialog_title),
+                    stringResource(title),
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
@@ -78,7 +97,7 @@ fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (String, Url, B
                     placeholder = { Text(stringResource(R.string.scanner_name_placeholder)) }
                 )
                 OutlinedTextField(
-                    modifier = Modifier.testTag("url_input"),
+                    modifier = Modifier.testTag("url_input").padding(top = 16.dp),
                     value = urlText,
                     onValueChange = {
                         urlErrorState = null
@@ -96,23 +115,36 @@ fun CustomScannerDialog(onDismiss: () -> Unit, onConnectClicked: (String, Url, B
                         }
                     }
                 )
-                Button(
-                    onClick = {
-                        val url = validateUrl() ?: return@Button
-                        onConnectClicked(nameText, url, true)
-                    },
-                    modifier = Modifier.padding(top = 16.dp)
-                ) {
-                    Text(stringResource(R.string.connect_and_save))
-                }
-                Button(
-                    onClick = {
-                        val url = validateUrl() ?: return@Button
-                        onConnectClicked(nameText, url, false)
-                    },
-                    modifier = Modifier.padding(top = 8.dp).testTag("justconnect")
-                ) {
-                    Text(stringResource(R.string.connect))
+
+                if (isNewScanner) {
+                    Button(
+                        onClick = {
+                            val url = validateUrl() ?: return@Button
+                            onConnectClicked(nameText, url, true, true)
+                        },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Text(stringResource(R.string.connect_and_save))
+                    }
+                    Button(
+                        onClick = {
+                            val url = validateUrl() ?: return@Button
+                            onConnectClicked(nameText, url, false, true)
+                        },
+                        modifier = Modifier.padding(top = 8.dp).testTag("justconnect")
+                    ) {
+                        Text(stringResource(R.string.connect))
+                    }
+                } else {
+                    Button(
+                        onClick = {
+                            val url = validateUrl() ?: return@Button
+                            onConnectClicked(nameText, url, true, false)
+                        },
+                        modifier = Modifier.padding(top = 0.dp).testTag("editcustomscanner")
+                    ) {
+                        Text(stringResource(R.string.save))
+                    }
                 }
             }
         }

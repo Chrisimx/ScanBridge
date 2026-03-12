@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,20 +35,21 @@ import androidx.compose.ui.unit.dp
 import io.github.chrisimx.scanbridge.R
 
 @Composable
-fun DeletionDialog(onDismiss: () -> Unit, onConfirmed: () -> Unit) {
+fun DeletionDialog(title: Int, confirmationQuestion: Int, onDismiss: () -> Unit, onConfirmed: () -> Unit) {
     AlertDialog(
         icon = {
             Icon(
                 imageVector = Icons.Rounded.Delete,
-                contentDescription = stringResource(R.string.delete_current_page),
-                modifier = Modifier.size(48.dp)
+                contentDescription = stringResource(title),
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.error
             )
         },
         title = {
-            Text(text = stringResource(R.string.delete_current_page))
+            Text(text = stringResource(title))
         },
         text = {
-            Text(text = stringResource(R.string.page_deletion_confirmation))
+            Text(text = stringResource(confirmationQuestion))
         },
         onDismissRequest = {
             onDismiss()
@@ -62,6 +65,9 @@ fun DeletionDialog(onDismiss: () -> Unit, onConfirmed: () -> Unit) {
         },
         confirmButton = {
             TextButton(
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                ),
                 onClick = {
                     onConfirmed()
                 }

@@ -65,7 +65,7 @@
     <string name="custom_scanner_desc">Accedi allo scanner personalizzato</string>
     <string name="connect">Connettiti</string>
     <string name="url_escl_resource">URL (risorsa eSCL)</string>
-    <string name="custom_scanner_dialog_title">Connettiti a uno scanner personalizzato</string>
+    <string name="new_custom_scanner_dialog_title">Connettiti a uno scanner personalizzato</string>
     <string name="invalid_url">URL non valido</string>
     <string name="error_state_please_enter_an_url">Per favore inserisci un URL</string>
     <string name="custom_scanner">Scanner personalizzato</string>
