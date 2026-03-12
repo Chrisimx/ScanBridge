@@ -119,4 +119,8 @@
     <string name="color_scan">Colore ({bitdepth} bit)</string>
     <string name="auto_detect">Rilevamento automatico</string>
     <string name="grayscale">Scala di grigi ({bitdepth} bit)</string>
+    <string name="save">Salva</string>
+    <string name="edit_custom_scanner">Modifica scanner personalizzato</string>
+    <string name="custom_scanner_deletion_confirmation">Vuoi davvero eliminare lo scanner personalizzato? Questa operazione è irreversibile.</string>
+    <string name="custom_scanner_deletion">Elimina scanner personalizzato</string>
 </resources>

@@ -120,4 +120,8 @@
     <string name="color_scan">Farbe ({bitdepth} bit)</string>
     <string name="auto_detect">Automatische Erkennung</string>
     <string name="grayscale">Graustufen ({bitdepth} bit)</string>
+    <string name="save">Speichern</string>
+    <string name="edit_custom_scanner">Benutzerdefinierten Scanner bearbeiten</string>
+    <string name="custom_scanner_deletion_confirmation">Willst du den benutzerdefinierten Scanner wirklich löschen? Dieser Vorgang ist unwiderruflich.</string>
+    <string name="custom_scanner_deletion">Benutzerdefinierten Scanner löschen</string>
 </resources>
