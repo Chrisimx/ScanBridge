@@ -65,7 +65,7 @@
     <string name="custom_scanner_desc">Accedi allo scanner personalizzato</string>
     <string name="connect">Connettiti</string>
     <string name="url_escl_resource">URL (risorsa eSCL)</string>
-    <string name="custom_scanner_dialog_title">Connettiti a uno scanner personalizzato</string>
+    <string name="new_custom_scanner_dialog_title">Connettiti a uno scanner personalizzato</string>
     <string name="invalid_url">URL non valido</string>
     <string name="error_state_please_enter_an_url">Per favore inserisci un URL</string>
     <string name="custom_scanner">Scanner personalizzato</string>
@@ -119,4 +119,8 @@
     <string name="color_scan">Colore ({bitdepth} bit)</string>
     <string name="auto_detect">Rilevamento automatico</string>
     <string name="grayscale">Scala di grigi ({bitdepth} bit)</string>
+    <string name="save">Salva</string>
+    <string name="edit_custom_scanner">Modifica scanner personalizzato</string>
+    <string name="custom_scanner_deletion_confirmation">Vuoi davvero eliminare lo scanner personalizzato? Questa operazione è irreversibile.</string>
+    <string name="custom_scanner_deletion">Elimina scanner personalizzato</string>
 </resources>

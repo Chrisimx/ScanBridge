@@ -25,6 +25,7 @@ import androidx.lifecycle.viewModelScope
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.CustomScanner
 import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -42,10 +43,19 @@ class CustomScannerViewModel(application: Application, appDb: ScanBridgeDb) : An
         }
     }
 
+    suspend fun loadScannerByUuid(scanner: Uuid): CustomScanner? = customScannerDao.getById(scanner)
+
     @OptIn(ExperimentalUuidApi::class)
     fun deleteScanner(scanner: CustomScanner) {
         viewModelScope.launch {
             customScannerDao.delete(scanner)
+        }
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
+    fun deleteScannerByUuid(scanner: Uuid) {
+        viewModelScope.launch {
+            customScannerDao.deleteById(scanner)
         }
     }
 }

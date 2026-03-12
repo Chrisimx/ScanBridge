@@ -49,6 +49,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import io.github.chrisimx.scanbridge.data.model.EditedCustomScanner
 import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,8 +69,8 @@ data class StartupScreen(
     val screenComposable: @Composable (
         innerPadding: PaddingValues,
         navController: NavController,
-        showCustomDialog: Boolean,
-        setShowCustomDialog: (Boolean) -> Unit,
+        showCustomDialog: EditedCustomScanner?,
+        setShowCustomDialog: (EditedCustomScanner?) -> Unit,
         statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
         statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>
     ) -> Unit
@@ -109,7 +110,7 @@ fun StartupScreen(navController: NavController) {
         }
     }
 
-    var showCustomDialog by remember { mutableStateOf(false) }
+    var showCustomDialog: EditedCustomScanner? by remember { mutableStateOf(null) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -137,7 +138,7 @@ fun StartupScreen(navController: NavController) {
                 FloatingActionButton(
                     modifier = Modifier.testTag("custom_scanner_fab"),
                     onClick = {
-                        showCustomDialog = true
+                        showCustomDialog = EditedCustomScanner.New
                     }
                 ) {
                     Icon(

@@ -14,16 +14,11 @@ import androidx.test.espresso.Espresso.pressBack
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import io.github.chrisimx.esclmockserver.EsclMockServer
-import io.github.chrisimx.esclmockserver.EsclMockServerArgs
-import io.github.chrisimx.esclmockserver.esclMockServerArgs
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.datastore.lastRouteStore
 import io.github.chrisimx.scanbridge.datastore.shownMessagesStore
 import io.github.chrisimx.scanbridge.datastore.updateSettings
 import io.github.chrisimx.scanbridge.proto.copy
-import java.io.BufferedReader
-import java.io.File
-import java.io.InputStreamReader
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before

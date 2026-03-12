@@ -1,7 +1,6 @@
 package io.github.chrisimx.scanbridge.screenshot
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -13,7 +12,6 @@ import androidx.compose.ui.test.swipeUp
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import io.github.chrisimx.esclmockserver.EsclMockServer
-import io.github.chrisimx.esclmockserver.esclMockServerArgs
 import io.github.chrisimx.scanbridge.BuildConfig
 import io.github.chrisimx.scanbridge.MainActivity
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
@@ -21,9 +19,6 @@ import io.github.chrisimx.scanbridge.datastore.lastRouteStore
 import io.github.chrisimx.scanbridge.datastore.shownMessagesStore
 import io.github.chrisimx.scanbridge.datastore.updateSettings
 import io.github.chrisimx.scanbridge.proto.copy
-import java.io.BufferedReader
-import java.io.File
-import java.io.InputStreamReader
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -46,8 +41,7 @@ class ScanBridgeScreenshotTest {
     fun startServer(): EsclMockServer {
         val context = InstrumentationRegistry.getInstrumentation().context
 
-        val imageFile = copyAssetToByteArray( context, "scan-1.jpg")
-
+        val imageFile = copyAssetToByteArray(context, "scan-1.jpg")
 
         val server = EsclMockServer {
             servedImage = imageFile
@@ -56,10 +50,9 @@ class ScanBridgeScreenshotTest {
         return server
     }
 
-    fun copyAssetToByteArray(testContext: Context, assetName: String): ByteArray =
-        testContext.assets.open(assetName).use {
-            it.readBytes()
-        }
+    fun copyAssetToByteArray(testContext: Context, assetName: String): ByteArray = testContext.assets.open(assetName).use {
+        it.readBytes()
+    }
 
     @Before
     fun cleanupForTest() {
