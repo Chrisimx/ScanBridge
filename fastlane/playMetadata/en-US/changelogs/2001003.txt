@@ -1,0 +1,3 @@
+* Fix layouting bug for long custom scanner names
+* Add editing feature for custom scanners
+* Add deletion confirmation dialog when custom scanners are deleted

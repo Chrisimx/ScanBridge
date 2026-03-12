@@ -1,0 +1,3 @@
+* Darstellungsproblem bei langen Namen von benutzerdefinierten Scannern behoben
+* Bearbeitungsfeature für benutzerdefinierten Scannern hinzugefügt
+* Bestätigungsdialog beim Löschen von benutzerdefinierten Scannern hinzugefügt

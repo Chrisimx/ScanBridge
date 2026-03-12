@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.3] - 2026-03-13
+
+### Added
+- Editing feature for custom scanners
+- Deletion confirmation dialog when custom scanners are deleted
+
+### Fixed
+- Layouting bug for long custom scanner names
+
 ## [2.1.0] - 2026-03-03
 
 ### Added

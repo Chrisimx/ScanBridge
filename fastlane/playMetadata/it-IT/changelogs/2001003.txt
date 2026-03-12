@@ -1,0 +1,3 @@
+* Risolto bug di layout per nomi lunghi di scanner personalizzati
+* Aggiunta la funzione di modifica per gli scanner personalizzati
+* Aggiunto il dialogo di conferma durante l’eliminazione di scanner personalizzati
