@@ -1,0 +1,1 @@
+Fixed crash that occurred when rotating or cropping black-and-white scans

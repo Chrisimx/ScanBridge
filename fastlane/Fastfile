@@ -95,6 +95,7 @@ platform :android do
       BASH
        sh('sleep 3')
 
+      sh("adb shell cmd uimode night yes")
       sh("adb shell settings put system accelerometer_rotation 0")
       sh("adb shell wm user-rotation lock #{rotation}")
 
@@ -105,7 +106,8 @@ platform :android do
         device_type: device_type,
         tests_package_name: "io.github.chrisimx.scanbridge.play.test",
         app_package_name: "io.github.chrisimx.scanbridge.play",
-        use_tests_in_packages: ['io.github.chrisimx.scanbridge.screenshot']
+        use_tests_in_packages: ['io.github.chrisimx.scanbridge.screenshot'],
+        clear_previous_screenshots: true
       )
 
       screengrab(
@@ -115,7 +117,8 @@ platform :android do
         device_type: device_type,
         tests_package_name: "io.github.chrisimx.scanbridge.test",
         app_package_name: "io.github.chrisimx.scanbridge",
-        use_tests_in_packages: ['io.github.chrisimx.scanbridge.screenshot']
+        use_tests_in_packages: ['io.github.chrisimx.scanbridge.screenshot'],
+        clear_previous_screenshots: true
       )
   end
 
@@ -127,5 +130,32 @@ platform :android do
       do_screenshot_on_device('Medium_Desktop', 'tv', 0)
   end
 
+  lane :copy_changelogs do |options|
+    filename = options[:filename]
+    UI.user_error!("Provide filename: fastlane copy_changelogs filename:123.txt") unless filename
+
+    locales = ["de-DE", "en-US", "it-IT"]
+
+    locales.each do |locale|
+      source = "metadata/android/#{locale}/changelogs/#{filename}"
+      destination_dir = "playMetadata/#{locale}/changelogs"
+      destination = "#{destination_dir}/#{filename}"
+
+      unless File.exist?(source)
+        UI.important("Source missing: #{source}")
+        next
+      end
+
+      if File.exist?(destination)
+        UI.message("Skipping existing file: #{destination}")
+        next
+      end
+
+      FileUtils.mkdir_p(destination_dir)
+      FileUtils.cp(source, destination)
+
+      UI.success("Copied #{source} → #{destination}")
+    end
+  end
 
 end

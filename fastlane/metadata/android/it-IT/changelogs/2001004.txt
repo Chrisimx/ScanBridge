@@ -1,0 +1,1 @@
+Risolto un arresto anomalo durante la rotazione o il ritaglio di scansioni in bianco e nero

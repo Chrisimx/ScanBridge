@@ -1,0 +1,1 @@
+Ein Absturz beim Drehen und Zuschneiden von Schwarz-Weiß-Scans wurde behoben

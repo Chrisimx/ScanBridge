@@ -63,6 +63,14 @@ Download metadata from Google Play
 
 
 
+### android copy_changelogs
+
+```sh
+[bundle exec] fastlane android copy_changelogs
+```
+
+
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
