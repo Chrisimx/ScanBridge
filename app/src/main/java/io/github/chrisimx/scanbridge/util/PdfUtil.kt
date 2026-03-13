@@ -30,7 +30,7 @@ fun extractPdfImages(pdfPath: String, outputDir: File): List<String> {
                 val bytes = imageXObject.imageBytes
 
                 // Convert raw bytes to Bitmap
-                val outputFile = File(outputDir, "image_${Uuid.random()}_$imageCounter.png")
+                val outputFile = File(outputDir, "scan-${Uuid.random()}.png")
                 val bitmap: Bitmap? = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                 if (bitmap != null) {
                     // Save bitmap as PNG
