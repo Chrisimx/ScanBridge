@@ -66,7 +66,7 @@ import io.github.chrisimx.scanbridge.util.saveAsJPEG
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.zipFiles
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
@@ -120,7 +120,7 @@ class ScanningScreenViewModel(
         ScanningScreenData(
             ESCLRequestClient(
                 address,
-                HttpClient(CIO) {
+                HttpClient(OkHttp) {
                     install(HttpTimeout) {
                         requestTimeoutMillis = timeout.toLong() * 1000
                         connectTimeoutMillis = timeout.toLong() * 1000
@@ -137,8 +137,10 @@ class ScanningScreenViewModel(
                     }
                     if (certificateValidationDisabled) {
                         engine {
-                            https {
-                                trustManager = getTrustAllTM().second
+                            config {
+                                val (socketFactory, trustManager) = getTrustAllTM()
+                                sslSocketFactory(socketFactory, trustManager)
+                                hostnameVerifier { _, _ -> true }
                             }
                         }
                     }

@@ -160,7 +160,7 @@ dependencies {
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.itext7.core)
-    implementation(libs.ktor.cio)
+    implementation(libs.ktor.okhttp)
     implementation(libs.ktor.logging)
     "playImplementation"(project(":lvl_library"))
     "playImplementation"("com.squareup.retrofit2:retrofit:3.0.0")
