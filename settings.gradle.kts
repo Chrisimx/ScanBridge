@@ -1,3 +1,5 @@
+rootProject.name = "ScanBridge"
+
 pluginManagement {
     repositories {
         google {
@@ -30,7 +32,8 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ScanBridge"
-include(":app")
+include(":shared")
+include(":androidApp")
+include(":desktopApp")
 include(":lvl_library")
 project(":lvl_library").projectDir = File(rootDir, "libraries/play-licensing/lvl_library/")
