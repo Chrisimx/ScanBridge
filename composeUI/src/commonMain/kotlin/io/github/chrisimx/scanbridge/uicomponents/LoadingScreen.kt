@@ -41,8 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import org.jetbrains.compose.resources.stringResource
-import scanbridge.sharedui.generated.resources.Res
-import scanbridge.sharedui.generated.resources.trying_to_retrieve_scannercapabilities
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.trying_to_retrieve_scannercapabilities
 
 @Composable
 fun LoadingScreen(loadingText: StringResource) {

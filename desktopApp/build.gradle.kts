@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 dependencies {
-    implementation(project(":sharedUI"))
+    implementation(project(":composeUI"))
 }
 
 compose.desktop {

@@ -111,7 +111,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(project(":core"))
-    implementation(project(":sharedUI"))
+    implementation(project(":composeUI"))
     implementation("androidx.concurrent:concurrent-futures:1.2.0")
 
     ksp(libs.androidx.room.compiler)

@@ -32,7 +32,7 @@ dependencyResolutionManagement {
     }
 }
 
-include(":sharedUI")
+include(":composeUI")
 include(":core")
 include(":androidApp")
 include(":desktopApp")
