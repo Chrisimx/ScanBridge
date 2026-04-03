@@ -22,24 +22,30 @@ package io.github.chrisimx.scanbridge.uicomponents
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.runtime.Composable
+import org.jetbrains.compose.resources.StringResource
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
+import org.jetbrains.compose.resources.stringResource
+import scanbridge.sharedui.generated.resources.Res
+import scanbridge.sharedui.generated.resources.trying_to_retrieve_scannercapabilities
 
 @Composable
-fun LoadingScreen(loadingText: Int) {
+fun LoadingScreen(loadingText: StringResource) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,5 +64,15 @@ fun LoadingScreen(loadingText: Int) {
             lineHeight = 32.sp,
             fontSize = 24.sp
         )
+    }
+}
+
+@Composable
+@Preview
+fun LoadingScreenPreview() {
+    ScanBridgeTheme {
+        Scaffold {
+            LoadingScreen(Res.string.trying_to_retrieve_scannercapabilities)
+        }
     }
 }

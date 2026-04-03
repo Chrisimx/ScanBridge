@@ -115,6 +115,8 @@ import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import scanbridge.sharedui.generated.resources.Res
+import scanbridge.sharedui.generated.resources.trying_to_retrieve_scannercapabilities
 import timber.log.Timber
 
 private const val TAG = "ScanningScreen"
@@ -354,7 +356,7 @@ fun ScanningScreen(
                 }
 
                 LoadingScreen(
-                    loadingText = R.string.trying_to_retrieve_scannercapabilities
+                    loadingText = Res.string.trying_to_retrieve_scannercapabilities
                 )
             }
 

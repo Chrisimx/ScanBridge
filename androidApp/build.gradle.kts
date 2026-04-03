@@ -110,6 +110,9 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+    implementation(project(":core"))
+    implementation(project(":sharedUI"))
+    implementation("androidx.concurrent:concurrent-futures:1.2.0")
 
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)

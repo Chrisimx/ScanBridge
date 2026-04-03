@@ -18,6 +18,7 @@ kotlin {
         namespace = "io.github.chrisimx.scanbridge"
         compileSdk = 36
         minSdk = 23
+        androidResources.enable = true
 
         /*compilerOptions.configure {
             jvmTarget.set(
@@ -38,7 +39,6 @@ kotlin {
             api(libs.compose.resources)
             api(libs.compose.ui.tooling.preview)
             api(libs.compose.material3)
-            //implementation(libs.compose.ui.tooling)
         }
 
         commonTest.dependencies {
@@ -61,9 +61,19 @@ kotlin {
         .configureEach {
             binaries {
                 framework {
-                    baseName = "SharedUI"
+                    baseName = "ScanBridgeSharedUI"
                     isStatic = true
                 }
             }
         }
+}
+
+dependencies {
+    androidRuntimeClasspath("org.jetbrains.compose.ui:ui-tooling:1.10.0")
+}
+
+compose.resources {
+    publicResClass = true
+    //packageOfResClass = "me.sample.library.resources"
+    generateResClass = always
 }

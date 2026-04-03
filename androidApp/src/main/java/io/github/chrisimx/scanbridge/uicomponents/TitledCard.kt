@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.chrisimx.scanbridge.theme.Poppins
+import io.github.chrisimx.scanbridge.theme.PoppinsTypography
 import io.github.chrisimx.scanbridge.theme.Teal1
 
 @Composable
@@ -47,7 +48,7 @@ fun TitledCard(title: String, color: Color = Teal1, content: @Composable () -> U
             Text(
                 title,
                 modifier = Modifier.padding(bottom = 16.dp),
-                fontFamily = Poppins,
+                fontFamily = Poppins(),
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 20.sp,
                 color = color

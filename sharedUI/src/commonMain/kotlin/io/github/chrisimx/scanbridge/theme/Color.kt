@@ -19,6 +19,7 @@
 
 package io.github.chrisimx.scanbridge.theme
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
@@ -36,6 +37,6 @@ val Purple = Color(0xFF702CCC)
 
 val gradientBrush = Brush.linearGradient(
     colors = listOf(NiceBlue, Purple), // Colors of the gradient
-    start = androidx.compose.ui.geometry.Offset.Zero, // Start position
-    end = androidx.compose.ui.geometry.Offset.Infinite // End position
+    start = Offset.Zero, // Start position
+    end = Offset.Infinite // End position
 )

@@ -32,7 +32,8 @@ dependencyResolutionManagement {
     }
 }
 
-include(":shared")
+include(":sharedUI")
+include(":core")
 include(":androidApp")
 include(":desktopApp")
 include(":lvl_library")

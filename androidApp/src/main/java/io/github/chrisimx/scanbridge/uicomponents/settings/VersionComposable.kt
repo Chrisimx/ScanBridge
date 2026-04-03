@@ -58,7 +58,7 @@ fun VersionComposable() {
     Text(
         stringResource(R.string.app_name),
         modifier = Modifier.padding(PaddingValues(4.dp)),
-        fontFamily = Poppins,
+        fontFamily = Poppins(),
         fontSize = 24.sp,
         fontWeight = FontWeight.ExtraBold,
         style = MaterialTheme.typography.labelLarge.copy(
@@ -69,7 +69,7 @@ fun VersionComposable() {
     Text(
         "${BuildConfig.VERSION_NAME.removeSuffix("-play")} (${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH})",
         fontStyle = FontStyle.Normal,
-        fontFamily = Poppins
+        fontFamily = Poppins()
     )
 
     val editionNotice = mutableListOf<String>()
@@ -87,7 +87,7 @@ fun VersionComposable() {
     Text(
         editionNotice.joinToString(),
         fontStyle = FontStyle.Italic,
-        fontFamily = Poppins
+        fontFamily = Poppins()
     )
 }
 
