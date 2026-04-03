@@ -9,7 +9,6 @@ if (testConfigFile.exists()) {
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.koin)
@@ -81,17 +80,6 @@ android {
         }
         debug {
             buildConfigField("String", "GIT_COMMIT_HASH", "\"${getGitCommitHash()}\"")
-
-            sourceSets {
-                getByName("androidTest") {
-                    jniLibs.srcDirs("src/androidTest/native-libs")
-                    packaging {
-                        jniLibs {
-                            useLegacyPackaging = true
-                        }
-                    }
-                }
-            }
         }
     }
     flavorDimensions += "edition"
@@ -120,9 +108,7 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_11
-    }
-    sourceSets.all {
-        languageSettings.optIn("kotlin.uuid.ExperimentalUuidApi")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 }
 
