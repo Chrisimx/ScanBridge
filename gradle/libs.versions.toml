@@ -5,7 +5,9 @@ androidx-activityCompose = "1.12.0"
 
 agp = "9.1.0"
 coilCompose = "3.3.0"
+concurrentFutures = "1.2.0"
 constraintlayoutCompose = "1.1.1"
+converterGson = "2.9.0"
 datastore = "1.2.0"
 esclkt = "2.0.6"
 escl-mock-server = "1.0.1"
@@ -16,11 +18,13 @@ junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 kotlinReflect = "2.1.20"
+kotlinxCoroutinesAndroid = "1.7.3"
 kotlinxSerializationJson = "1.9.0"
 kotlinxCoroutines = "1.10.2"
 lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
 composeBom = "2026.03.01"
+retrofit = "3.0.0"
 room = "2.8.4"
 timber = "5.0.1"
 zoomable = "0.18.0"
@@ -36,9 +40,13 @@ koin-plugin = "0.3.0"
 protobuf-plugin = "0.9.6"
 protobuf-kotlin-lite = "4.33.5"
 rules = "1.7.0"
+paraphrase-plugin = "0.4.1"
+ksp = "2.3.6"
+protoc = "4.33.5"
 
 [libraries]
 
+androidx-concurrent-futures = { module = "androidx.concurrent:concurrent-futures", version.ref = "concurrentFutures" }
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
@@ -55,6 +63,7 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 
+retrofit-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
 koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
@@ -73,6 +82,7 @@ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", ver
 koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-viewmodel-navigation", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 ktor-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor"}
 ktor-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor"}
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
@@ -98,11 +108,13 @@ androidx-material3 = { module = "androidx.compose.material3:material3", version.
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlinReflect" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines = { module = " org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines"}
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 screengrab = { module = "tools.fastlane:screengrab", version.ref = "screengrab" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 zoomable = { module = "me.saket.telephoto:zoomable", version.ref = "zoomable" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf-kotlin-lite"}
 androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
+protoc = { module = "com.google.protobuf:protoc", version.ref = "protoc" }
 
 escl-mock-server = { module = "io.github.chrisimx:escl-mock-server", version.ref = "escl-mock-server"}
 
@@ -122,3 +134,5 @@ versions = { id = "com.github.ben-manes.versions", version.ref = "versionsPlugin
 koin = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
 room = { id = "androidx.room", version.ref = "room"}
+paraphrase = { id = "app.cash.paraphrase", version.ref = "paraphrase-plugin"}
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

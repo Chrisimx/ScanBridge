@@ -1,3 +1,4 @@
+import com.android.utils.TraceUtils.simpleId
 import java.util.*
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -14,8 +15,8 @@ plugins {
     alias(libs.plugins.koin)
     alias(libs.plugins.protobuf)
     alias(libs.plugins.room)
-    id("com.google.devtools.ksp") version "2.3.6"
-    id("app.cash.paraphrase") version "0.4.1"
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.paraphrase)
 }
 
 val gitHashProvider = providers.exec {
@@ -112,7 +113,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(project(":core"))
     implementation(project(":composeUI"))
-    implementation("androidx.concurrent:concurrent-futures:1.2.0")
+    implementation(libs.androidx.concurrent.futures)
 
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
@@ -136,9 +137,9 @@ dependencies {
     implementation(libs.ktor.okhttp)
     implementation(libs.ktor.logging)
     "playImplementation"(project(":lvl_library"))
-    "playImplementation"("com.squareup.retrofit2:retrofit:3.0.0")
-    "playImplementation"("com.squareup.retrofit2:converter-gson:2.9.0")
-    "playImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    "playImplementation"(libs.retrofit)
+    "playImplementation"(libs.retrofit.converter.gson)
+    "playImplementation"(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
 
@@ -155,7 +156,9 @@ dependencies {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:4.33.5"
+        val protoc = libs.protoc.get()
+
+        artifact = "${protoc.module}:${protoc.version}"
     }
     generateProtoTasks {
         all().forEach { task ->
