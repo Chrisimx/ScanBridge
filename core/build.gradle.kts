@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kmp.library)
+    alias(libs.plugins.koin)
 }
 
 kotlin {
@@ -17,11 +18,12 @@ kotlin {
         compileSdk = 36
         minSdk = 23
 
-        /*compilerOptions.configure {
+
+        compilerOptions {
             jvmTarget.set(
                 org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
             )
-        }*/
+        }
     }
 
 
@@ -30,7 +32,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-
+            api("com.diamondedge:logging:2.1.0")
+            api(libs.koin.core)
+            api(libs.koin.annotations)
+            api(libs.kotlinx.coroutines)
         }
 
         commonTest.dependencies {

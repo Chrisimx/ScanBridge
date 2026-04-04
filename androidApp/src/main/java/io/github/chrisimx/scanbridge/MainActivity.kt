@@ -31,6 +31,7 @@ import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.activityScope
@@ -41,6 +42,7 @@ class MainActivity :
     ComponentActivity(),
     AndroidScopeComponent {
     private val localeProvider: AndroidLocaleProvider by inject()
+    private val crashHandler: Thread.UncaughtExceptionHandler by inject()
 
     override val scope: Scope by activityScope()
 
@@ -52,7 +54,7 @@ class MainActivity :
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this.applicationContext))
+        Thread.setDefaultUncaughtExceptionHandler(crashHandler)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 

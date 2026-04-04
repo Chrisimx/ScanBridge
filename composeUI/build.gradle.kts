@@ -20,16 +20,12 @@ kotlin {
         minSdk = 23
         androidResources.enable = true
 
-        /*compilerOptions.configure {
+        compilerOptions {
             jvmTarget.set(
                 org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
             )
-        }*/
+        }
     }
-
-
-    iosArm64()
-    iosSimulatorArm64()
 
     sourceSets {
         commonMain.dependencies {

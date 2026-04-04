@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 
-class FileDebugLogService(val appSettings: DataStore<ScanBridgeSettings>, val application: Application) : DebugLogService {
+class FileDebugLogService(appSettings: DataStore<ScanBridgeSettings>, val application: Application) : DebugLogService {
 
     val scope = CoroutineScope(Dispatchers.Main)
 

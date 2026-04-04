@@ -21,15 +21,13 @@ package io.github.chrisimx.scanbridge
 
 import android.content.Context
 import android.content.Intent
-import io.github.chrisimx.scanbridge.datastore.lastRouteStore
-import io.github.chrisimx.scanbridge.proto.copy
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
-class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {
+class CrashHandler(val context: Context, val lastRouteRepository: LastRouteRepository) : Thread.UncaughtExceptionHandler {
 
     private val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
 
@@ -71,10 +69,6 @@ class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {
     }
 
     suspend fun deleteStoredRoute() {
-        context.lastRouteStore.updateData {
-            it.copy {
-                clearLastRoute()
-            }
-        }
+        lastRouteRepository.setLastRoute(null)
     }
 }

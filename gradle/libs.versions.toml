@@ -17,6 +17,7 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 kotlinReflect = "2.1.20"
 kotlinxSerializationJson = "1.9.0"
+kotlinxCoroutines = "1.10.2"
 lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
 composeBom = "2026.03.01"
@@ -96,6 +97,7 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref= "androidx-material3" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlinReflect" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotlinx-coroutines = { module = " org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines"}
 screengrab = { module = "tools.fastlane:screengrab", version.ref = "screengrab" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 zoomable = { module = "me.saket.telephoto:zoomable", version.ref = "zoomable" }
