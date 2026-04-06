@@ -7,10 +7,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.Font
-import scanbridge.sharedui.generated.resources.Res
+import scanbridge.composeui.generated.resources.Res
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontStyle
-import scanbridge.sharedui.generated.resources.*
+import scanbridge.composeui.generated.resources.*
 
 @Composable
 fun Poppins(): FontFamily = FontFamily(
