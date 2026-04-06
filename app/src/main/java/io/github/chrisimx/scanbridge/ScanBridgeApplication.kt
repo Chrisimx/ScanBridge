@@ -26,12 +26,14 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.plugin.module.dsl.factory
 import org.koin.plugin.module.dsl.single
+import org.koin.plugin.module.dsl.create
 import org.koin.plugin.module.dsl.viewModel
 import timber.log.Timber
 
+fun createAppSettingsDataStore(context: Context) = context.appSettingsStore
 val appModule = module {
     single<DataStore<ScanBridgeSettings>> {
-        get<Context>().appSettingsStore
+        create(::createAppSettingsDataStore)
     }
     single<AndroidLocaleProvider>() bind LocaleProvider::class
     single<FileDebugLogService>() bind DebugLogService::class
