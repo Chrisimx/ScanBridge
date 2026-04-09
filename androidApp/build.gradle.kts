@@ -172,6 +172,10 @@ protobuf {
     }
 }
 
+koinCompiler {
+    compileSafety = true
+}
+
 afterEvaluate {
     tasks.named("clean") {
         doLast {
