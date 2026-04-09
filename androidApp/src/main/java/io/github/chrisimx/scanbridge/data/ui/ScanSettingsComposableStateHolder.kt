@@ -39,12 +39,12 @@ import io.github.chrisimx.esclkt.inches
 import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.esclkt.scanRegion
 import io.github.chrisimx.esclkt.threeHundredthsOfInch
+import io.github.chrisimx.scanbridge.Locale
 import io.github.chrisimx.scanbridge.R
-import io.github.chrisimx.scanbridge.services.LocaleProvider
+import io.github.chrisimx.scanbridge.LocaleProvider
 import io.github.chrisimx.scanbridge.util.derived
 import io.github.chrisimx.scanbridge.util.getMaxResolution
 import io.github.chrisimx.scanbridge.util.toDoubleLocalized
-import java.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -402,7 +402,7 @@ class ScanSettingsComposableStateHolder(
         }
     }
 
-    private fun unitByLocale(locale: Locale = Locale.getDefault()): ScanSettingsLengthUnit =
+    private fun unitByLocale(locale: Locale): ScanSettingsLengthUnit =
         if (locale.country in setOf("US", "LR", "MM")) {
             ScanSettingsLengthUnit.INCH
         } else {
