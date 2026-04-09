@@ -1,8 +1,8 @@
 package io.github.chrisimx.scanbridge.db.typeconverters
 
 import androidx.room.TypeConverter
-import io.github.chrisimx.scanbridge.data.ui.ScanSettingsStateData
-import io.github.chrisimx.scanbridge.util.ScanSettingsJson
+import io.github.chrisimx.scanbridge.ScanSettingsJson
+import io.github.chrisimx.scanbridge.model.ScanSettingsStateData
 
 class ScanSettingsUiDataTypeConverter {
 

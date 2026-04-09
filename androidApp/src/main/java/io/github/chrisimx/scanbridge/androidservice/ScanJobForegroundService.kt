@@ -21,10 +21,10 @@ import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.scanbridge.MainActivity
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.data.model.ScanJob
-import io.github.chrisimx.scanbridge.data.ui.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.daos.ScannedPageDao
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
+import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
 import io.github.chrisimx.scanbridge.util.extractPdfImages
 import io.github.chrisimx.scanbridge.util.toJobStateString

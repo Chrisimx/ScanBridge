@@ -4,7 +4,7 @@ import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.esclkt.getInputSourceCaps
 import io.github.chrisimx.esclkt.getInputSourceOptions
-import io.github.chrisimx.scanbridge.data.ui.ScanRelativeRotation
+import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import timber.log.Timber

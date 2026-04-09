@@ -42,6 +42,8 @@ import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.Locale
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.LocaleProvider
+import io.github.chrisimx.scanbridge.model.NumberValidationResult
+import io.github.chrisimx.scanbridge.model.ScanSettingsStateData
 import io.github.chrisimx.scanbridge.util.derived
 import io.github.chrisimx.scanbridge.util.getMaxResolution
 import io.github.chrisimx.scanbridge.util.toDoubleLocalized

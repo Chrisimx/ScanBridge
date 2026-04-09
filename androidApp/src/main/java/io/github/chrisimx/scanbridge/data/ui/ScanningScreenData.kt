@@ -28,17 +28,7 @@ import io.github.chrisimx.esclkt.ScannerCapabilities
 import java.io.File
 import kotlin.uuid.Uuid
 
-enum class ScanRelativeRotation {
-    Rotated,
-    Original
-}
-
 data class ErrorDescription(val pretext: Int?, val icon: Int?, val text: String?)
-
-fun ScanRelativeRotation.toggleRotation() = when (this) {
-    ScanRelativeRotation.Rotated -> ScanRelativeRotation.Original
-    ScanRelativeRotation.Original -> ScanRelativeRotation.Rotated
-}
 
 data class ScanningScreenData(
     val esclClient: ESCLRequestClient,

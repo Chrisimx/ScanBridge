@@ -56,9 +56,9 @@ import androidx.compose.ui.unit.dp
 import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.SupportedResolutions
 import io.github.chrisimx.esclkt.equalsLength
-import io.github.chrisimx.scanbridge.data.ui.NumberValidationResult
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsLengthUnit
+import io.github.chrisimx.scanbridge.model.NumberValidationResult
 import io.github.chrisimx.scanbridge.uicomponents.SizeBasedConditionalView
 import io.github.chrisimx.scanbridge.uicomponents.ValidatedDimensionsTextEdit
 import io.github.chrisimx.scanbridge.util.localizedString

@@ -1,5 +1,6 @@
 package io.github.chrisimx.scanbridge
 
+import AndroidScanBridgeDbBuilderFactory
 import android.app.Application
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -38,24 +39,16 @@ import org.koin.plugin.module.dsl.single
 import org.koin.plugin.module.dsl.create
 import org.koin.plugin.module.dsl.viewModel
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import io.github.chrisimx.scanbridge.db.DefaultScanBridgeDbFactory
+import io.github.chrisimx.scanbridge.db.ScanBridgeDbBuilderFactory
+import io.github.chrisimx.scanbridge.db.ScanBridgeDbFactory
 import timber.log.Timber
 
 fun createAppSettingsDataStore(context: Context) = context.appSettingsStore
 fun createShownMessagesDataStore(context: Context) = context.shownMessagesStore
 
-fun createScanBridgeDb(context: Context): ScanBridgeDb {
-    val databaseFile = context.getDatabasePath("scanbridge")
-    val builder = Room.databaseBuilder<ScanBridgeDb>(
-        context,
-        databaseFile.absolutePath
-    )
-        .setDriver(BundledSQLiteDriver())
-
-    val db = builder.build()
-        .migrateLegacyCustomScanners(context)
-        .migrateLegacySessions(context)
-
-    return db
+fun createScanBridgeDb(factory: ScanBridgeDbFactory): ScanBridgeDb {
+    return factory.createInstance()
 }
 val appModule = module {
     single<DataStore<ShownMessages>>(named<ShownMessages>()) {
@@ -73,6 +66,8 @@ val appModule = module {
     single<ScanJobRepository>()
     single<RoomBackedMigrationExecutor>() bind MigrationExecutor::class
     includes(migrationsModule)
+    single<AndroidScanBridgeDbBuilderFactory>() bind ScanBridgeDbBuilderFactory::class
+    single<DefaultScanBridgeDbFactory>() bind ScanBridgeDbFactory::class
     single<ScanBridgeDb> {
         create(::createScanBridgeDb)
     }

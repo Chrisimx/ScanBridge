@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge.util
+package io.github.chrisimx.scanbridge
 
 import io.github.chrisimx.esclkt.Inches
 import io.github.chrisimx.esclkt.LengthUnit

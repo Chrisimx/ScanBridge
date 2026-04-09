@@ -9,7 +9,6 @@ import androidx.room.Update
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
-import timber.log.Timber
 
 @Dao
 interface ScannedPageDao {
@@ -40,7 +39,6 @@ interface ScannedPageDao {
         val page2 = getByScanId(page2.scanId)
 
         if (page1 == null || page2 == null) {
-            Timber.e("Could not swap pages: $page1, $page2")
             return
         }
 

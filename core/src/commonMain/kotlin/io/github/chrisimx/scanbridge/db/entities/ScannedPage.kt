@@ -5,7 +5,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import io.github.chrisimx.esclkt.ScanSettings
-import io.github.chrisimx.scanbridge.data.ui.ScanRelativeRotation
+import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
 import kotlin.uuid.Uuid
 
 @Entity(

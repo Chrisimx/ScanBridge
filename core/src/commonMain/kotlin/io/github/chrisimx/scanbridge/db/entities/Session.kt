@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import io.github.chrisimx.esclkt.ScanSettings
-import io.github.chrisimx.scanbridge.data.ui.ScanSettingsStateData
+import io.github.chrisimx.scanbridge.model.ScanSettingsStateData
 import kotlin.uuid.Uuid
 
 @Entity(tableName = "sessions")

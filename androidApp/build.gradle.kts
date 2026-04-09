@@ -38,10 +38,6 @@ android {
         generateLocaleConfig = true
     }
 
-    room {
-        schemaDirectory("$projectDir/schemas")
-    }
-
     defaultConfig {
         applicationId = "io.github.chrisimx.scanbridge"
         minSdk = 28
@@ -94,7 +90,12 @@ kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_17
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
+        freeCompilerArgs.add("-Xnon-local-break-continue")
     }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {

@@ -22,13 +22,13 @@ package io.github.chrisimx.scanbridge.stores
 import android.content.Context
 import com.google.protobuf.StringValue
 import io.github.chrisimx.esclkt.ScanSettings
-import io.github.chrisimx.scanbridge.data.ui.ScanSettingsStateData
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.datastore.updateSettings
 import io.github.chrisimx.scanbridge.proto.lastUsedScanSettingsOrNull
 import io.github.chrisimx.scanbridge.proto.lastUsedScanSettingsUiStateOrNull
 import io.github.chrisimx.scanbridge.proto.rememberScanSettingsOrNull
-import io.github.chrisimx.scanbridge.util.ScanSettingsJson
+import io.github.chrisimx.scanbridge.ScanSettingsJson
+import io.github.chrisimx.scanbridge.model.ScanSettingsStateData
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
 

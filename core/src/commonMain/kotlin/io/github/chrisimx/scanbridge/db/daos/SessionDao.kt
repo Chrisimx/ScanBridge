@@ -5,8 +5,8 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import io.github.chrisimx.scanbridge.data.ui.ScanSettingsStateData
 import io.github.chrisimx.scanbridge.db.entities.Session
+import io.github.chrisimx.scanbridge.model.ScanSettingsStateData
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 

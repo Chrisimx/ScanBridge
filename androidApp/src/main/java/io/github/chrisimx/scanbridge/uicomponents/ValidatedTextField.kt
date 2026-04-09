@@ -28,7 +28,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import io.github.chrisimx.scanbridge.R
-import io.github.chrisimx.scanbridge.data.ui.NumberValidationResult
+import io.github.chrisimx.scanbridge.model.NumberValidationResult
+
 fun NumberValidationResult.toHumanString(context: Context): String = when (this) {
     is NumberValidationResult.OutOfRange -> context.getString(R.string.error_state_not_in_allowed_range)
     NumberValidationResult.NotANumber -> context.getString(R.string.error_state_not_a_valid_number)

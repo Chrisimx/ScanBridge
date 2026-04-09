@@ -12,7 +12,7 @@ import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
 import io.github.chrisimx.scanbridge.proto.copy
-import io.github.chrisimx.scanbridge.util.ScanSettingsJson
+import io.github.chrisimx.scanbridge.ScanSettingsJson
 import java.io.File
 import java.nio.file.Files
 import kotlin.concurrent.atomics.AtomicBoolean

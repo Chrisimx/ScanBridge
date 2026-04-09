@@ -7,6 +7,15 @@ plugins {
     alias(libs.plugins.android.kmp.library)
     alias(libs.plugins.koin)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+}
+
+kotlin {
+    compilerOptions {
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+        freeCompilerArgs.add("-Xnon-local-break-continue")
+    }
 }
 
 kotlin {
@@ -27,7 +36,6 @@ kotlin {
         }
     }
 
-
     iosArm64()
     iosSimulatorArm64()
 
@@ -39,6 +47,10 @@ kotlin {
             api(libs.kotlinx.coroutines)
             api(libs.kotlinx.serialization.json)
             api(libs.esclkt)
+
+            // Room deps
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
         }
 
         commonTest.dependencies {
@@ -64,4 +76,15 @@ kotlin {
                 }
             }
         }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspJvm", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
 }

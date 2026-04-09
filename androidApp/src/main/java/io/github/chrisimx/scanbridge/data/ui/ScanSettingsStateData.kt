@@ -19,24 +19,3 @@
 
 package io.github.chrisimx.scanbridge.data.ui
 
-import io.github.chrisimx.esclkt.ScannerCapabilities
-import io.github.chrisimx.scanbridge.PaperFormat
-import io.github.chrisimx.scanbridge.loadDefaultFormats
-import kotlinx.serialization.Serializable
-
-@Serializable
-sealed class NumberValidationResult {
-    data class Success(val value: Double) : NumberValidationResult()
-    data class OutOfRange(val min: Double, val max: Double) : NumberValidationResult()
-    data object NotANumber : NumberValidationResult()
-}
-
-@Serializable
-data class ScanSettingsStateData(
-    val capabilities: ScannerCapabilities,
-    val paperFormats: List<PaperFormat> = loadDefaultFormats(),
-    val customMenuEnabled: Boolean = false,
-    val widthString: String = "",
-    val heightString: String = "",
-    val maximumSize: Boolean = true
-)
