@@ -21,7 +21,6 @@ import io.github.chrisimx.scanbridge.repositories.RoomLastRouteRepository
 import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
 import io.github.chrisimx.scanbridge.services.DebugLogService
 import io.github.chrisimx.scanbridge.services.FileDebugLogService
-import io.github.chrisimx.scanbridge.services.LocaleProvider
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
 import io.github.chrisimx.scanbridge.stores.LegacyCustomScannerStore.migrateLegacyCustomScanners
 import io.github.chrisimx.scanbridge.stores.LegacySessionsStore.migrateLegacySessions
