@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge.data.model
+package io.github.chrisimx.scanbridge.model
 
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.ScanSettings

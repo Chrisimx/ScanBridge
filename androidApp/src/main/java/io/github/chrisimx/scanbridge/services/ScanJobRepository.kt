@@ -1,6 +1,6 @@
 package io.github.chrisimx.scanbridge.services
 
-import io.github.chrisimx.scanbridge.data.model.ScanJob
+import io.github.chrisimx.scanbridge.model.ScanJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow

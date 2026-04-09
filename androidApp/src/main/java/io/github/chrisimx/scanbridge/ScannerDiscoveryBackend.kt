@@ -24,6 +24,7 @@ import android.net.nsd.NsdServiceInfo
 import android.os.Build
 import android.os.ext.SdkExtensions
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import io.github.chrisimx.scanbridge.model.DiscoveredScanner
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url
@@ -34,8 +35,6 @@ import java.util.concurrent.ForkJoinPool
 import timber.log.Timber
 
 private const val TAG = "ScannerDiscovery"
-
-data class DiscoveredScanner(val name: String, val addresses: List<String>)
 
 class ScannerDiscovery(
     val nsdManager: NsdManager,

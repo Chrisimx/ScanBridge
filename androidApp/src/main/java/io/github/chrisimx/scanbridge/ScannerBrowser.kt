@@ -48,6 +48,7 @@ import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.data.model.EditedCustomScanner
 import io.github.chrisimx.scanbridge.data.ui.CustomScannerViewModel
 import io.github.chrisimx.scanbridge.db.entities.CustomScanner
+import io.github.chrisimx.scanbridge.model.DiscoveredScanner
 import io.github.chrisimx.scanbridge.uicomponents.FoundScannerItem
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.dialog.CustomScannerDialog

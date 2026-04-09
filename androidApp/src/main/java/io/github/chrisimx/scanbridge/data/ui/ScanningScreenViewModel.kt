@@ -56,6 +56,7 @@ import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
+import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.model.ScanSettingsStateData
 import io.github.chrisimx.scanbridge.model.toggleRotation
@@ -516,7 +517,7 @@ class ScanningScreenViewModel(
                 return@launch
             }
 
-            val scanJob = io.github.chrisimx.scanbridge.data.model.ScanJob(
+            val scanJob = ScanJob(
                 Uuid.generateV4(),
                 sessionID,
                 currentSettings,

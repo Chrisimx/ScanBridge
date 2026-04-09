@@ -50,6 +50,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.data.model.EditedCustomScanner
+import io.github.chrisimx.scanbridge.model.DiscoveredScanner
 import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
