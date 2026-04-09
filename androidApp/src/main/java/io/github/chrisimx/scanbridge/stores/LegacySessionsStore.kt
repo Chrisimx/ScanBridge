@@ -1,8 +1,8 @@
 package io.github.chrisimx.scanbridge.stores
 
 import android.content.Context
-import androidx.room.util.copy
-import androidx.room.withTransaction
+import androidx.room.immediateTransaction
+import androidx.room.useWriterConnection
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.scanbridge.data.model.LegacySessionV2
 import io.github.chrisimx.scanbridge.data.model.LegacySessionV2.Companion.fromString
@@ -18,8 +18,6 @@ import java.nio.file.Files
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.io.path.Path
-import kotlin.io.path.extension
-import kotlin.io.path.nameWithoutExtension
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -84,29 +82,10 @@ object LegacySessionsStore {
 
                     val sessionId = Uuid.parse(legacySession.sessionID)
 
-                    db.withTransaction {
-                        sessionDao().insertAll(
-                            Session(sessionId, legacySession.scanSettings, null)
-                        )
-
-                        tmpFileDao().insertAllList(
-                            legacySession.tmpFiles.map {
-                                TempFile(ownerSessionId = sessionId, path = it)
-                            }
-                        )
-
-                        scannedPageDao().insertAllList(
-                            legacySession.scannedPages.mapIndexed { index, page ->
-                                ScannedPage(
-                                    scanId = Uuid.generateV4(),
-                                    ownerSessionId = sessionId,
-                                    filePath = page.filePath,
-                                    originalScanSettings = page.originalScanSettings,
-                                    rotation = page.rotation,
-                                    orderIndex = index
-                                )
-                            }
-                        )
+                    db.useWriterConnection {
+                        it.immediateTransaction {
+                            db.insertLegacySessionData(sessionId, legacySession)
+                        }
                     }
 
                     Files.deleteIfExists(sessionDir.resolve("$sessionIdString.session"))
@@ -123,5 +102,33 @@ object LegacySessionsStore {
         }
 
         return this
+    }
+
+    private suspend fun ScanBridgeDb.insertLegacySessionData(
+        sessionId: Uuid,
+        legacySession: LegacySessionV2
+    ) {
+        sessionDao().insertAll(
+            Session(sessionId, legacySession.scanSettings, null)
+        )
+
+        tmpFileDao().insertAllList(
+            legacySession.tmpFiles.map {
+                TempFile(ownerSessionId = sessionId, path = it)
+            }
+        )
+
+        scannedPageDao().insertAllList(
+            legacySession.scannedPages.mapIndexed { index, page ->
+                ScannedPage(
+                    scanId = Uuid.generateV4(),
+                    ownerSessionId = sessionId,
+                    filePath = page.filePath,
+                    originalScanSettings = page.originalScanSettings,
+                    rotation = page.rotation,
+                    orderIndex = index
+                )
+            }
+        )
     }
 }

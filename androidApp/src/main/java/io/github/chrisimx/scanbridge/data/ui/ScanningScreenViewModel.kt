@@ -29,7 +29,8 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
-import androidx.room.withTransaction
+import androidx.room.immediateTransaction
+import androidx.room.useWriterConnection
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.pdf.PdfDocument
@@ -321,13 +322,15 @@ class ScanningScreenViewModel(
         Timber.d("Stored session: $storedSession")
 
         val updateSettings: suspend (ScanSettings.() -> ScanSettings) -> Unit = { lambda ->
-            db.withTransaction {
-                val oldSession = sessionDao.getSessionById(sessionID) ?: return@withTransaction
-                val newSession = oldSession.copy(
-                    currentScanSettings = oldSession.currentScanSettings?.lambda()
-                )
-                Timber.d("Settings updated ${newSession.currentScanSettings}")
-                sessionDao.update(newSession)
+            db.useWriterConnection {
+                it.immediateTransaction {
+                    val oldSession = sessionDao.getSessionById(sessionID) ?: return@immediateTransaction
+                    val newSession = oldSession.copy(
+                        currentScanSettings = oldSession.currentScanSettings?.lambda()
+                    )
+                    Timber.d("Settings updated ${newSession.currentScanSettings}")
+                    sessionDao.update(newSession)
+                }
             }
         }
 
@@ -526,14 +529,16 @@ class ScanningScreenViewModel(
             val filePaths = mutableListOf<String>()
             val tmpPaths = mutableListOf<String>()
 
-            db.withTransaction {
-                val scannedPages = scannedPageDao.getAllForSession(sessionID)
-                val tmpFiles = tmpFileDao.getFilesBySessionId(sessionID)
+            db.useWriterConnection {
+                it.immediateTransaction {
+                    val scannedPages = scannedPageDao.getAllForSession(sessionID)
+                    val tmpFiles = tmpFileDao.getFilesBySessionId(sessionID)
 
-                filePaths += scannedPages.map { it.filePath }
-                tmpPaths += tmpFiles.map { it.path }
+                    filePaths += scannedPages.map { it.filePath }
+                    tmpPaths += tmpFiles.map { it.path }
 
-                sessionDao.deleteById(sessionID)
+                    sessionDao.deleteById(sessionID)
+                }
             }
 
             withContext(Dispatchers.IO) {

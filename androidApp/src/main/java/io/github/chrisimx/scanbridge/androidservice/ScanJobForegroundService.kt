@@ -12,7 +12,8 @@ import android.os.IBinder
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.application
-import androidx.room.withTransaction
+import androidx.room.immediateTransaction
+import androidx.room.useWriterConnection
 import io.github.chrisimx.esclkt.ESCLHttpCallResult
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.JobState
@@ -365,20 +366,22 @@ class ScanJobForegroundService : Service() {
 
     suspend fun addScan(sessionID: Uuid, path: String, settings: ScanSettings, rotation: ScanRelativeRotation) {
         Timber.d("Adding scan: $path, $rotation")
-        db.withTransaction {
-            val highestIdx = scannedPageDao.getHighestIdxForSession(sessionID) ?: -1
+        db.useWriterConnection {
+            it.immediateTransaction {
+                val highestIdx = scannedPageDao.getHighestIdxForSession(sessionID) ?: -1
 
-            Timber.d("Inserting scan with index ${highestIdx + 1}")
-            scannedPageDao.insertAll(
-                ScannedPage(
-                    Uuid.generateV4(),
-                    sessionID,
-                    path,
-                    settings,
-                    rotation,
-                    highestIdx + 1
+                Timber.d("Inserting scan with index ${highestIdx + 1}")
+                scannedPageDao.insertAll(
+                    ScannedPage(
+                        Uuid.generateV4(),
+                        sessionID,
+                        path,
+                        settings,
+                        rotation,
+                        highestIdx + 1
+                    )
                 )
-            )
+            }
         }
     }
 
