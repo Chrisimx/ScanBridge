@@ -17,11 +17,9 @@
  *     SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package org.github.chrisimx.scanbridge
-
-import io.github.chrisimx.scanbridge.data.model.loadDefaultFormats
-import junit.framework.TestCase.assertEquals
-import org.junit.Test
+import io.github.chrisimx.scanbridge.loadDefaultFormats
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class PaperFormatTest {
 

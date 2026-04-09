@@ -104,7 +104,6 @@ dependencies {
     implementation(libs.koin.annotations)
     implementation(libs.koin.compose.viewmodel)
     implementation(libs.koin.androix.navigation)
-    implementation(libs.esclkt)
     implementation(libs.zoomable)
     implementation(libs.kotlin.reflect)
     implementation(libs.coil.compose)
