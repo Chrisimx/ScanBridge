@@ -43,6 +43,7 @@ rules = "1.7.0"
 paraphrase-plugin = "0.4.1"
 ksp = "2.3.6"
 protoc = "4.33.5"
+androidx-sqlite = "2.6.2"
 
 [libraries]
 
@@ -62,6 +63,7 @@ androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "d
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite" }
 
 retrofit-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }

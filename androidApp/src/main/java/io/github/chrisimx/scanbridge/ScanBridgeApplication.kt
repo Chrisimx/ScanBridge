@@ -37,26 +37,20 @@ import org.koin.plugin.module.dsl.factory
 import org.koin.plugin.module.dsl.single
 import org.koin.plugin.module.dsl.create
 import org.koin.plugin.module.dsl.viewModel
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import timber.log.Timber
 
 fun createAppSettingsDataStore(context: Context) = context.appSettingsStore
 fun createShownMessagesDataStore(context: Context) = context.shownMessagesStore
 
 fun createScanBridgeDb(context: Context): ScanBridgeDb {
-    val builder = Room.databaseBuilder(
+    val databaseFile = context.getDatabasePath("scanbridge")
+    val builder = Room.databaseBuilder<ScanBridgeDb>(
         context,
-        ScanBridgeDb::class.java,
-        "scanbridge"
+        databaseFile.absolutePath
     )
-    //val logger = logger<ScanBridgeApplication>()
-    builder.setQueryCallback(
-        { sqlQuery, bindArgs ->
-          //  logger.debug("RoomDebug") {
-          //      "SQL: $sqlQuery, args: $bindArgs"
-          //  }
-        },
-        { it.run() }
-    )
+        .setDriver(BundledSQLiteDriver())
+
     val db = builder.build()
         .migrateLegacyCustomScanners(context)
         .migrateLegacySessions(context)
