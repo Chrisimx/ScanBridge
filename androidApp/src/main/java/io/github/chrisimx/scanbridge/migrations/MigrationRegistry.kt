@@ -5,13 +5,18 @@ import io.github.chrisimx.scanbridge.repositories.LastRouteRepoAutoMigration
 import io.github.chrisimx.scanbridge.repositories.RoomLastRouteRepository
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import org.koin.plugin.module.dsl.create
+
+fun createLastRouteRepoAutoMigration(datastoreLastRouteRepository: DatastoreLastRouteRepository, roomLastRouteRepository: RoomLastRouteRepository): LastRouteRepoAutoMigration {
+    return LastRouteRepoAutoMigration(
+        datastoreLastRouteRepository,
+        roomLastRouteRepository,
+        "LastRouteDataStoreToRoom"
+    )
+}
 
 val migrationsModule = module {
     single<LastRouteRepoAutoMigration> {
-        LastRouteRepoAutoMigration(
-            get<DatastoreLastRouteRepository>(),
-            get<RoomLastRouteRepository>(),
-            "LastRouteDataStoreToRoom"
-        )
+        create(::createLastRouteRepoAutoMigration)
     } bind Migration::class
 }

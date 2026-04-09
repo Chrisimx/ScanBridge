@@ -41,9 +41,32 @@ import org.koin.plugin.module.dsl.viewModel
 import timber.log.Timber
 
 fun createAppSettingsDataStore(context: Context) = context.appSettingsStore
+fun createShownMessagesDataStore(context: Context) = context.shownMessagesStore
+
+fun createScanBridgeDb(context: Context): ScanBridgeDb {
+    val builder = Room.databaseBuilder(
+        context,
+        ScanBridgeDb::class.java,
+        "scanbridge"
+    )
+    //val logger = logger<ScanBridgeApplication>()
+    builder.setQueryCallback(
+        { sqlQuery, bindArgs ->
+          //  logger.debug("RoomDebug") {
+          //      "SQL: $sqlQuery, args: $bindArgs"
+          //  }
+        },
+        { it.run() }
+    )
+    val db = builder.build()
+        .migrateLegacyCustomScanners(context)
+        .migrateLegacySessions(context)
+
+    return db
+}
 val appModule = module {
     single<DataStore<ShownMessages>>(named<ShownMessages>()) {
-        get<Context>().shownMessagesStore
+        create(::createShownMessagesDataStore)
     }
     single<DataStore<ScanBridgeSettings>>(named<ScanBridgeSettings>()) {
         create(::createAppSettingsDataStore)
@@ -58,26 +81,7 @@ val appModule = module {
     single<RoomBackedMigrationExecutor>() bind MigrationExecutor::class
     includes(migrationsModule)
     single<ScanBridgeDb> {
-        val context = get<Application>()
-        val builder = Room.databaseBuilder(
-            context,
-            ScanBridgeDb::class.java,
-            "scanbridge"
-        )
-        val logger = logger<ScanBridgeApplication>()
-        builder.setQueryCallback(
-            { sqlQuery, bindArgs ->
-                logger.debug("RoomDebug") {
-                    "SQL: $sqlQuery, args: $bindArgs"
-                }
-            },
-            { it.run() }
-        )
-        val db = builder.build()
-            .migrateLegacyCustomScanners(context)
-            .migrateLegacySessions(context)
-
-        return@single db
+        create(::createScanBridgeDb)
     }
     single<DatastoreLastRouteRepository>()
     single<RoomLastRouteRepository>() bind LastRouteRepository::class
@@ -92,7 +96,7 @@ val appModule = module {
 class ScanBridgeApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        val koinApp = startKoin {
+        startKoin {
             androidContext(this@ScanBridgeApplication)
             modules(appModule)
         }
