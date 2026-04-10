@@ -29,6 +29,12 @@ suspend fun DataStore<ScanBridgeSettings>.setTimeoutSetting(value: UInt) {
     }
 }
 
+suspend fun DataStore<ScanBridgeSettings>.setDefaultScanDpi(value: UInt) {
+    this.updateSettings {
+        defaultScanDpi = UInt32Value.of(value.toInt())
+    }
+}
+
 suspend fun DataStore<ScanBridgeSettings>.setChunkSize(value: UInt) {
     this.updateSettings {
         chunkSizePdfExport = UInt32Value.of(value.toInt())

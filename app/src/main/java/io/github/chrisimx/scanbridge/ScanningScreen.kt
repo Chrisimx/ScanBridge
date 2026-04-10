@@ -496,6 +496,21 @@ fun ScanningScreen(
                     exportAlpha,
                     onDismiss = { scanningViewModel.setShowExportOptionsPopup(false) },
                     updateWidth = { exportOptionsWidth = it },
+                    onExportOcrPdf = {
+                        scanningViewModel.setShowExportOptionsPopup(false)
+                        scanningViewModel.doPdfExportWithOcr(
+                            context,
+                            { error ->
+                                snackBarError(
+                                    error,
+                                    scope,
+                                    context,
+                                    snackbarHostState,
+                                    false
+                                )
+                            }
+                        )
+                    },
                     onExportPdf = {
                         scanningViewModel.setShowExportOptionsPopup(false)
                         scanningViewModel.doPdfExport(
@@ -535,7 +550,23 @@ fun ScanningScreen(
                     saveOptionsWidth,
                     saveOptionsAlpha,
                     onDismiss = { scanningViewModel.setShowSaveOptionsPopup(false) },
-                    updateWidth = { exportOptionsWidth = it },
+                    updateWidth = { saveOptionsWidth = it },
+                    onExportOcrPdf = {
+                        scanningViewModel.setShowSaveOptionsPopup(false)
+                        scanningViewModel.doPdfExportWithOcr(
+                            context,
+                            { error ->
+                                snackBarError(
+                                    error,
+                                    scope,
+                                    context,
+                                    snackbarHostState,
+                                    false
+                                )
+                            },
+                            saveFileLauncher
+                        )
+                    },
                     onExportPdf = {
                         scanningViewModel.setShowSaveOptionsPopup(false)
                         scanningViewModel.doPdfExport(

@@ -42,6 +42,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
@@ -60,12 +61,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.core.net.toUri
 import io.github.chrisimx.scanbridge.datastore.*
 import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
+import io.github.chrisimx.scanbridge.proto.defaultScanDpiOrNull
 import io.github.chrisimx.scanbridge.proto.rememberScanSettingsOrNull
 import io.github.chrisimx.scanbridge.services.DebugLogService
 import io.github.chrisimx.scanbridge.uicomponents.TitledCard
@@ -74,6 +77,9 @@ import io.github.chrisimx.scanbridge.uicomponents.settings.CheckboxSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.MoreInformationButton
 import io.github.chrisimx.scanbridge.uicomponents.settings.UIntSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
+import io.github.chrisimx.scanbridge.util.DEFAULT_SCAN_DPI_MAX
+import io.github.chrisimx.scanbridge.util.defaultScanDpiPresets
+import io.github.chrisimx.scanbridge.util.normalizeDefaultScanDpiPreference
 import java.io.File
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -88,6 +94,76 @@ fun DisableCertChecksSetting(onInformationRequested: (Int) -> Unit, checked: Boo
         setChecked
     ) {
         onInformationRequested(it)
+    }
+}
+
+@Composable
+fun DefaultScanDpiSetting(
+    selectedValue: UInt,
+    onInformationRequested: (Int) -> Unit,
+    setValue: (UInt) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
+    ) {
+        ConstraintLayout(
+            Modifier.fillMaxWidth()
+        ) {
+            val (title, informationButton) = createRefs()
+
+            Text(
+                text = stringResource(R.string.default_scan_dpi),
+                modifier = Modifier.constrainAs(title) {
+                    start.linkTo(parent.start)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    end.linkTo(informationButton.start, 12.dp)
+                    width = Dimension.fillToConstraints
+                },
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Box(
+                modifier = Modifier.constrainAs(informationButton) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    end.linkTo(parent.end)
+                }
+            ) {
+                MoreInformationButton {
+                    onInformationRequested(R.string.default_scan_dpi_info)
+                }
+            }
+        }
+
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            defaultScanDpiPresets.forEach { preset ->
+                val label = if (preset == DEFAULT_SCAN_DPI_MAX) {
+                    stringResource(R.string.max_short)
+                } else {
+                    preset.toString()
+                }
+
+                InputChip(
+                    selected = selectedValue == preset,
+                    onClick = { setValue(preset) },
+                    label = {
+                        Text(
+                            label,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                )
+            }
+        }
     }
 }
 
@@ -266,6 +342,16 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 ) {
                     information = it
                 }
+
+                DefaultScanDpiSetting(
+                    normalizeDefaultScanDpiPreference(appSettings.defaultScanDpiOrNull?.value?.toUInt()),
+                    setInformationRequested,
+                    { selectedValue ->
+                        coroutineScope.launch {
+                            appSettingsStore.setDefaultScanDpi(selectedValue)
+                        }
+                    }
+                )
 
                 // Timeout setting
                 UIntSetting(

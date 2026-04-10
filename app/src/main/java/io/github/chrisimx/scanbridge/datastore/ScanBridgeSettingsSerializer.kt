@@ -13,6 +13,7 @@ import java.io.OutputStream
 object ScanBridgeSettingsSerializer : Serializer<ScanBridgeSettings> {
     override val defaultValue: ScanBridgeSettings = scanBridgeSettings {
         scanningResponseTimeout = UInt32Value.of(25)
+        defaultScanDpi = UInt32Value.of(300)
         rememberScanSettings = BoolValue.of(true)
         chunkSizePdfExport = UInt32Value.of(50)
     }

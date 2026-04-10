@@ -29,6 +29,7 @@ val Context.appSettingsStore: DataStore<ScanBridgeSettings> by dataStore(
                     }
                     writeDebug = sharedPrefs.getBoolean("write_debug", false)
                     scanningResponseTimeout = UInt32Value.of(sharedPrefs.getInt("scanning_response_timeout", 25))
+                    defaultScanDpi = UInt32Value.of(sharedPrefs.getInt("default_scan_dpi", 300))
                     chunkSizePdfExport = UInt32Value.of(sharedPrefs.getInt("chunk_size_pdf_export", 50))
                     rememberScanSettings = BoolValue.of(sharedPrefs.getBoolean("remember_scan_settings", true))
                 }.build()

@@ -30,14 +30,20 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import androidx.room.withTransaction
+import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.kernel.geom.PageSize
+import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Image
+import com.itextpdf.layout.element.Paragraph
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import getTrustAllTM
 import io.github.chrisimx.esclkt.ESCLRequestClient
+import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanRegion
 import io.github.chrisimx.esclkt.ScanSettings
@@ -56,11 +62,16 @@ import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
 import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
+import io.github.chrisimx.scanbridge.proto.defaultScanDpiOrNull
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
 import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
 import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
+import io.github.chrisimx.scanbridge.util.getClosestResolution
 import io.github.chrisimx.scanbridge.util.getEditedImageName
 import io.github.chrisimx.scanbridge.util.getMaxResolution
+import io.github.chrisimx.scanbridge.util.pickClosestResolution
+import io.github.chrisimx.scanbridge.util.recognizePageText
+import io.github.chrisimx.scanbridge.util.resolveDefaultScanDpiPreference
 import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.saveAsJPEG
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
@@ -317,6 +328,9 @@ class ScanningScreenViewModel(
     suspend fun setScannerCapabilities(caps: ScannerCapabilities) {
         _scanningScreenData.capabilities.value = caps
         val storedSession = sessionDao.getSessionById(sessionID)
+        val defaultScanDpi = resolveDefaultScanDpiPreference(
+            application.appSettingsStore.data.first().defaultScanDpiOrNull?.value?.toUInt()
+        )
 
         Timber.d("Stored session: $storedSession")
 
@@ -380,6 +394,12 @@ class ScanningScreenViewModel(
                         validatedInputSource ?: caps.getInputSourceOptions().first(),
                         duplex ?: false
                     )
+                    val supportedResolutions = selectedInputSourceCaps
+                        .settingProfiles
+                        .firstOrNull()
+                        ?.supportedResolutions
+                        ?.discreteResolutions
+                        .orEmpty()
 
                     val intent = if (savedSettings.intent != null &&
                         !selectedInputSourceCaps.supportedIntents.contains(savedSettings.intent)
@@ -439,20 +459,46 @@ class ScanningScreenViewModel(
                         null
                     }
 
+                    val savedXResolution = savedSettings.xResolution
+                    val savedYResolution = savedSettings.yResolution
+                    val preferredResolution = when {
+                        savedXResolution != null && savedYResolution != null -> {
+                            val savedResolution = DiscreteResolution(savedXResolution, savedYResolution)
+                            if (supportedResolutions.contains(savedResolution)) {
+                                savedResolution
+                            } else {
+                                pickClosestResolution(
+                                    supportedResolutions,
+                                    maxOf(savedXResolution, savedYResolution)
+                                )
+                            }
+                        }
+
+                        else -> {
+                            if (defaultScanDpi == null) {
+                                supportedResolutions.maxByOrNull { it.xResolution * it.yResolution }
+                            } else {
+                                pickClosestResolution(supportedResolutions, defaultScanDpi)
+                            }
+                        }
+                    } ?: caps.getClosestResolution(validatedInputSource ?: caps.getInputSourceOptions().first(), defaultScanDpi)
+
                     val validatedSettings = savedSettings.copy(
                         inputSource = validatedInputSource,
                         duplex = duplex,
                         intent = intent,
-                        scanRegions = scanRegion
+                        scanRegions = scanRegion,
+                        xResolution = preferredResolution.xResolution,
+                        yResolution = preferredResolution.yResolution
                     )
 
                     validatedSettings
                 } catch (e: Exception) {
                     Timber.e(e, "Error applying saved settings, using defaults")
-                    caps.calculateDefaultESCLScanSettingsState()
+                    caps.calculateDefaultESCLScanSettingsState(defaultScanDpi)
                 }
             } else {
-                caps.calculateDefaultESCLScanSettingsState()
+                caps.calculateDefaultESCLScanSettingsState(defaultScanDpi)
             }
 
             sessionDao.insertAll(Session(sessionID, initialSettings, savedSettingsUiState))
@@ -551,14 +597,25 @@ class ScanningScreenViewModel(
 
     fun doPdfExport(context: Context, onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
         viewModelScope.launch {
-            doPdfExportInternal(context, onError, saveFileLauncher)
+            doPdfExportInternal(context, onError, saveFileLauncher, false)
+        }
+    }
+
+    fun doPdfExportWithOcr(
+        context: Context,
+        onError: (String) -> Unit,
+        saveFileLauncher: ActivityResultLauncher<String>? = null
+    ) {
+        viewModelScope.launch {
+            doPdfExportInternal(context, onError, saveFileLauncher, true)
         }
     }
 
     private suspend fun doPdfExportInternal(
         context: Context,
         onError: (String) -> Unit,
-        saveFileLauncher: ActivityResultLauncher<String>? = null
+        saveFileLauncher: ActivityResultLauncher<String>? = null,
+        withOcr: Boolean
     ) {
         val currentScans = scannedPages.value
         val scannerCapsNullable = scanningScreenData.capabilities
@@ -578,14 +635,14 @@ class ScanningScreenViewModel(
             return
         }
 
-        setLoadingText(R.string.exporting)
+        setLoadingText(if (withOcr) R.string.exporting_with_ocr else R.string.exporting)
 
         val parentDir = File(application.filesDir, "exports")
         if (!parentDir.exists()) {
             parentDir.mkdir()
         }
 
-        val nameRoot = "pdfexport-${
+        val nameRoot = "${if (withOcr) "pdfocr-export" else "pdfexport"}-${
             LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH_mm_ss_SSS"))
         }"
@@ -601,63 +658,97 @@ class ScanningScreenViewModel(
 
         val chunks = currentScans.chunked(chunkSize)
 
-        chunks.forEachIndexed { index, chunk ->
-            val pdfFile = File(
-                parentDir,
-                "$nameRoot-$index.pdf"
-            )
-            PdfWriter(pdfFile).use { writer ->
-                PdfDocument(writer).use { pdf ->
-                    Document(pdf).use { document ->
-                        chunk.forEachIndexed { i, scan ->
-                            val scanRegion =
-                                scan.originalScanSettings.scanRegions?.regions?.first() ?: ScanRegion(
-                                    297.millimeters().toThreeHundredthsOfInch(),
-                                    210.millimeters().toThreeHundredthsOfInch(),
-                                    0.threeHundredthsOfInch(),
-                                    0.threeHundredthsOfInch()
+        val digitsNeeded = chunks.size.toString().length
+        val recognizer = if (withOcr) {
+            TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+        } else {
+            null
+        }
+
+        try {
+            chunks.forEachIndexed { index, chunk ->
+                val pdfFile = File(
+                    parentDir,
+                    "$nameRoot-${index.toString().padStart(digitsNeeded, '0')}.pdf"
+                )
+                PdfWriter(pdfFile).use { writer ->
+                    PdfDocument(writer).use { pdf ->
+                        Document(pdf).use { document ->
+                            val ocrFont = if (withOcr) PdfFontFactory.createFont(StandardFonts.HELVETICA) else null
+
+                            chunk.forEachIndexed { i, scan ->
+                                val scanRegion =
+                                    scan.originalScanSettings.scanRegions?.regions?.first() ?: ScanRegion(
+                                        297.millimeters().toThreeHundredthsOfInch(),
+                                        210.millimeters().toThreeHundredthsOfInch(),
+                                        0.threeHundredthsOfInch(),
+                                        0.threeHundredthsOfInch()
+                                    )
+
+                                val imageData = ImageDataFactory.create(scan.filePath)
+
+                                val rotated = scan.rotation == ScanRelativeRotation.Rotated
+
+                                val inputSource = scan.originalScanSettings.inputSource ?: InputSource.Platen
+
+                                val fallbackResolution = scannerCaps.getMaxResolution(inputSource)
+                                val scannerXResolution = scan.originalScanSettings.xResolution ?: fallbackResolution.xResolution
+                                val scannerYResolution = scan.originalScanSettings.yResolution ?: fallbackResolution.yResolution
+
+                                val rotationCorrectedXRes = if (rotated) scannerYResolution else scannerXResolution
+                                val rotationCorrectedYRes = if (rotated) scannerXResolution else scannerYResolution
+
+                                // pts are 1/72th inch
+                                val widthPts = (imageData.width / rotationCorrectedXRes.toFloat()).inches().toPoints().value
+                                val heightPts = (imageData.height / rotationCorrectedYRes.toFloat()).inches().toPoints().value
+
+                                val pageWidth = widthPts.toFloat()
+                                val pageHeight = heightPts.toFloat()
+                                val pageNumber = i + 1
+
+                                pdf.addNewPage(
+                                    PageSize(
+                                        pageWidth,
+                                        pageHeight
+                                    )
                                 )
 
-                            val imageData = ImageDataFactory.create(scan.filePath)
+                                if (withOcr && recognizer != null && ocrFont != null) {
+                                    val recognizedPage = recognizePageText(File(scan.filePath), recognizer)
+                                    recognizedPage.lines.forEach { line ->
+                                        val x = (pageWidth * line.leftRatio).coerceIn(0f, pageWidth)
+                                        val y = (pageHeight * line.bottomRatio).coerceIn(0f, pageHeight)
+                                        val availableWidth = (pageWidth * line.widthRatio).coerceAtLeast(1f)
+                                        val fontSize = (pageHeight * line.heightRatio).coerceIn(6f, 48f)
 
-                            val rotated = scan.rotation == ScanRelativeRotation.Rotated
+                                        document.add(
+                                            Paragraph(line.text)
+                                                .setFont(ocrFont)
+                                                .setFontSize(fontSize)
+                                                .setMargin(0f)
+                                                .setFixedPosition(pageNumber, x, y, availableWidth)
+                                        )
+                                    }
+                                }
 
-                            val inputSource = scan.originalScanSettings.inputSource ?: InputSource.Platen
+                                val imageElem = Image(imageData)
+                                imageElem.setFixedPosition(pageNumber, 0f, 0f)
+                                imageElem.setHeight(pageHeight)
+                                imageElem.setWidth(pageWidth)
 
-                            val fallbackResolution = scannerCaps.getMaxResolution(inputSource)
-                            val scannerXResolution = scan.originalScanSettings.xResolution ?: fallbackResolution.xResolution
-                            val scannerYResolution = scan.originalScanSettings.yResolution ?: fallbackResolution.yResolution
+                                document.add(imageElem)
 
-                            val rotationCorrectedXRes = if (rotated) scannerYResolution else scannerXResolution
-                            val rotationCorrectedYRes = if (rotated) scannerXResolution else scannerYResolution
-
-                            // pts are 1/72th inch
-                            val widthPts = (imageData.width / rotationCorrectedXRes.toFloat()).inches().toPoints().value
-                            val heightPts = (imageData.height / rotationCorrectedYRes.toFloat()).inches().toPoints().value
-
-                            pdf.addNewPage(
-                                PageSize(
-                                    widthPts.toFloat(),
-                                    heightPts.toFloat()
-                                )
-                            )
-
-                            val imageElem = Image(imageData)
-                            imageElem.setFixedPosition(i + 1, 0f, 0f)
-                            imageElem.setHeight(heightPts.toFloat())
-                            imageElem.setWidth(widthPts.toFloat())
-
-                            document.add(imageElem)
-
-                            pageCounter++
-                            Timber.d("Added page $pageCounter to PDF")
+                                pageCounter++
+                                Timber.d("Added page $pageCounter to PDF")
+                            }
                         }
                     }
                 }
             }
+        } finally {
+            recognizer?.close()
         }
 
-        val digitsNeeded = chunks.size.toString().length
         val tempPdfFiles = List(chunks.size) { index ->
             File(parentDir, "$nameRoot-${index.toString().padStart(digitsNeeded, '0')}.pdf")
         }

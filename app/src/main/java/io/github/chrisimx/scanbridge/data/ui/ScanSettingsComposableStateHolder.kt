@@ -42,7 +42,7 @@ import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.services.LocaleProvider
 import io.github.chrisimx.scanbridge.util.derived
-import io.github.chrisimx.scanbridge.util.getMaxResolution
+import io.github.chrisimx.scanbridge.util.pickClosestResolution
 import io.github.chrisimx.scanbridge.util.toDoubleLocalized
 import java.util.*
 import kotlinx.coroutines.CoroutineScope
@@ -325,9 +325,10 @@ class ScanSettingsComposableStateHolder(
                     !supportedResolutions.contains(DiscreteResolution(xRes, yRes))
 
                 val replacementResolution = if (invalidResolutionSetting) {
-                    val highestScanResolution = uiState.capabilities.getMaxResolution(inputSource)
+                    val preferredDpi = maxOf(xRes, yRes)
+                    val closestResolution = pickClosestResolution(supportedResolutions, preferredDpi)
 
-                    Pair(highestScanResolution.xResolution, highestScanResolution.yResolution)
+                    Pair(closestResolution?.xResolution, closestResolution?.yResolution)
                 } else {
                     Pair(xRes, yRes)
                 }

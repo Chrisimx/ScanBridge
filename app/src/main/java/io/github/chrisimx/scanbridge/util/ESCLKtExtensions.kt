@@ -88,10 +88,39 @@ fun ScannerCapabilities.getBestColorMode(inputSource: InputSource): ColorModeEnu
     return chosenColorMode
 }
 
-fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): ScanSettings {
+fun pickClosestResolution(resolutions: List<DiscreteResolution>, preferredDpi: UInt): DiscreteResolution? = resolutions.minWithOrNull(
+    compareBy<DiscreteResolution>(
+        {
+            kotlin.math.abs(it.xResolution.toLong() - preferredDpi.toLong()) +
+                kotlin.math.abs(it.yResolution.toLong() - preferredDpi.toLong())
+        },
+        {
+            if (it.xResolution <= preferredDpi && it.yResolution <= preferredDpi) {
+                0
+            } else {
+                1
+            }
+        },
+        { it.xResolution.toLong() * it.yResolution.toLong() }
+    )
+)
+
+fun ScannerCapabilities.getClosestResolution(inputSource: InputSource, preferredDpi: UInt?): DiscreteResolution {
+    val inputCaps = this.getInputSourceCaps(inputSource)
+    if (preferredDpi == null) {
+        return getMaxResolution(inputSource)
+    }
+
+    return pickClosestResolution(
+        inputCaps.settingProfiles.first().supportedResolutions.discreteResolutions,
+        preferredDpi
+    ) ?: getMaxResolution(inputSource)
+}
+
+fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(preferredDpi: UInt? = 300u): ScanSettings {
     val inputSource = this.getInputSourceOptions().firstOrNull() ?: InputSource.Platen
 
-    val maxResolution = getMaxResolution(inputSource)
+    val defaultResolution = getClosestResolution(inputSource, preferredDpi)
 
     val inputSourceCaps = this.getInputSourceCaps(inputSource, false)
 
@@ -106,8 +135,8 @@ fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): ScanSettings {
         version = this.interfaceVersion,
         inputSource = inputSource,
         scanRegions = maxScanRegion,
-        xResolution = maxResolution.xResolution,
-        yResolution = maxResolution.yResolution,
+        xResolution = defaultResolution.xResolution,
+        yResolution = defaultResolution.yResolution,
         colorMode = bestColorMode,
         documentFormatExt = "image/jpeg"
     )

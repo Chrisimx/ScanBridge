@@ -72,7 +72,11 @@
     <string name="error_state_please_enter_an_url">Please enter an URL</string>
     <string name="custom_scanner">Custom scanner</string>
     <string name="export_pdf">Export as PDF</string>
+    <string name="export_pdf_short">PDF</string>
+    <string name="export_pdf_with_ocr">Export as searchable OCR PDF</string>
+    <string name="export_pdf_with_ocr_short">OCR PDF</string>
     <string name="export_as_archive">Export as archive of JPEGs</string>
+    <string name="export_archive_short">JPEG ZIP</string>
     <string name="no_further_pages">No further pages. %1$s</string>
     <string name="error_while_copying_received_image_to_file">Error while copying received image to file: %1$s</string>
     <string name="couldn_t_decode_received_image">Couldn\'t decode received image. %1$s</string>
@@ -85,6 +89,9 @@
     <string name="export_debug_log">Export debug log</string>
     <string name="timeout_info">This timeout determines how long ScanBridge waits at maximum for the scanner to respond to requests until it aborts the scan job.\n\nThis is mostly useful for slow scanners and large scan areas which take longer to scan.</string>
     <string name="timeout">Response Timeout (in seconds)</string>
+    <string name="default_scan_dpi">Default scan resolution (DPI)</string>
+    <string name="default_scan_dpi_info">Choose which DPI preset new scan sessions should start with when remembered scan settings are disabled.\n\nThe Max preset always uses the highest resolution supported by the current scanner.</string>
+    <string name="max_short">Max</string>
     <string name="advanced">Advanced Settings</string>
     <string name="connect_and_save"><![CDATA[Connect & save]]></string>
     <string name="name">Name</string>
@@ -96,12 +103,13 @@
     <string name="disable_cert_checks">Disable certificate checks</string>
     <string name="disable_cert_checks_desc">This option disables all HTTPS certificate validation. Any certificate will be accepted, including self-signed, expired, or otherwise invalid ones. Do not use this option on insecure or public networks, as it makes man-in-the-middle (MitM) attacks possible.\n\nIn most cases, scanners are used on private networks or over VPN connections, where concerns about authenticity are minimal. In such environments, disabling certificate checks is unlikely to pose a real security risk. And in case confidentiality or authenticity is a concern, even HTTPS won\'t help much, as eSCL lacks client authentication altogether. Anyone with access to the network can potentially retrieve scanned pages.</string>
     <string name="remember_scan_settings">Remember scan settings</string>
-    <string name="remember_scan_settings_desc">When enabled, your last used scan settings (input source, duplex, etc.) will be restored when you create a new scan session.\n\nWhen disabled, each session starts with default scan settings (highest resolution, largest possible scan area).</string>
+    <string name="remember_scan_settings_desc">When enabled, your last used scan settings (input source, duplex, etc.) will be restored when you create a new scan session.\n\nWhen disabled, each session starts with the configured default DPI and the largest possible scan area.</string>
     <string name="donate">Support development</string>
     <string name="source_code">View source code</string>
     <string name="f_droid" translatable="false">F-Droid</string>
     <string name="google_play" translatable="false">Play Store</string>
     <string name="save_to_file">Save to File</string>
+    <string name="exporting_with_ocr">Running OCR and exporting PDF...</string>
     <string name="loading_image">Loading image…</string>
     <string name="crop">Crop current page</string>
     <string name="crop_button">Crop</string>

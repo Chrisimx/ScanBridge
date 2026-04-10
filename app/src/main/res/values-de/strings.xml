@@ -72,7 +72,11 @@
     <string name="error_state_please_enter_an_url">Gib bitte eine URL ein</string>
     <string name="custom_scanner">Benutzerdefinierter Scanner</string>
     <string name="export_pdf">Als PDF exportieren</string>
+    <string name="export_pdf_short">PDF</string>
+    <string name="export_pdf_with_ocr">Als OCR-PDF exportieren</string>
+    <string name="export_pdf_with_ocr_short">OCR-PDF</string>
     <string name="export_as_archive">Als JPEG-Archiv exportieren</string>
+    <string name="export_archive_short">JPEG-ZIP</string>
     <string name="no_further_pages">Keine weiteren Seiten. %1$s</string>
     <string name="error_while_copying_received_image_to_file">Fehler beim Herunterladen des empfangenen Bilds als Datei: %1$s</string>
     <string name="couldn_t_decode_received_image">Empfangenes Bild konnte nicht dekodiert werden. %1$s</string>
@@ -85,6 +89,9 @@
     <string name="export_debug_log">Debugprotokoll exportieren</string>
     <string name="timeout_info">Diese Einstellung legt fest wie lange ScanBridge maximal auf eine Antwort vom Scanner wartet bevor es den Scanversuch abbricht.\n\nDiese Einstellung ist für langsame Scanner und große Scanbereiche nützlich.</string>
     <string name="timeout">Timeoutlänge für Scannerantwort (in Sekunden)</string>
+    <string name="default_scan_dpi">Standard-Scanauflösung (DPI)</string>
+    <string name="default_scan_dpi_info">Lege fest, mit welchem DPI-Preset neue Scansitzungen starten sollen, wenn gemerkte Scaneinstellungen deaktiviert sind.\n\nDas Preset Max verwendet immer die höchste vom aktuellen Scanner unterstützte Auflösung.</string>
+    <string name="max_short">Max</string>
     <string name="advanced">Erweiterte Einstellungen</string>
     <string name="connect_and_save"><![CDATA[Verbinden & speichern]]></string>
     <string name="name">Name</string>
@@ -96,10 +103,11 @@
     <string name="disable_cert_checks">HTTPS-Zertifikatsüberprüfung umgehen</string>
     <string name="disable_cert_checks_desc">Diese Einstellung deaktiviert alle Zertifikatsprüfungen bei HTTPS-Verbindungen. Jedes Zertifikat wird folglich akzeptiert, egal ob es ungültig oder selbstsigniert ist. Diese Einstellung sollte nicht in unsicheren Netwerken verwendet werden, denn durch sie wird ein Man-in-the-Middle-Angriff leicht durchführbar.\n\nIn den meisten Fällen werden Scanner in privaten Netzwerken oder über VPN-Verbindungen verwendet, wo Authentizität in der Regel keine große Rolle spielt. In solchen Umgebungen ist es unwahrscheinlich, dass das Deaktivieren der Zertifikatsprüfung ein echtes Sicherheitsrisiko darstellt. Und falls Vertraulichkeit oder Authentizität doch eine Rolle spielen, hilft selbst HTTPS nur begrenzt – denn eSCL bietet keinerlei Client-Authentifizierung. Jeder mit Netzwerkzugriff auf den Scanner kann potenziell auf gescannte Seiten zugreifen.</string>
     <string name="remember_scan_settings">Speichern der zuletzt verwendeten Scaneinstellungen</string>
-    <string name="remember_scan_settings_desc">Wenn diese Option aktiviert ist, werden die zuletzt verwendeten Scaneinstellungen (z.B. Quelle, Duplex usw.) beim Erstellen einer neuen Scansitzung wiederhergestellt.\n\nWenn sie deaktiviert ist, beginnt jede Sitzung mit den standardmäßigen Scaneinstellungen (höchste Auflösung, größtmöglicher Scanbereich).</string>
+    <string name="remember_scan_settings_desc">Wenn diese Option aktiviert ist, werden die zuletzt verwendeten Scaneinstellungen (z.B. Quelle, Duplex usw.) beim Erstellen einer neuen Scansitzung wiederhergestellt.\n\nWenn sie deaktiviert ist, beginnt jede Sitzung mit der konfigurierten Standard-DPI und dem größtmöglichen Scanbereich.</string>
     <string name="donate">Für ScanBridge spenden</string>
     <string name="source_code">Den Quellcode anschauen</string>
     <string name="save_to_file">In Datei speichern</string>
+    <string name="exporting_with_ocr">OCR wird ausgefuehrt und PDF exportiert...</string>
     <string name="loading_image">Bild wird geladen…</string>
     <string name="crop">Seite zuschneiden</string>
     <string name="crop_button">Zuschneiden</string>

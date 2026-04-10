@@ -146,6 +146,7 @@ dependencies {
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.itext7.core)
+    implementation(libs.mlkit.text.recognition)
     implementation(libs.ktor.okhttp)
     implementation(libs.ktor.logging)
     "playImplementation"(project(":lvl_library"))
