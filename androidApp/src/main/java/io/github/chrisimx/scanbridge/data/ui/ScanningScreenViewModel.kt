@@ -37,7 +37,6 @@ import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Image
-import getTrustAllTM
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanRegion
@@ -59,7 +58,7 @@ import io.github.chrisimx.scanbridge.db.entities.TempFile
 import io.github.chrisimx.scanbridge.model.HttpClientConfig
 import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
-import io.github.chrisimx.scanbridge.model.ScanSettingsStateData
+import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableData
 import io.github.chrisimx.scanbridge.model.toggleRotation
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
@@ -72,11 +71,6 @@ import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.saveAsJPEG
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.zipFiles
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.logging.Logger
-import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.Url
 import java.io.File
 import java.nio.file.Files
@@ -289,7 +283,7 @@ class ScanningScreenViewModel(
         }
     }
 
-    suspend fun saveUpdatedScanSettingsUiData(newData: ScanSettingsStateData?) {
+    suspend fun saveUpdatedScanSettingsUiData(newData: ScanSettingsEnterableData?) {
         Timber.d("Settings ui data updated $newData")
         sessionDao.updateScanSettingsUiData(sessionID, newData)
     }
@@ -313,7 +307,7 @@ class ScanningScreenViewModel(
             }
         }
 
-        val defaultScanSettingsUIData = ScanSettingsStateData(
+        val defaultScanSettingsUIData = ScanSettingsEnterableData(
             caps
         )
 

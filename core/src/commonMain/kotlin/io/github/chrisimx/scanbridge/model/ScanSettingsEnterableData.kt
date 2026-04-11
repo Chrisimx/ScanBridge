@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class ScanSettingsStateData(
+data class ScanSettingsEnterableData(
     val capabilities: ScannerCapabilities,
     val paperFormats: List<PaperFormat> = loadDefaultFormats(),
     val customMenuEnabled: Boolean = false,

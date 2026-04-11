@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import io.github.chrisimx.scanbridge.db.entities.Session
-import io.github.chrisimx.scanbridge.model.ScanSettingsStateData
+import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableData
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 
@@ -37,7 +37,7 @@ interface SessionDao {
     suspend fun updateCurrentPage(sessionId: Uuid, pageIdx: Int)
 
     @Query("UPDATE sessions SET currentSettingsUIData = :uiData WHERE sessionId = :sessionId")
-    suspend fun updateScanSettingsUiData(sessionId: Uuid, uiData: ScanSettingsStateData?)
+    suspend fun updateScanSettingsUiData(sessionId: Uuid, uiData: ScanSettingsEnterableData?)
 
     @Delete
     suspend fun delete(session: Session)

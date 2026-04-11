@@ -43,7 +43,7 @@ import io.github.chrisimx.scanbridge.model.Locale
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.ports.LocaleProvider
 import io.github.chrisimx.scanbridge.model.NumberValidationResult
-import io.github.chrisimx.scanbridge.model.ScanSettingsStateData
+import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableData
 import io.github.chrisimx.scanbridge.util.derived
 import io.github.chrisimx.scanbridge.util.getMaxResolution
 import io.github.chrisimx.scanbridge.util.toDoubleLocalized
@@ -74,7 +74,7 @@ class ScanSettingsComposableStateHolder(
     @InjectedParam
     val scanSettings: StateFlow<ScanSettings>,
     @InjectedParam
-    private val initialScanSettingsData: ScanSettingsStateData,
+    private val initialScanSettingsData: ScanSettingsEnterableData,
     @InjectedParam
     private val updateSettings: suspend (ScanSettings.() -> ScanSettings) -> Unit,
     @InjectedParam
@@ -84,7 +84,7 @@ class ScanSettingsComposableStateHolder(
 ) {
 
     private val _uiState = MutableStateFlow(initialScanSettingsData)
-    val uiState: StateFlow<ScanSettingsStateData> = _uiState.asStateFlow()
+    val uiState: StateFlow<ScanSettingsEnterableData> = _uiState.asStateFlow()
 
     val inputSourceOptions: StateFlow<List<InputSource>> = _uiState.derived(coroutineScope) {
         it.capabilities.getInputSourceOptions()

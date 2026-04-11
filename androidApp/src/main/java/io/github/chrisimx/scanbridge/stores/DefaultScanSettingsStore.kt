@@ -28,7 +28,7 @@ import io.github.chrisimx.scanbridge.proto.lastUsedScanSettingsOrNull
 import io.github.chrisimx.scanbridge.proto.lastUsedScanSettingsUiStateOrNull
 import io.github.chrisimx.scanbridge.proto.rememberScanSettingsOrNull
 import io.github.chrisimx.scanbridge.ScanSettingsJson
-import io.github.chrisimx.scanbridge.model.ScanSettingsStateData
+import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableData
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
@@ -38,7 +38,7 @@ object DefaultScanSettingsStore {
         return appPreferences.rememberScanSettingsOrNull?.value ?: true
     }
 
-    suspend fun save(context: Context, scanSettings: ScanSettings, uiStateData: ScanSettingsStateData?) {
+    suspend fun save(context: Context, scanSettings: ScanSettings, uiStateData: ScanSettingsEnterableData?) {
         if (!isRememberSettingsEnabled(context)) {
             Timber.d("Scan settings persistence is disabled, skipping save")
             return
@@ -61,7 +61,7 @@ object DefaultScanSettingsStore {
         }
     }
 
-    suspend fun load(context: Context): Pair<ScanSettings?, ScanSettingsStateData?> {
+    suspend fun load(context: Context): Pair<ScanSettings?, ScanSettingsEnterableData?> {
         if (!isRememberSettingsEnabled(context)) {
             Timber.d("Scan settings persistence is disabled, returning null")
             return null to null
@@ -80,7 +80,7 @@ object DefaultScanSettingsStore {
             val json = ScanSettingsJson.json
             val lastUsedScanSettingsDecoded = json.decodeFromString<ScanSettings>(lastUsedScanSettings)
             val lastUsedScanSettingsUIStateDecoded = lastUsedScanSettingsUiState?.let {
-                json.decodeFromString<ScanSettingsStateData>(it)
+                json.decodeFromString<ScanSettingsEnterableData>(it)
             }
             Timber.d("Loaded default scan settings $lastUsedScanSettings, $lastUsedScanSettingsUIStateDecoded")
             return lastUsedScanSettingsDecoded to lastUsedScanSettingsUIStateDecoded
