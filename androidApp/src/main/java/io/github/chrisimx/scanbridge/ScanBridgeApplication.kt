@@ -1,5 +1,6 @@
 package io.github.chrisimx.scanbridge
 
+import AndroidHttpClientFactory
 import AndroidScanBridgeDbBuilderFactory
 import android.app.Application
 import android.content.Context
@@ -42,6 +43,12 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import io.github.chrisimx.scanbridge.db.DefaultScanBridgeDbFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbBuilderFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbFactory
+import io.github.chrisimx.scanbridge.infrastructure.KmLogScanBridgeLogger
+import io.github.chrisimx.scanbridge.infrastructure.KmLogScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.ports.HttpClientFactory
+import io.github.chrisimx.scanbridge.ports.LocaleProvider
+import io.github.chrisimx.scanbridge.ports.ScanBridgeLogger
+import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
 import timber.log.Timber
 
 fun createAppSettingsDataStore(context: Context) = context.appSettingsStore
@@ -62,7 +69,8 @@ val appModule = module {
     single<FileDebugLogService> {
         FileDebugLogService(get(named<ScanBridgeSettings>()),get())
     } bind DebugLogService::class
-    factory<KmLogScanBridgeLogger>() bind ScanBridgeLogger::class
+    single<AndroidHttpClientFactory>() bind HttpClientFactory::class
+    single<KmLogScanBridgeLoggerFactory>() bind ScanBridgeLoggerFactory::class
     single<ScanJobRepository>()
     single<RoomBackedMigrationExecutor>() bind MigrationExecutor::class
     includes(migrationsModule)

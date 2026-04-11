@@ -25,6 +25,7 @@ import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.daos.ScannedPageDao
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
+import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
 import io.github.chrisimx.scanbridge.util.extractPdfImages
 import io.github.chrisimx.scanbridge.util.toJobStateString
@@ -64,6 +65,9 @@ class ScanJobForegroundService : Service() {
     }
 
     private val scanJobs: ScanJobRepository by inject()
+
+    private val httpClientFactory: HttpClientFactory by inject()
+
     private val db: ScanBridgeDb by inject()
     private val scannedPageDao: ScannedPageDao = db.scannedPageDao()
 
@@ -166,7 +170,10 @@ class ScanJobForegroundService : Service() {
     private suspend fun doScan(scanJob: ScanJob) {
         val currentScanSettings = scanJob.scanSettings
 
-        val esclRequestClient = scanJob.esclClient
+        val esclRequestClient = ESCLRequestClient(
+            scanJob.scannerBaseUrl,
+            httpClientFactory.create(scanJob.httpClientConfig)
+        )
 
         scanJobs.notifyStarted(scanJob)
 

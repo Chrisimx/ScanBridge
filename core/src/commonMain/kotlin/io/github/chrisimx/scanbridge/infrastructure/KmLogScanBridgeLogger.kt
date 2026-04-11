@@ -1,12 +1,10 @@
-package io.github.chrisimx.scanbridge
+package io.github.chrisimx.scanbridge.infrastructure
 
 import com.diamondedge.logging.KmLog
 import com.diamondedge.logging.logging
-import org.koin.core.annotation.InjectedParam
-import org.koin.mp.KoinPlatform.getKoin
+import io.github.chrisimx.scanbridge.ports.ScanBridgeLogger
 
 class KmLogScanBridgeLogger(
-    @InjectedParam
     tag: String
 ) : ScanBridgeLogger {
     private val logger: KmLog = logging(tag)
@@ -33,17 +31,5 @@ class KmLogScanBridgeLogger(
 
     override fun wtf(t: Throwable?, tag: String?, msg: () -> String) {
         logger.e(t, tag, msg)
-    }
-}
-
-inline fun <reified T> org.koin.core.scope.Scope.logger(): ScanBridgeLogger {
-    val tag = T::class.simpleName ?: "Unknown"
-    return get { org.koin.core.parameter.parametersOf(tag) }
-}
-
-inline fun <reified T> logger() = lazy {
-    val koin = getKoin()
-    koin.get<ScanBridgeLogger> {
-        org.koin.core.parameter.parametersOf(T::class.simpleName ?: "Unknown")
     }
 }

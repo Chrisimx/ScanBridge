@@ -1,4 +1,3 @@
-import com.android.utils.TraceUtils.simpleId
 import java.util.*
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -134,7 +133,7 @@ dependencies {
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.itext7.core)
-    implementation(libs.ktor.okhttp)
+    implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.logging)
     "playImplementation"(project(":lvl_library"))
     "playImplementation"(libs.retrofit)

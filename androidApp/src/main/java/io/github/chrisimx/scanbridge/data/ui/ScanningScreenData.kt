@@ -31,7 +31,6 @@ import kotlin.uuid.Uuid
 data class ErrorDescription(val pretext: Int?, val icon: Int?, val text: String?)
 
 data class ScanningScreenData(
-    val esclClient: ESCLRequestClient,
     val sessionID: Uuid,
     val confirmDialogShown: MutableState<Boolean> = mutableStateOf(false),
     val confirmPageDeleteDialogShown: MutableState<Boolean> = mutableStateOf(false),
@@ -48,7 +47,6 @@ data class ScanningScreenData(
     val isRotating: MutableState<Boolean> = mutableStateOf(false)
 ) {
     fun toImmutable() = ImmutableScanningScreenData(
-        esclClient,
         sessionID,
         confirmDialogShown,
         confirmPageDeleteDialogShown,
@@ -67,7 +65,6 @@ data class ScanningScreenData(
 }
 
 data class ImmutableScanningScreenData(
-    val esclClient: ESCLRequestClient,
     val sessionID: Uuid,
     private val confirmDialogShownState: State<Boolean>,
     private val confirmPageDeleteDialogShownState: State<Boolean>,

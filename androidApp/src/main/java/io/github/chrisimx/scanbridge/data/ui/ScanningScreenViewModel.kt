@@ -56,10 +56,12 @@ import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
+import io.github.chrisimx.scanbridge.model.HttpClientConfig
 import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.model.ScanSettingsStateData
 import io.github.chrisimx.scanbridge.model.toggleRotation
+import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
 import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
@@ -108,49 +110,22 @@ enum class ScanningScreenEvent {
 
 class ScanningScreenViewModel(
     @InjectedParam
-    address: Url,
+    val address: Url,
     @InjectedParam
-    timeout: UInt,
+    val timeout: UInt,
     @InjectedParam
-    withDebugInterceptor: Boolean,
+    val withDebugInterceptor: Boolean,
     @InjectedParam
-    certificateValidationDisabled: Boolean,
+    val certificateValidationDisabled: Boolean,
     @InjectedParam
     val sessionID: Uuid,
     val db: ScanBridgeDb,
     application: Application,
-    val scanJobRepo: ScanJobRepository
+    val scanJobRepo: ScanJobRepository,
+    val httpClientFactory: HttpClientFactory
 ) : AndroidViewModel(application) {
     private val _scanningScreenData =
         ScanningScreenData(
-            ESCLRequestClient(
-                address,
-                HttpClient(OkHttp) {
-                    install(HttpTimeout) {
-                        requestTimeoutMillis = timeout.toLong() * 1000
-                        connectTimeoutMillis = timeout.toLong() * 1000
-                        socketTimeoutMillis = timeout.toLong() * 1000
-                    }
-                    if (withDebugInterceptor) {
-                        install(Logging) {
-                            logger = object : Logger {
-                                override fun log(message: String) {
-                                    Timber.tag("ESCLRequestClient").d(message)
-                                }
-                            }
-                        }
-                    }
-                    if (certificateValidationDisabled) {
-                        engine {
-                            config {
-                                val (socketFactory, trustManager) = getTrustAllTM()
-                                sslSocketFactory(socketFactory, trustManager)
-                                hostnameVerifier { _, _ -> true }
-                            }
-                        }
-                    }
-                }
-            ),
             sessionID
         )
     val scanningScreenData: ImmutableScanningScreenData
@@ -521,7 +496,12 @@ class ScanningScreenViewModel(
                 Uuid.generateV4(),
                 sessionID,
                 currentSettings,
-                _scanningScreenData.esclClient
+                address,
+                HttpClientConfig(
+                    certificateValidationDisabled,
+                    withDebugInterceptor,
+                    timeout.toULong()
+                )
             )
             scanJobRepo.enqueue(scanJob)
             ScanJobForegroundService.startService(application)
@@ -778,8 +758,20 @@ class ScanningScreenViewModel(
         }
     }
 
+    fun createHttpClientConfig() = HttpClientConfig(
+            certificateValidationDisabled,
+            withDebugInterceptor,
+            timeout.toULong()
+        )
+
     fun retrieveScannerCapabilities() = viewModelScope.launch {
-        val esclClient = scanningScreenData.esclClient
+        val httpClient = httpClientFactory.create(
+            createHttpClientConfig()
+        )
+        val esclClient = ESCLRequestClient(
+            address,
+            httpClient
+        )
 
         val scannerCapabilitiesResult = esclClient.getScannerCapabilities()
 

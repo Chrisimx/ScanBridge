@@ -1,8 +1,8 @@
 package io.github.chrisimx.scanbridge.services
 
 import android.annotation.SuppressLint
-import io.github.chrisimx.scanbridge.Locale
-import io.github.chrisimx.scanbridge.LocaleProvider
+import io.github.chrisimx.scanbridge.model.Locale
+import io.github.chrisimx.scanbridge.ports.LocaleProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

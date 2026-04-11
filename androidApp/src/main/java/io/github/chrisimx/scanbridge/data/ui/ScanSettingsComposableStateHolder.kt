@@ -39,9 +39,9 @@ import io.github.chrisimx.esclkt.inches
 import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.esclkt.scanRegion
 import io.github.chrisimx.esclkt.threeHundredthsOfInch
-import io.github.chrisimx.scanbridge.Locale
+import io.github.chrisimx.scanbridge.model.Locale
 import io.github.chrisimx.scanbridge.R
-import io.github.chrisimx.scanbridge.LocaleProvider
+import io.github.chrisimx.scanbridge.ports.LocaleProvider
 import io.github.chrisimx.scanbridge.model.NumberValidationResult
 import io.github.chrisimx.scanbridge.model.ScanSettingsStateData
 import io.github.chrisimx.scanbridge.util.derived

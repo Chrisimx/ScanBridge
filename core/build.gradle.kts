@@ -46,6 +46,8 @@ kotlin {
             api(libs.koin.annotations)
             api(libs.kotlinx.coroutines)
             api(libs.kotlinx.serialization.json)
+            api(libs.ktor.client.core)
+            api(libs.ktor.logging)
             api(libs.esclkt)
 
             // Room deps
@@ -58,6 +60,7 @@ kotlin {
         }
 
         androidMain.dependencies {
+            api(libs.ktor.client.okhttp)
         }
 
         jvmMain.dependencies {

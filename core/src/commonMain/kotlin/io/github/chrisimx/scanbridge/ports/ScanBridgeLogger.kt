@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge
+package io.github.chrisimx.scanbridge.ports
 
 interface ScanBridgeLogger {
     /** Log a verbose message */
