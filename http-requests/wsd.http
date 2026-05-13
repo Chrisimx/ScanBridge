@@ -1,0 +1,164 @@
+### Retrieve scanner caps
+POST http://{{server}}/WebServices/ScannerService
+Content-Type: application/soap+xml
+User-Agent: WSDAPI
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+               xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+               xmlns:sca="http://schemas.microsoft.com/windows/2006/08/wdp/scan">
+    <soap:Header>
+        <wsa:MessageID>urn:uuid:9c8c2edb-3ffc-b823-28e8-b4339548f743</wsa:MessageID>
+        <wsa:To>http://192.168.178.122:80/WebServices/ScannerService</wsa:To>
+        <wsa:ReplyTo>
+            <wsa:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</wsa:Address>
+        </wsa:ReplyTo>
+        <wsa:Action>http://schemas.microsoft.com/windows/2006/08/wdp/scan/GetScannerElements</wsa:Action>
+    </soap:Header>
+    <soap:Body>
+        <sca:GetScannerElementsRequest>
+            <sca:RequestedElements>
+                <sca:Name>sca:ScannerConfiguration</sca:Name>
+                <sca:Name>sca:ScannerDescription</sca:Name>
+                <sca:Name>sca:DefaultScanTicket</sca:Name>
+                <sca:Name>sca:ScannerStatus</sca:Name>
+            </sca:RequestedElements>
+        </sca:GetScannerElementsRequest>
+    </soap:Body>
+</soap:Envelope>
+
+
+### Get scanner status
+POST http://{{server}}/WebServices/ScannerService
+Content-Type: application/soap+xml
+User-Agent: WSDAPI
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope
+    xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+    xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+    xmlns:sca="http://schemas.microsoft.com/windows/2006/08/wdp/scan">
+    <soap:Header>
+        <wsa:MessageID>urn:uuid:8af74e6f-1f8b-4d40-c36f-f10eee60221e</wsa:MessageID>
+        <wsa:To>http://192.168.178.122:80/WebServices/ScannerService</wsa:To>
+        <wsa:ReplyTo>
+            <wsa:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</wsa:Address>
+        </wsa:ReplyTo>
+        <wsa:Action>http://schemas.microsoft.com/windows/2006/08/wdp/scan/GetScannerElements</wsa:Action>
+    </soap:Header>
+    <soap:Body>
+        <sca:GetScannerElementsRequest>
+            <sca:RequestedElements>
+                <sca:Name>sca:ScannerStatus</sca:Name>
+            </sca:RequestedElements>
+        </sca:GetScannerElementsRequest>
+    </soap:Body>
+</soap:Envelope>
+
+
+### Create scanjob
+POST http://{{server}}/WebServices/ScannerService
+Content-Type: application/soap+xml
+User-Agent: WSDAPI
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope
+    xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+    xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+    xmlns:sca="http://schemas.microsoft.com/windows/2006/08/wdp/scan">
+    <soap:Header>
+        <wsa:MessageID>urn:uuid:e6d472bf-e3bd-a7a4-6066-cdea1f91e5fa</wsa:MessageID>
+        <wsa:To>http://192.168.178.122:80/WebServices/ScannerService</wsa:To>
+        <wsa:ReplyTo>
+            <wsa:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</wsa:Address>
+        </wsa:ReplyTo>
+        <wsa:Action>http://schemas.microsoft.com/windows/2006/08/wdp/scan/CreateScanJob</wsa:Action>
+    </soap:Header>
+    <soap:Body>
+        <sca:CreateScanJobRequest>
+            <sca:ScanTicket>
+                <sca:JobDescription>
+                    <sca:JobName>sane-airscan request</sca:JobName>
+                    <sca:JobOriginatingUserName>sane-airscan</sca:JobOriginatingUserName>
+                    <sca:JobInformation>sane-airscan</sca:JobInformation>
+                </sca:JobDescription>
+                <sca:DocumentParameters>
+                    <sca:Format>exif</sca:Format>
+                    <sca:ImagesToTransfer>1</sca:ImagesToTransfer>
+                    <sca:InputSize>
+                        <sca:InputMediaSize>
+                            <sca:Width>8500</sca:Width>
+                            <sca:Height>11700</sca:Height>
+                        </sca:InputMediaSize>
+                    </sca:InputSize>
+                    <sca:InputSource>Platen</sca:InputSource>
+                    <sca:MediaSides>
+                        <sca:MediaFront>
+                            <sca:ColorProcessing>RGB24</sca:ColorProcessing>
+                            <sca:Resolution>
+                                <sca:Width>300</sca:Width>
+                                <sca:Height>300</sca:Height>
+                            </sca:Resolution>
+                            <sca:ScanRegion>
+                                <sca:ScanRegionXOffset>0</sca:ScanRegionXOffset>
+                                <sca:ScanRegionYOffset>0</sca:ScanRegionYOffset>
+                                <sca:ScanRegionWidth>8500</sca:ScanRegionWidth>
+                                <sca:ScanRegionHeight>11700</sca:ScanRegionHeight>
+                            </sca:ScanRegion>
+                        </sca:MediaFront>
+                    </sca:MediaSides>
+                </sca:DocumentParameters>
+            </sca:ScanTicket>
+        </sca:CreateScanJobRequest>
+    </soap:Body>
+</soap:Envelope>
+
+### Retrieve scanned image
+POST http://{{server}}/WebServices/ScannerService
+Content-Type: application/soap+xml
+User-Agent: WSDAPI
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope
+    xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+    xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+    xmlns:sca="http://schemas.microsoft.com/windows/2006/08/wdp/scan">
+    <soap:Header>
+        <wsa:MessageID>urn:uuid:dc1ff0f8-e4e2-b1ef-758f-b1e6186a5cc6</wsa:MessageID>
+        <wsa:To>http://192.168.178.122:80/WebServices/ScannerService</wsa:To>
+        <wsa:ReplyTo>
+            <wsa:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</wsa:Address>
+        </wsa:ReplyTo>
+        <wsa:Action>http://schemas.microsoft.com/windows/2006/08/wdp/scan/RetrieveImage</wsa:Action>
+    </soap:Header>
+    <soap:Body>
+        <sca:RetrieveImageRequest>
+            <sca:DocumentDescription>
+                <sca:DocumentName>IMAGE000.JPG</sca:DocumentName>
+            </sca:DocumentDescription>
+            <sca:JobId>2</sca:JobId>
+            <sca:JobToken>urn:uuid:81b7a2a1-f1ff-4504-84a2-3c2af46faf5d</sca:JobToken>
+        </sca:RetrieveImageRequest>
+    </soap:Body>
+</soap:Envelope>
+
+
+### Retrieve device info
+POST http://{{server}}/WebServices/Device
+Content-Type: application/soap+xml
+User-Agent: WSDAPI
+
+<?xml version="1.0"?>
+<soap:Envelope
+    xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+    xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+    <soap:Header>
+        <wsa:Action>http://schemas.xmlsoap.org/ws/2004/09/transfer/Get</wsa:Action>
+        <wsa:MessageID>urn:uuid:414bbe9a-7059-e7c3-a856-a38029a53c1c</wsa:MessageID>
+        <wsa:To>urn:uuid:e3248000-80ce-11db-8000-3c2af46faf5d</wsa:To>
+        <wsa:ReplyTo>
+            <wsa:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</wsa:Address>
+        </wsa:ReplyTo>
+    </soap:Header>
+    <soap:Body/>
+</soap:Envelope>

@@ -17,3 +17,4 @@ app/src/androidTest/native-libs
 /app/release
 /app/play
 /fastlane/report.xml
+/http-requests/http-client.private.env.json
