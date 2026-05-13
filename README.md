@@ -4,7 +4,7 @@
 
 <p align="center" style="text-align: center;">
 <a href='https://f-droid.org/packages/io.github.chrisimx.scanbridge/' target="_blank">
-    <img src="assets/get-it-on-fdroid.svg"
+    <img src="androidApp/assets/get-it-on-fdroid.svg"
          align="center"         
          alt="Get it on F-Droid"
          style="height: 50px"
@@ -12,7 +12,7 @@
 </a>
 
 <a href='https://play.google.com/store/apps/details?id=io.github.chrisimx.scanbridge.play' target="_blank">
-  <img src='assets/GetItOnGooglePlay_Badge_Web_color_English.svg'
+  <img src='androidApp/assets/GetItOnGooglePlay_Badge_Web_color_English.svg'
        align="center"
        alt='Get it on Google Play'
        style="height: 50px"
@@ -31,9 +31,9 @@ scanners.
 It is written in Kotlin and uses Jetpack Compose.
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/01-scannedPageScreen_1773391873581.png" alt="Discover scanners in your network" style="width: 30%; height: auto;" />
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02-scanSettings_1773391870896.png" alt="Scan multiple pages" style="width: 30%; height: auto;" />
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/03-discoveryScreen_1773391871298.png" alt="Use your scanner to the maximum of its abilities" style="width: 30%; height: auto;" />
+  <img src="androidApp/fastlane/metadata/android/en-US/images/phoneScreenshots/01-scannedPageScreen_1773391873581.png" alt="Discover scanners in your network" style="width: 30%; height: auto;" />
+  <img src="androidApp/fastlane/metadata/android/en-US/images/phoneScreenshots/02-scanSettings_1773391870896.png" alt="Scan multiple pages" style="width: 30%; height: auto;" />
+  <img src="androidApp/fastlane/metadata/android/en-US/images/phoneScreenshots/03-discoveryScreen_1773391871298.png" alt="Use your scanner to the maximum of its abilities" style="width: 30%; height: auto;" />
 </div>
 
 ## Features
@@ -104,7 +104,7 @@ If you want to chat with me or other users, you can join the Matrix room
 ## Contributions
 
 Contributions are welcome, and it would be amazing if you want to help. Refer to
-the [Contribution Guidelines](CONTRIBUTING.md) for more information.
+the [Contribution Guidelines](androidApp/CONTRIBUTING.md) for more information.
 
 ## License
 

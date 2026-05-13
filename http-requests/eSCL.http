@@ -1,0 +1,4 @@
+### Retrieve the eSCL scanner capabilities
+GET http://{{server}}/eSCL/ScannerCapabilities
+
+###
