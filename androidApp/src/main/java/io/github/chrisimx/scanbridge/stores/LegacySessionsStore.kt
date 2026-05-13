@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import io.github.chrisimx.esclkt.ScannerCapabilities
+import io.github.chrisimx.scanbridge.ScanSettingsJson
 import io.github.chrisimx.scanbridge.data.model.LegacySessionV2
 import io.github.chrisimx.scanbridge.data.model.LegacySessionV2.Companion.fromString
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
@@ -12,7 +13,6 @@ import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
 import io.github.chrisimx.scanbridge.proto.copy
-import io.github.chrisimx.scanbridge.ScanSettingsJson
 import java.io.File
 import java.nio.file.Files
 import kotlin.concurrent.atomics.AtomicBoolean
@@ -104,10 +104,7 @@ object LegacySessionsStore {
         return this
     }
 
-    private suspend fun ScanBridgeDb.insertLegacySessionData(
-        sessionId: Uuid,
-        legacySession: LegacySessionV2
-    ) {
+    private suspend fun ScanBridgeDb.insertLegacySessionData(sessionId: Uuid, legacySession: LegacySessionV2) {
         sessionDao().insertAll(
             Session(sessionId, legacySession.scanSettings, null)
         )

@@ -5,7 +5,6 @@ import io.github.chrisimx.scanbridge.PaperFormat
 import io.github.chrisimx.scanbridge.loadDefaultFormats
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class ScanSettingsEnterableData(
     val capabilities: ScannerCapabilities,

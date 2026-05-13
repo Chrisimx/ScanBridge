@@ -20,10 +20,10 @@ import io.github.chrisimx.esclkt.JobState
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.scanbridge.MainActivity
 import io.github.chrisimx.scanbridge.R
-import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.daos.ScannedPageDao
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
+import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.services.ScanJobRepository

@@ -7,13 +7,14 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.plugin.module.dsl.create
 
-fun createLastRouteRepoAutoMigration(datastoreLastRouteRepository: DatastoreLastRouteRepository, roomLastRouteRepository: RoomLastRouteRepository): LastRouteRepoAutoMigration {
-    return LastRouteRepoAutoMigration(
-        datastoreLastRouteRepository,
-        roomLastRouteRepository,
-        "LastRouteDataStoreToRoom"
-    )
-}
+fun createLastRouteRepoAutoMigration(
+    datastoreLastRouteRepository: DatastoreLastRouteRepository,
+    roomLastRouteRepository: RoomLastRouteRepository
+): LastRouteRepoAutoMigration = LastRouteRepoAutoMigration(
+    datastoreLastRouteRepository,
+    roomLastRouteRepository,
+    "LastRouteDataStoreToRoom"
+)
 
 val migrationsModule = module {
     single<LastRouteRepoAutoMigration> {

@@ -1,5 +1,5 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
@@ -27,7 +27,6 @@ kotlin {
         namespace = "io.github.chrisimx.scanbridge"
         compileSdk = 36
         minSdk = 23
-
 
         compilerOptions {
             jvmTarget.set(
@@ -65,7 +64,6 @@ kotlin {
 
         jvmMain.dependencies {
         }
-
     }
 
     targets

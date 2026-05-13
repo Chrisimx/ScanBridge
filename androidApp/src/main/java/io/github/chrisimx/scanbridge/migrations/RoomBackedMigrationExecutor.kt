@@ -5,13 +5,9 @@ import io.github.chrisimx.scanbridge.db.entities.ExecutedMigrationToRoom
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.koin.core.scope.Scope
 import org.koin.mp.KoinPlatform.getKoin
 
-class RoomBackedMigrationExecutor(
-    val db: ScanBridgeDb,
-    loggerFactory: ScanBridgeLoggerFactory
-) : MigrationExecutor {
+class RoomBackedMigrationExecutor(val db: ScanBridgeDb, loggerFactory: ScanBridgeLoggerFactory) : MigrationExecutor {
     val logger = loggerFactory.withClass(this::class)
     val executedMigrationsDao = db.executedMigrationsDao()
 

@@ -36,7 +36,7 @@ import timber.log.Timber
 
 private const val TAG = "ScannerDiscovery"
 
-class ScannerDiscovery(
+class ScannerDiscoveryBackend(
     val nsdManager: NsdManager,
     val isSecure: Boolean,
     val statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>
@@ -155,7 +155,7 @@ class ScannerDiscovery(
     }
 }
 
-private fun ScannerDiscovery.tryParseScannerUrl(address: InetAddress, serviceInfo: NsdServiceInfo, rs: String): Url? {
+private fun ScannerDiscoveryBackend.tryParseScannerUrl(address: InetAddress, serviceInfo: NsdServiceInfo, rs: String): Url? {
     if (address.isLinkLocalAddress) {
         Timber.tag(TAG).d("Ignoring link local address: ${address.hostAddress}")
         return null

@@ -6,5 +6,5 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "executedmigrationtoroom")
 data class ExecutedMigrationToRoom(
     @PrimaryKey
-    val migrationId: String,
+    val migrationId: String
 )

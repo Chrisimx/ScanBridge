@@ -1,5 +1,5 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
@@ -48,7 +48,6 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
         }
-
     }
 
     targets
@@ -70,6 +69,6 @@ dependencies {
 
 compose.resources {
     publicResClass = true
-    //packageOfResClass = "me.sample.library.resources"
+    // packageOfResClass = "me.sample.library.resources"
     generateResClass = always
 }

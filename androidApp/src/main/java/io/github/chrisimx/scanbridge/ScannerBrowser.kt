@@ -64,14 +64,14 @@ fun startScannerDiscovery(
     context: Context,
     scannerMap: SnapshotStateMap<String, DiscoveredScanner>,
     scannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>
-): Optional<Pair<NsdManager, Array<ScannerDiscovery>>> {
+): Optional<Pair<NsdManager, Array<ScannerDiscoveryBackend>>> {
     val service = getSystemService(context, NsdManager::class.java)
     if (service == null) {
         Timber.e("Couldn't get NsdManager service")
         return Optional.empty()
     }
-    val listener = ScannerDiscovery(service, isSecure = false, scannerMap)
-    val listenerSecure = ScannerDiscovery(service, isSecure = true, scannerMapSecure)
+    val listener = ScannerDiscoveryBackend(service, isSecure = false, scannerMap)
+    val listenerSecure = ScannerDiscoveryBackend(service, isSecure = true, scannerMapSecure)
     service.discoverServices("_uscan._tcp", NsdManager.PROTOCOL_DNS_SD, listener)
     service.discoverServices("_uscans._tcp", NsdManager.PROTOCOL_DNS_SD, listenerSecure)
     Timber.i("Discovery started")

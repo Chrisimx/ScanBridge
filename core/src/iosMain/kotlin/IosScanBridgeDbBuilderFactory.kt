@@ -11,7 +11,7 @@ class IosScanBridgeDbBuilderFactory : ScanBridgeDbBuilderFactory {
     override fun getBuilder(): RoomDatabase.Builder<ScanBridgeDb> {
         val dbFilePath = documentDirectory() + "/scanbridge.db"
         return Room.databaseBuilder<ScanBridgeDb>(
-            name = dbFilePath,
+            name = dbFilePath
         )
     }
 
@@ -22,7 +22,7 @@ class IosScanBridgeDbBuilderFactory : ScanBridgeDbBuilderFactory {
             inDomain = NSUserDomainMask,
             appropriateForURL = null,
             create = false,
-            error = null,
+            error = null
         )
         return requireNotNull(documentDirectory?.path)
     }

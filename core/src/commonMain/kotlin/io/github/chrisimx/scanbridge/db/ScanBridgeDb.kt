@@ -22,7 +22,9 @@ import io.github.chrisimx.scanbridge.db.typeconverters.UrlTypeConverter
 import io.github.chrisimx.scanbridge.db.typeconverters.UuidTypeConverter
 
 @Database(
-    entities = [CustomScanner::class, ScannedPage::class, Session::class, TempFile::class, LastRoute::class, ExecutedMigrationToRoom::class],
+    entities = [
+        CustomScanner::class, ScannedPage::class, Session::class, TempFile::class, LastRoute::class, ExecutedMigrationToRoom::class
+    ],
     version = 4,
     autoMigrations = [
         AutoMigration(

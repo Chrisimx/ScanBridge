@@ -10,25 +10,19 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.InjectedParam
-import org.koin.core.annotation.Named
 
 class DatastoreShownMessagesRepository(
     val shownMessagesDataStore: DataStore<ShownMessages>,
     @InjectedParam
     val coroutineScope: CoroutineScope
 ) : ShownMessagesRepository {
-    override fun getWasShownFlow(message: UserInformationMessage): Flow<Boolean> {
-        return shownMessagesDataStore.data.map {
-            (BuildConfig.FLAVOR != "play" && message.playOnly) || !when (message) {
-                UserInformationMessage.THANKS_FOR_PURCHASE -> it.thankPlayOne
-            }
+    override fun getWasShownFlow(message: UserInformationMessage): Flow<Boolean> = shownMessagesDataStore.data.map {
+        (BuildConfig.FLAVOR != "play" && message.playOnly) || !when (message) {
+            UserInformationMessage.THANKS_FOR_PURCHASE -> it.thankPlayOne
         }
     }
 
-    override suspend fun setShown(
-        message: UserInformationMessage,
-        shown: Boolean
-    ) {
+    override suspend fun setShown(message: UserInformationMessage, shown: Boolean) {
         shownMessagesDataStore.updateData {
             it.copy {
                 when (message) {

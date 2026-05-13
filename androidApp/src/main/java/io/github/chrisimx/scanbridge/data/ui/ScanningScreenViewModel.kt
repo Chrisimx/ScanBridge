@@ -753,10 +753,10 @@ class ScanningScreenViewModel(
     }
 
     fun createHttpClientConfig() = HttpClientConfig(
-            certificateValidationDisabled,
-            withDebugInterceptor,
-            timeout.toULong()
-        )
+        certificateValidationDisabled,
+        withDebugInterceptor,
+        timeout.toULong()
+    )
 
     fun retrieveScannerCapabilities() = viewModelScope.launch {
         val httpClient = httpClientFactory.create(

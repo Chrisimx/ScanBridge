@@ -33,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.chrisimx.scanbridge.theme.Poppins
-import io.github.chrisimx.scanbridge.theme.PoppinsTypography
 import io.github.chrisimx.scanbridge.theme.Teal1
 
 @Composable

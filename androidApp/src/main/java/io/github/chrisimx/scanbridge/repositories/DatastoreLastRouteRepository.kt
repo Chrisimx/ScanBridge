@@ -8,7 +8,7 @@ import io.github.chrisimx.scanbridge.proto.copy
 import io.github.chrisimx.scanbridge.proto.lastRouteOrNull
 import kotlinx.coroutines.flow.firstOrNull
 
-class DatastoreLastRouteRepository(context: Context): LastRouteRepository {
+class DatastoreLastRouteRepository(context: Context) : LastRouteRepository {
     val lastRouteStore = context.lastRouteStore
     override suspend fun getLastRoute(): String? = lastRouteStore.data.firstOrNull()?.lastRouteOrNull?.value
 

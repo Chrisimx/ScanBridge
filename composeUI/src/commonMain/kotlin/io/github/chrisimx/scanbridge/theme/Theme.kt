@@ -54,7 +54,6 @@ expect fun platformDarkColorScheme(): ColorScheme?
 @Composable
 expect fun platformLightColorScheme(): ColorScheme?
 
-
 @Composable
 fun ScanBridgeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -64,7 +63,7 @@ fun ScanBridgeTheme(
 ) {
     val colorScheme = when {
         darkTheme -> platformDarkColorScheme() ?: DarkColorScheme
-        else ->  platformLightColorScheme() ?: LightColorScheme
+        else -> platformLightColorScheme() ?: LightColorScheme
     }
 
     MaterialTheme(

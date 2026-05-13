@@ -1,46 +1,46 @@
 package io.github.chrisimx.scanbridge.theme
 
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.Font
-import scanbridge.composeui.generated.resources.Res
-import androidx.compose.material3.Typography
-import androidx.compose.ui.text.font.FontStyle
 import scanbridge.composeui.generated.resources.*
+import scanbridge.composeui.generated.resources.Res
 
 @Composable
 fun Poppins(): FontFamily = FontFamily(
-        Font(Res.font.poppins_thin, weight = FontWeight.Thin),
-        Font(Res.font.poppins_thinitalic, weight = FontWeight.Thin, style = FontStyle.Italic),
+    Font(Res.font.poppins_thin, weight = FontWeight.Thin),
+    Font(Res.font.poppins_thinitalic, weight = FontWeight.Thin, style = FontStyle.Italic),
 
-        Font(Res.font.poppins_extralight, weight = FontWeight.ExtraLight),
-        Font(Res.font.poppins_extralightitalic, weight = FontWeight.ExtraLight, style = FontStyle.Italic),
+    Font(Res.font.poppins_extralight, weight = FontWeight.ExtraLight),
+    Font(Res.font.poppins_extralightitalic, weight = FontWeight.ExtraLight, style = FontStyle.Italic),
 
-        Font(Res.font.poppins_light, weight = FontWeight.Light),
-        Font(Res.font.poppins_lightitalic, weight = FontWeight.Light, style = FontStyle.Italic),
+    Font(Res.font.poppins_light, weight = FontWeight.Light),
+    Font(Res.font.poppins_lightitalic, weight = FontWeight.Light, style = FontStyle.Italic),
 
-        Font(Res.font.poppins_regular, weight = FontWeight.Normal),
-        Font(Res.font.poppins_italic, weight = FontWeight.Normal, style = FontStyle.Italic),
+    Font(Res.font.poppins_regular, weight = FontWeight.Normal),
+    Font(Res.font.poppins_italic, weight = FontWeight.Normal, style = FontStyle.Italic),
 
-        Font(Res.font.poppins_medium, weight = FontWeight.Medium),
-        Font(Res.font.poppins_mediumitalic, weight = FontWeight.Medium, style = FontStyle.Italic),
+    Font(Res.font.poppins_medium, weight = FontWeight.Medium),
+    Font(Res.font.poppins_mediumitalic, weight = FontWeight.Medium, style = FontStyle.Italic),
 
-        Font(Res.font.poppins_semibold, weight = FontWeight.SemiBold),
-        Font(Res.font.poppins_semibolditalic, weight = FontWeight.SemiBold, style = FontStyle.Italic),
+    Font(Res.font.poppins_semibold, weight = FontWeight.SemiBold),
+    Font(Res.font.poppins_semibolditalic, weight = FontWeight.SemiBold, style = FontStyle.Italic),
 
-        Font(Res.font.poppins_bold, weight = FontWeight.Bold),
-        Font(Res.font.poppins_bolditalic, weight = FontWeight.Bold, style = FontStyle.Italic),
+    Font(Res.font.poppins_bold, weight = FontWeight.Bold),
+    Font(Res.font.poppins_bolditalic, weight = FontWeight.Bold, style = FontStyle.Italic),
 
-        Font(Res.font.poppins_extrabold, weight = FontWeight.ExtraBold),
-        Font(Res.font.poppins_extrabolditalic, weight = FontWeight.ExtraBold, style = FontStyle.Italic),
+    Font(Res.font.poppins_extrabold, weight = FontWeight.ExtraBold),
+    Font(Res.font.poppins_extrabolditalic, weight = FontWeight.ExtraBold, style = FontStyle.Italic),
 
-        Font(Res.font.poppins_black, weight = FontWeight.Black),
-        Font(Res.font.poppins_blackitalic, weight = FontWeight.Black, style = FontStyle.Italic)
-    )
+    Font(Res.font.poppins_black, weight = FontWeight.Black),
+    Font(Res.font.poppins_blackitalic, weight = FontWeight.Black, style = FontStyle.Italic)
+)
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -195,5 +195,4 @@ fun PoppinsTypography(): Typography {
             letterSpacing = 0.sp
         )
     )
-
 }
