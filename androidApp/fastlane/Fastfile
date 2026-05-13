@@ -100,8 +100,8 @@ platform :android do
       sh("adb shell wm user-rotation lock #{rotation}")
 
       screengrab(
-        tests_apk_path: "app/build/outputs/apk/androidTest/play/debug/app-play-debug-androidTest.apk",
-        app_apk_path: "app/build/outputs/apk/play/debug/app-play-debug.apk",
+        tests_apk_path: "androidApp/build/outputs/apk/androidTest/play/debug/androidApp-play-debug-androidTest.apk",
+        app_apk_path: "androidApp/build/outputs/apk/play/debug/androidApp-play-debug.apk",
         output_directory: $playMetadata,
         device_type: device_type,
         tests_package_name: "io.github.chrisimx.scanbridge.play.test",
@@ -111,8 +111,8 @@ platform :android do
       )
 
       screengrab(
-        tests_apk_path: "app/build/outputs/apk/androidTest/fdroid/debug/app-fdroid-debug-androidTest.apk",
-        app_apk_path: "app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk",
+        tests_apk_path: "androidApp/build/outputs/apk/androidTest/fdroid/debug/androidApp-fdroid-debug-androidTest.apk",
+        app_apk_path: "androidApp/build/outputs/apk/fdroid/debug/androidApp-fdroid-debug.apk",
         output_directory: "fastlane/metadata/android",
         device_type: device_type,
         tests_package_name: "io.github.chrisimx.scanbridge.test",
