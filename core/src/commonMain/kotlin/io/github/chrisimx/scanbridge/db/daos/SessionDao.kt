@@ -24,9 +24,6 @@ interface SessionDao {
     @Query("SELECT * FROM sessions WHERE sessionId = :id")
     suspend fun getSessionById(id: Uuid): Session?
 
-    @Query("SELECT * FROM sessions WHERE sessionId = :id")
-    fun getSessionByIdBlocking(id: Uuid): Session?
-
     @Insert
     suspend fun insertAll(vararg sessions: Session)
 

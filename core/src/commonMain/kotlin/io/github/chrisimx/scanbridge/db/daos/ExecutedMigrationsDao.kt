@@ -5,14 +5,17 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import io.github.chrisimx.scanbridge.db.entities.ExecutedMigrationToRoom
+import kotlinx.coroutines.runBlocking
 
 @Dao
 interface ExecutedMigrationsDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun markAsExecuted(migration: ExecutedMigrationToRoom)
+    suspend fun markAsExecuted(migration: ExecutedMigrationToRoom)
 
     @Query("SELECT * FROM executedmigrationtoroom WHERE migrationId = :id")
-    fun getExecutedMigration(id: String): ExecutedMigrationToRoom?
+    suspend fun getExecutedMigration(id: String): ExecutedMigrationToRoom?
 
-    fun isAlreadyDone(id: String): Boolean = getExecutedMigration(id) != null
+    fun isAlreadyDone(id: String): Boolean = runBlocking {
+        getExecutedMigration(id) != null
+    }
 }
