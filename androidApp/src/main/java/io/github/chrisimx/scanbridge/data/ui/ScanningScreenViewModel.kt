@@ -491,11 +491,7 @@ class ScanningScreenViewModel(
                 sessionID,
                 currentSettings,
                 address,
-                HttpClientConfig(
-                    certificateValidationDisabled,
-                    withDebugInterceptor,
-                    timeout.toULong()
-                )
+                createHttpClientConfig()
             )
             scanJobRepo.enqueue(scanJob)
             ScanJobForegroundService.startService(application)
@@ -755,6 +751,8 @@ class ScanningScreenViewModel(
     fun createHttpClientConfig() = HttpClientConfig(
         certificateValidationDisabled,
         withDebugInterceptor,
+        timeout.toULong(),
+        timeout.toULong(),
         timeout.toULong()
     )
 

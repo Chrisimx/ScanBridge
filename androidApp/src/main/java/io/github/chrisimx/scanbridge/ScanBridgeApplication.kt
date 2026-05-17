@@ -66,7 +66,9 @@ fun createScannerIconImageLoader(factory: HttpClientFactory, context: Context): 
         HttpClientConfig(
             disableCertValidation = true,
             debugLogging = false,
-            timeoutInSeconds = 2u,
+            requestTimeoutInSeconds = 2u,
+            connectTimeoutInSeconds = 2u,
+            socketTimeoutInSeconds = 2u,
         )
     )
     return ImageLoader.Builder(context)

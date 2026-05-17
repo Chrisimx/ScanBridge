@@ -4,12 +4,12 @@ import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.scanbridge.model.ScannerHandle
-import io.github.chrisimx.scanbridge.model.UrlScannerHandle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 data class ScannerConnectionSettings(
-    val timeoutInSeconds: ULong = 10uL,
+    val connectionTimeoutInSeconds: ULong = 10uL,
+    val totalTimeoutInSeconds: ULong = 10uL,
     val allowSelfSignedCertificates: Boolean = false,
     val debugLogging: Boolean = false,
 )
@@ -19,7 +19,7 @@ sealed class ScannerCapabilitiesResult {
     data class ScannerCapsFormatInvalid(val error: Exception, val scannerCapsContent: String?) : ScannerCapabilitiesResult()
     data class UntrustedCertificate(val error: String?) : ScannerCapabilitiesResult()
     data class InvalidScannerHandle(val scannerHandle: ScannerHandle) : ScannerCapabilitiesResult()
-    data class InternalBug(val exception: Exception) : ScannerCapabilitiesResult()
+    data class InternalBug(val exception: Any) : ScannerCapabilitiesResult()
     data class Failure(val reason: Any) : ScannerCapabilitiesResult()
 }
 

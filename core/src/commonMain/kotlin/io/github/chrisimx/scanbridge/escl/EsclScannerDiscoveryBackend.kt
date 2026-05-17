@@ -15,8 +15,13 @@ import io.ktor.http.Url
 import io.ktor.http.encodedPath
 import kotlin.time.measureTimedValue
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -39,15 +44,40 @@ class EsclScannerDiscoveryBackend(
     private val SECURE_SCANNER_DISCOVER_TYPE = "_uscans._tcp"
     private val INSECURE_SCANNER_DISCOVER_TYPE = "_uscan._tcp"
 
+    private val isScannerReachableMap = mutableMapOf<String, Boolean>()
 
+    private val capabilityFetchDispatcher = Dispatchers.IO.limitedParallelism(8)
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val scanners: StateFlow<List<DiscoveredScanner>>
-        get() = combine(mdnsDiscoveryInsecureEscl.foundServices, mdnsDiscoverySecureEscl.foundServices) { foundServices1, foundServices2 ->
+    val _scanners: StateFlow<List<DiscoveredScanner>> =
+        combine(mdnsDiscoveryInsecureEscl.foundServices, mdnsDiscoverySecureEscl.foundServices) { foundServices1, foundServices2 ->
             foundServices1.values to foundServices2.values
         }.mapLatest { (foundServices1, foundServices2) ->
             val allFoundServices = foundServices1 + foundServices2
-            mdnsServicesToDiscoveredScanners(allFoundServices)
+            val discoveredScanners = mdnsServicesToDiscoveredScanners(allFoundServices)
+
+            coroutineScope {
+                discoveredScanners.map { scanner ->
+                    async(capabilityFetchDispatcher) {
+                        val reachableCached = isScannerReachableMap[scanner.handle.stringRepresentation]
+                        if (reachableCached != null) {
+                            _logger.debug { "Using cached reachable status for ${scanner.handle.stringRepresentation} that was $reachableCached" }
+                            return@async scanner to reachableCached
+                        }
+
+                        val isReachable = isReachable(scanner)
+                        _logger.debug { "Scanner ${scanner.handle.stringRepresentation} is reachable: $isReachable" }
+                        isScannerReachableMap[scanner.handle.stringRepresentation] = isReachable
+                        scanner to isReachable
+                    }
+                }
+            }.awaitAll()
+                .filter { (scanner, reachable) -> reachable }
+                .map { (scanner, _) -> scanner }
+
         }.stateIn(coroutineScope, SharingStarted.Eagerly, emptyList())
+
+    override val scanners: StateFlow<List<DiscoveredScanner>>
+        get() = _scanners
 
 
     init {
@@ -67,14 +97,10 @@ class EsclScannerDiscoveryBackend(
         }
     }
 
-    private suspend fun mdnsServicesToDiscoveredScanners(mdnsServices: List<MdnsService>): List<DiscoveredScanner> {
-        val scannerConnectionSettingsForTesting = ScannerConnectionSettings(
-            timeoutInSeconds = 3uL,
-            allowSelfSignedCertificates = true,
-        )
-
-        return mdnsServices.mapNotNull {
-            val mdnsService = it
+    private fun mdnsServicesToDiscoveredScanners(
+        mdnsServices: List<MdnsService>,
+    ): List<DiscoveredScanner> {
+        return mdnsServices.flatMap { mdnsService ->
             val scannerName = mdnsService.serviceName
             var rs = mdnsService.txtAttributes["rs"]?.decodeToString() ?: "/"
             val iconUrlString = mdnsService.txtAttributes["representation"]?.decodeToString()
@@ -86,38 +112,58 @@ class EsclScannerDiscoveryBackend(
                 URLBuilder(icoUrl)
                     .apply {
                         host = mdnsService.addresses.firstOrNull()?.urlHost ?: icoUrl.host
-                    }.build()
+                    }
+                    .build()
             }
 
             val scannerUrls = mdnsService.addresses.mapNotNull { address ->
                 tryParseScannerUrl(address, mdnsService, rs)
             }
 
-            scannerUrls.mapNotNull { url ->
+            scannerUrls.map { url ->
                 val scannerHandle = UrlScannerHandle(esclScanningProtocol, url)
 
-                val scannerCapabilitiesResult = esclScanningProtocol.capabilitiesFor(
+                DiscoveredScanner(
+                    scannerName,
+                    iconUrlWithResolvedIp,
                     scannerHandle,
-                    scannerConnectionSettingsForTesting
                 )
-
-                when (scannerCapabilitiesResult) {
-                    is ScannerCapabilitiesResult.Failure,
-                    is ScannerCapabilitiesResult.InternalBug,
-                    is ScannerCapabilitiesResult.InvalidScannerHandle -> return@mapNotNull null
-
-                    else -> {}
-                }
-
-                DiscoveredScanner(scannerName, iconUrlWithResolvedIp, scannerHandle)
             }
-        }.flatten()
+        }
     }
 
     private fun String.toNullableUrl(): Url? {
         return runCatching {
             Url(this)
         }.getOrNull()
+    }
+
+    private suspend fun isReachable(
+        scanner: DiscoveredScanner,
+    ): Boolean {
+        val settings = ScannerConnectionSettings(
+            connectionTimeoutInSeconds = 3uL,
+            totalTimeoutInSeconds = 10uL,
+            debugLogging = true,
+            allowSelfSignedCertificates = true,
+        )
+
+        val result = measureTimedValue {
+            esclScanningProtocol.capabilitiesFor(scanner.handle, settings)
+        }
+        _logger.debug {
+            "Scanner capabilities for ${scanner.handle.stringRepresentation} took ${result.duration}"
+        }
+
+        return when (result.value) {
+            is ScannerCapabilitiesResult.Failure,
+            is ScannerCapabilitiesResult.InvalidScannerHandle -> {
+                _logger.debug { "Scanner ${scanner.handle.stringRepresentation} is not reachable. Result ${result.value}" }
+                false
+            }
+
+            else -> true
+        }
     }
 
     private fun tryParseScannerUrl(address: IpAddress, serviceInfo: MdnsService, rs: String): Url? {

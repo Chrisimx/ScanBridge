@@ -76,7 +76,9 @@ class EsclScanningProtocol(
     private fun deriveHttpConfigFromConnectionSettings(settings: ScannerConnectionSettings): HttpClientConfig = HttpClientConfig(
         settings.allowSelfSignedCertificates,
         settings.debugLogging,
-        settings.timeoutInSeconds
+        settings.connectionTimeoutInSeconds,
+        settings.connectionTimeoutInSeconds,
+        settings.totalTimeoutInSeconds,
     )
 
     override fun executeScanJob(
