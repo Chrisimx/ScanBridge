@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.InjectedParam
@@ -135,23 +134,31 @@ class EsclScannerDiscoveryBackend(
         val discoveredScanners = mdnsServicesToDiscoveredScanners(mdnsServices)
             .distinctBy { it.handle.stringRepresentation }
 
-        val alreadyKnownReachable = discoveredScanners.filter { scanner ->
-            isScannerReachableMap[scanner.handle.stringRepresentation] == true
+        val alreadyKnownWithOutcome = discoveredScanners.mapNotNull { scanner ->
+            scanner to (isScannerReachableMap[scanner.handle.stringRepresentation] ?: return@mapNotNull null)
         }
+        val alreadyKnownJustScanners = alreadyKnownWithOutcome.map { (scanner, _) -> scanner }
+
+        val alreadyKnownReachable = alreadyKnownWithOutcome.filter {
+            (_, reachable) -> reachable
+        }.map { (scanner, _) -> scanner }
 
         emit(alreadyKnownReachable)
 
-        val uncheckedScanners = discoveredScanners.filterNot { scanner ->
-            isScannerReachableMap[scanner.handle.stringRepresentation] == true
-        }
+        val uncheckedScanners = discoveredScanners - alreadyKnownJustScanners.toSet()
 
-        val fastReachable = validateScanners(
+        val fastPassResults = validateScanners(
             scanners = uncheckedScanners,
             connectionTimeoutSeconds = 1uL,
             totalTimeoutSeconds = 2uL,
         )
+        val fastReachable = fastPassResults
+            .filter { (_, isReachable) -> isReachable }
+            .map { (scanner, _) -> scanner }
 
-        fastReachable.forEach { scanner ->
+        fastPassResults.filter {
+            (_, isReachable) -> isReachable
+        }.forEach { (scanner, _) ->
             isScannerReachableMap[scanner.handle.stringRepresentation] = true
         }
 
@@ -159,14 +166,17 @@ class EsclScannerDiscoveryBackend(
 
         val slowRetryCandidates = uncheckedScanners - fastReachable.toSet()
 
-        val slowReachable = validateScanners(
+        val slowPassResult = validateScanners(
             scanners = slowRetryCandidates,
             connectionTimeoutSeconds = 5uL,
             totalTimeoutSeconds = 5uL,
         )
+        val slowReachable = slowPassResult
+            .filter { (_, isReachable) -> isReachable }
+            .map { (scanner, _) -> scanner }
 
-        slowReachable.forEach { scanner ->
-            isScannerReachableMap[scanner.handle.stringRepresentation] = true
+        slowPassResult.forEach { (scanner, reachable) ->
+            isScannerReachableMap[scanner.handle.stringRepresentation] = reachable
         }
 
         emit(
@@ -179,7 +189,7 @@ class EsclScannerDiscoveryBackend(
         scanners: List<DiscoveredScanner>,
         connectionTimeoutSeconds: ULong,
         totalTimeoutSeconds: ULong,
-    ): List<DiscoveredScanner> = coroutineScope {
+    ): List<Pair<DiscoveredScanner, Boolean>> = coroutineScope {
         scanners
             .map { scanner ->
                 async(capabilityFetchDispatcher) {
@@ -189,11 +199,10 @@ class EsclScannerDiscoveryBackend(
                         totalTimeoutSeconds = totalTimeoutSeconds,
                     )
 
-                    scanner.takeIf { reachable }
+                    scanner to reachable
                 }
             }
             .awaitAll()
-            .filterNotNull()
     }
 
     private suspend fun isReachable(
