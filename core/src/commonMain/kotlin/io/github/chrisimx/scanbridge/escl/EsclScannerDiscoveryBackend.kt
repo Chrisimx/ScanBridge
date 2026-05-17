@@ -18,19 +18,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.InjectedParam
+
+sealed class Optional<out T> {
+    data class Some<out T>(val value: T) : Optional<T>()
+    object None : Optional<Nothing>()
+}
 
 class EsclScannerDiscoveryBackend(
     val mdnsDiscoverySecureEscl: MdnsDiscoverService,
@@ -46,7 +51,8 @@ class EsclScannerDiscoveryBackend(
     private val SECURE_SCANNER_DISCOVER_TYPE = "_uscans._tcp"
     private val INSECURE_SCANNER_DISCOVER_TYPE = "_uscan._tcp"
 
-    private val isScannerReachableMap = mutableMapOf<String, Boolean>()
+    private val isScannerReachableMap = mutableMapOf<String, Optional<ScannerCapabilitiesResult>>()
+    private val isScannerReachableMapMutex = Mutex()
 
     private val capabilityFetchDispatcher = Dispatchers.IO.limitedParallelism(8)
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -130,86 +136,64 @@ class EsclScannerDiscoveryBackend(
 
     private fun discoveredScannersFlow(
         mdnsServices: List<MdnsService>,
-    ): Flow<List<DiscoveredScanner>> = flow {
+    ): Flow<List<DiscoveredScanner>> = channelFlow {
         val discoveredScanners = mdnsServicesToDiscoveredScanners(mdnsServices)
             .distinctBy { it.handle.stringRepresentation }
 
-        val alreadyKnownWithOutcome = discoveredScanners.mapNotNull { scanner ->
-            scanner to (isScannerReachableMap[scanner.handle.stringRepresentation] ?: return@mapNotNull null)
-        }
-        val alreadyKnownJustScanners = alreadyKnownWithOutcome.map { (scanner, _) -> scanner }
+        send(emptyList())
 
-        val alreadyKnownReachable = alreadyKnownWithOutcome.filter {
-            (_, reachable) -> reachable
-        }.map { (scanner, _) -> scanner }
+        discoveredScanners.forEach { scanner ->
+            launch(capabilityFetchDispatcher) {
+                _logger.debug {
+                    "Checking reachability of ${scanner.handle.stringRepresentation}"
+                }
 
-        emit(alreadyKnownReachable)
 
-        val uncheckedScanners = discoveredScanners - alreadyKnownJustScanners.toSet()
+                val cachedReachability = isScannerReachableMapMutex.withLock {
+                    isScannerReachableMap[scanner.handle.stringRepresentation]
+                }
 
-        val fastPassResults = validateScanners(
-            scanners = uncheckedScanners,
-            connectionTimeoutSeconds = 1uL,
-            totalTimeoutSeconds = 2uL,
-        )
-        val fastReachable = fastPassResults
-            .filter { (_, isReachable) -> isReachable }
-            .map { (scanner, _) -> scanner }
+                when (cachedReachability) {
+                    Optional.None -> return@launch
 
-        fastPassResults.filter {
-            (_, isReachable) -> isReachable
-        }.forEach { (scanner, _) ->
-            isScannerReachableMap[scanner.handle.stringRepresentation] = true
-        }
+                    is Optional.Some<ScannerCapabilitiesResult> -> {
+                        send(listOf(scanner.copy(scannerCaps = cachedReachability.value)))
+                        return@launch
+                    }
 
-        emit((alreadyKnownReachable + fastReachable).distinctBy { it.handle.stringRepresentation })
+                    null -> Unit
+                }
 
-        val slowRetryCandidates = uncheckedScanners - fastReachable.toSet()
+                val scannerCapabilitiesResult = checkReachabilityAndGetScannerCaps(
+                    scanner = scanner,
+                    connectionTimeoutSeconds = 20u,
+                    totalTimeoutSeconds = 20u,
+                )
 
-        val slowPassResult = validateScanners(
-            scanners = slowRetryCandidates,
-            connectionTimeoutSeconds = 5uL,
-            totalTimeoutSeconds = 5uL,
-        )
-        val slowReachable = slowPassResult
-            .filter { (_, isReachable) -> isReachable }
-            .map { (scanner, _) -> scanner }
+                isScannerReachableMapMutex.withLock {
+                    isScannerReachableMap[scanner.handle.stringRepresentation] = scannerCapabilitiesResult
+                        ?.let { Optional.Some(it) }
+                        ?: Optional.None
+                }
 
-        slowPassResult.forEach { (scanner, reachable) ->
-            isScannerReachableMap[scanner.handle.stringRepresentation] = reachable
-        }
+                val discoveredScannerWithCaps = scanner.copy(scannerCaps = scannerCapabilitiesResult)
 
-        emit(
-            (alreadyKnownReachable + fastReachable + slowReachable)
-                .distinctBy { it.handle.stringRepresentation }
-        )
-    }
-
-    private suspend fun validateScanners(
-        scanners: List<DiscoveredScanner>,
-        connectionTimeoutSeconds: ULong,
-        totalTimeoutSeconds: ULong,
-    ): List<Pair<DiscoveredScanner, Boolean>> = coroutineScope {
-        scanners
-            .map { scanner ->
-                async(capabilityFetchDispatcher) {
-                    val reachable = isReachable(
-                        scanner = scanner,
-                        connectionTimeoutSeconds = connectionTimeoutSeconds,
-                        totalTimeoutSeconds = totalTimeoutSeconds,
-                    )
-
-                    scanner to reachable
+                if (scannerCapabilitiesResult != null) {
+                    send(listOf(discoveredScannerWithCaps))
                 }
             }
-            .awaitAll()
+        }
     }
+        .runningFold(emptyList()) { current, newlyReachable ->
+            (current + newlyReachable)
+                .distinctBy { it.handle.stringRepresentation }
+        }
 
-    private suspend fun isReachable(
+    private suspend fun checkReachabilityAndGetScannerCaps(
         scanner: DiscoveredScanner,
         connectionTimeoutSeconds: ULong,
         totalTimeoutSeconds: ULong,
-    ): Boolean {
+    ): ScannerCapabilitiesResult? {
         val settings = ScannerConnectionSettings(
             connectionTimeoutInSeconds = connectionTimeoutSeconds,
             totalTimeoutInSeconds = totalTimeoutSeconds,
@@ -228,10 +212,10 @@ class EsclScannerDiscoveryBackend(
             is ScannerCapabilitiesResult.Failure,
             is ScannerCapabilitiesResult.InvalidScannerHandle -> {
                 _logger.debug { "Scanner ${scanner.handle.stringRepresentation} is not reachable. Result ${result.value}" }
-                false
+                null
             }
 
-            else -> true
+            else -> result.value
         }
     }
 
