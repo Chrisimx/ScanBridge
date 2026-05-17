@@ -15,14 +15,12 @@ val STARTUP_TABS = listOf(
         Icons.Filled.Home,
         Icons.Outlined.Home,
         true,
-        { innerPadding, navController, showCustomDialog, setShowCustomDialog, statefulScannerMap, statefulScannerMapSecure ->
+        { innerPadding, navController, showCustomDialog, setShowCustomDialog ->
             ScannerBrowser(
                 innerPadding,
                 navController,
                 showCustomDialog,
                 setShowCustomDialog,
-                statefulScannerMap,
-                statefulScannerMapSecure
             )
         }
     ),
@@ -32,7 +30,7 @@ val STARTUP_TABS = listOf(
         Icons.Filled.Settings,
         Icons.Outlined.Settings,
         false,
-        { innerPadding, _, _, _, _, _ ->
+        { innerPadding, _, _, _, ->
             AppSettingsScreen(innerPadding)
         }
     )

@@ -1,3 +1,9 @@
 package io.github.chrisimx.scanbridge.model
 
-data class DiscoveredScanner(val name: String, val addresses: List<String>)
+import io.ktor.http.Url
+
+data class DiscoveredScanner(
+    val name: String,
+    val iconUrl: Url?,
+    val handle: ScannerHandle
+)

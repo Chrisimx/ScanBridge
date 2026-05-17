@@ -19,8 +19,6 @@
 
 package io.github.chrisimx.scanbridge
 
-import android.content.Context
-import android.net.nsd.NsdManager
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,18 +35,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.data.model.EditedCustomScanner
-import io.github.chrisimx.scanbridge.data.ui.CustomScannerViewModel
 import io.github.chrisimx.scanbridge.db.entities.CustomScanner
+import io.github.chrisimx.scanbridge.escl.EsclScanningProtocol
 import io.github.chrisimx.scanbridge.model.DiscoveredScanner
+import io.github.chrisimx.scanbridge.model.UrlScannerHandle
+import io.github.chrisimx.scanbridge.scannerdiscovery.ScannerDiscoveryScreenViewModel
 import io.github.chrisimx.scanbridge.uicomponents.FoundScannerItem
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.dialog.CustomScannerDialog
@@ -58,37 +56,17 @@ import java.util.*
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import org.koin.androidx.compose.koinViewModel
-import timber.log.Timber
-
-fun startScannerDiscovery(
-    context: Context,
-    scannerMap: SnapshotStateMap<String, DiscoveredScanner>,
-    scannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>
-): Optional<Pair<NsdManager, Array<ScannerDiscoveryBackend>>> {
-    val service = getSystemService(context, NsdManager::class.java)
-    if (service == null) {
-        Timber.e("Couldn't get NsdManager service")
-        return Optional.empty()
-    }
-    val listener = ScannerDiscoveryBackend(service, isSecure = false, scannerMap)
-    val listenerSecure = ScannerDiscoveryBackend(service, isSecure = true, scannerMapSecure)
-    service.discoverServices("_uscan._tcp", NsdManager.PROTOCOL_DNS_SD, listener)
-    service.discoverServices("_uscans._tcp", NsdManager.PROTOCOL_DNS_SD, listenerSecure)
-    Timber.i("Discovery started")
-    return Optional.of(Pair(service, arrayOf(listener, listenerSecure)))
-}
+import org.koin.compose.getKoin
 
 @Composable
 fun ScannerList(
     innerPadding: PaddingValues,
     navController: NavController,
-    statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
-    statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>,
-    customScannerViewModel: CustomScannerViewModel,
+    customScanners: List<CustomScanner>,
+    discoveredScanners: List<DiscoveredScanner>,
     setScannerToDelete: (Uuid?) -> Unit,
     setScannerToEdit: (EditedCustomScanner?) -> Unit
 ) {
-    val customScanners by customScannerViewModel.customScanners.collectAsState()
 
     LazyColumn(
         modifier = Modifier
@@ -98,25 +76,13 @@ fun ScannerList(
         verticalArrangement = Arrangement.Center,
         reverseLayout = true
     ) {
-        statefulScannerMap.forEach {
-            val discoveredScanner = it.value
-            discoveredScanner.addresses.forEach {
-                item {
-                    FoundScannerItem(discoveredScanner.name, it, navController)
-                }
+        discoveredScanners.forEach { discoveredScanner ->
+            item {
+                FoundScannerItem(discoveredScanner.name, discoveredScanner.iconUrl, discoveredScanner.handle, navController)
             }
         }
 
-        statefulScannerMapSecure.forEach {
-            val discoveredScanner = it.value
-            discoveredScanner.addresses.forEach {
-                item {
-                    FoundScannerItem(discoveredScanner.name, it, navController)
-                }
-            }
-        }
-
-        if (customScanners.isNotEmpty() && statefulScannerMap.isNotEmpty()) {
+        if (customScanners.isNotEmpty() && discoveredScanners.isNotEmpty()) {
             item {
                 Text(
                     stringResource(R.string.discovered_scanners),
@@ -132,9 +98,11 @@ fun ScannerList(
 
         customScanners.forEach { customScanner ->
             item {
+                // TODO: Store handles directly instead of converting to UrlHandle here
                 FoundScannerItem(
                     customScanner.name,
-                    customScanner.url.toString(),
+                    null, // No downloaded icon for custom scanners
+                    UrlScannerHandle(getKoin().get<EsclScanningProtocol>(), customScanner.url),
                     navController,
                     {
                         setScannerToDelete(customScanner.uuid)
@@ -148,7 +116,7 @@ fun ScannerList(
             }
         }
 
-        if (customScanners.isNotEmpty() && statefulScannerMap.isNotEmpty()) {
+        if (customScanners.isNotEmpty() && discoveredScanners.isNotEmpty()) {
             item {
                 Text(
                     stringResource(R.string.saved_scanners),
@@ -167,20 +135,23 @@ fun ScannerBrowser(
     navController: NavController,
     currentlyEditedScanner: EditedCustomScanner?,
     setEditedCustomDialog: (EditedCustomScanner?) -> Unit,
-    statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
-    statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>
 ) {
-    val customScannerViewModel: CustomScannerViewModel = koinViewModel()
-    val customScanners by customScannerViewModel.customScanners.collectAsState()
+    val scannerDiscoveryScreenViewModel: ScannerDiscoveryScreenViewModel = koinViewModel()
+    val customScanners by scannerDiscoveryScreenViewModel.customScanners.collectAsState()
+    val discoveredScanners by scannerDiscoveryScreenViewModel.discoveredScanners.collectAsState()
 
     var deletionScheduledScanner: Uuid? by remember { mutableStateOf(null) }
 
     AnimatedContent(
-        targetState = statefulScannerMap.isNotEmpty() || customScanners.isNotEmpty(),
+        targetState = discoveredScanners.isNotEmpty() || customScanners.isNotEmpty(),
         label = "ScannerList"
     ) {
         if (it) {
-            ScannerList(innerPadding, navController, statefulScannerMap, statefulScannerMapSecure, customScannerViewModel, {
+            ScannerList(innerPadding,
+                navController,
+                customScanners,
+                discoveredScanners,
+                {
                 deletionScheduledScanner = it
             }, setEditedCustomDialog)
         } else {
@@ -198,7 +169,7 @@ fun ScannerBrowser(
             R.string.custom_scanner_deletion_confirmation,
             onDismiss = { deletionScheduledScanner = null },
             onConfirmed = {
-                customScannerViewModel.deleteScannerByUuid(deletionScheduledScannerImmutable)
+                scannerDiscoveryScreenViewModel.deleteScannerByUuid(deletionScheduledScannerImmutable)
                 deletionScheduledScanner = null
             }
         )
@@ -218,7 +189,7 @@ fun ScannerBrowser(
                     EditedCustomScanner.New -> Uuid.random()
                 }
                 if (save) {
-                    customScannerViewModel.addScanner(CustomScanner(uuid, name, Url(url)))
+                    scannerDiscoveryScreenViewModel.addScanner(CustomScanner(uuid, name, Url(url)))
                 }
                 setEditedCustomDialog(null)
                 if (navigate) {

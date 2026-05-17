@@ -113,6 +113,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":composeUI"))
     implementation(libs.androidx.concurrent.futures)
+    implementation(libs.coil.fetcher.ktor)
 
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)

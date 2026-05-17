@@ -4,12 +4,12 @@ compose-multiplatform = "1.10.3"
 androidx-activityCompose = "1.12.0"
 
 agp = "9.1.0"
-coilCompose = "3.3.0"
+coil = "3.3.0"
 concurrentFutures = "1.2.0"
 constraintlayoutCompose = "1.1.1"
 converterGson = "2.9.0"
 datastore = "1.2.0"
-esclkt = "2.0.6"
+esclkt = "2.0.8-SNAPSHOT"
 escl-mock-server = "1.0.1"
 itextCore = "9.3.0"
 kotlin = "2.3.20-Beta1"
@@ -94,7 +94,8 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core" , version.ref = "materialIcons"}
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-fetcher-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 esclkt = { module = "io.github.chrisimx:esclkt", version.ref = "esclkt" }
 itext7-core = { module = "com.itextpdf:itext-core", version.ref = "itextCore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

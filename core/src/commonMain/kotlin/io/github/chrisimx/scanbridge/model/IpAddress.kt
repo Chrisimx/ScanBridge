@@ -8,6 +8,8 @@ sealed interface IpAddress {
     val urlHost: String
         get() = text
 
+    fun isLinkLocal(): Boolean = false // TODO: Implement link local detection
+
     class V4(
         override val bytes: ByteArray,
     ) : IpAddress {

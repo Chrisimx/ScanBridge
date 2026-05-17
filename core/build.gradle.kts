@@ -33,12 +33,20 @@ kotlin {
                 org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
             )
         }
+
+        withDeviceTest {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+            execution = "HOST"
+        }
     }
 
     iosArm64()
     iosSimulatorArm64()
 
     sourceSets {
+        all {
+            languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
+        }
         commonMain.dependencies {
             api("com.diamondedge:logging:2.1.0")
             api(libs.koin.core)
@@ -52,6 +60,8 @@ kotlin {
             // Room deps
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
+
+            api("com.rickclephas.kmp:kmp-observableviewmodel-core:1.0.3")
         }
 
         commonTest.dependencies {
@@ -60,6 +70,15 @@ kotlin {
 
         androidMain.dependencies {
             api(libs.ktor.client.okhttp)
+        }
+
+        getByName("androidDeviceTest") {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation("androidx.test:core-ktx:1.7.0")
+                implementation("androidx.test.ext:junit-ktx:1.2.1")
+                implementation("androidx.test:runner:1.7.0")
+            }
         }
 
         jvmMain.dependencies {
