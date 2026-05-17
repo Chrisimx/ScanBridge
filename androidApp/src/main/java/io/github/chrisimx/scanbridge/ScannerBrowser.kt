@@ -78,7 +78,14 @@ fun ScannerList(
     ) {
         discoveredScanners.forEach { discoveredScanner ->
             item {
-                FoundScannerItem(discoveredScanner.name, discoveredScanner.iconUrl, discoveredScanner.handle, navController)
+                val handle = discoveredScanner.handle
+                FoundScannerItem(
+                    handle.stringRepresentation,
+                    handle.protocol.protocolIdentifier,
+                    discoveredScanner.name,
+                    discoveredScanner.iconUrl?.toString(),
+                    navController
+                )
             }
         }
 
@@ -98,11 +105,12 @@ fun ScannerList(
 
         customScanners.forEach { customScanner ->
             item {
-                // TODO: Store handles directly instead of converting to UrlHandle here
+                // TODO: Store protocol in database
                 FoundScannerItem(
+                    customScanner.url.toString(),
+                    "eSCL",
                     customScanner.name,
-                    null, // No downloaded icon for custom scanners
-                    UrlScannerHandle(getKoin().get<EsclScanningProtocol>(), customScanner.url),
+                    null,
                     navController,
                     {
                         setScannerToDelete(customScanner.uuid)
@@ -197,6 +205,7 @@ fun ScannerBrowser(
                         ScannerRoute(
                             name,
                             url,
+                            "eSCL", // TODO: Store protocol in database and make this choosable
                             sessionID.toString()
                         )
                     )

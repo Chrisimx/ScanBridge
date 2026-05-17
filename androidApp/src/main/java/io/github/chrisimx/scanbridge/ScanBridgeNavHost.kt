@@ -19,9 +19,7 @@
 
 package io.github.chrisimx.scanbridge
 
-import android.app.Application
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -31,17 +29,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
+import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager
 import io.github.chrisimx.scanbridge.proto.scanningResponseTimeoutOrNull
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
 import io.github.chrisimx.scanbridge.util.doTempFilesExist
-import io.ktor.http.Url
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.koin.compose.koinInject
 import timber.log.Timber
 
 @Serializable
@@ -53,7 +52,7 @@ object StartUpScreenRoute : BaseRoute
 
 @Serializable
 @SerialName("ScannerRoute")
-data class ScannerRoute(val scannerName: String, val scannerURL: String, val sessionID: String) : BaseRoute
+data class ScannerRoute(val scannerName: String, val scannerHandleString: String, val protocolId: String, val sessionID: String) : BaseRoute
 
 @Serializable
 @SerialName("CropImageRoute")
@@ -74,11 +73,12 @@ fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
             CropImageRoute(scanId, returnRouteString)
         }
 
-        "ScannerRoute/{scannerName}/{scannerURL}/{sessionID}" -> {
+        "ScannerRoute/{scannerName}/{scannerHandleString}/{protocolId}/{sessionID}" -> {
             val scannerName = arguments?.getString("scannerName") ?: return null
-            val scannerURL = arguments?.getString("scannerURL") ?: return null
+            val scannerHandling = arguments?.getString("scannerHandleString") ?: return null
+            val protocolId = arguments?.getString("protocolId") ?: return null
             val sessionID = arguments?.getString("sessionID") ?: return null
-            ScannerRoute(scannerName, scannerURL, sessionID)
+            ScannerRoute(scannerName, scannerHandling, protocolId, sessionID)
         }
 
         "ErrorRoute/{error}" -> {
@@ -94,6 +94,7 @@ fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
 fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
     val context = LocalContext.current
     val appSettings = context.appSettingsStore.data
+    val protocolManager = koinInject<ScanningProtocolManager>()
 
     NavHost(
         modifier = Modifier.testTag("root_node"),
@@ -130,19 +131,26 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
             val debug = appSettingsCurrent.writeDebug
             val certValidationDisabled = appSettingsCurrent.disableCertChecks
             val timeout = appSettingsCurrent.scanningResponseTimeoutOrNull?.value?.toUInt() ?: 25u
+            val scannerHandle = protocolManager.getScannerHandle(
+                scannerRoute.protocolId,
+                scannerRoute.scannerHandleString
+            )
             Timber.tag("ScanBridgeNavHost")
                 .d(
-                    "Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerURL}. Timeout is $timeout seconds, Debug is $debug. Disabling of cert checks is $certValidationDisabled. Session id is ${scannerRoute.sessionID}"
+                    "Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerHandleString}. Timeout is $timeout seconds, Debug is $debug. Disabling of cert checks is $certValidationDisabled. Session id is ${scannerRoute.sessionID}"
                 )
+
+            check(scannerHandle != null) {
+                "Scanner handle not found for protocol ${scannerRoute.protocolId} and handle ${scannerRoute.scannerHandleString}"
+            }
             ScanningScreen(
                 scannerRoute.scannerName,
-                Url(scannerRoute.scannerURL),
+                scannerHandle,
                 navController,
                 timeout,
                 debug,
                 certValidationDisabled,
                 Uuid.parse(scannerRoute.sessionID),
-                context.applicationContext as Application
             )
         }
     }

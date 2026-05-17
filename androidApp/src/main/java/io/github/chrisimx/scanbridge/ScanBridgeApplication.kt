@@ -8,6 +8,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import coil3.ImageLoader
 import coil3.network.ktor3.KtorNetworkFetcherFactory
+import io.github.chrisimx.scanbridge.adapters.KoinBasedScanningProtocolManager
 import io.github.chrisimx.scanbridge.adapters.RoomBackedCustomScannerRepository
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
@@ -29,6 +30,7 @@ import io.github.chrisimx.scanbridge.ports.LocaleProvider
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.ports.ScanningProtocol
+import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager
 import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
 import io.github.chrisimx.scanbridge.proto.ShownMessages
 import io.github.chrisimx.scanbridge.repositories.DatastoreLastRouteRepository
@@ -112,6 +114,7 @@ val appModule = module {
     single<DatastoreShownMessagesRepository> { (scope: CoroutineScope) ->
         DatastoreShownMessagesRepository(get(named<ShownMessages>()), scope)
     } bind ShownMessagesRepository::class
+    single<KoinBasedScanningProtocolManager>() bind ScanningProtocolManager::class
     factory<ScanSettingsComposableStateHolder>()
     viewModel<ScanningScreenViewModel>()
     single<RoomBackedCustomScannerRepository>() bind CustomScannerRepository::class

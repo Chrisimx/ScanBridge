@@ -32,7 +32,6 @@ sealed class ScanJobProcessingEvent {
 interface ScanningProtocol {
     /**
      * A string that uniquely identifies this protocol (e.g. "eSCL", "WSD", ...)
-     * Maybe not needed, let's see...
      */
     val protocolIdentifier: String
 
@@ -44,6 +43,17 @@ interface ScanningProtocol {
     val usesUrls: Boolean
 
     /**
+     * Creates a [ScannerHandle] for the given scanner identifier. This handle can be used for the rest of the API.
+     *
+     * The meaning of the string [scannerIdentifier] is protocol dependent. It could be a URL,
+     * a PCI device number or something else. This is left free to allow support for protocols that
+     * do not use URLs.
+     * Within a [ScanningProtocol] this identifier should have
+     * consistent meaning.
+     */
+    fun createScannerHandle(scannerIdentifier: String): ScannerHandle?
+
+    /**
      * Creates a [ScannerDiscoveryBackend] that can be used to find scanners providing
      * this scanning protocol.
      *
@@ -53,19 +63,13 @@ interface ScanningProtocol {
 
     /**
      * Retrieves the capabilities of a scanner identified by the given string.
-     *
-     * The meaning of the string [scannerIdentifier] is protocol dependent. It could be a URL,
-     * a PCI device number or something else. This is left free to allow support for protocols that
-     * do not use URLs.
-     * Within a [ScanningProtocol] this identifier should have
-     * consistent meaning.
      */
     suspend fun capabilitiesFor(scanner: ScannerHandle, settings: ScannerConnectionSettings): ScannerCapabilitiesResult
 
     /**
      * Executes the scan job on the given scanner.
      *
-     * Each process update is provided as a [ScanJobProcessingEvnt]. This also provides
+     * Each process update is provided as a [ScanJobProcessingEvent]. This also provides
      * the scanned pages if the scanning job succeeds.
      */
     fun executeScanJob(handle: ScannerHandle, settings: ScannerConnectionSettings, jobScanSettings: ScanSettings): Flow<ScanJobProcessingEvent>

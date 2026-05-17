@@ -14,6 +14,7 @@ import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
 import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
 import io.github.chrisimx.scanbridge.ports.ScanningProtocol
 import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
+import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -34,6 +35,18 @@ class EsclScanningProtocol(
     init {
         check(mdnsDiscoverySecureEscl !== mdnsDiscoveryInsecureEscl) {
             "The MdnsDiscoverServices for secure and insecure eSCL must be different instances"
+        }
+    }
+
+    override fun createScannerHandle(scannerIdentifier: String): ScannerHandle? {
+
+        val url = runCatching { Url(scannerIdentifier) }.getOrNull()
+
+        return url?.let {
+            UrlScannerHandle(
+                this,
+                it
+            )
         }
     }
 

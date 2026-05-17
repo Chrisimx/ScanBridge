@@ -59,8 +59,13 @@ import io.github.chrisimx.scanbridge.model.HttpClientConfig
 import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableData
+import io.github.chrisimx.scanbridge.model.ScannerHandle
+import io.github.chrisimx.scanbridge.model.UrlScannerHandle
+import io.github.chrisimx.scanbridge.model.scannerCapabilities
 import io.github.chrisimx.scanbridge.model.toggleRotation
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
+import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
+import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
 import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
 import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
@@ -104,7 +109,7 @@ enum class ScanningScreenEvent {
 
 class ScanningScreenViewModel(
     @InjectedParam
-    val address: Url,
+    val scannerHandle: ScannerHandle,
     @InjectedParam
     val timeout: UInt,
     @InjectedParam
@@ -116,7 +121,6 @@ class ScanningScreenViewModel(
     val db: ScanBridgeDb,
     application: Application,
     val scanJobRepo: ScanJobRepository,
-    val httpClientFactory: HttpClientFactory
 ) : AndroidViewModel(application) {
     private val _scanningScreenData =
         ScanningScreenData(
@@ -490,7 +494,7 @@ class ScanningScreenViewModel(
                 Uuid.generateV4(),
                 sessionID,
                 currentSettings,
-                address,
+                (scannerHandle as UrlScannerHandle).url,
                 createHttpClientConfig()
             )
             scanJobRepo.enqueue(scanJob)
@@ -757,22 +761,21 @@ class ScanningScreenViewModel(
     )
 
     fun retrieveScannerCapabilities() = viewModelScope.launch {
-        val httpClient = httpClientFactory.create(
-            createHttpClientConfig()
-        )
-        val esclClient = ESCLRequestClient(
-            address,
-            httpClient
+        val connectionSettings = ScannerConnectionSettings(
+            timeout.toULong(),
+            timeout.toULong(),
+            certificateValidationDisabled,
+            withDebugInterceptor
         )
 
-        val scannerCapabilitiesResult = esclClient.getScannerCapabilities()
+        val scannerCapabilities = scannerHandle.scannerCapabilities(connectionSettings)
 
-        if (scannerCapabilitiesResult !is ESCLRequestClient.ScannerCapabilitiesResult.Success) {
-            Timber.e("Error while retrieving ScannerCapabilities: $scannerCapabilitiesResult")
-            setError("$scannerCapabilitiesResult")
+        if (scannerCapabilities !is ScannerCapabilitiesResult.Success) {
+            Timber.e("Error while retrieving ScannerCapabilities: $scannerCapabilities")
+            setError("$scannerCapabilities")
             return@launch
         }
 
-        setScannerCapabilities(scannerCapabilitiesResult.scannerCapabilities)
+        setScannerCapabilities(scannerCapabilities.scannerCapabilities)
     }
 }

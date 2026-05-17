@@ -20,7 +20,6 @@
 package io.github.chrisimx.scanbridge
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -93,6 +92,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
+import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.services.ScanJobEvent
 import io.github.chrisimx.scanbridge.uicomponents.ExportSettingsPopup
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
@@ -104,7 +104,6 @@ import io.github.chrisimx.scanbridge.util.clearAndNavigateTo
 import io.github.chrisimx.scanbridge.util.snackBarError
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.toReadableString
-import io.ktor.http.Url
 import java.io.File
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
@@ -278,16 +277,15 @@ fun saveFile(context: Context, sourceFile: File, destUri: Uri) {
 @Composable
 fun ScanningScreen(
     scannerName: String,
-    scannerAddress: Url,
+    scannerHandle: ScannerHandle,
     navController: NavHostController,
     timeout: UInt,
     withDebug: Boolean,
     certificateValidationDisabled: Boolean,
     sessionID: Uuid,
-    application: Application,
     scanningViewModel: ScanningScreenViewModel = koinViewModel {
         parametersOf(
-            scannerAddress,
+            scannerHandle,
             timeout,
             withDebug,
             certificateValidationDisabled,

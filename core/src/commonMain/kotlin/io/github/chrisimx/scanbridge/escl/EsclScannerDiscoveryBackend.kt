@@ -121,8 +121,9 @@ class EsclScannerDiscoveryBackend(
 
                 DiscoveredScanner(
                     scannerName,
-                    iconUrlWithResolvedIp,
                     scannerHandle,
+                    null,
+                    iconUrlWithResolvedIp,
                 )
             }
         }

@@ -41,12 +41,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.addPathNodes
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,9 +51,6 @@ import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.ScannerRoute
-import io.github.chrisimx.scanbridge.model.ScannerHandle
-import io.github.chrisimx.scanbridge.model.UrlScannerHandle
-import io.ktor.http.Url
 import java.util.*
 import kotlin.uuid.Uuid
 import org.koin.compose.koinInject
@@ -90,9 +83,10 @@ fun tintedPainterResource(
 
 @Composable
 fun FoundScannerItem(
+    scannerHandleString: String,
+    protocolIdentifier: String,
     name: String,
-    iconUrl: Url?,
-    handle: ScannerHandle,
+    iconUrl: String?,
     navController: NavController,
     deleteScanner: (() -> Unit)? = null,
     editScanner: (() -> Unit)? = null
@@ -104,9 +98,12 @@ fun FoundScannerItem(
             .padding(10.dp),
         onClick = {
             val sessionID = Uuid.random()
-            // TODO: Use scanner handle instead of URL
-            val url = (handle as UrlScannerHandle).url
-            navController.navigate(route = ScannerRoute(name, url.toString(), sessionID.toString()))
+            navController.navigate(route = ScannerRoute(
+                name,
+                scannerHandleString,
+                protocolIdentifier,
+                sessionID.toString())
+            )
         }
     ) {
         Row(
@@ -116,7 +113,7 @@ fun FoundScannerItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val tintedPlaceholder = tintedPainterResource(
-                io.github.chrisimx.scanbridge.R.drawable.round_print_36,
+                R.drawable.round_print_36,
                 MaterialTheme.colorScheme.surfaceTint
             )
 
@@ -165,7 +162,7 @@ fun FoundScannerItem(
                     )
                 }
                 Text(
-                    "${handle.stringRepresentation} (${handle.protocol.protocolIdentifier})",
+                    "$scannerHandleString (${protocolIdentifier})",
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -174,7 +171,7 @@ fun FoundScannerItem(
                     modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
                     onClick = {
                         editScanner.invoke()
-                        Timber.i("Edit button clicked for custom scanner: $name at $handle")
+                        Timber.i("Edit button clicked for custom scanner: $name at $scannerHandleString")
                     }
                 ) {
                     Icon(
@@ -187,7 +184,7 @@ fun FoundScannerItem(
                     modifier = Modifier.padding(end = 8.dp, top = 8.dp, bottom = 8.dp),
                     onClick = {
                         deleteScanner.invoke()
-                        Timber.i("Delete button clicked for custom scanner: $name at $handle")
+                        Timber.i("Delete button clicked for custom scanner: $name at $scannerHandleString")
                     }
                 ) {
                     Icon(

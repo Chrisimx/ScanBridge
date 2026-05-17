@@ -55,7 +55,6 @@ fun ScanBridgeApp() {
     ScanBridgeTheme {
         val navController = rememberNavController()
         var startDestination: Any? by remember { mutableStateOf(null) }
-        val context = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
 
         val currentBackStackEntry by navController.currentBackStackEntryAsState()

@@ -5,7 +5,7 @@ import io.ktor.http.Url
 
 data class DiscoveredScanner(
     val name: String,
-    val iconUrl: Url?,
     val handle: ScannerHandle,
-    val scannerCaps: ScannerCapabilitiesResult? = null
+    val scannerCaps: ScannerCapabilitiesResult? = null,
+    val iconUrl: Url? = null,
 )
