@@ -32,6 +32,11 @@ dependencyResolutionManagement {
     }
 }
 
+val localSettings = file("settings.local.gradle.kts")
+if (localSettings.exists()) {
+    apply(from = localSettings)
+}
+
 include(":composeUI")
 include(":core")
 include(":androidApp")
