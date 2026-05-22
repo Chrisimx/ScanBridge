@@ -6,6 +6,7 @@ import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.scanbridge.model.HttpClientConfig
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.UrlScannerHandle
+import io.github.chrisimx.scanbridge.model.toHttpClientConfig
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
@@ -17,6 +18,7 @@ import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 
 class EsclScanningProtocol(
@@ -63,7 +65,7 @@ class EsclScanningProtocol(
         val scannerUrlHandle =
             scanner as? UrlScannerHandle ?: return ScannerCapabilitiesResult.InvalidScannerHandle(scanner)
 
-        val httpConfig = deriveHttpConfigFromConnectionSettings(settings)
+        val httpConfig = settings.toHttpClientConfig()
         val httpClient = httpClientFactory.create(httpConfig)
 
         val esclRequestClient = ESCLRequestClient(scannerUrlHandle.url, httpClient)
@@ -86,29 +88,23 @@ class EsclScanningProtocol(
         }
     }
 
-    private fun deriveHttpConfigFromConnectionSettings(settings: ScannerConnectionSettings): HttpClientConfig = HttpClientConfig(
-        settings.allowSelfSignedCertificates,
-        settings.debugLogging,
-        settings.connectionTimeoutInSeconds,
-        settings.connectionTimeoutInSeconds,
-        settings.totalTimeoutInSeconds,
-    )
-
     override fun executeScanJob(
         handle: ScannerHandle,
         settings: ScannerConnectionSettings,
-        jobScanSettings: ScanSettings
+        jobScanSettings: ScanSettings,
+        cancelled: StateFlow<Boolean>
     ): Flow<ScanJobProcessingEvent> = flow {
-        /*val scannerUrlHandle =
-            handle as? UrlScannerHandle ?: return ScannerCapabilitiesResult.InvalidScannerHandle(scanner)
+        val scannerUrlHandle =
+            handle as? UrlScannerHandle
 
-        requireNotNull(scannerUrlHandle) { "Scanner handle is not a URL handle" }
+        if (scannerUrlHandle == null) {
+            emit(ScanJobProcessingEvent.InvalidScannerHandle(handle))
+            return@flow
+        }
 
-        val httpConfig = deriveHttpConfigFromConnectionSettings(settings)
+        val httpConfig = settings.toHttpClientConfig()
         val httpClient = httpClientFactory.create(httpConfig)
 
-        val esclRequestClient = ESCLRequestClient(scannerUrlHandle.url, httpClient)*/
-
-        emit(ScanJobProcessingEvent.Failure(Exception("Not implemented")))
+        val esclRequestClient = ESCLRequestClient(scannerUrlHandle.url, httpClient)
     }
 }

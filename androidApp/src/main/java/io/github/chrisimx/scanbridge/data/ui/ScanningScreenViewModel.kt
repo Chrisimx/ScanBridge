@@ -37,7 +37,6 @@ import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Image
-import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanRegion
 import io.github.chrisimx.esclkt.ScanSettings
@@ -55,15 +54,12 @@ import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
-import io.github.chrisimx.scanbridge.model.HttpClientConfig
 import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableData
 import io.github.chrisimx.scanbridge.model.ScannerHandle
-import io.github.chrisimx.scanbridge.model.UrlScannerHandle
 import io.github.chrisimx.scanbridge.model.scannerCapabilities
 import io.github.chrisimx.scanbridge.model.toggleRotation
-import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
 import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
 import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
@@ -76,7 +72,6 @@ import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.saveAsJPEG
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.zipFiles
-import io.ktor.http.Url
 import java.io.File
 import java.nio.file.Files
 import java.time.LocalDateTime
@@ -494,8 +489,8 @@ class ScanningScreenViewModel(
                 Uuid.generateV4(),
                 sessionID,
                 currentSettings,
-                (scannerHandle as UrlScannerHandle).url,
-                createHttpClientConfig()
+                scannerHandle,
+                createScannerConnectionSettings()
             )
             scanJobRepo.enqueue(scanJob)
             ScanJobForegroundService.startService(application)
@@ -752,21 +747,15 @@ class ScanningScreenViewModel(
         }
     }
 
-    fun createHttpClientConfig() = HttpClientConfig(
+    fun createScannerConnectionSettings() = ScannerConnectionSettings(
+        timeout.toULong(),
+        timeout.toULong(),
         certificateValidationDisabled,
-        withDebugInterceptor,
-        timeout.toULong(),
-        timeout.toULong(),
-        timeout.toULong()
+        withDebugInterceptor
     )
 
     fun retrieveScannerCapabilities() = viewModelScope.launch {
-        val connectionSettings = ScannerConnectionSettings(
-            timeout.toULong(),
-            timeout.toULong(),
-            certificateValidationDisabled,
-            withDebugInterceptor
-        )
+        val connectionSettings = createScannerConnectionSettings()
 
         val scannerCapabilities = scannerHandle.scannerCapabilities(connectionSettings)
 

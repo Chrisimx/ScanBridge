@@ -6,6 +6,7 @@ import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 data class ScannerConnectionSettings(
     val connectionTimeoutInSeconds: ULong = 10uL,
@@ -24,8 +25,9 @@ sealed class ScannerCapabilitiesResult {
 }
 
 sealed class ScanJobProcessingEvent {
-    data class Update(val progress: Double) : ScanJobProcessingEvent()
-    data class Success(val scannedPages: ESCLRequestClient.ScannedPage) : ScanJobProcessingEvent()
+    data class NewPage(val scannedPages: ESCLRequestClient.ScannedPage) : ScanJobProcessingEvent()
+    data class InvalidScannerHandle(val scannerHandle: ScannerHandle) : ScanJobProcessingEvent()
+    data object Cancelled : ScanJobProcessingEvent()
     data class Failure(val reason: Any) : ScanJobProcessingEvent()
 }
 
@@ -72,5 +74,9 @@ interface ScanningProtocol {
      * Each process update is provided as a [ScanJobProcessingEvent]. This also provides
      * the scanned pages if the scanning job succeeds.
      */
-    fun executeScanJob(handle: ScannerHandle, settings: ScannerConnectionSettings, jobScanSettings: ScanSettings): Flow<ScanJobProcessingEvent>
+    fun executeScanJob(handle: ScannerHandle,
+                       settings: ScannerConnectionSettings,
+                       jobScanSettings: ScanSettings,
+                       cancelled: StateFlow<Boolean>
+    ): Flow<ScanJobProcessingEvent>
 }

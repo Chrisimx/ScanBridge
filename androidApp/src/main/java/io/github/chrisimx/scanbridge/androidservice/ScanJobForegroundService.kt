@@ -11,7 +11,6 @@ import android.graphics.BitmapFactory
 import android.os.IBinder
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.app.NotificationCompat
-import androidx.lifecycle.application
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import io.github.chrisimx.esclkt.ESCLHttpCallResult
@@ -25,6 +24,8 @@ import io.github.chrisimx.scanbridge.db.daos.ScannedPageDao
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
+import io.github.chrisimx.scanbridge.model.UrlScannerHandle
+import io.github.chrisimx.scanbridge.model.toHttpClientConfig
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
 import io.github.chrisimx.scanbridge.util.extractPdfImages
@@ -169,10 +170,11 @@ class ScanJobForegroundService : Service() {
     @OptIn(ExperimentalUuidApi::class)
     private suspend fun doScan(scanJob: ScanJob) {
         val currentScanSettings = scanJob.scanSettings
+        val scannerUrl = (scanJob.scannerHandle as UrlScannerHandle)
 
         val esclRequestClient = ESCLRequestClient(
-            scanJob.scannerBaseUrl,
-            httpClientFactory.create(scanJob.httpClientConfig)
+            scannerUrl.url,
+            httpClientFactory.create(scanJob.connectionSettings.toHttpClientConfig())
         )
 
         scanJobs.notifyStarted(scanJob)
