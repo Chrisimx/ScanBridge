@@ -3,7 +3,9 @@ package io.github.chrisimx.scanbridge.ports
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
+import io.github.chrisimx.scanbridge.model.ScanProtocolScannedPage
 import io.github.chrisimx.scanbridge.model.ScannerHandle
+import io.github.chrisimx.scanbridge.model.ScanningError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,10 +27,9 @@ sealed class ScannerCapabilitiesResult {
 }
 
 sealed class ScanJobProcessingEvent {
-    data class NewPage(val scannedPages: ESCLRequestClient.ScannedPage) : ScanJobProcessingEvent()
-    data class InvalidScannerHandle(val scannerHandle: ScannerHandle) : ScanJobProcessingEvent()
+    data class NewPage(val scannedPage: ScanProtocolScannedPage) : ScanJobProcessingEvent()
     data object Cancelled : ScanJobProcessingEvent()
-    data class Failure(val reason: Any) : ScanJobProcessingEvent()
+    data class Failure(val error: ScanningError) : ScanJobProcessingEvent()
 }
 
 interface ScanningProtocol {

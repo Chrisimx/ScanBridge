@@ -25,7 +25,7 @@ import io.github.chrisimx.scanbridge.db.typeconverters.UuidTypeConverter
     entities = [
         CustomScanner::class, ScannedPage::class, Session::class, TempFile::class, LastRoute::class, ExecutedMigrationToRoom::class
     ],
-    version = 4,
+    version = 5,
     autoMigrations = [
         AutoMigration(
             from = 1,
@@ -38,6 +38,10 @@ import io.github.chrisimx.scanbridge.db.typeconverters.UuidTypeConverter
         AutoMigration(
             from = 3,
             to = 4
+        ),
+        AutoMigration(
+            from = 4,
+            to = 5
         )
     ]
 )

@@ -23,8 +23,11 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SnackbarVisuals
+import androidx.compose.ui.graphics.Color
 import io.github.chrisimx.scanbridge.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -34,6 +37,24 @@ fun String.truncate(maxLength: Int): String = if (this.length <= maxLength) {
 } else {
     this.take(maxLength.coerceAtLeast(1) - 1) + "…"
 }
+
+enum class SnackbarType(
+    val containerColor: Color,
+    val contentColor: Color = Color.White,
+) {
+    SUCCESS(containerColor = Color(0xFF4CAF50)),
+    ERROR(containerColor = Color(0xFFF44336)),
+    WARNING(containerColor = Color(0xFFFF9800)),
+    DEFAULT(containerColor = Color.DarkGray);
+}
+
+data class CustomSnackbarVisuals(
+    override val message: String,
+    override val actionLabel: String? = null,
+    override val duration: SnackbarDuration = SnackbarDuration.Short,
+    override val withDismissAction: Boolean = false,
+    val type: SnackbarType = SnackbarType.DEFAULT,
+) : SnackbarVisuals
 
 fun snackbarErrorRetrievingPage(
     error: String,
@@ -52,6 +73,24 @@ fun snackbarErrorRetrievingPage(
     )
 }
 
+suspend fun SnackbarHostState.showCustomSnackbar(
+    message: String,
+    type: SnackbarType = SnackbarType.DEFAULT,
+    actionLabel: String? = null,
+    duration: SnackbarDuration = SnackbarDuration.Short,
+    withDismissAction: Boolean = false,
+): SnackbarResult {
+    return showSnackbar(
+        CustomSnackbarVisuals(
+            message = message,
+            actionLabel = actionLabel,
+            duration = duration,
+            withDismissAction = withDismissAction,
+            type = type
+        )
+    )
+}
+
 fun snackBarError(
     error: String,
     scope: CoroutineScope,
@@ -61,9 +100,11 @@ fun snackBarError(
     copyData: String? = null
 ) {
     scope.launch {
-        val result = snackbarHostState.showSnackbar(
+        val result = snackbarHostState.showCustomSnackbar(
             error,
+            SnackbarType.ERROR,
             if (action) context.getString(R.string.copy) else null,
+            SnackbarDuration.Indefinite,
             true
         )
         when (result) {
