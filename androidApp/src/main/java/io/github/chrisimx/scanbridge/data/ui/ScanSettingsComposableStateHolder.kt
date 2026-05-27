@@ -23,22 +23,22 @@ import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context.CLIPBOARD_SERVICE
-import io.github.chrisimx.esclkt.ColorMode
-import io.github.chrisimx.esclkt.ColorModeEnumOrRaw
+import io.github.chrisimx.csa.CSAEnumOrRaw
+import io.github.chrisimx.csa.LengthUnit
+import io.github.chrisimx.csa.ThreeHundredthsOfInch
+import io.github.chrisimx.csa.inches
+import io.github.chrisimx.csa.millimeters
+import io.github.chrisimx.csa.threeHundredthsOfInch
 import io.github.chrisimx.esclkt.DiscreteResolution
-import io.github.chrisimx.esclkt.EnumOrRaw
+import io.github.chrisimx.esclkt.EsclColorMode
+import io.github.chrisimx.esclkt.EsclColorModeEnumOrRaw
+import io.github.chrisimx.esclkt.EsclScanIntentEnumOrRaw
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.InputSourceCaps
-import io.github.chrisimx.esclkt.LengthUnit
-import io.github.chrisimx.esclkt.ScanIntentEnumOrRaw
 import io.github.chrisimx.esclkt.ScanSettings
-import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
 import io.github.chrisimx.esclkt.getInputSourceCaps
 import io.github.chrisimx.esclkt.getInputSourceOptions
-import io.github.chrisimx.esclkt.inches
-import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.esclkt.scanRegion
-import io.github.chrisimx.esclkt.threeHundredthsOfInch
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.model.Locale
 import io.github.chrisimx.scanbridge.model.NumberValidationResult
@@ -292,9 +292,9 @@ class ScanSettingsComposableStateHolder(
         }
     }
 
-    fun setColorMode(colorMode: ColorModeEnumOrRaw?) {
+    fun setColorMode(colorMode: EsclColorModeEnumOrRaw?) {
         coroutineScope.launch {
-            if (colorMode is EnumOrRaw.Known && colorMode.value == ColorMode.BlackAndWhite1) {
+            if (colorMode is CSAEnumOrRaw.Known && colorMode.value == EsclColorMode.BlackAndWhite1) {
                 Timber.d("Selecting b&w. Switching to PDF format")
                 updateSettings {
                     copy(colorMode = colorMode, documentFormat = "application/pdf", documentFormatExt = "application/pdf")
@@ -367,7 +367,7 @@ class ScanSettingsComposableStateHolder(
         }
     }
 
-    fun setIntent(intent: ScanIntentEnumOrRaw?) {
+    fun setIntent(intent: EsclScanIntentEnumOrRaw?) {
         coroutineScope.launch {
             updateSettings {
                 copy(intent = intent)

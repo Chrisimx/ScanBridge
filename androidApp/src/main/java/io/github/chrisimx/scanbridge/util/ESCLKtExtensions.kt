@@ -22,10 +22,10 @@ package io.github.chrisimx.scanbridge.util
 import android.content.Context
 import android.icu.text.DecimalFormat
 import app.cash.paraphrase.getString
-import io.github.chrisimx.esclkt.ColorMode
-import io.github.chrisimx.esclkt.ColorModeEnumOrRaw
+import io.github.chrisimx.csa.CSAEnumOrRaw
 import io.github.chrisimx.esclkt.DiscreteResolution
-import io.github.chrisimx.esclkt.EnumOrRaw
+import io.github.chrisimx.esclkt.EsclColorMode
+import io.github.chrisimx.esclkt.EsclColorModeEnumOrRaw
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.JobState
 import io.github.chrisimx.esclkt.ScanSettings
@@ -55,17 +55,17 @@ fun InputSource.toReadableString(context: Context): String = when (this) {
     InputSource.Camera -> context.getString(R.string.camera)
 }
 
-fun ColorModeEnumOrRaw.localizedString(context: Context): String = when (this) {
-    is EnumOrRaw.Known<ColorMode> -> when (this.value) {
-        ColorMode.BlackAndWhite1 -> context.getString(R.string.black_and_white)
-        ColorMode.RGB24 -> context.getString(FormattedResources.color_scan("24"))
-        ColorMode.RGB48 -> context.getString(FormattedResources.color_scan("48"))
-        ColorMode.AutoColorDetection -> context.getString(R.string.auto_detect)
-        ColorMode.Grayscale8 -> context.getString(FormattedResources.grayscale("8"))
-        ColorMode.Grayscale16 -> context.getString(FormattedResources.grayscale("16"))
+fun EsclColorModeEnumOrRaw.localizedString(context: Context): String = when (this) {
+    is CSAEnumOrRaw.Known<EsclColorMode> -> when (this.value) {
+        EsclColorMode.BlackAndWhite1 -> context.getString(R.string.black_and_white)
+        EsclColorMode.RGB24 -> context.getString(FormattedResources.color_scan("24"))
+        EsclColorMode.RGB48 -> context.getString(FormattedResources.color_scan("48"))
+        EsclColorMode.AutoColorDetection -> context.getString(R.string.auto_detect)
+        EsclColorMode.Grayscale8 -> context.getString(FormattedResources.grayscale("8"))
+        EsclColorMode.Grayscale16 -> context.getString(FormattedResources.grayscale("16"))
     }
 
-    is EnumOrRaw.Unknown<ColorMode> -> this.asString()
+    is CSAEnumOrRaw.Unknown<EsclColorMode> -> this.asString()
 }
 
 fun ScannerCapabilities.getMaxResolution(inputSource: InputSource): DiscreteResolution {
@@ -77,12 +77,12 @@ fun ScannerCapabilities.getMaxResolution(inputSource: InputSource): DiscreteReso
     return maxResolution
 }
 
-fun ScannerCapabilities.getBestColorMode(inputSource: InputSource): ColorModeEnumOrRaw? {
+fun ScannerCapabilities.getBestColorMode(inputSource: InputSource): EsclColorModeEnumOrRaw? {
     val inputCaps = this.getInputSourceCaps(inputSource)
     val chosenColorMode = inputCaps.settingProfiles.elementAtOrNull(0)?.colorModes?.maxByOrNull {
         when (it) {
-            is EnumOrRaw.Known -> it.value.ordinal
-            is EnumOrRaw.Unknown -> 0
+            is CSAEnumOrRaw.Known -> it.value.ordinal
+            is CSAEnumOrRaw.Unknown -> 0
         }
     }
     return chosenColorMode

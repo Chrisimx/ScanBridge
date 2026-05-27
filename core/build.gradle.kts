@@ -56,6 +56,9 @@ kotlin {
             api(libs.ktor.client.core)
             api(libs.ktor.logging)
             api(libs.esclkt)
+            api(libs.wsdkt)
+            api(libs.commonScannerAbstractions)
+            api(libs.nonThrowingKtor)
 
             // Room deps
             implementation(libs.androidx.room.runtime)

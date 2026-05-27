@@ -9,7 +9,7 @@ concurrentFutures = "1.2.0"
 constraintlayoutCompose = "1.1.1"
 converterGson = "2.9.0"
 datastore = "1.2.0"
-esclkt = "2.0.8-SNAPSHOT"
+anyscankt = "2.0.8-SNAPSHOT"
 escl-mock-server = "1.0.1"
 itextCore = "9.3.0"
 kotlin = "2.3.20-Beta1"
@@ -96,7 +96,10 @@ androidx-material-icons-core = { module = "androidx.compose.material:material-ic
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-fetcher-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
-esclkt = { module = "io.github.chrisimx:esclkt", version.ref = "esclkt" }
+esclkt = { module = "io.github.chrisimx:esclkt", version.ref = "anyscankt" }
+wsdkt = { module = "io.github.chrisimx:wsdkt", version.ref = "anyscankt" }
+commonScannerAbstractions = { module = "io.github.chrisimx:common-scanner-abstractions", version.ref = "anyscankt" }
+nonThrowingKtor = { module = "io.github.chrisimx:nonthrowingktor", version.ref = "anyscankt" }
 itext7-core = { module = "com.itextpdf:itext-core", version.ref = "itextCore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

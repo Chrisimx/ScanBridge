@@ -1,7 +1,7 @@
 package io.github.chrisimx.scanbridge.escl
 
-import io.github.chrisimx.esclkt.ESCLHttpCallResult
 import io.github.chrisimx.esclkt.ESCLRequestClient
+import io.github.chrisimx.safektor.ESCLHttpCallResult
 import io.github.chrisimx.esclkt.JobState
 import io.github.chrisimx.esclkt.ScanJob
 import io.github.chrisimx.esclkt.ScanSettings

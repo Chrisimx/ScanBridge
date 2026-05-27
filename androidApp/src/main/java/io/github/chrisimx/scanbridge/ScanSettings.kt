@@ -55,7 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.chrisimx.esclkt.DiscreteResolution
 import io.github.chrisimx.esclkt.SupportedResolutions
-import io.github.chrisimx.esclkt.equalsLength
+import io.github.chrisimx.csa.equalsLength
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsLengthUnit
 import io.github.chrisimx.scanbridge.model.NumberValidationResult

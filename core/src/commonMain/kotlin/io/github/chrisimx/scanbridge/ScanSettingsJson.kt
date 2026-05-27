@@ -1,10 +1,10 @@
 package io.github.chrisimx.scanbridge
 
-import io.github.chrisimx.esclkt.Inches
-import io.github.chrisimx.esclkt.LengthUnit
-import io.github.chrisimx.esclkt.Millimeters
-import io.github.chrisimx.esclkt.Points
-import io.github.chrisimx.esclkt.ThreeHundredthsOfInch
+import io.github.chrisimx.csa.Inches
+import io.github.chrisimx.csa.LengthUnit
+import io.github.chrisimx.csa.Millimeters
+import io.github.chrisimx.csa.Points
+import io.github.chrisimx.csa.ThreeHundredthsOfInch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
