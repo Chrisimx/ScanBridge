@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import io.github.chrisimx.esclkt.ScannerCapabilities
+import io.github.chrisimx.esclkt.anyscancompat.toCommonAbstraction
 import io.github.chrisimx.scanbridge.ScanSettingsJson
 import io.github.chrisimx.scanbridge.data.model.LegacySessionV2
 import io.github.chrisimx.scanbridge.data.model.LegacySessionV2.Companion.fromString
@@ -106,7 +107,7 @@ object LegacySessionsStore {
 
     private suspend fun ScanBridgeDb.insertLegacySessionData(sessionId: Uuid, legacySession: LegacySessionV2) {
         sessionDao().insertAll(
-            Session(sessionId, legacySession.scanSettings, null)
+            Session(sessionId, legacySession.scanSettings?.toCommonAbstraction(), null)
         )
 
         tmpFileDao().insertAllList(
@@ -121,7 +122,7 @@ object LegacySessionsStore {
                     scanId = Uuid.generateV4(),
                     ownerSessionId = sessionId,
                     filePath = page.filePath,
-                    originalScanSettings = page.originalScanSettings,
+                    originalScanSettings = page.originalScanSettings.toCommonAbstraction(),
                     rotation = page.rotation,
                     orderIndex = index
                 )

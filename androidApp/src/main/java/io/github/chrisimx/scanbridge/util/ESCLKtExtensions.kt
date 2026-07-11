@@ -75,67 +75,6 @@ fun <T> T.takeIfContainedElseFirstOrNull(list: List<T>): T? {
     }
 }
 
-fun CommonScanSettings.coerceIn(capabilities: CommonScannerCapabilities): CommonScanSettings {
-    val inputSourceType = this.inputSource ?: CommonInputSourceType.PLATEN
-    val inputSourceCaps = capabilities.getInputSourceCaps(inputSourceType)
-        ?: capabilities.inputSources.firstOrNull()
-        ?: throw IllegalArgumentException("No input sources found in capabilities.")
-
-    // Coerce resolution
-    val coercedResolution = this.resolution?.let { res ->
-        val availableResolutions = inputSourceCaps.supportedResolutions
-        if (availableResolutions.contains(res)) {
-            res
-        } else {
-            // Find closest resolution
-            availableResolutions.minByOrNull {
-                kotlin.math.abs(it.widthDPI.toInt() - res.widthDPI.toInt()) +
-                    kotlin.math.abs(it.heightDPI.toInt() - res.heightDPI.toInt())
-            } ?: res
-        }
-    }
-
-    // Coerce color mode
-    val coercedColorMode = this.colorMode?.let { mode ->
-        if (inputSourceCaps.supportedColorModes.contains(mode)) {
-            mode
-        } else {
-            inputSourceCaps.supportedColorModes.firstOrNull()
-        }
-    }
-
-    // Coerce scan area
-    val coercedScanArea = this.scanArea?.let { area ->
-        val minWidth = inputSourceCaps.minSize.width.toMillimeters().value
-        val maxWidth = inputSourceCaps.maxSize.width.toMillimeters().value
-        val minHeight = inputSourceCaps.minSize.height.toMillimeters().value
-        val maxHeight = inputSourceCaps.maxSize.height.toMillimeters().value
-
-        area.copy(
-            width = Millimeters(area.width.toMillimeters().value.coerceIn(minWidth, maxWidth)),
-            height = Millimeters(area.height.toMillimeters().value.coerceIn(minHeight, maxHeight))
-        )
-    }
-
-    // Coerce format
-    val coercedFormat = this.format?.takeIfContainedElseFirstOrNull(
-        inputSourceCaps.supportedFileFormats
-    )
-
-    // Coerce intent
-    val coercedIntent = this.scanIntent?.takeIfContainedElseFirstOrNull(
-        inputSourceCaps.supportedIntents
-    )
-
-    return this.copy(
-        inputSource = inputSourceType,
-        resolution = coercedResolution,
-        colorMode = coercedColorMode,
-        scanArea = coercedScanArea,
-        format = coercedFormat,
-        scanIntent = coercedIntent
-    )
-}
 fun AnyScanEnumOrRaw<ColorMode>.localizedString(context: Context): String = when (this) {
     is AnyScanEnumOrRaw.Known<ColorMode> -> when (this.value) {
         ColorMode.BlackAndWhite1 -> context.getString(R.string.black_and_white)
@@ -156,40 +95,4 @@ fun ScannerCapabilities.getMaxResolution(inputSource: InputSource): DiscreteReso
         .supportedResolutions.discreteResolutions.maxBy { it.xResolution * it.yResolution }
 
     return maxResolution
-}
-
-fun CommonScannerCapabilities.getBestColorMode(inputSource: InputSource): EsclColorModeEnumOrRaw? {
-    val inputCaps = this.getInputSourceCaps(inputSource)
-    val chosenColorMode = inputCaps.settingProfiles.elementAtOrNull(0)?.colorModes?.maxByOrNull {
-        when (it) {
-            is CSAEnumOrRaw.Known -> it.value.ordinal
-            is CSAEnumOrRaw.Unknown -> 0
-        }
-    }
-    return chosenColorMode
-}
-
-fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): ScanSettings {
-    val inputSource = this.getInputSourceOptions().firstOrNull() ?: InputSource.Platen
-
-    val maxResolution = getMaxResolution(inputSource)
-
-    val inputSourceCaps = this.getInputSourceCaps(inputSource, false)
-
-    val maxScanRegion = scanRegion(inputSourceCaps) {
-        maxHeight()
-        maxWidth()
-    }
-
-    val bestColorMode = getBestColorMode(inputSource)
-
-    return ScanSettings(
-        version = this.interfaceVersion,
-        inputSource = inputSource,
-        scanRegions = maxScanRegion,
-        xResolution = maxResolution.xResolution,
-        yResolution = maxResolution.yResolution,
-        colorMode = bestColorMode,
-        documentFormatExt = "image/jpeg"
-    )
 }

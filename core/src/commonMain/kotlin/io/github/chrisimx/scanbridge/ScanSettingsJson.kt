@@ -1,5 +1,7 @@
 package io.github.chrisimx.scanbridge
 
+import io.github.chrisimx.anyscan.AnyScanEnumOrRaw
+import io.github.chrisimx.anyscan.Area
 import io.github.chrisimx.anyscan.Inches
 import io.github.chrisimx.anyscan.LengthUnit
 import io.github.chrisimx.anyscan.Millimeters
@@ -20,7 +22,13 @@ object ScanSettingsJson {
                 subclass(ThreeHundredthsOfInch::class)
                 subclass(Points::class)
             }
+            polymorphic(Any::class) {
+                subclass(Area::class)
+                subclass(AnyScanEnumOrRaw.Known::class)
+                subclass(AnyScanEnumOrRaw.Unknown::class)
+            }
         }
+        allowStructuredMapKeys = true
         classDiscriminator = "type"
         prettyPrint = false
     }

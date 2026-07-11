@@ -20,6 +20,7 @@ object AppSettingsMigrationV0To1 : DataMigration<ScanBridgeSettings> {
     }
 
     override suspend fun migrate(currentData: ScanBridgeSettings): ScanBridgeSettings {
+        /*
         val json = ScanSettingsJson.json
         val oldScanSettingsString = currentData.lastUsedScanSettings?.value
         val oldScanSettingsParsed = oldScanSettingsString?.let {
@@ -70,7 +71,9 @@ object AppSettingsMigrationV0To1 : DataMigration<ScanBridgeSettings> {
             if (newEnterableData != null) {
                 lastUsedScanSettingsUiState = StringValue.of(newEnterableData)
             }
-        }
+        }*/
+
+        return currentData
     }
 
     override suspend fun cleanUp() {

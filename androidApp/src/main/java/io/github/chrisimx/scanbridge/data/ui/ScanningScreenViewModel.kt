@@ -38,7 +38,9 @@ import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Image
 import io.github.chrisimx.anyscan.CommonScanSettings
+import io.github.chrisimx.anyscan.CommonScanSettingsEditor
 import io.github.chrisimx.anyscan.CommonScannerCapabilities
+import io.github.chrisimx.anyscan.ScanSettingsMap
 import io.github.chrisimx.anyscan.inches
 import io.github.chrisimx.anyscan.millimeters
 import io.github.chrisimx.anyscan.threeHundredthsOfInch
@@ -62,10 +64,7 @@ import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
 import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
 import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
-import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
-import io.github.chrisimx.scanbridge.util.coerceIn
 import io.github.chrisimx.scanbridge.util.getEditedImageName
-import io.github.chrisimx.scanbridge.util.getMaxResolution
 import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.saveAsJPEG
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
@@ -291,14 +290,32 @@ class ScanningScreenViewModel(
 
         Timber.d("Stored session: $storedSession")
 
-        val updateSettings: suspend (CommonScanSettings.() -> CommonScanSettings) -> Unit = { lambda ->
+        val updateSettings: suspend (CommonScanSettingsEditor.() -> Unit) -> Unit = { edit ->
             db.useWriterConnection {
                 it.immediateTransaction {
-                    val oldSession = sessionDao.getSessionById(sessionID) ?: return@immediateTransaction
-                    val newSession = oldSession.copy(
-                        currentScanSettings = oldSession.currentScanSettings?.lambda()
+                    val oldSession = sessionDao.getSessionById(sessionID)
+                        ?: return@immediateTransaction
+
+                    val oldSettings = oldSession.currentScanSettings
+                        ?: CommonScanSettings(
+                            setting = ScanSettingsMap.empty()
+                        )
+
+                    val editor = CommonScanSettingsEditor(
+                        capabilities = _scanningScreenData.capabilities.value!!,
+                        initial = oldSettings
                     )
-                    Timber.d("Settings updated ${newSession.currentScanSettings}")
+
+                    editor.edit()
+
+                    val newSettings = editor.build()
+
+                    val newSession = oldSession.copy(
+                        currentScanSettings = newSettings
+                    )
+
+                    Timber.d("Settings updated $newSettings")
+
                     sessionDao.update(newSession)
                 }
             }
@@ -323,16 +340,18 @@ class ScanningScreenViewModel(
             val savedSettingsPair = DefaultScanSettingsStore.load(application.applicationContext)
             val (savedSettings, savedSettingsUiState) = savedSettingsPair
             val initialSettings = if (savedSettings != null) {
-                try {
-                    val coercedSettings = savedSettings.coerceIn(caps)
-
-                    coercedSettings
-                } catch (e: Exception) {
-                    Timber.e(e, "Error applying saved settings, using defaults")
-                    caps.calculateDefaultESCLScanSettingsState()
-                }
+                val editor = CommonScanSettingsEditor(
+                    caps,
+                    savedSettings
+                )
+                editor.build()
             } else {
-                caps.calculateDefaultESCLScanSettingsState()
+                // TODO: Use actual defaults here and use swappable default providers
+                val editor = CommonScanSettingsEditor(
+                    caps,
+                    CommonScanSettings(setting = ScanSettingsMap.empty())
+                )
+                editor.build()
             }
 
             val savedSettingsUiStateWithCaps = savedSettingsUiState?.copy(capabilities = caps)
@@ -445,7 +464,7 @@ class ScanningScreenViewModel(
         onError: (String) -> Unit,
         saveFileLauncher: ActivityResultLauncher<String>? = null
     ) {
-        val currentScans = scannedPages.value
+        /*val currentScans = scannedPages.value
         val scannerCapsNullable = scanningScreenData.capabilities
         val scannerCaps = if (scannerCapsNullable == null) {
             onError(application.getString(R.string.scannercapabilities_null))
@@ -577,7 +596,7 @@ class ScanningScreenViewModel(
         } else {
             setFileToSave(outputFile)
             saveFileLauncher.launch(outputFile.name)
-        }
+        }*/
     }
 
     fun doZipExport(context: Context, onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {

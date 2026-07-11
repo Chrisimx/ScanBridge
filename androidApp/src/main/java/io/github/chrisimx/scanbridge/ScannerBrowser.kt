@@ -105,10 +105,9 @@ fun ScannerList(
 
         customScanners.forEach { customScanner ->
             item {
-                // TODO: Store protocol in database
                 FoundScannerItem(
                     customScanner.url.toString(),
-                    "eSCL",
+                    customScanner.protocolIdentifier,
                     customScanner.name,
                     null,
                     navController,
@@ -196,8 +195,11 @@ fun ScannerBrowser(
                     is EditedCustomScanner.EditingOld -> currentlyEditedScanner.scanner.uuid
                     EditedCustomScanner.New -> Uuid.random()
                 }
+                val protocolIdentifier = "eSCL"
                 if (save) {
-                    scannerDiscoveryScreenViewModel.addScanner(CustomScanner(uuid, name, Url(url)))
+                    scannerDiscoveryScreenViewModel.addScanner(
+                        CustomScanner(uuid, name, Url(url), protocolIdentifier)
+                    )
                 }
                 setEditedCustomDialog(null)
                 if (navigate) {
@@ -205,7 +207,7 @@ fun ScannerBrowser(
                         ScannerRoute(
                             name,
                             url,
-                            "eSCL", // TODO: Store protocol in database and make this choosable
+                            protocolIdentifier,
                             sessionID.toString()
                         )
                     )

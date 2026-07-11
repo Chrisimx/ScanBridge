@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "d3761fdca3862892813e41388ac28a43",
+    "identityHash": "967a7f604f397eeb0b79f656da762e6d",
     "entities": [
       {
         "tableName": "customscanners",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` TEXT NOT NULL, `name` TEXT NOT NULL, `url` TEXT NOT NULL, PRIMARY KEY(`uuid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` TEXT NOT NULL, `name` TEXT NOT NULL, `url` TEXT NOT NULL, `protocolIdentifier` TEXT NOT NULL DEFAULT 'eSCL', PRIMARY KEY(`uuid`))",
         "fields": [
           {
             "fieldPath": "uuid",
@@ -25,6 +25,13 @@
             "columnName": "url",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "protocolIdentifier",
+            "columnName": "protocolIdentifier",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'eSCL'"
           }
         ],
         "primaryKey": {
@@ -256,7 +263,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd3761fdca3862892813e41388ac28a43')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '967a7f604f397eeb0b79f656da762e6d')"
     ]
   }
 }

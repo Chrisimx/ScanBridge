@@ -57,7 +57,8 @@ object LegacyCustomScannerStore {
                 val scanner = CustomScanner(
                     name = name,
                     url = Url(url),
-                    uuid = Uuid.parse(uuid)
+                    uuid = Uuid.parse(uuid),
+                    protocolIdentifier = "eSCL"
                 )
                 scannerList.add(scanner)
             } catch (e: IllegalArgumentException) {

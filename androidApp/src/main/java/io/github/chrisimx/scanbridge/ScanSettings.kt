@@ -53,7 +53,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import io.github.chrisimx.anyscan.Choice
+import io.github.chrisimx.anyscan.CommonScanSettingsEditor
 import io.github.chrisimx.anyscan.DiscreteResolution
+import io.github.chrisimx.anyscan.ScanSettingParam
+import io.github.chrisimx.anyscan.ScannerConcept
 import io.github.chrisimx.anyscan.equalsLength
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsLengthUnit
@@ -76,20 +80,9 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
     val context = LocalContext.current
     val vmData by scanSettingsStateHolder.uiState.collectAsState()
 
-    val currentResolution by scanSettingsStateHolder.currentResolution.collectAsState()
-    val currentScanRegion by scanSettingsStateHolder.currentScanRegion.collectAsState()
-
-    val duplexCurrentlyAvailable by scanSettingsStateHolder.duplexCurrentlyAvailable.collectAsState()
-
-    val currentColorMode by scanSettingsStateHolder.currentColorMode.collectAsState()
+    val duplexCurrentlyAvailable by scanSettingsStateHolder.duplexCurrentlyActive.collectAsState()
 
     val inputSourceOptions by scanSettingsStateHolder.inputSourceOptions.collectAsState()
-    val supportedResolutions by scanSettingsStateHolder.supportedScanResolutions.collectAsState()
-    val intentOptions by scanSettingsStateHolder.intentOptions.collectAsState()
-    val supportedColorModes by scanSettingsStateHolder.supportedColorModes.collectAsState()
-
-    val widthValidationResult by scanSettingsStateHolder.widthValidationResult.collectAsState(NumberValidationResult.NotANumber)
-    val heightValidationResult by scanSettingsStateHolder.heightValidationResult.collectAsState(NumberValidationResult.NotANumber)
 
     val userUnitEnum by scanSettingsStateHolder.lengthUnit.collectAsState(ScanSettingsLengthUnit.MILLIMETER)
 
@@ -98,12 +91,12 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
         ScanSettingsLengthUnit.MILLIMETER -> stringResource(R.string.millimeter_unit_abbreviation)
     }
 
+    val availableParameters by scanSettingsStateHolder.availableParameters.collectAsState()
+
     val scanSettings by scanSettingsStateHolder.scanSettings.collectAsState()
 
     val selectedInputSource by scanSettingsStateHolder.selectedInputSource.collectAsState()
     val duplexUsed by scanSettingsStateHolder.duplexUsed.collectAsState()
-
-    val selectedIntent by scanSettingsStateHolder.currentIntent.collectAsState()
 
     val scrollState = rememberScrollState()
 
@@ -144,131 +137,34 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
 
         var fitsRowVersion by remember { mutableStateOf(false) }
 
-        SizeBasedConditionalView(
-            modifier = Modifier,
-            largeView = {
-                ResolutionSettingButtonRowVersion(supportedResolutions, currentResolution) { x, y ->
-                    scanSettingsStateHolder.setResolution(x, y)
-                }
-            },
-            smallView = {
-                ResolutionSettingCardVersion(supportedResolutions, currentResolution) { x, y ->
-                    scanSettingsStateHolder.setResolution(x, y)
-                }
-            },
-            onViewChosen = { fitsRowVersion = it }
-        )
+        for (parameterPair in availableParameters) {
+            val (scannerConcept, parameter) = parameterPair
 
-        if (intentOptions.isNotEmpty()) {
-            SelectionCardWithDefault(
-                stringResource(R.string.intent),
-                intentOptions,
-                {
-                    scanSettingsStateHolder.setIntent(it)
-                },
-                { this.asString() },
-                selectedIntent,
-                fitsRowVersion
-            )
-        }
-
-
-        SelectionCardWithDefault(
-            stringResource(R.string.color_mode),
-            supportedColorModes,
-            {
-                scanSettingsStateHolder.setColorMode(it)
-            },
-            { this.localizedString(context) },
-            currentColorMode
-        )
-
-        OutlinedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 15.dp, bottom = 15.dp)
-        ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(
-                    stringResource(R.string.scan_region),
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-
-                FlowRow(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    vmData.paperFormats.forEach { paperFormat ->
-                        InputChip(
-                            onClick = {
-                                scanSettingsStateHolder.setCustomMenuEnabled(false)
-                                scanSettingsStateHolder.setRegionDimension(
-                                    paperFormat.width,
-                                    paperFormat.height
-                                )
-                                Timber.tag(TAG).d("New region state: ${scanSettings.scanArea}")
-                            },
-                            label = { Text(paperFormat.name) },
-                            selected = !vmData.customMenuEnabled && !vmData.maximumSize &&
-                                currentScanRegion?.width?.equalsLength(paperFormat.width) == true &&
-                                currentScanRegion?.height?.equalsLength(paperFormat.height) == true
-                        )
-                    }
-                    InputChip(
-                        onClick = {
-                            scanSettingsStateHolder.setCustomMenuEnabled(false)
-                            scanSettingsStateHolder.selectMaxRegion()
-                        },
-                        label = { Text(stringResource(R.string.maximum_size)) },
-                        selected =
-                            vmData.maximumSize && !vmData.customMenuEnabled
-                    )
-                    InputChip(
-                        selected = vmData.customMenuEnabled,
-                        onClick = { scanSettingsStateHolder.setCustomMenuEnabled(true) },
-                        label = { Text(stringResource(R.string.custom)) }
-                    )
-                }
-                AnimatedVisibility(vmData.customMenuEnabled) {
-                    Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                        ValidatedDimensionsTextEdit(
-                            vmData.widthString,
-                            context,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 10.dp),
-                            stringResource(R.string.width_in_unit, userUnitString),
-                            { newText: String ->
-                                scanSettingsStateHolder.setCustomWidthTextFieldContent(
-                                    newText
-                                )
-                            },
-                            widthValidationResult
-                        )
-                        ValidatedDimensionsTextEdit(
-                            vmData.heightString,
-                            context,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 10.dp),
-                            stringResource(R.string.height_in_unit, userUnitString),
-                            { scanSettingsStateHolder.setCustomHeightTextFieldContent(it) },
-                            heightValidationResult
-                        )
-                    }
-                }
+            val scannerConceptLocalizedName = when (scannerConcept) {
+                ScannerConcept.ColorMode -> R.string.color_mode
+                ScannerConcept.ScanIntent -> R.string.intent
+                ScannerConcept.ScanRegion -> R.string.scan_region
+                ScannerConcept.ScanResolution -> R.string.resolution_dpi
             }
-        }
-        Button(
-            modifier = Modifier.padding(horizontal = 15.dp).testTag("copyesclkt"),
-            onClick = { scanSettingsStateHolder.copySettingsToClipboard() }
-        ) {
-            Text(
-                stringResource(R.string.copy_current_scanner_options_in_esclkt_format),
-                style = MaterialTheme.typography.labelMedium,
-                textAlign = TextAlign.Center
-            )
+
+            when (parameter) {
+                is ScanSettingParam.ScanSettingBoolParam -> TODO()
+                is ScanSettingParam.ScanSettingChoiceParam<*> -> {
+                    SelectionCardWithDefault(
+                        stringResource(scannerConceptLocalizedName),
+                        parameter.availableChoices,
+                        { selectedChoice ->
+                            scanSettingsStateHolder.setSetting(parameter.concept, selectedChoice?.value)
+                        },
+                        { this.value.toString() },
+                        scanSettings.setting[parameter.concept] as Choice<out Any>?
+                    )
+                }
+                is ScanSettingParam.ScanSettingDoubleParam -> TODO()
+                is ScanSettingParam.ScanSettingFloatParam -> TODO()
+                is ScanSettingParam.ScanSettingIntParam -> TODO()
+                is ScanSettingParam.ScanSettingRegionParam -> TODO()
+            }
         }
     }
 }
