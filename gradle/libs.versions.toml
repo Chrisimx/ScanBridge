@@ -98,7 +98,7 @@ coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" 
 coil-fetcher-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 esclkt = { module = "io.github.chrisimx:esclkt", version.ref = "anyscankt" }
 wsdkt = { module = "io.github.chrisimx:wsdkt", version.ref = "anyscankt" }
-commonScannerAbstractions = { module = "io.github.chrisimx:common-scanner-abstractions", version.ref = "anyscankt" }
+anyscanCore = { module = "io.github.chrisimx:anyscankt-core", version.ref = "anyscankt" }
 nonThrowingKtor = { module = "io.github.chrisimx:nonthrowingktor", version.ref = "anyscankt" }
 itext7-core = { module = "com.itextpdf:itext-core", version.ref = "itextCore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

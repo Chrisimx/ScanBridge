@@ -57,7 +57,7 @@ kotlin {
             api(libs.ktor.logging)
             api(libs.esclkt)
             api(libs.wsdkt)
-            api(libs.commonScannerAbstractions)
+            api(libs.anyscanCore)
             api(libs.nonThrowingKtor)
 
             // Room deps

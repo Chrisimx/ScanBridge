@@ -6,6 +6,7 @@ option java_multiple_files = true;
 import "google/protobuf/wrappers.proto";
 
 message ScanBridgeSettings {
+  uint32 app_settings_version = 10;
   bool auto_cleanup = 1;
   bool write_debug = 2;
   bool disable_cert_checks = 3;

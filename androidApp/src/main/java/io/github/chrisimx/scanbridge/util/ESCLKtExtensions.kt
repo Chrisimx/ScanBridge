@@ -22,9 +22,13 @@ package io.github.chrisimx.scanbridge.util
 import android.content.Context
 import android.icu.text.DecimalFormat
 import app.cash.paraphrase.getString
-import io.github.chrisimx.csa.CSAEnumOrRaw
+import io.github.chrisimx.anyscan.AnyScanEnumOrRaw
+import io.github.chrisimx.anyscan.ColorMode
+import io.github.chrisimx.anyscan.CommonInputSourceType
+import io.github.chrisimx.anyscan.CommonScanSettings
+import io.github.chrisimx.anyscan.CommonScannerCapabilities
+import io.github.chrisimx.anyscan.Millimeters
 import io.github.chrisimx.esclkt.DiscreteResolution
-import io.github.chrisimx.esclkt.EsclColorMode
 import io.github.chrisimx.esclkt.EsclColorModeEnumOrRaw
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.JobState
@@ -49,23 +53,100 @@ fun String.toDoubleLocalized(): Double = DecimalFormat.getInstance().parse(this)
 
 fun Double.toStringLocalized(): String = DecimalFormat.getInstance().format(this)
 
-fun InputSource.toReadableString(context: Context): String = when (this) {
-    InputSource.Platen -> context.getString(R.string.platen)
-    InputSource.Feeder -> context.getString(R.string.adf)
-    InputSource.Camera -> context.getString(R.string.camera)
+fun UIInputSourceType.toReadableString(context: Context): String = when (this) {
+    UIInputSourceType.PLATEN ->
+        context.getString(R.string.platen)
+    UIInputSourceType.ADF -> context.getString(R.string.adf)
 }
 
-fun EsclColorModeEnumOrRaw.localizedString(context: Context): String = when (this) {
-    is CSAEnumOrRaw.Known<EsclColorMode> -> when (this.value) {
-        EsclColorMode.BlackAndWhite1 -> context.getString(R.string.black_and_white)
-        EsclColorMode.RGB24 -> context.getString(FormattedResources.color_scan("24"))
-        EsclColorMode.RGB48 -> context.getString(FormattedResources.color_scan("48"))
-        EsclColorMode.AutoColorDetection -> context.getString(R.string.auto_detect)
-        EsclColorMode.Grayscale8 -> context.getString(FormattedResources.grayscale("8"))
-        EsclColorMode.Grayscale16 -> context.getString(FormattedResources.grayscale("16"))
+/**
+ * Returns the caller object if it is contained in the provided list; otherwise, returns the first
+ * element of the list or null if the list is empty.
+ *
+ * @param list The list to search for the caller object.
+ * @return The caller object if it is contained in the list, the first element of the list if not contained, 
+ *         or null if the list is empty.
+ */
+fun <T> T.takeIfContainedElseFirstOrNull(list: List<T>): T? {
+    return if (list.contains(this)) {
+        this
+    } else {
+        list.firstOrNull()
+    }
+}
+
+fun CommonScanSettings.coerceIn(capabilities: CommonScannerCapabilities): CommonScanSettings {
+    val inputSourceType = this.inputSource ?: CommonInputSourceType.PLATEN
+    val inputSourceCaps = capabilities.getInputSourceCaps(inputSourceType)
+        ?: capabilities.inputSources.firstOrNull()
+        ?: throw IllegalArgumentException("No input sources found in capabilities.")
+
+    // Coerce resolution
+    val coercedResolution = this.resolution?.let { res ->
+        val availableResolutions = inputSourceCaps.supportedResolutions
+        if (availableResolutions.contains(res)) {
+            res
+        } else {
+            // Find closest resolution
+            availableResolutions.minByOrNull {
+                kotlin.math.abs(it.widthDPI.toInt() - res.widthDPI.toInt()) +
+                    kotlin.math.abs(it.heightDPI.toInt() - res.heightDPI.toInt())
+            } ?: res
+        }
     }
 
-    is CSAEnumOrRaw.Unknown<EsclColorMode> -> this.asString()
+    // Coerce color mode
+    val coercedColorMode = this.colorMode?.let { mode ->
+        if (inputSourceCaps.supportedColorModes.contains(mode)) {
+            mode
+        } else {
+            inputSourceCaps.supportedColorModes.firstOrNull()
+        }
+    }
+
+    // Coerce scan area
+    val coercedScanArea = this.scanArea?.let { area ->
+        val minWidth = inputSourceCaps.minSize.width.toMillimeters().value
+        val maxWidth = inputSourceCaps.maxSize.width.toMillimeters().value
+        val minHeight = inputSourceCaps.minSize.height.toMillimeters().value
+        val maxHeight = inputSourceCaps.maxSize.height.toMillimeters().value
+
+        area.copy(
+            width = Millimeters(area.width.toMillimeters().value.coerceIn(minWidth, maxWidth)),
+            height = Millimeters(area.height.toMillimeters().value.coerceIn(minHeight, maxHeight))
+        )
+    }
+
+    // Coerce format
+    val coercedFormat = this.format?.takeIfContainedElseFirstOrNull(
+        inputSourceCaps.supportedFileFormats
+    )
+
+    // Coerce intent
+    val coercedIntent = this.scanIntent?.takeIfContainedElseFirstOrNull(
+        inputSourceCaps.supportedIntents
+    )
+
+    return this.copy(
+        inputSource = inputSourceType,
+        resolution = coercedResolution,
+        colorMode = coercedColorMode,
+        scanArea = coercedScanArea,
+        format = coercedFormat,
+        scanIntent = coercedIntent
+    )
+}
+fun AnyScanEnumOrRaw<ColorMode>.localizedString(context: Context): String = when (this) {
+    is AnyScanEnumOrRaw.Known<ColorMode> -> when (this.value) {
+        ColorMode.BlackAndWhite1 -> context.getString(R.string.black_and_white)
+        ColorMode.RGB24 -> context.getString(FormattedResources.color_scan("24"))
+        ColorMode.RGB48 -> context.getString(FormattedResources.color_scan("48"))
+        ColorMode.AutoColorDetection -> context.getString(R.string.auto_detect)
+        ColorMode.Grayscale8 -> context.getString(FormattedResources.grayscale("8"))
+        ColorMode.Grayscale16 -> context.getString(FormattedResources.grayscale("16"))
+    }
+
+    is AnyScanEnumOrRaw.Unknown<ColorMode> -> this.asString()
 }
 
 fun ScannerCapabilities.getMaxResolution(inputSource: InputSource): DiscreteResolution {
@@ -77,7 +158,7 @@ fun ScannerCapabilities.getMaxResolution(inputSource: InputSource): DiscreteReso
     return maxResolution
 }
 
-fun ScannerCapabilities.getBestColorMode(inputSource: InputSource): EsclColorModeEnumOrRaw? {
+fun CommonScannerCapabilities.getBestColorMode(inputSource: InputSource): EsclColorModeEnumOrRaw? {
     val inputCaps = this.getInputSourceCaps(inputSource)
     val chosenColorMode = inputCaps.settingProfiles.elementAtOrNull(0)?.colorModes?.maxByOrNull {
         when (it) {

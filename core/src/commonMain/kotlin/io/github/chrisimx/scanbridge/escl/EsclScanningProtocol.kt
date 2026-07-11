@@ -1,10 +1,14 @@
 package io.github.chrisimx.scanbridge.escl
 
+import io.github.chrisimx.anyscan.CommonScanSettings
+import io.github.chrisimx.anyscan.CommonScannerCapabilities
 import io.github.chrisimx.esclkt.ESCLRequestClient
 import io.github.chrisimx.safektor.ESCLHttpCallResult
 import io.github.chrisimx.esclkt.JobState
 import io.github.chrisimx.esclkt.ScanJob
-import io.github.chrisimx.esclkt.ScanSettings
+import io.github.chrisimx.esclkt.anyscancompat.CommonAbstractionConversionResult
+import io.github.chrisimx.esclkt.anyscancompat.toCommonAbstraction
+import io.github.chrisimx.esclkt.anyscancompat.toESCLScanSettings
 import io.github.chrisimx.scanbridge.model.ScanProtocolScannedPage
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.ScanningError
@@ -78,17 +82,28 @@ class EsclScanningProtocol(
             esclRequestClient.getScannerCapabilities()
         }
 
-        return when (scannerCapsResult) {
-            is ESCLRequestClient.ScannerCapabilitiesResult.InternalBug -> ScannerCapabilitiesResult.InternalBug(scannerCapsResult.exception)
-            is ESCLRequestClient.ScannerCapabilitiesResult.RequestFailure -> when (val error = scannerCapsResult.error) {
+        when (scannerCapsResult) {
+            is ESCLRequestClient.ScannerCapabilitiesResult.InternalBug -> return ScannerCapabilitiesResult.InternalBug(scannerCapsResult.exception)
+            is ESCLRequestClient.ScannerCapabilitiesResult.RequestFailure -> return when (val error = scannerCapsResult.error) {
                 is ESCLHttpCallResult.Error.UntrustedCertificate -> ScannerCapabilitiesResult.UntrustedCertificate(error.cause)
                 else -> ScannerCapabilitiesResult.Failure(error)
             }
-            is ESCLRequestClient.ScannerCapabilitiesResult.ScannerCapabilitiesMalformed -> ScannerCapabilitiesResult.ScannerCapsFormatInvalid(
+            is ESCLRequestClient.ScannerCapabilitiesResult.ScannerCapabilitiesMalformed -> return ScannerCapabilitiesResult.ScannerCapsFormatInvalid(
                 scannerCapsResult.exception,
                 scannerCapsResult.content
             )
-            is ESCLRequestClient.ScannerCapabilitiesResult.Success -> ScannerCapabilitiesResult.Success(scannerCapsResult.scannerCapabilities)
+            is ESCLRequestClient.ScannerCapabilitiesResult.Success -> {}
+        }
+
+        val esclScanCaps = scannerCapsResult.scannerCapabilities
+        return when (val conversionResult = esclScanCaps.toCommonAbstraction()) {
+            is CommonAbstractionConversionResult.Failure -> ScannerCapabilitiesResult.ScannerCapsFormatInvalid(
+                Exception("Could not convert eSCL scanner capabilities to CommonAbstraction"),
+                scannerCapsResult.scannerCapabilities.toString()
+            )
+            is CommonAbstractionConversionResult.Success<CommonScannerCapabilities> -> ScannerCapabilitiesResult.Success(
+                conversionResult.value
+            )
         }
     }
 
@@ -150,7 +165,7 @@ class EsclScanningProtocol(
     override fun executeScanJob(
         handle: ScannerHandle,
         settings: ScannerConnectionSettings,
-        jobScanSettings: ScanSettings,
+        jobScanSettings: CommonScanSettings,
         cancelled: StateFlow<Boolean>
     ): Flow<ScanJobProcessingEvent> = flow {
         val scannerUrlHandle =
@@ -180,9 +195,10 @@ class EsclScanningProtocol(
 
         if (abortIfCancelling()) return@flow
 
-        _logger.debug { "Creating scan job. eSCLKt scan settings: $jobScanSettings" }
+        val esclScanSettings = jobScanSettings.toESCLScanSettings()
+        _logger.debug { "Creating scan job. Common scan settings: $jobScanSettings eSCL scan settings: $esclScanSettings" }
 
-        val job = esclRequestClient.createJob(jobScanSettings)
+        val job = esclRequestClient.createJob(esclScanSettings)
 
         _logger.debug { "Creation request done. Result: $job" }
         if (job !is ESCLRequestClient.ScannerCreateJobResult.Success) {

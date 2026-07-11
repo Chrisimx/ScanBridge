@@ -11,7 +11,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
-import io.github.chrisimx.esclkt.ScanSettings
+import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.scanbridge.MainActivity
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
@@ -226,7 +226,7 @@ class ScanJobForegroundService : Service() {
         scanJobs.notifyCompleted(scanJob)
     }
 
-    suspend fun addScan(sessionID: Uuid, path: String, settings: ScanSettings, rotation: ScanRelativeRotation, fileName: String? = null) {
+    suspend fun addScan(sessionID: Uuid, path: String, settings: CommonScanSettings, rotation: ScanRelativeRotation, fileName: String? = null) {
         Timber.d("Adding scan: $path, $rotation")
         db.useWriterConnection {
             it.immediateTransaction {

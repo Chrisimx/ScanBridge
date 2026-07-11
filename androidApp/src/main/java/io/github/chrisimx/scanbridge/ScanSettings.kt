@@ -53,9 +53,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import io.github.chrisimx.esclkt.DiscreteResolution
-import io.github.chrisimx.esclkt.SupportedResolutions
-import io.github.chrisimx.csa.equalsLength
+import io.github.chrisimx.anyscan.DiscreteResolution
+import io.github.chrisimx.anyscan.equalsLength
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsLengthUnit
 import io.github.chrisimx.scanbridge.model.NumberValidationResult
@@ -101,6 +100,11 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
 
     val scanSettings by scanSettingsStateHolder.scanSettings.collectAsState()
 
+    val selectedInputSource by scanSettingsStateHolder.selectedInputSource.collectAsState()
+    val duplexUsed by scanSettingsStateHolder.duplexUsed.collectAsState()
+
+    val selectedIntent by scanSettingsStateHolder.currentIntent.collectAsState()
+
     val scrollState = rememberScrollState()
 
     Column(
@@ -125,7 +129,7 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
                             count = inputSourceOptions.size
                         ),
                         onClick = { scanSettingsStateHolder.setInputSource(inputSource) },
-                        selected = scanSettings.inputSource == inputSource
+                        selected = selectedInputSource == inputSource
                     ) {
                         Text(inputSource.toReadableString(context))
                     }
@@ -133,7 +137,7 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
             }
             ToggleButton(
                 enabled = duplexCurrentlyAvailable,
-                checked = scanSettings.duplex == true,
+                checked = duplexUsed,
                 onCheckedChange = { scanSettingsStateHolder.setDuplex(it) }
             ) { Text(stringResource(R.string.setting_duplex)) }
         }
@@ -155,16 +159,19 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
             onViewChosen = { fitsRowVersion = it }
         )
 
-        SelectionCardWithDefault(
-            stringResource(R.string.intent),
-            intentOptions,
-            {
-                scanSettingsStateHolder.setIntent(it)
-            },
-            { this.asString() },
-            scanSettings.intent,
-            fitsRowVersion
-        )
+        if (intentOptions.isNotEmpty()) {
+            SelectionCardWithDefault(
+                stringResource(R.string.intent),
+                intentOptions,
+                {
+                    scanSettingsStateHolder.setIntent(it)
+                },
+                { this.asString() },
+                selectedIntent,
+                fitsRowVersion
+            )
+        }
+
 
         SelectionCardWithDefault(
             stringResource(R.string.color_mode),
@@ -200,7 +207,7 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
                                     paperFormat.width,
                                     paperFormat.height
                                 )
-                                Timber.tag(TAG).d("New region state: ${scanSettings.scanRegions}")
+                                Timber.tag(TAG).d("New region state: ${scanSettings.scanArea}")
                             },
                             label = { Text(paperFormat.name) },
                             selected = !vmData.customMenuEnabled && !vmData.maximumSize &&
@@ -316,28 +323,28 @@ private fun <T> SelectionCardWithDefault(
 
 @Composable
 private fun ResolutionSettingButtonRowVersion(
-    supportedResolutions: SupportedResolutions,
+    supportedResolutions: List<DiscreteResolution>,
     currentResolution: DiscreteResolution?,
     setSelectedResolution: (UInt, UInt) -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(stringResource(R.string.resolution_dpi))
         SingleChoiceSegmentedButtonRow {
-            supportedResolutions.discreteResolutions.forEachIndexed { index, discreteResolution ->
+            supportedResolutions.forEachIndexed { index, discreteResolution ->
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(
                         index = index,
-                        count = supportedResolutions.discreteResolutions.size
+                        count = supportedResolutions.size
                     ),
                     onClick = {
-                        setSelectedResolution(discreteResolution.xResolution, discreteResolution.yResolution)
+                        setSelectedResolution(discreteResolution.widthDPI, discreteResolution.heightDPI)
                     },
                     selected = currentResolution == discreteResolution
                 ) {
-                    if (discreteResolution.xResolution == discreteResolution.yResolution) {
-                        Text("${discreteResolution.xResolution}")
+                    if (discreteResolution.widthDPI == discreteResolution.heightDPI) {
+                        Text("${discreteResolution.widthDPI}")
                     } else {
-                        Text("${discreteResolution.xResolution}x${discreteResolution.yResolution}")
+                        Text("${discreteResolution.widthDPI}x${discreteResolution.heightDPI}")
                     }
                 }
             }
@@ -347,7 +354,7 @@ private fun ResolutionSettingButtonRowVersion(
 
 @Composable
 private fun ResolutionSettingCardVersion(
-    supportedResolutions: SupportedResolutions,
+    supportedResolutions: List<DiscreteResolution>,
     currentResolution: DiscreteResolution?,
     setSelectedResolution: (UInt, UInt) -> Unit
 ) {
@@ -368,17 +375,17 @@ private fun ResolutionSettingCardVersion(
 
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                supportedResolutions.discreteResolutions.forEachIndexed { index, discreteResolution ->
-                    val text = if (discreteResolution.xResolution == discreteResolution.yResolution) {
-                        "${discreteResolution.xResolution}"
+                supportedResolutions.forEach { discreteResolution ->
+                    val text = if (discreteResolution.widthDPI == discreteResolution.heightDPI) {
+                        "${discreteResolution.widthDPI}"
                     } else {
-                        "${discreteResolution.xResolution}x${discreteResolution.yResolution}"
+                        "${discreteResolution.widthDPI}x${discreteResolution.heightDPI}"
                     }
                     InputChip(
                         onClick = {
                             setSelectedResolution(
-                                discreteResolution.xResolution,
-                                discreteResolution.yResolution
+                                discreteResolution.widthDPI,
+                                discreteResolution.heightDPI
                             )
                         },
                         label = { Text(text) },

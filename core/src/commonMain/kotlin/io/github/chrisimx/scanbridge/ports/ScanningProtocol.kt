@@ -1,8 +1,7 @@
 package io.github.chrisimx.scanbridge.ports
 
-import io.github.chrisimx.esclkt.ESCLRequestClient
-import io.github.chrisimx.esclkt.ScanSettings
-import io.github.chrisimx.esclkt.ScannerCapabilities
+import io.github.chrisimx.anyscan.CommonScanSettings
+import io.github.chrisimx.anyscan.CommonScannerCapabilities
 import io.github.chrisimx.scanbridge.model.ScanProtocolScannedPage
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.ScanningError
@@ -18,7 +17,7 @@ data class ScannerConnectionSettings(
 )
 
 sealed class ScannerCapabilitiesResult {
-    data class Success(val scannerCapabilities: ScannerCapabilities) : ScannerCapabilitiesResult()
+    data class Success(val scannerCapabilities: CommonScannerCapabilities) : ScannerCapabilitiesResult()
     data class ScannerCapsFormatInvalid(val error: Exception, val scannerCapsContent: String?) : ScannerCapabilitiesResult()
     data class UntrustedCertificate(val error: String?) : ScannerCapabilitiesResult()
     data class InvalidScannerHandle(val scannerHandle: ScannerHandle) : ScannerCapabilitiesResult()
@@ -77,7 +76,7 @@ interface ScanningProtocol {
      */
     fun executeScanJob(handle: ScannerHandle,
                        settings: ScannerConnectionSettings,
-                       jobScanSettings: ScanSettings,
+                       jobScanSettings: CommonScanSettings,
                        cancelled: StateFlow<Boolean>
     ): Flow<ScanJobProcessingEvent>
 }

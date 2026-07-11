@@ -108,6 +108,7 @@ import io.github.chrisimx.scanbridge.util.clearAndNavigateTo
 import io.github.chrisimx.scanbridge.util.snackBarError
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.toReadableString
+import io.github.chrisimx.scanbridge.util.toUIInputSourceType
 import java.io.File
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
@@ -653,7 +654,7 @@ fun ScanContent(
 
             if (currentPages.size > pagerState.currentPage) {
                 Text(
-                    currentPage?.originalScanSettings?.inputSource?.toReadableString(
+                    currentPage?.originalScanSettings?.inputSource?.toUIInputSourceType()?.toReadableString(
                         context
                     ).toString()
                 )

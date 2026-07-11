@@ -1,7 +1,7 @@
 package io.github.chrisimx.scanbridge.data.model
 
-import io.github.chrisimx.csa.LengthUnit
-import io.github.chrisimx.csa.millimeters
+import io.github.chrisimx.anyscan.LengthUnit
+import io.github.chrisimx.anyscan.millimeters
 import io.github.chrisimx.esclkt.BinaryRendering
 import io.github.chrisimx.esclkt.CcdChannelEnumOrRaw
 import io.github.chrisimx.esclkt.EsclColorModeEnumOrRaw

@@ -1,8 +1,8 @@
 package io.github.chrisimx.scanbridge
 
-import io.github.chrisimx.csa.LengthUnit
-import io.github.chrisimx.csa.Millimeters
-import io.github.chrisimx.csa.millimeters
+import io.github.chrisimx.anyscan.LengthUnit
+import io.github.chrisimx.anyscan.Millimeters
+import io.github.chrisimx.anyscan.millimeters
 import kotlinx.serialization.Serializable
 
 @Serializable

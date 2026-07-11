@@ -7,6 +7,7 @@ import androidx.datastore.migrations.SharedPreferencesMigration
 import com.google.protobuf.BoolValue
 import com.google.protobuf.StringValue
 import com.google.protobuf.UInt32Value
+import io.github.chrisimx.scanbridge.migrations.appsettingsstore.AppSettingsMigrationV0To1
 import io.github.chrisimx.scanbridge.proto.LastRoute
 import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
 import io.github.chrisimx.scanbridge.proto.ShownMessages
@@ -32,7 +33,8 @@ val Context.appSettingsStore: DataStore<ScanBridgeSettings> by dataStore(
                     chunkSizePdfExport = UInt32Value.of(sharedPrefs.getInt("chunk_size_pdf_export", 50))
                     rememberScanSettings = BoolValue.of(sharedPrefs.getBoolean("remember_scan_settings", true))
                 }.build()
-            }
+            },
+            AppSettingsMigrationV0To1
         )
     }
 )
