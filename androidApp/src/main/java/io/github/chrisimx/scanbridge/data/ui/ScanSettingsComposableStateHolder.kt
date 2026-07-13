@@ -25,7 +25,6 @@ import io.github.chrisimx.anyscan.CommonInputSourceType
 import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.anyscan.CommonScanSettingsEditor
 import io.github.chrisimx.anyscan.LengthUnit
-import io.github.chrisimx.anyscan.ScanSettingParam
 import io.github.chrisimx.anyscan.ScannerConcept
 import io.github.chrisimx.scanbridge.model.Locale
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
@@ -39,11 +38,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.InjectedParam
@@ -90,8 +84,9 @@ class ScanSettingsComposableStateHolder(
         } != null
     }
 
-    val duplexCurrentlyActive: StateFlow<Boolean> = combine(duplexAdfSupported, scanSettings) { duplexSupport, scanSettings ->
-        duplexSupport && scanSettings.inputSource == CommonInputSourceType.ADF_DUPLEX
+    val duplexSettingAvailable: StateFlow<Boolean> = combine(duplexAdfSupported, scanSettings) { duplexSupport, scanSettings ->
+        duplexSupport &&
+            (scanSettings.inputSource in setOf(CommonInputSourceType.ADF_DUPLEX, CommonInputSourceType.ADF_SIMPLEX))
     }.stateIn(coroutineScope, SharingStarted.Lazily, false)
 
     private val selectedInputSourceCaps: StateFlow<CommonInputSourceCaps> = combine(scanSettings, _uiState) { settings, uiState ->
@@ -124,7 +119,7 @@ class ScanSettingsComposableStateHolder(
     }
 
     init {
-        _uiState
+        /*_uiState
             .map { it.maximumSize }
             .distinctUntilChanged()
             .combine(selectedInputSourceCaps) { maxSize, inputSourceCaps -> Pair(maxSize, inputSourceCaps) }
@@ -138,11 +133,11 @@ class ScanSettingsComposableStateHolder(
                         set(ScannerConcept.ScanRegion, maxArea)
                     }
                 }
-            }.launchIn(coroutineScope)
+            }.launchIn(coroutineScope)*/
     }
 
     fun setDuplex(duplex: Boolean) {
-        val duplexCurrentlyActive = duplexCurrentlyActive.value
+        val duplexCurrentlyActive = duplexSettingAvailable.value
 
         if (duplex && !duplexCurrentlyActive) {
             Timber.d("Duplex can not be turned on because it is not available. Current duplex state: $duplexCurrentlyActive")

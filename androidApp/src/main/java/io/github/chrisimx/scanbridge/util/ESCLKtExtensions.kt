@@ -22,21 +22,13 @@ package io.github.chrisimx.scanbridge.util
 import android.content.Context
 import android.icu.text.DecimalFormat
 import app.cash.paraphrase.getString
-import io.github.chrisimx.anyscan.AnyScanEnumOrRaw
+import io.github.chrisimx.enumorrawcodegen.AnyScanEnumOrRaw
 import io.github.chrisimx.anyscan.ColorMode
-import io.github.chrisimx.anyscan.CommonInputSourceType
-import io.github.chrisimx.anyscan.CommonScanSettings
-import io.github.chrisimx.anyscan.CommonScannerCapabilities
-import io.github.chrisimx.anyscan.Millimeters
 import io.github.chrisimx.esclkt.DiscreteResolution
-import io.github.chrisimx.esclkt.EsclColorModeEnumOrRaw
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.JobState
-import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.esclkt.getInputSourceCaps
-import io.github.chrisimx.esclkt.getInputSourceOptions
-import io.github.chrisimx.esclkt.scanRegion
 import io.github.chrisimx.scanbridge.FormattedResources
 import io.github.chrisimx.scanbridge.R
 

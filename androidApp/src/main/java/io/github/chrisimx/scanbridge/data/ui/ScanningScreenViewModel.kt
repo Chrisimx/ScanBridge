@@ -40,10 +40,12 @@ import com.itextpdf.layout.element.Image
 import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.anyscan.CommonScanSettingsEditor
 import io.github.chrisimx.anyscan.CommonScannerCapabilities
+import io.github.chrisimx.anyscan.FileFormat
 import io.github.chrisimx.anyscan.ScanSettingsMap
 import io.github.chrisimx.anyscan.inches
 import io.github.chrisimx.anyscan.millimeters
 import io.github.chrisimx.anyscan.threeHundredthsOfInch
+import io.github.chrisimx.enumorrawcodegen.AnyScanEnumOrRaw
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.ScanRegion
 import io.github.chrisimx.scanbridge.R
@@ -351,6 +353,10 @@ class ScanningScreenViewModel(
                     caps,
                     CommonScanSettings(setting = ScanSettingsMap.empty())
                 )
+
+                editor.setInputSource(caps.inputSources.first().inputSourceType)
+                editor.setFormat(AnyScanEnumOrRaw.Known(FileFormat.JPEG))
+
                 editor.build()
             }
 

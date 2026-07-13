@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script adb+
 # Usage
-# You can run any command adb provide on all your current devices
+# You can run any command adb provides on all your current devices
 # ./adb+ <command> is the equivalent of ./adb -s <serial number> <command>
 #
 # Examples

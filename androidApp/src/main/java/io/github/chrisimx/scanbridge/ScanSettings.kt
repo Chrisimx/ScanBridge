@@ -19,21 +19,17 @@
 
 package io.github.chrisimx.scanbridge
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.InputChip
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -53,20 +49,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import io.github.chrisimx.anyscan.Choice
-import io.github.chrisimx.anyscan.CommonScanSettingsEditor
 import io.github.chrisimx.anyscan.DiscreteResolution
 import io.github.chrisimx.anyscan.ScanSettingParam
 import io.github.chrisimx.anyscan.ScannerConcept
-import io.github.chrisimx.anyscan.equalsLength
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsLengthUnit
-import io.github.chrisimx.scanbridge.model.NumberValidationResult
-import io.github.chrisimx.scanbridge.uicomponents.SizeBasedConditionalView
-import io.github.chrisimx.scanbridge.uicomponents.ValidatedDimensionsTextEdit
-import io.github.chrisimx.scanbridge.util.localizedString
 import io.github.chrisimx.scanbridge.util.toReadableString
-import timber.log.Timber
 
 @OptIn(
     ExperimentalLayoutApi::class,
@@ -80,7 +68,7 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
     val context = LocalContext.current
     val vmData by scanSettingsStateHolder.uiState.collectAsState()
 
-    val duplexCurrentlyAvailable by scanSettingsStateHolder.duplexCurrentlyActive.collectAsState()
+    val duplexCurrentlyAvailable by scanSettingsStateHolder.duplexSettingAvailable.collectAsState()
 
     val inputSourceOptions by scanSettingsStateHolder.inputSourceOptions.collectAsState()
 
@@ -152,18 +140,18 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
                 is ScanSettingParam.ScanSettingChoiceParam<*> -> {
                     SelectionCardWithDefault(
                         stringResource(scannerConceptLocalizedName),
-                        parameter.availableChoices,
+                        parameter.availableChoices.map { it.value },
                         { selectedChoice ->
-                            scanSettingsStateHolder.setSetting(parameter.concept, selectedChoice?.value)
+                            scanSettingsStateHolder.setSetting(parameter.concept, selectedChoice)
                         },
-                        { this.value.toString() },
-                        scanSettings.setting[parameter.concept] as Choice<out Any>?
+                        { this.toString() },
+                        scanSettings.setting[parameter.concept]
                     )
                 }
                 is ScanSettingParam.ScanSettingDoubleParam -> TODO()
                 is ScanSettingParam.ScanSettingFloatParam -> TODO()
                 is ScanSettingParam.ScanSettingIntParam -> TODO()
-                is ScanSettingParam.ScanSettingRegionParam -> TODO()
+                is ScanSettingParam.ScanSettingRegionParam -> {}
             }
         }
     }
