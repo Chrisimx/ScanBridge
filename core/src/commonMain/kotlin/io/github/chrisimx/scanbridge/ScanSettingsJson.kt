@@ -15,18 +15,7 @@ import kotlinx.serialization.modules.subclass
 object ScanSettingsJson {
     val json = Json {
         ignoreUnknownKeys = false
-        serializersModule = SerializersModule {
-            polymorphic(LengthUnit::class) {
-                subclass(Inches::class)
-                subclass(Millimeters::class)
-                subclass(ThreeHundredthsOfInch::class)
-                subclass(Points::class)
-            }
-            polymorphic(Any::class) {
-                subclass(Area::class)
-                subclass(DiscreteResolution::class)
-            }
-        }
+        serializersModule = SerializersModule {}
         allowStructuredMapKeys = true
         classDiscriminator = "type"
         prettyPrint = false

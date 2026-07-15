@@ -26,6 +26,7 @@ import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.anyscan.CommonScanSettingsEditor
 import io.github.chrisimx.anyscan.LengthUnit
 import io.github.chrisimx.anyscan.ScannerConcept
+import io.github.chrisimx.anyscan.SettingValue
 import io.github.chrisimx.scanbridge.model.Locale
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 import io.github.chrisimx.scanbridge.ports.LocaleProvider
@@ -172,7 +173,7 @@ class ScanSettingsComposableStateHolder(
         }
     }
 
-    fun <T : Any> setSetting(concept: ScannerConcept<T>, value: Any?) {
+    fun <T : SettingValue> setSetting(concept: ScannerConcept<T>, value: Any?) {
         coroutineScope.launch {
             updateSettings {
                 if (value == null) {
