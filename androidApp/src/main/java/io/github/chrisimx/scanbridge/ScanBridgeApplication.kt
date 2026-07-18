@@ -2,6 +2,7 @@ package io.github.chrisimx.scanbridge
 
 import AndroidHttpClientFactory
 import AndroidMdnsDiscoverService
+import AndroidMulticastLockHandler
 import AndroidScanBridgeDbBuilderFactory
 import android.app.Application
 import android.content.Context
@@ -31,6 +32,7 @@ import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.ports.ScanningProtocol
 import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager
+import io.github.chrisimx.scanbridge.ports.multicast.MulticastLockHandler
 import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
 import io.github.chrisimx.scanbridge.proto.ShownMessages
 import io.github.chrisimx.scanbridge.repositories.DatastoreLastRouteRepository
@@ -42,6 +44,7 @@ import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
 import io.github.chrisimx.scanbridge.services.DebugLogService
 import io.github.chrisimx.scanbridge.services.FileDebugLogService
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
+import io.github.chrisimx.scanbridge.wsd.WsdScanningProtocol
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -121,6 +124,8 @@ val appModule = module {
     single<DiscoveryUsecase>()
     viewModel<ScannerDiscoveryScreenViewModel>()
     single<EsclScanningProtocol>() bind ScanningProtocol::class
+    single<WsdScanningProtocol>() bind ScanningProtocol::class
+    single<AndroidMulticastLockHandler>() bind MulticastLockHandler::class
 }
 
 class ScanBridgeApplication : Application() {
