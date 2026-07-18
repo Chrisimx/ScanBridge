@@ -19,6 +19,7 @@
 
 package io.github.chrisimx.scanbridge
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -188,6 +189,7 @@ fun ScannerBrowser(
         CustomScannerDialog(
             onDismiss = { setEditedCustomDialog(null) },
             onConnectClicked = { name, url, save, navigate ->
+                @SuppressLint("LocalContextGetResourceValueCall")
                 val name = name.ifEmpty { context.getString(R.string.custom_scanner) }
                 val url = if (url.toString().endsWith("/")) url.toString() else "$url/"
                 val sessionID = Uuid.random()

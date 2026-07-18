@@ -21,7 +21,6 @@ package io.github.chrisimx.scanbridge
 
 import android.app.Application
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag

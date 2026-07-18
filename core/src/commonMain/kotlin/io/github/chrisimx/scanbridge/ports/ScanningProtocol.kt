@@ -38,6 +38,11 @@ interface ScanningProtocol {
     val protocolIdentifier: String
 
     /**
+     * An exemplary string that shows what the scanner identifier string usually looks like.
+     */
+    val exampleScannerIdentifierString: String
+
+    /**
      * Whether this scanning protocol uses URLs for identifying a scanner.
      * This flag is needed so that it can be decided for which protocols the manual URL entry
      * feature is allowed.
@@ -48,7 +53,7 @@ interface ScanningProtocol {
      * Creates a [ScannerHandle] for the given scanner identifier. This handle can be used for the rest of the API.
      *
      * The meaning of the string [scannerIdentifier] is protocol dependent. It could be a URL,
-     * a PCI device number or something else. This is left free to allow support for protocols that
+     * a PCI device number, or something else. This is left free to allow support for protocols that
      * do not use URLs.
      * Within a [ScanningProtocol] this identifier should have
      * consistent meaning.

@@ -21,15 +21,7 @@ package io.github.chrisimx.scanbridge.util
 
 import android.content.Context
 import android.icu.text.DecimalFormat
-import app.cash.paraphrase.getString
-import io.github.chrisimx.enumorrawcodegen.AnyScanEnumOrRaw
-import io.github.chrisimx.anyscan.ColorMode
-import io.github.chrisimx.esclkt.DiscreteResolution
-import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.JobState
-import io.github.chrisimx.esclkt.ScannerCapabilities
-import io.github.chrisimx.esclkt.getInputSourceCaps
-import io.github.chrisimx.scanbridge.FormattedResources
 import io.github.chrisimx.scanbridge.R
 
 fun JobState?.toJobStateString(context: Context): String = when (this) {
@@ -65,26 +57,4 @@ fun <T> T.takeIfContainedElseFirstOrNull(list: List<T>): T? {
     } else {
         list.firstOrNull()
     }
-}
-
-fun AnyScanEnumOrRaw<ColorMode>.localizedString(context: Context): String = when (this) {
-    is AnyScanEnumOrRaw.Known<ColorMode> -> when (this.value) {
-        ColorMode.BlackAndWhite1 -> context.getString(R.string.black_and_white)
-        ColorMode.RGB24 -> context.getString(FormattedResources.color_scan("24"))
-        ColorMode.RGB48 -> context.getString(FormattedResources.color_scan("48"))
-        ColorMode.AutoColorDetection -> context.getString(R.string.auto_detect)
-        ColorMode.Grayscale8 -> context.getString(FormattedResources.grayscale("8"))
-        ColorMode.Grayscale16 -> context.getString(FormattedResources.grayscale("16"))
-    }
-
-    is AnyScanEnumOrRaw.Unknown<ColorMode> -> this.asString()
-}
-
-fun ScannerCapabilities.getMaxResolution(inputSource: InputSource): DiscreteResolution {
-    val inputCaps = this.getInputSourceCaps(inputSource)
-    val maxResolution = inputCaps
-        .settingProfiles.first()
-        .supportedResolutions.discreteResolutions.maxBy { it.xResolution * it.yResolution }
-
-    return maxResolution
 }

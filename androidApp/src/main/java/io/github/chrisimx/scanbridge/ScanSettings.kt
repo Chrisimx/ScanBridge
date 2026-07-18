@@ -19,7 +19,7 @@
 
 package io.github.chrisimx.scanbridge
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -39,9 +39,6 @@ import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -49,18 +46,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import io.github.chrisimx.anyscan.DiscreteResolution
+import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.anyscan.ScanSettingParam
 import io.github.chrisimx.anyscan.ScannerConcept
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsLengthUnit
+import io.github.chrisimx.scanbridge.uicomponents.SizeBasedConditionalView
+import io.github.chrisimx.scanbridge.util.UIInputSourceType
+import io.github.chrisimx.scanbridge.util.toLocalizedName
 import io.github.chrisimx.scanbridge.util.toReadableString
 
-@OptIn(
-    ExperimentalLayoutApi::class,
-    ExperimentalFoundationApi::class
-)
-private val TAG = "ScanSettings"
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -96,58 +91,26 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(stringResource(R.string.input_source))
-        FlowRow(
-            Modifier.fillMaxWidth().padding(horizontal = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
-            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)
-        ) {
-            SingleChoiceSegmentedButtonRow {
-                inputSourceOptions.forEachIndexed { index, inputSource ->
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = inputSourceOptions.size
-                        ),
-                        onClick = { scanSettingsStateHolder.setInputSource(inputSource) },
-                        selected = selectedInputSource == inputSource
-                    ) {
-                        Text(inputSource.toReadableString(context))
-                    }
-                }
-            }
-            ToggleButton(
-                enabled = duplexCurrentlyAvailable,
-                checked = duplexUsed,
-                onCheckedChange = { scanSettingsStateHolder.setDuplex(it) }
-            ) { Text(stringResource(R.string.setting_duplex)) }
-        }
-
-        var fitsRowVersion by remember { mutableStateOf(false) }
+        InputSourceSelection(
+            inputSourceOptions,
+            scanSettingsStateHolder,
+            selectedInputSource,
+            context,
+            duplexCurrentlyAvailable,
+            duplexUsed
+        )
 
         for (parameterPair in availableParameters) {
             val (scannerConcept, parameter) = parameterPair
 
-            val scannerConceptLocalizedName = when (scannerConcept) {
-                ScannerConcept.ColorMode -> R.string.color_mode
-                ScannerConcept.ScanIntent -> R.string.intent
-                ScannerConcept.ScanRegion -> R.string.scan_region
-                ScannerConcept.ScanResolution -> R.string.resolution_dpi
-            }
+            val scannerConceptLocalizedName = scannerConcept.toLocalizedName()
 
             when (parameter) {
                 is ScanSettingParam.ScanSettingBoolParam -> TODO()
                 is ScanSettingParam.ScanSettingChoiceParam<*> -> {
-                    SelectionCardWithDefault(
-                        stringResource(scannerConceptLocalizedName),
-                        parameter.availableChoices.map { it.value },
-                        { selectedChoice ->
-                            scanSettingsStateHolder.setSetting(parameter.concept, selectedChoice)
-                        },
-                        { this.toString() },
-                        scanSettings.setting[parameter.concept]
-                    )
+                    ChoiceParameterDisplay(scannerConceptLocalizedName, parameter, scanSettingsStateHolder, scannerConcept, scanSettings)
                 }
+
                 is ScanSettingParam.ScanSettingDoubleParam -> TODO()
                 is ScanSettingParam.ScanSettingFloatParam -> TODO()
                 is ScanSettingParam.ScanSettingIntParam -> TODO()
@@ -158,13 +121,88 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
 }
 
 @Composable
-private fun <T> SelectionCardWithDefault(
+private fun ChoiceParameterDisplay(
+    scannerConceptLocalizedName: String,
+    parameter: ScanSettingParam.ScanSettingChoiceParam<*>,
+    scanSettingsStateHolder: ScanSettingsComposableStateHolder,
+    scannerConcept: ScannerConcept<*>,
+    scanSettings: CommonScanSettings
+) {
+    SizeBasedConditionalView(
+        largeView = {
+            SelectionButtonRow(
+                scannerConceptLocalizedName,
+                parameter.availableChoices.map { it.value },
+                { selectedChoice ->
+                    scanSettingsStateHolder.setSetting(parameter.concept, selectedChoice)
+                },
+                { this.toLocalizedName(scannerConcept) },
+                scanSettings.setting[parameter.concept]
+            )
+        },
+        smallView = {
+            SelectionCard(
+                scannerConceptLocalizedName,
+                parameter.availableChoices.map { it.value },
+                { selectedChoice ->
+                    scanSettingsStateHolder.setSetting(parameter.concept, selectedChoice)
+                },
+                { this.toLocalizedName(scannerConcept) },
+                scanSettings.setting[parameter.concept]
+            )
+        }
+    )
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun InputSourceSelection(
+    inputSourceOptions: List<UIInputSourceType>,
+    scanSettingsStateHolder: ScanSettingsComposableStateHolder,
+    selectedInputSource: UIInputSourceType,
+    context: Context,
+    duplexCurrentlyAvailable: Boolean,
+    duplexUsed: Boolean
+) {
+    Text(stringResource(R.string.input_source))
+    FlowRow(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)
+    ) {
+        SingleChoiceSegmentedButtonRow {
+            inputSourceOptions.forEachIndexed { index, inputSource ->
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = inputSourceOptions.size
+                    ),
+                    onClick = { scanSettingsStateHolder.setInputSource(inputSource) },
+                    selected = selectedInputSource == inputSource
+                ) {
+                    Text(inputSource.toReadableString(context))
+                }
+            }
+        }
+        ToggleButton(
+            enabled = duplexCurrentlyAvailable,
+            checked = duplexUsed,
+            onCheckedChange = { scanSettingsStateHolder.setDuplex(it) }
+        ) { Text(stringResource(R.string.setting_duplex)) }
+    }
+}
+
+@Composable
+private fun <T> SelectionCard(
     title: String,
     options: List<T>,
     onSet: (T?) -> Unit,
-    stringify: T.() -> String,
+    stringify: @Composable T.() -> String,
     value: T?,
-    isSmallRowAbove: Boolean = false
+    isSmallRowAbove: Boolean = false,
+    hasDefaultOption: Boolean = false
 ) {
     OutlinedCard(
         modifier = Modifier
@@ -193,43 +231,14 @@ private fun <T> SelectionCardWithDefault(
                         selected = value == option
                     )
                 }
-                InputChip(
-                    onClick = {
-                        onSet(null)
-                    },
-                    label = { Text(stringResource(R.string.default_string)) },
-                    selected = value == null
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ResolutionSettingButtonRowVersion(
-    supportedResolutions: List<DiscreteResolution>,
-    currentResolution: DiscreteResolution?,
-    setSelectedResolution: (UInt, UInt) -> Unit
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(stringResource(R.string.resolution_dpi))
-        SingleChoiceSegmentedButtonRow {
-            supportedResolutions.forEachIndexed { index, discreteResolution ->
-                SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        index = index,
-                        count = supportedResolutions.size
-                    ),
-                    onClick = {
-                        setSelectedResolution(discreteResolution.widthDPI, discreteResolution.heightDPI)
-                    },
-                    selected = currentResolution == discreteResolution
-                ) {
-                    if (discreteResolution.widthDPI == discreteResolution.heightDPI) {
-                        Text("${discreteResolution.widthDPI}")
-                    } else {
-                        Text("${discreteResolution.widthDPI}x${discreteResolution.heightDPI}")
-                    }
+                if (hasDefaultOption) {
+                    InputChip(
+                        onClick = {
+                            onSet(null)
+                        },
+                        label = { Text(stringResource(R.string.default_string)) },
+                        selected = value == null
+                    )
                 }
             }
         }
@@ -237,44 +246,33 @@ private fun ResolutionSettingButtonRowVersion(
 }
 
 @Composable
-private fun ResolutionSettingCardVersion(
-    supportedResolutions: List<DiscreteResolution>,
-    currentResolution: DiscreteResolution?,
-    setSelectedResolution: (UInt, UInt) -> Unit
+private fun <T> SelectionButtonRow(
+    title: String,
+    options: List<T>,
+    onSet: (T?) -> Unit,
+    stringify: @Composable T.() -> String,
+    value: T?,
 ) {
-    OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 15.dp)
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                stringResource(R.string.resolution_dpi),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-
-            FlowRow(
-                Modifier.fillMaxWidth(),
-
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                supportedResolutions.forEach { discreteResolution ->
-                    val text = if (discreteResolution.widthDPI == discreteResolution.heightDPI) {
-                        "${discreteResolution.widthDPI}"
-                    } else {
-                        "${discreteResolution.widthDPI}x${discreteResolution.heightDPI}"
-                    }
-                    InputChip(
-                        onClick = {
-                            setSelectedResolution(
-                                discreteResolution.widthDPI,
-                                discreteResolution.heightDPI
-                            )
-                        },
-                        label = { Text(text) },
-                        selected = currentResolution == discreteResolution
-                    )
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            title,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+        SingleChoiceSegmentedButtonRow {
+            options.forEachIndexed { index, option ->
+                val name = option.stringify()
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = options.size
+                    ),
+                    onClick = {
+                        onSet(option)
+                    },
+                    selected = option == value
+                ) {
+                    Text(name)
                 }
             }
         }
