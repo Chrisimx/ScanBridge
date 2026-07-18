@@ -134,4 +134,5 @@
     <string name="scan_intent_preview">Preview</string>
     <string name="scan_intent_object">3D Object</string>
     <string name="scan_intent_business_card">Business Card</string>
+    <string name="scanning_protocol">Protocol</string>
 </resources>

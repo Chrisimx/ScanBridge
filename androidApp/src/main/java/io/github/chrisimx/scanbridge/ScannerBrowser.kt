@@ -147,6 +147,7 @@ fun ScannerBrowser(
     val scannerDiscoveryScreenViewModel: ScannerDiscoveryScreenViewModel = koinViewModel()
     val customScanners by scannerDiscoveryScreenViewModel.customScanners.collectAsState()
     val discoveredScanners by scannerDiscoveryScreenViewModel.discoveredScanners.collectAsState()
+    val protocolsForCustomScanners = scannerDiscoveryScreenViewModel.protocolsForCustomScanners
 
     var deletionScheduledScanner: Uuid? by remember { mutableStateOf(null) }
 
@@ -187,20 +188,19 @@ fun ScannerBrowser(
         val context = LocalContext.current
 
         CustomScannerDialog(
+            protocolsWithExampleHandle = protocolsForCustomScanners,
             onDismiss = { setEditedCustomDialog(null) },
-            onConnectClicked = { name, url, save, navigate ->
+            onConnectClicked = { name, url, protocol, save, navigate ->
                 @SuppressLint("LocalContextGetResourceValueCall")
                 val name = name.ifEmpty { context.getString(R.string.custom_scanner) }
-                val url = if (url.toString().endsWith("/")) url.toString() else "$url/"
                 val sessionID = Uuid.random()
                 val uuid = when (currentlyEditedScanner) {
                     is EditedCustomScanner.EditingOld -> currentlyEditedScanner.scanner.uuid
                     EditedCustomScanner.New -> Uuid.random()
                 }
-                val protocolIdentifier = "eSCL"
                 if (save) {
                     scannerDiscoveryScreenViewModel.addScanner(
-                        CustomScanner(uuid, name, Url(url), protocolIdentifier)
+                        CustomScanner(uuid, name, url, protocol)
                     )
                 }
                 setEditedCustomDialog(null)
@@ -208,8 +208,8 @@ fun ScannerBrowser(
                     navController.navigate(
                         ScannerRoute(
                             name,
-                            url,
-                            protocolIdentifier,
+                            url.toString(),
+                            protocol,
                             sessionID.toString()
                         )
                     )

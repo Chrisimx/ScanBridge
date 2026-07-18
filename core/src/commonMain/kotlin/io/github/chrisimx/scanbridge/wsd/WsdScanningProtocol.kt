@@ -33,6 +33,8 @@ class WsdScanningProtocol(
         get() = "WSD"
     override val usesUrls: Boolean
         get() = true
+    override val exampleScannerIdentifierString: String
+        get() = "http://192.168.178.122/WebServices/ScannerService"
 
     override fun createScannerHandle(scannerIdentifier: String): ScannerHandle? {
 

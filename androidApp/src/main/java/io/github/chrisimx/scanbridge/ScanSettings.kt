@@ -51,11 +51,12 @@ import io.github.chrisimx.anyscan.ScanSettingParam
 import io.github.chrisimx.anyscan.ScannerConcept
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsLengthUnit
+import io.github.chrisimx.scanbridge.uicomponents.SelectionButtonRow
+import io.github.chrisimx.scanbridge.uicomponents.SelectionCard
 import io.github.chrisimx.scanbridge.uicomponents.SizeBasedConditionalView
 import io.github.chrisimx.scanbridge.util.UIInputSourceType
 import io.github.chrisimx.scanbridge.util.toLocalizedName
 import io.github.chrisimx.scanbridge.util.toReadableString
-
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -194,87 +195,3 @@ private fun InputSourceSelection(
     }
 }
 
-@Composable
-private fun <T> SelectionCard(
-    title: String,
-    options: List<T>,
-    onSet: (T?) -> Unit,
-    stringify: @Composable T.() -> String,
-    value: T?,
-    isSmallRowAbove: Boolean = false,
-    hasDefaultOption: Boolean = false
-) {
-    OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp, top = if (isSmallRowAbove) 30.dp else 15.dp, bottom = 15.dp)
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                title,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-
-            FlowRow(
-                Modifier.fillMaxWidth(),
-
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                options.forEach { option ->
-                    val name = option.stringify()
-                    InputChip(
-                        onClick = {
-                            onSet(option)
-                        },
-                        label = { Text(name) },
-                        selected = value == option
-                    )
-                }
-                if (hasDefaultOption) {
-                    InputChip(
-                        onClick = {
-                            onSet(null)
-                        },
-                        label = { Text(stringResource(R.string.default_string)) },
-                        selected = value == null
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun <T> SelectionButtonRow(
-    title: String,
-    options: List<T>,
-    onSet: (T?) -> Unit,
-    stringify: @Composable T.() -> String,
-    value: T?,
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            title,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
-        )
-        SingleChoiceSegmentedButtonRow {
-            options.forEachIndexed { index, option ->
-                val name = option.stringify()
-                SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        index = index,
-                        count = options.size
-                    ),
-                    onClick = {
-                        onSet(option)
-                    },
-                    selected = option == value
-                ) {
-                    Text(name)
-                }
-            }
-        }
-    }
-}

@@ -1,5 +1,6 @@
 package io.github.chrisimx.scanbridge.uicomponents.dialog
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -10,6 +11,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,17 +23,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.data.model.EditedCustomScanner
+import io.github.chrisimx.scanbridge.scannerdiscovery.ProtocolWithExampleHandleString
+import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
+import io.github.chrisimx.scanbridge.uicomponents.SelectionButtonRow
 import io.ktor.http.Url
+import org.jetbrains.compose.resources.stringResource
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.scanning_protocol
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CustomScannerDialog(
+    protocolsWithExampleHandle: List<ProtocolWithExampleHandleString>,
     onDismiss: () -> Unit,
-    onConnectClicked: (name: String, url: Url, save: Boolean, navigate: Boolean) -> Unit,
+    onConnectClicked: (name: String, url: Url, protocol: String, save: Boolean, navigate: Boolean) -> Unit,
     editingType: EditedCustomScanner
 ) {
     var urlErrorState: String? by remember { mutableStateOf(null) }
@@ -39,10 +49,17 @@ fun CustomScannerDialog(
         is EditedCustomScanner.EditingOld -> editingType.scanner
         EditedCustomScanner.New -> null
     }
+    val originalIdentifier = protocolsWithExampleHandle
+        .firstOrNull { it.protocolIdentifier == initializeWith?.protocolIdentifier }
+
     var urlText: String by remember {
         mutableStateOf(initializeWith?.url?.toString() ?: "")
     }
     var nameText: String by remember { mutableStateOf(initializeWith?.name ?: "") }
+
+    var selectedProtocol by remember {
+        mutableStateOf(originalIdentifier ?: protocolsWithExampleHandle.first())
+    }
 
     val context = LocalContext.current
 
@@ -103,8 +120,8 @@ fun CustomScannerDialog(
                         urlErrorState = null
                         urlText = it
                     },
-                    label = { Text(stringResource(R.string.url_escl_resource)) },
-                    placeholder = { Text("http://192.168.178.2/eSCL/") },
+                    label = { Text(stringResource(R.string.custom_scanner_url)) },
+                    placeholder = { Text(selectedProtocol.exampleScannerIdentifierString) },
                     supportingText = {
                         urlErrorState?.let {
                             Text(
@@ -116,11 +133,25 @@ fun CustomScannerDialog(
                     }
                 )
 
+                SelectionButtonRow(
+                    stringResource(Res.string.scanning_protocol),
+                    protocolsWithExampleHandle,
+                    { selectedProtocol = it!! },
+                    { this.protocolIdentifier },
+                    selectedProtocol
+                )
+
                 if (isNewScanner) {
                     Button(
                         onClick = {
                             val url = validateUrl() ?: return@Button
-                            onConnectClicked(nameText, url, true, true)
+                            onConnectClicked(
+                                nameText,
+                                url,
+                                selectedProtocol.protocolIdentifier,
+                                true,
+                                true
+                            )
                         },
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
@@ -129,7 +160,13 @@ fun CustomScannerDialog(
                     Button(
                         onClick = {
                             val url = validateUrl() ?: return@Button
-                            onConnectClicked(nameText, url, false, true)
+                            onConnectClicked(
+                                nameText,
+                                url,
+                                selectedProtocol.protocolIdentifier,
+                                false,
+                                true
+                            )
                         },
                         modifier = Modifier.padding(top = 8.dp).testTag("justconnect")
                     ) {
@@ -139,14 +176,40 @@ fun CustomScannerDialog(
                     Button(
                         onClick = {
                             val url = validateUrl() ?: return@Button
-                            onConnectClicked(nameText, url, true, false)
+                            onConnectClicked(
+                                nameText,
+                                url,
+                                selectedProtocol.protocolIdentifier,
+                                true,
+                                false
+                            )
                         },
-                        modifier = Modifier.padding(top = 0.dp).testTag("editcustomscanner")
+                        modifier = Modifier.padding(top = 16.dp).testTag("editcustomscanner")
                     ) {
                         Text(stringResource(R.string.save))
                     }
                 }
             }
+        }
+    }
+}
+
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Preview
+@Composable
+fun PreviewCustomScannerDialog() {
+    Scaffold {
+        ScanBridgeTheme {
+            CustomScannerDialog(
+                listOf(
+                    ProtocolWithExampleHandleString("test", "test")
+                ),
+                {},
+                { _, _, _, _, _ -> Unit },
+                EditedCustomScanner.New
+
+            )
         }
     }
 }

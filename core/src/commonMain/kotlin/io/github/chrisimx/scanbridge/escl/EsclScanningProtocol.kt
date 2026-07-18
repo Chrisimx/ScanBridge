@@ -41,6 +41,8 @@ class EsclScanningProtocol(
         get() = "eSCL"
     override val usesUrls: Boolean
         get() = true
+    override val exampleScannerIdentifierString: String
+        get() = "http://192.168.178.122/eSCL/"
 
     init {
         check(mdnsDiscoverySecureEscl !== mdnsDiscoveryInsecureEscl) {
@@ -69,6 +71,13 @@ class EsclScanningProtocol(
             coroutineScope
         )
 
+    private fun Url.addTrailingSlash(): Url = Url(if (this.toString().endsWith("/")) {
+        this.toString()
+    } else {
+        "$this/"
+    })
+
+
     override suspend fun capabilitiesFor(scanner: ScannerHandle, settings: ScannerConnectionSettings): ScannerCapabilitiesResult {
         val scannerUrlHandle =
             scanner as? UrlScannerHandle ?: return ScannerCapabilitiesResult.InvalidScannerHandle(scanner)
@@ -76,7 +85,10 @@ class EsclScanningProtocol(
         val httpConfig = settings.toHttpClientConfig()
         val httpClient = httpClientFactory.create(httpConfig)
 
-        val esclRequestClient = ESCLRequestClient(scannerUrlHandle.url, httpClient)
+        val esclRequestClient = ESCLRequestClient(
+            baseUrl = scannerUrlHandle.url.addTrailingSlash(),
+            httpClient
+        )
 
         val scannerCapsResult = httpClient.use {
             esclRequestClient.getScannerCapabilities()
@@ -181,7 +193,9 @@ class EsclScanningProtocol(
         val httpConfig = settings.toHttpClientConfig()
         val httpClient = httpClientFactory.create(httpConfig)
 
-        val esclRequestClient = ESCLRequestClient(scannerUrlHandle.url, httpClient)
+        val esclRequestClient = ESCLRequestClient(
+            scannerUrlHandle.url.addTrailingSlash(),
+            httpClient)
 
         suspend fun abortIfCancelling(scanJob: io.github.chrisimx.esclkt.ScanJob? = null): Boolean = if (cancelled.value) {
             _logger.debug { "Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob" }
