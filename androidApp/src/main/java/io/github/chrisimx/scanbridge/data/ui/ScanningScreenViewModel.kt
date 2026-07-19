@@ -42,12 +42,9 @@ import io.github.chrisimx.anyscan.CommonScanSettingsEditor
 import io.github.chrisimx.anyscan.CommonScannerCapabilities
 import io.github.chrisimx.anyscan.FileFormat
 import io.github.chrisimx.anyscan.ScanSettingsMap
+import io.github.chrisimx.anyscan.ScannerConcept
 import io.github.chrisimx.anyscan.inches
-import io.github.chrisimx.anyscan.millimeters
-import io.github.chrisimx.anyscan.threeHundredthsOfInch
 import io.github.chrisimx.enumorrawcodegen.AnyScanEnumOrRaw
-import io.github.chrisimx.esclkt.InputSource
-import io.github.chrisimx.esclkt.ScanRegion
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.androidservice.ScanJobForegroundService
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
@@ -470,7 +467,7 @@ class ScanningScreenViewModel(
         onError: (String) -> Unit,
         saveFileLauncher: ActivityResultLauncher<String>? = null
     ) {
-        /*val currentScans = scannedPages.value
+        val currentScans = scannedPages.value
         val scannerCapsNullable = scanningScreenData.capabilities
         val scannerCaps = if (scannerCapsNullable == null) {
             onError(application.getString(R.string.scannercapabilities_null))
@@ -520,23 +517,22 @@ class ScanningScreenViewModel(
                 PdfDocument(writer).use { pdf ->
                     Document(pdf).use { document ->
                         chunk.forEachIndexed { i, scan ->
-                            val scanRegion =
-                                scan.originalScanSettings.scanRegions?.regions?.first() ?: ScanRegion(
-                                    297.millimeters().toThreeHundredthsOfInch(),
-                                    210.millimeters().toThreeHundredthsOfInch(),
-                                    0.threeHundredthsOfInch(),
-                                    0.threeHundredthsOfInch()
-                                )
-
                             val imageData = ImageDataFactory.create(scan.filePath)
 
                             val rotated = scan.rotation == ScanRelativeRotation.Rotated
 
-                            val inputSource = scan.originalScanSettings.inputSource ?: InputSource.Platen
+                            val fallbackInputSourceCaps = scannerCaps.inputSources.first()
 
-                            val fallbackResolution = scannerCaps.getMaxResolution(inputSource)
-                            val scannerXResolution = scan.originalScanSettings.xResolution ?: fallbackResolution.xResolution
-                            val scannerYResolution = scan.originalScanSettings.yResolution ?: fallbackResolution.yResolution
+                            val fallbackResolution = fallbackInputSourceCaps
+                                    .furtherOptions[ScannerConcept.ScanResolution]!!
+                                    .defaultValue
+
+                            val originalSettingsMap = scan.originalScanSettings.setting
+
+                            val scanResolution = originalSettingsMap[ScannerConcept.ScanResolution] ?: fallbackResolution
+
+                            val scannerXResolution = scanResolution.value.widthDPI
+                            val scannerYResolution = scanResolution.value.heightDPI
 
                             val rotationCorrectedXRes = if (rotated) scannerYResolution else scannerXResolution
                             val rotationCorrectedYRes = if (rotated) scannerXResolution else scannerYResolution
@@ -602,7 +598,7 @@ class ScanningScreenViewModel(
         } else {
             setFileToSave(outputFile)
             saveFileLauncher.launch(outputFile.name)
-        }*/
+        }
     }
 
     fun doZipExport(context: Context, onError: (String) -> Unit, saveFileLauncher: ActivityResultLauncher<String>? = null) {
