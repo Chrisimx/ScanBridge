@@ -40,11 +40,9 @@ import com.itextpdf.layout.element.Image
 import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.anyscan.CommonScanSettingsEditor
 import io.github.chrisimx.anyscan.CommonScannerCapabilities
-import io.github.chrisimx.anyscan.FileFormat
 import io.github.chrisimx.anyscan.ScanSettingsMap
 import io.github.chrisimx.anyscan.ScannerConcept
 import io.github.chrisimx.anyscan.inches
-import io.github.chrisimx.enumorrawcodegen.AnyScanEnumOrRaw
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.androidservice.ScanJobForegroundService
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
@@ -58,6 +56,7 @@ import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.scannerCapabilities
 import io.github.chrisimx.scanbridge.model.toggleRotation
+import io.github.chrisimx.scanbridge.ports.InitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
 import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
 import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
@@ -112,6 +111,7 @@ class ScanningScreenViewModel(
     val db: ScanBridgeDb,
     application: Application,
     val scanJobRepo: ScanJobRepository,
+    val initialScanSettingsProvider: InitialScanSettingsProvider
 ) : AndroidViewModel(application) {
     private val _scanningScreenData =
         ScanningScreenData(
@@ -345,15 +345,11 @@ class ScanningScreenViewModel(
                 )
                 editor.build()
             } else {
-                // TODO: Use actual defaults here and use swappable default providers
                 val editor = CommonScanSettingsEditor(
                     caps,
                     CommonScanSettings(setting = ScanSettingsMap.empty())
                 )
-
-                editor.setInputSource(caps.inputSources.first().inputSourceType)
-                editor.setFormat(AnyScanEnumOrRaw.Known(FileFormat.JPEG))
-
+                initialScanSettingsProvider.applyDefaults(editor, caps)
                 editor.build()
             }
 

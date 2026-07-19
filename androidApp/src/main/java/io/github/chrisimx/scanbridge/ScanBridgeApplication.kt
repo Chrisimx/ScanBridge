@@ -30,6 +30,7 @@ import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.ports.LocaleProvider
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.ports.InitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.ports.ScanningProtocol
 import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager
 import io.github.chrisimx.scanbridge.ports.multicast.MulticastLockHandler
@@ -118,6 +119,7 @@ val appModule = module {
         DatastoreShownMessagesRepository(get(named<ShownMessages>()), scope)
     } bind ShownMessagesRepository::class
     single<KoinBasedScanningProtocolManager>() bind ScanningProtocolManager::class
+    single<DefaultInitialScanSettingsProvider>() bind InitialScanSettingsProvider::class
     factory<ScanSettingsComposableStateHolder>()
     viewModel<ScanningScreenViewModel>()
     single<RoomBackedCustomScannerRepository>() bind CustomScannerRepository::class
