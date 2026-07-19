@@ -1,7 +1,7 @@
 package io.github.chrisimx.scanbridge.wsd
 
 import io.github.chrisimx.anyscan.CommonScanSettings
-import io.github.chrisimx.esclkt.ESCLRequestClient
+import io.github.chrisimx.scanbridge.model.ScanProtocolScannedPage
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.ScanningError
 import io.github.chrisimx.scanbridge.model.UrlScannerHandle
@@ -15,7 +15,9 @@ import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
 import io.github.chrisimx.scanbridge.ports.ScanningProtocol
 import io.github.chrisimx.scanbridge.ports.multicast.MulticastLockHandler
 import io.github.chrisimx.wsdkt.anyscancompat.toCommonAbstraction
+import io.github.chrisimx.wsdkt.anyscancompat.toWSDScanTicket
 import io.github.chrisimx.wsdkt.client.WsdScanServiceClient
+import io.github.chrisimx.wsdkt.scanjob.ScanJob
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -106,9 +108,9 @@ class WsdScanningProtocol(
         val httpConfig = settings.toHttpClientConfig()
         val httpClient = httpClientFactory.create(httpConfig)
 
-        val esclRequestClient = ESCLRequestClient(scannerUrlHandle.url, httpClient)
+        val wsdRequestClient = WsdScanServiceClient(scannerUrlHandle.url, httpClient)
 
-        suspend fun abortIfCancelling(scanJob: io.github.chrisimx.esclkt.ScanJob? = null): Boolean = if (cancelled.value) {
+        suspend fun abortIfCancelling(scanJob: ScanJob? = null): Boolean = if (cancelled.value) {
             _logger.debug { "Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob" }
             scanJob?.cancel()
 
@@ -120,5 +122,70 @@ class WsdScanningProtocol(
 
         if (abortIfCancelling()) return@flow
 
+        val caps = wsdRequestClient.retrieveAllScannerElements()
+
+        if (caps !is WsdScanServiceClient.RetrieveAllScannerElementsResult.Success) {
+            emit(
+                ScanJobProcessingEvent.Failure(
+                    ScanningError.CannotGetScannerCaps(caps.toString())
+                )
+            )
+            return@flow
+        }
+
+        val scanTicket = jobScanSettings.toWSDScanTicket(
+            caps.allScannerElements.scannerConfiguration
+        )
+
+        val jobCreationResult = wsdRequestClient.createScanJob(scanTicket)
+
+        if (jobCreationResult !is WsdScanServiceClient.CreateScanJobResult.Success) {
+            emit(
+                ScanJobProcessingEvent.Failure(
+                    ScanningError.JobCreationFailed(jobCreationResult.toString())
+                )
+            )
+            return@flow
+        }
+
+        val job = jobCreationResult.scanJob
+
+        if (abortIfCancelling(job)) return@flow
+
+        while (true) {
+            if (abortIfCancelling(job)) return@flow
+
+            val newPageResult = job.retrieveNextPage()
+            when (newPageResult) {
+                WsdScanServiceClient.RetrieveImageResult.NoFurtherPages -> {
+                    break
+                }
+                is WsdScanServiceClient.RetrieveImageResult.Success -> {}
+                else -> {
+                    job.cancel()
+                    emit(ScanJobProcessingEvent.Failure(
+                        ScanningError.NextPageRetrievalError(newPageResult.toString(), "null")
+                    ))
+                    return@flow
+                }
+            }
+
+            val newPage = newPageResult.page
+
+            if (newPage.contentType == null) {
+                job.cancel()
+                emit(ScanJobProcessingEvent.Failure(
+                    ScanningError.NextPageRetrievalError("Content type missing", "null")
+                ))
+                return@flow
+            }
+
+            emit(ScanJobProcessingEvent.NewPage(
+                ScanProtocolScannedPage(
+                    newPage.contentType!!,
+                    newPage.data
+                )
+            ))
+        }
     }
 }

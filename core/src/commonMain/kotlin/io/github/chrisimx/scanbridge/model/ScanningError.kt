@@ -15,6 +15,10 @@ sealed class ScanningError(val unlocalizedMessage: String) {
         "Job completed but failed. Job status: $jobStatus"
     )
 
+    data class CannotGetScannerCaps(val error: String) : ScanningError(
+        "Cannot get scanner capabilities: $error"
+    )
+
     data object PollingTimedOut: ScanningError(
         "Timed out waiting for images to transfer"
     )
