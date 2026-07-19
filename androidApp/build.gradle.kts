@@ -41,8 +41,8 @@ android {
         applicationId = "io.github.chrisimx.scanbridge"
         minSdk = 28
         targetSdk = 36
-        versionCode = 2_001_004 // format is MAJ_MIN_PAT with always 3 digits
-        versionName = "2.1.4"
+        versionCode = 2_001_005 // we just count up for each build
+        versionName = "2.2.0-alpha1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments["escl_server_url"] =
