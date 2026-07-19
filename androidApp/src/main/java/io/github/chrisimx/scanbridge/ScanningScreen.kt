@@ -54,6 +54,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -399,17 +401,35 @@ fun ScanningScreen(
                     contentColor = type.contentColor,
                     shape = RoundedCornerShape(16.dp),
                     action = {
-                        IconButton(
-                            onClick = { data.dismiss() },
-                            colors = IconButtonColors(
-                                type.containerColor,
-                                type.contentColor,
-                                type.containerColor,
-                                type.contentColor
-                            ),
-                            modifier = Modifier.testTag("snackbar_dismiss")
-                        ) {
-                            Icon(Icons.Default.Close, contentDescription = "Dismiss")
+                        Row {
+                            val actionLabel = visuals?.actionLabel
+                            if (actionLabel != null) {
+                                Button(
+                                    onClick = { data.performAction() },
+                                    colors = ButtonColors(
+                                        type.containerColor,
+                                        type.contentColor,
+                                        type.containerColor,
+                                        type.contentColor
+                                    ),
+                                    modifier = Modifier.testTag("snackbar_perform_action")
+                                ) {
+                                    Text(actionLabel)
+                                }
+                            }
+
+                            IconButton(
+                                onClick = { data.dismiss() },
+                                colors = IconButtonColors(
+                                    type.containerColor,
+                                    type.contentColor,
+                                    type.containerColor,
+                                    type.contentColor
+                                ),
+                                modifier = Modifier.testTag("snackbar_dismiss")
+                            ) {
+                                Icon(Icons.Default.Close, contentDescription = "Dismiss")
+                            }
                         }
                     }
                 ) {
