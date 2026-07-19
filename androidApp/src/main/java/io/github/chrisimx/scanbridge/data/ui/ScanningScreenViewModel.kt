@@ -652,6 +652,7 @@ class ScanningScreenViewModel(
                 zipOutputFile,
                 {
                     counter++
+                    // TODO: This will never work correctly because extension is always empty
                     "scan-${counter.toString().padStart(digitsNeeded, '0')}.${it.extension}"
                 }
             )
