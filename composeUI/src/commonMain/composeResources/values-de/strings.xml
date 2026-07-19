@@ -126,4 +126,11 @@
     <string name="edit_custom_scanner">Benutzerdefinierten Scanner bearbeiten</string>
     <string name="custom_scanner_deletion_confirmation">Willst du den benutzerdefinierten Scanner wirklich löschen? Dieser Vorgang ist unwiderruflich.</string>
     <string name="custom_scanner_deletion">Benutzerdefinierten Scanner löschen</string>
+    <string name="scan_intent_document">Dokument</string>
+    <string name="scan_intent_text_and_graphic"><![CDATA[Text & Grafiken]]></string>
+    <string name="scan_intent_photo">Foto</string>
+    <string name="scan_intent_preview">Vorschau</string>
+    <string name="scan_intent_object">3D-Objekt</string>
+    <string name="scan_intent_business_card">Visitenkarte</string>
+    <string name="scanning_protocol">Protokoll</string>
 </resources>
