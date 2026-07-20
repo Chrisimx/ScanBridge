@@ -28,18 +28,18 @@ data class StatelessImmutableScanRegion(
     fun toESCLScanRegion(selectedInputSourceCaps: InputSourceCaps): ScanRegion {
         val height: LengthUnit = when (height) {
             "max" -> selectedInputSourceCaps.maxHeight
-            else -> height.toDoubleLocalized().millimeters()
+            else -> height.toDoubleLocalized()!!.millimeters()
         }
         val width: LengthUnit = when (width) {
             "max" -> selectedInputSourceCaps.maxWidth
-            else -> width.toDoubleLocalized().millimeters()
+            else -> width.toDoubleLocalized()!!.millimeters()
         }
 
         return ScanRegion(
             height.toThreeHundredthsOfInch(),
             width.toThreeHundredthsOfInch(),
-            xOffset.toDoubleLocalized().millimeters().toThreeHundredthsOfInch(),
-            yOffset.toDoubleLocalized().millimeters().toThreeHundredthsOfInch()
+            xOffset.toDoubleLocalized()!!.millimeters().toThreeHundredthsOfInch(),
+            yOffset.toDoubleLocalized()!!.millimeters().toThreeHundredthsOfInch()
         )
     }
 }

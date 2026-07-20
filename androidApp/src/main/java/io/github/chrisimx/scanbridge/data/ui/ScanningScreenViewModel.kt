@@ -75,8 +75,10 @@ import kotlin.io.path.Path
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -320,16 +322,15 @@ class ScanningScreenViewModel(
             }
         }
 
-        val defaultScanSettingsUIData = ScanSettingsEnterableDataV1(
-            caps
-        )
+        val defaultScanSettingsUIData = ScanSettingsEnterableDataV1()
 
         if (storedSession != null) {
             _scanningScreenData.scanSettingsVM.value = getKoin().get {
                 parametersOf(
+                    MutableStateFlow(caps).asStateFlow(),
                     session.map { it?.currentScanSettings ?: storedSession.currentScanSettings }
                         .stateIn(viewModelScope, SharingStarted.Lazily, storedSession.currentScanSettings),
-                    storedSession.currentSettingsUIData?.copy(capabilities = caps) ?: defaultScanSettingsUIData,
+                    storedSession.currentSettingsUIData?.copy() ?: defaultScanSettingsUIData,
                     updateSettings,
                     viewModelScope
                 )
@@ -353,12 +354,13 @@ class ScanningScreenViewModel(
                 editor.build()
             }
 
-            val savedSettingsUiStateWithCaps = savedSettingsUiState?.copy(capabilities = caps)
+            val savedSettingsUiStateWithCaps = savedSettingsUiState?.copy()
 
             sessionDao.insertAll(Session(sessionID, initialSettings, savedSettingsUiState))
 
             _scanningScreenData.scanSettingsVM.value = getKoin().get {
                 parametersOf(
+                    MutableStateFlow(caps).asStateFlow(),
                     session.map { it?.currentScanSettings ?: initialSettings }
                         .stateIn(viewModelScope, SharingStarted.Lazily, initialSettings),
                     savedSettingsUiStateWithCaps ?: defaultScanSettingsUIData,

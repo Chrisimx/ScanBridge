@@ -19,8 +19,6 @@ data class ScanSettingsEnterableDataV0(
 
 @Serializable
 data class ScanSettingsEnterableDataV1(
-    val capabilities: CommonScannerCapabilities,
-    val paperFormats: List<PaperFormat> = loadDefaultFormats(),
     val customMenuEnabled: Boolean = false,
     val widthString: String = "",
     val heightString: String = "",

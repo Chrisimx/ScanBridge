@@ -37,6 +37,7 @@ kotlin {
             api(libs.compose.material3)
 
             api(libs.anyscanCore)
+            api(project(":core"))
         }
 
         commonTest.dependencies {

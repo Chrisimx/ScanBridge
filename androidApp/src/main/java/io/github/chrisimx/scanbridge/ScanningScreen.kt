@@ -672,9 +672,7 @@ fun ScanContent(
 
             if (currentPages.size > pagerState.currentPage) {
                 Text(
-                    currentPage?.originalScanSettings?.inputSource?.toUIInputSourceType()?.toReadableString(
-                        context
-                    ).toString()
+                    currentPage?.originalScanSettings?.inputSource?.toUIInputSourceType()?.toReadableString().toString()
                 )
             }
         }

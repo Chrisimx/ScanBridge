@@ -120,6 +120,7 @@ val appModule = module {
     } bind ShownMessagesRepository::class
     single<KoinBasedScanningProtocolManager>() bind ScanningProtocolManager::class
     single<DefaultInitialScanSettingsProvider>() bind InitialScanSettingsProvider::class
+    single<DefaultPaperFormatProvider>() bind PaperFormatProvider::class
     factory<ScanSettingsComposableStateHolder>()
     viewModel<ScanningScreenViewModel>()
     single<RoomBackedCustomScannerRepository>() bind CustomScannerRepository::class

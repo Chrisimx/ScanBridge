@@ -19,7 +19,6 @@
 
 package io.github.chrisimx.scanbridge.uicomponents
 
-import android.content.Context
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -27,19 +26,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
-import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.model.NumberValidationResult
+import org.jetbrains.compose.resources.stringResource
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.error_state_not_a_valid_number
+import scanbridge.composeui.generated.resources.error_state_not_in_allowed_range
+import scanbridge.composeui.generated.resources.error_state_valid
 
-fun NumberValidationResult.toHumanString(context: Context): String = when (this) {
-    is NumberValidationResult.OutOfRange -> context.getString(R.string.error_state_not_in_allowed_range)
-    NumberValidationResult.NotANumber -> context.getString(R.string.error_state_not_a_valid_number)
-    is NumberValidationResult.Success -> context.getString(R.string.error_state_valid)
+@Composable
+fun NumberValidationResult.toHumanString(): String = when (this) {
+    is NumberValidationResult.OutOfRange -> stringResource(Res.string.error_state_not_in_allowed_range)
+    NumberValidationResult.NotANumber -> stringResource(Res.string.error_state_not_a_valid_number)
+    is NumberValidationResult.Success -> stringResource(Res.string.error_state_valid)
 }
 
 @Composable
 fun ValidatedDimensionsTextEdit(
     text: String,
-    context: Context,
     modifier: Modifier = Modifier,
     label: String,
     updateContent: (String) -> Unit,
@@ -54,9 +57,7 @@ fun ValidatedDimensionsTextEdit(
         supportingText = {
             if (validationResult !is NumberValidationResult.Success) {
                 Text(
-                    validationResult.toHumanString(
-                        context
-                    ),
+                    validationResult.toHumanString(),
                     style = MaterialTheme.typography.labelSmall
                 )
             }

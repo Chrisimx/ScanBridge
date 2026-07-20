@@ -65,6 +65,7 @@ fun CustomScannerDialog(
 
     val isNewScanner = editingType is EditedCustomScanner.New
 
+    // TODO: Move validation to view model
     val validateUrl = fun(): Url? {
         if (urlText.isEmpty()) {
             urlErrorState = context.getString(R.string.error_state_please_enter_an_url)
