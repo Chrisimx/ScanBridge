@@ -27,7 +27,7 @@ class ScannerDiscoveryScreenViewModel(
     val customScanners: StateFlow<List<CustomScanner>> = _customScanners
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val discoveredScanners = discoveryUsecase.discoveredScanners(viewModelScope.coroutineScope)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     /**
      * The protocols for which we can create a custom scanner.

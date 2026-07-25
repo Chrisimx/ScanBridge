@@ -41,23 +41,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.data.model.EditedCustomScanner
 import io.github.chrisimx.scanbridge.db.entities.CustomScanner
-import io.github.chrisimx.scanbridge.escl.EsclScanningProtocol
 import io.github.chrisimx.scanbridge.model.DiscoveredScanner
-import io.github.chrisimx.scanbridge.model.UrlScannerHandle
 import io.github.chrisimx.scanbridge.scannerdiscovery.ScannerDiscoveryScreenViewModel
 import io.github.chrisimx.scanbridge.uicomponents.FoundScannerItem
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.dialog.CustomScannerDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.DeletionDialog
-import io.ktor.http.Url
 import java.util.*
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.getKoin
 
 @Composable
 fun ScannerList(
@@ -146,7 +143,7 @@ fun ScannerBrowser(
 ) {
     val scannerDiscoveryScreenViewModel: ScannerDiscoveryScreenViewModel = koinViewModel()
     val customScanners by scannerDiscoveryScreenViewModel.customScanners.collectAsState()
-    val discoveredScanners by scannerDiscoveryScreenViewModel.discoveredScanners.collectAsState()
+    val discoveredScanners by scannerDiscoveryScreenViewModel.discoveredScanners.collectAsStateWithLifecycle()
     val protocolsForCustomScanners = scannerDiscoveryScreenViewModel.protocolsForCustomScanners
 
     var deletionScheduledScanner: Uuid? by remember { mutableStateOf(null) }
