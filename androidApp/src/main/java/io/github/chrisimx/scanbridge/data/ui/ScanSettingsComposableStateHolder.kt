@@ -173,10 +173,15 @@ class ScanSettingsComposableStateHolder(
             emptyList<PaperFormat>()
         } else {
             val maxArea = regionParam.maxArea.value
-            paperFormats.filter { paperFormat ->
-                paperFormat.width.toMillimeters().value <= maxArea.width.toMillimeters().value + 0.1 &&
-                    paperFormat.height.toMillimeters().value <= maxArea.height.toMillimeters().value + 0.1
-            }
+            val minArea = regionParam.minArea.value
+
+            val maxAreaWithTol = maxArea + 0.1.millimeters()
+            val minAreaWithTol = minArea - 0.1.millimeters()
+
+            paperFormats
+                .filter { paperFormat ->
+                    paperFormat.area in maxAreaWithTol && minAreaWithTol in paperFormat.area
+                }
         }
     }.stateIn(coroutineScope, SharingStarted.Lazily, emptyList<PaperFormat>())
 
