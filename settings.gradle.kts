@@ -21,14 +21,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven {
-            name = "Fireamp Snapshots"
-            url = uri("https://repo.fireamp.eu/repository/maven-snapshots/")
-
-            content {
-                includeGroup("io.github.chrisimx")
-            }
-        }
     }
 }
 

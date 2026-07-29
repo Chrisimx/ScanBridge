@@ -14,7 +14,14 @@ data class ScanSettingsEnterableDataV0(
     val widthString: String = "",
     val heightString: String = "",
     val maximumSize: Boolean = true
-)
+) {
+    fun toV1(): ScanSettingsEnterableDataV1 = ScanSettingsEnterableDataV1(
+        customMenuEnabled = customMenuEnabled,
+        widthString = widthString,
+        heightString = heightString,
+        maximumSize = maximumSize
+    )
+}
 
 
 @Serializable

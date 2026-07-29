@@ -35,6 +35,5 @@ data class ScannedPage(
     val originalScanSettings: CommonScanSettings,
     val rotation: ScanRelativeRotation = ScanRelativeRotation.Original,
     val orderIndex: Int,
-    @ColumnInfo(defaultValue = "null")
     val outputName: String? = null,
 )

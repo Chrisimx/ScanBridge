@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "967a7f604f397eeb0b79f656da762e6d",
+    "identityHash": "057d1a9308ba437a28a881e7a441cfbf",
     "entities": [
       {
         "tableName": "customscanners",
@@ -43,7 +43,7 @@
       },
       {
         "tableName": "scannedpages",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scanId` TEXT NOT NULL, `ownerSessionId` TEXT NOT NULL, `filePath` TEXT NOT NULL, `originalScanSettings` TEXT NOT NULL, `rotation` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, `outputName` TEXT DEFAULT null, PRIMARY KEY(`scanId`), FOREIGN KEY(`ownerSessionId`) REFERENCES `sessions`(`sessionId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scanId` TEXT NOT NULL, `ownerSessionId` TEXT NOT NULL, `filePath` TEXT NOT NULL, `originalScanSettings` TEXT NOT NULL, `rotation` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, `outputName` TEXT, PRIMARY KEY(`scanId`), FOREIGN KEY(`ownerSessionId`) REFERENCES `sessions`(`sessionId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "scanId",
@@ -84,8 +84,7 @@
           {
             "fieldPath": "outputName",
             "columnName": "outputName",
-            "affinity": "TEXT",
-            "defaultValue": "null"
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -263,7 +262,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '967a7f604f397eeb0b79f656da762e6d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '057d1a9308ba437a28a881e7a441cfbf')"
     ]
   }
 }

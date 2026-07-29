@@ -37,9 +37,11 @@ import io.github.chrisimx.scanbridge.util.doTempFilesExist
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNames
 import org.koin.compose.koinInject
 import timber.log.Timber
 
@@ -52,7 +54,14 @@ object StartUpScreenRoute : BaseRoute
 
 @Serializable
 @SerialName("ScannerRoute")
-data class ScannerRoute(val scannerName: String, val scannerHandleString: String, val protocolId: String, val sessionID: String) : BaseRoute
+@OptIn(ExperimentalSerializationApi::class)
+data class ScannerRoute(
+    val scannerName: String,
+    @JsonNames("scannerHandle", "scannerURL")
+    val scannerHandleString: String,
+    val protocolId: String = "eSCL",
+    val sessionID: String
+) : BaseRoute
 
 @Serializable
 @SerialName("CropImageRoute")
