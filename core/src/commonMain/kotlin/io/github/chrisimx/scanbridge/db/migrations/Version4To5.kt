@@ -49,8 +49,8 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
                     val newOriginalScanSettings = deserializedOldOriginalScanSettings.toCommonAbstraction()
                     val newOriginalScanSettingsString = json.encodeToString(newOriginalScanSettings)
 
-                    scannedPagesUpdate.bindText(0, newOriginalScanSettingsString)
-                    scannedPagesUpdate.bindText(1, scanId)
+                    scannedPagesUpdate.bindText(1, newOriginalScanSettingsString)
+                    scannedPagesUpdate.bindText(2, scanId)
                     scannedPagesUpdate.step()
                     scannedPagesUpdate.clearBindings()
                 }
@@ -105,9 +105,9 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
                     val newCurrentScanSettingsString = json.encodeToString(newCurrentScanSettings)
                     val newCurrentSettingsUIDataString = json.encodeToString(newCurrentSettingsUIData)
 
-                    sessionsUpdate.bindText(0, newCurrentScanSettingsString)
-                    sessionsUpdate.bindText(1, newCurrentSettingsUIDataString)
-                    sessionsUpdate.bindText(2, sessionId)
+                    sessionsUpdate.bindText(1, newCurrentScanSettingsString)
+                    sessionsUpdate.bindText(2, newCurrentSettingsUIDataString)
+                    sessionsUpdate.bindText(3, sessionId)
                     sessionsUpdate.step()
                     sessionsUpdate.clearBindings()
                 }
