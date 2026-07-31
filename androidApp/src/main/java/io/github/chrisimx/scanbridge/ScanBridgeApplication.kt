@@ -19,7 +19,6 @@ import io.github.chrisimx.scanbridge.db.DefaultScanBridgeDbFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbBuilderFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbFactory
-import io.github.chrisimx.scanbridge.escl.EsclScanningProtocol
 import io.github.chrisimx.scanbridge.infrastructure.KmLogScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.migrations.MigrationExecutor
 import io.github.chrisimx.scanbridge.migrations.RoomBackedMigrationExecutor
@@ -27,25 +26,25 @@ import io.github.chrisimx.scanbridge.migrations.migrationsModule
 import io.github.chrisimx.scanbridge.model.HttpClientConfig
 import io.github.chrisimx.scanbridge.ports.CustomScannerRepository
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
+import io.github.chrisimx.scanbridge.ports.InitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.ports.LocaleProvider
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
-import io.github.chrisimx.scanbridge.ports.InitialScanSettingsProvider
-import io.github.chrisimx.scanbridge.ports.ScanningProtocol
 import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager
+import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import io.github.chrisimx.scanbridge.ports.multicast.MulticastLockHandler
 import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
 import io.github.chrisimx.scanbridge.proto.ShownMessages
 import io.github.chrisimx.scanbridge.repositories.DatastoreLastRouteRepository
 import io.github.chrisimx.scanbridge.repositories.DatastoreShownMessagesRepository
 import io.github.chrisimx.scanbridge.repositories.RoomLastRouteRepository
+import io.github.chrisimx.scanbridge.scan.AndroidStartScanUseCase
 import io.github.chrisimx.scanbridge.scannerdiscovery.DiscoveryUsecase
 import io.github.chrisimx.scanbridge.scannerdiscovery.ScannerDiscoveryScreenViewModel
 import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
 import io.github.chrisimx.scanbridge.services.DebugLogService
 import io.github.chrisimx.scanbridge.services.FileDebugLogService
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
-import io.github.chrisimx.scanbridge.wsd.WsdScanningProtocol
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -126,9 +125,9 @@ val appModule = module {
     single<RoomBackedCustomScannerRepository>() bind CustomScannerRepository::class
     single<DiscoveryUsecase>()
     viewModel<ScannerDiscoveryScreenViewModel>()
-    single<EsclScanningProtocol>() bind ScanningProtocol::class
-    single<WsdScanningProtocol>() bind ScanningProtocol::class
     single<AndroidMulticastLockHandler>() bind MulticastLockHandler::class
+    single<AndroidStartScanUseCase>() bind StartScanUseCase::class
+    includes(scanProtocols)
 }
 
 class ScanBridgeApplication : Application() {

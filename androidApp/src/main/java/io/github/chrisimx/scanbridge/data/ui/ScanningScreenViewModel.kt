@@ -44,13 +44,11 @@ import io.github.chrisimx.anyscan.ScanSettingsMap
 import io.github.chrisimx.anyscan.ScannerConcept
 import io.github.chrisimx.anyscan.inches
 import io.github.chrisimx.scanbridge.R
-import io.github.chrisimx.scanbridge.androidservice.ScanJobForegroundService
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
-import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 import io.github.chrisimx.scanbridge.model.ScannerHandle
@@ -59,6 +57,7 @@ import io.github.chrisimx.scanbridge.model.toggleRotation
 import io.github.chrisimx.scanbridge.ports.InitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
 import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
+import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
 import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
@@ -113,7 +112,8 @@ class ScanningScreenViewModel(
     val db: ScanBridgeDb,
     application: Application,
     val scanJobRepo: ScanJobRepository,
-    val initialScanSettingsProvider: InitialScanSettingsProvider
+    val initialScanSettingsProvider: InitialScanSettingsProvider,
+    val startScanUseCase: StartScanUseCase
 ) : AndroidViewModel(application) {
     private val _scanningScreenData =
         ScanningScreenData(
@@ -396,7 +396,7 @@ class ScanningScreenViewModel(
             val currentSettings = session.value?.currentScanSettings
 
             if (currentSettings == null) {
-                Timber.e("Could not start scan job. Current scan setttings null")
+                Timber.e("Could not start scan job. Current scan settings null")
                 return@launch
             }
 
@@ -412,15 +412,12 @@ class ScanningScreenViewModel(
                 return@launch
             }
 
-            val scanJob = ScanJob(
-                Uuid.generateV4(),
-                sessionID,
-                currentSettings,
-                scannerHandle,
-                createScannerConnectionSettings()
+            startScanUseCase.startScan(
+                ownerSessionId = sessionID,
+                scannerHandle = scannerHandle,
+                scanSettings = currentSettings,
+                connectionSettings = scannerConnectionSettings(),
             )
-            scanJobRepo.enqueue(scanJob)
-            ScanJobForegroundService.startService(application)
         }
     }
 
@@ -674,7 +671,7 @@ class ScanningScreenViewModel(
         }
     }
 
-    fun createScannerConnectionSettings() = ScannerConnectionSettings(
+    fun scannerConnectionSettings() = ScannerConnectionSettings(
         timeout.toULong(),
         timeout.toULong(),
         certificateValidationDisabled,
@@ -682,7 +679,7 @@ class ScanningScreenViewModel(
     )
 
     fun retrieveScannerCapabilities() = viewModelScope.launch {
-        val connectionSettings = createScannerConnectionSettings()
+        val connectionSettings = scannerConnectionSettings()
 
         val scannerCapabilities = scannerHandle.scannerCapabilities(connectionSettings)
 
