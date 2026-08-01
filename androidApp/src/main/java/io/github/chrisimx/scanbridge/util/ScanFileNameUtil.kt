@@ -3,8 +3,7 @@ package io.github.chrisimx.scanbridge.util
 import java.io.File
 
 fun File.getEditedImageName(): String {
-    val baseName = this.nameWithoutExtension
-    val extension = this.extension
+    val baseName = this.name.substringBefore(" edit-")
 
-    return "$baseName edit-${System.currentTimeMillis()}.$extension"
+    return "$baseName edit-${System.currentTimeMillis()}"
 }
