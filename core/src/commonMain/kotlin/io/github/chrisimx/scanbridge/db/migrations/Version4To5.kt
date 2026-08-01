@@ -5,7 +5,6 @@ import io.github.chrisimx.esclkt.ScanSettings
 import io.github.chrisimx.esclkt.anyscancompat.toCommonAbstraction
 import io.github.chrisimx.scanbridge.ScanSettingsJson
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV0
-import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 
 val MIGRATION_4_5 = object : Migration(4, 5) {
 
@@ -65,7 +64,9 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
         val json = ScanSettingsJson.json
 
         val sessionsQuery = connection.prepare("SELECT sessionId, currentScanSettings, currentSettingsUIData FROM sessions")
-        val sessionsUpdate = connection.prepare("UPDATE sessions SET currentScanSettings = ?, currentSettingsUIData = ? WHERE sessionId = ?")
+        val sessionsUpdate = connection.prepare(
+            "UPDATE sessions SET currentScanSettings = ?, currentSettingsUIData = ? WHERE sessionId = ?"
+        )
 
         sessionsUpdate.use {
             sessionsQuery.use {

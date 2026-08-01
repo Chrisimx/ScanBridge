@@ -8,11 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Serializable
-data class PaperFormat(
-    val name: String,
-    val width: LengthUnit,
-    val height: LengthUnit
-) {
+data class PaperFormat(val name: String, val width: LengthUnit, val height: LengthUnit) {
     @Transient
     val area = Area(height, width)
 }

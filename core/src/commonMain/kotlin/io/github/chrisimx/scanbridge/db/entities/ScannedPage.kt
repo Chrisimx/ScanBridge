@@ -1,6 +1,5 @@
 package io.github.chrisimx.scanbridge.db.entities
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -35,5 +34,5 @@ data class ScannedPage(
     val originalScanSettings: CommonScanSettings,
     val rotation: ScanRelativeRotation = ScanRelativeRotation.Original,
     val orderIndex: Int,
-    val outputName: String? = null,
+    val outputName: String? = null
 )

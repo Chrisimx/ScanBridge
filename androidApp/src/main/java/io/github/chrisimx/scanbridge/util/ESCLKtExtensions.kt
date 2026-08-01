@@ -54,13 +54,11 @@ fun UIInputSourceType.toReadableString(): String = when (this) {
  * element of the list or null if the list is empty.
  *
  * @param list The list to search for the caller object.
- * @return The caller object if it is contained in the list, the first element of the list if not contained, 
+ * @return The caller object if it is contained in the list, the first element of the list if not contained,
  *         or null if the list is empty.
  */
-fun <T> T.takeIfContainedElseFirstOrNull(list: List<T>): T? {
-    return if (list.contains(this)) {
-        this
-    } else {
-        list.firstOrNull()
-    }
+fun <T> T.takeIfContainedElseFirstOrNull(list: List<T>): T? = if (list.contains(this)) {
+    this
+} else {
+    list.firstOrNull()
 }

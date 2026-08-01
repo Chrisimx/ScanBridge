@@ -65,7 +65,6 @@ fun ScannerList(
     setScannerToDelete: (Uuid?) -> Unit,
     setScannerToEdit: (EditedCustomScanner?) -> Unit
 ) {
-
     LazyColumn(
         modifier = Modifier
             .padding(innerPadding)
@@ -139,7 +138,7 @@ fun ScannerBrowser(
     innerPadding: PaddingValues,
     navController: NavController,
     currentlyEditedScanner: EditedCustomScanner?,
-    setEditedCustomDialog: (EditedCustomScanner?) -> Unit,
+    setEditedCustomDialog: (EditedCustomScanner?) -> Unit
 ) {
     val scannerDiscoveryScreenViewModel: ScannerDiscoveryScreenViewModel = koinViewModel()
     val customScanners by scannerDiscoveryScreenViewModel.customScanners.collectAsState()
@@ -153,13 +152,16 @@ fun ScannerBrowser(
         label = "ScannerList"
     ) {
         if (it) {
-            ScannerList(innerPadding,
+            ScannerList(
+                innerPadding,
                 navController,
                 customScanners,
                 discoveredScanners,
                 {
-                deletionScheduledScanner = it
-            }, setEditedCustomDialog)
+                    deletionScheduledScanner = it
+                },
+                setEditedCustomDialog
+            )
         } else {
             FullScreenError(
                 R.drawable.twotone_wifi_find_24,

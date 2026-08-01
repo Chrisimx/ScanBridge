@@ -29,7 +29,7 @@ class WsdScanningProtocol(
     private val httpClientFactory: HttpClientFactory,
     private val multicastLockHandler: MulticastLockHandler
 ) : ScanningProtocol {
-    private val _logger = loggerFactory.withClass(this::class)
+    private val logger = loggerFactory.withClass(this::class)
 
     override val protocolIdentifier: String
         get() = "WSD"
@@ -39,7 +39,6 @@ class WsdScanningProtocol(
         get() = "http://192.168.178.122/WebServices/ScannerService"
 
     override fun createScannerHandle(scannerIdentifier: String): ScannerHandle? {
-
         val url = runCatching { Url(scannerIdentifier) }.getOrNull()
 
         return url?.let {
@@ -55,7 +54,7 @@ class WsdScanningProtocol(
             protocol = this,
             loggerFactory = loggerFactory,
             multicastLockHandler = multicastLockHandler,
-            coroutineScope =  coroutineScope
+            coroutineScope = coroutineScope
         )
 
     override suspend fun capabilitiesFor(scanner: ScannerHandle, settings: ScannerConnectionSettings): ScannerCapabilitiesResult {
@@ -75,9 +74,12 @@ class WsdScanningProtocol(
             is WsdScanServiceClient.RetrieveAllScannerElementsResult.RequestFailure -> return ScannerCapabilitiesResult.Failure(
                 allScannerElementsResult.error
             )
+
             WsdScanServiceClient.RetrieveAllScannerElementsResult.ScannerConfigurationNotFound -> return ScannerCapabilitiesResult.Failure(
                 allScannerElementsResult
-            ) // TODO: Map UnknownCertificate error here to the right type
+            )
+
+            // TODO: Map UnknownCertificate error here to the right type
             is WsdScanServiceClient.RetrieveAllScannerElementsResult.Success -> {}
         }
 
@@ -87,7 +89,6 @@ class WsdScanningProtocol(
 
         return ScannerCapabilitiesResult.Success(commonScanCaps)
     }
-
 
     override fun executeScanJob(
         handle: ScannerHandle,
@@ -99,9 +100,11 @@ class WsdScanningProtocol(
             handle as? UrlScannerHandle
 
         if (scannerUrlHandle == null) {
-            emit(ScanJobProcessingEvent.Failure(
+            emit(
+                ScanJobProcessingEvent.Failure(
                     ScanningError.InvalidScanHandle(handle)
-            ))
+                )
+            )
             return@flow
         }
 
@@ -111,7 +114,7 @@ class WsdScanningProtocol(
         val wsdRequestClient = WsdScanServiceClient(scannerUrlHandle.url, httpClient)
 
         suspend fun abortIfCancelling(scanJob: ScanJob? = null): Boolean = if (cancelled.value) {
-            _logger.debug { "Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob" }
+            logger.debug { "Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob" }
             scanJob?.cancel()
 
             emit(ScanJobProcessingEvent.Cancelled)
@@ -160,12 +163,16 @@ class WsdScanningProtocol(
                 WsdScanServiceClient.RetrieveImageResult.NoFurtherPages -> {
                     break
                 }
+
                 is WsdScanServiceClient.RetrieveImageResult.Success -> {}
+
                 else -> {
                     job.cancel()
-                    emit(ScanJobProcessingEvent.Failure(
-                        ScanningError.NextPageRetrievalError(newPageResult.toString(), "null")
-                    ))
+                    emit(
+                        ScanJobProcessingEvent.Failure(
+                            ScanningError.NextPageRetrievalError(newPageResult.toString(), "null")
+                        )
+                    )
                     return@flow
                 }
             }
@@ -174,18 +181,22 @@ class WsdScanningProtocol(
 
             if (newPage.contentType == null) {
                 job.cancel()
-                emit(ScanJobProcessingEvent.Failure(
-                    ScanningError.NextPageRetrievalError("Content type missing", "null")
-                ))
+                emit(
+                    ScanJobProcessingEvent.Failure(
+                        ScanningError.NextPageRetrievalError("Content type missing", "null")
+                    )
+                )
                 return@flow
             }
 
-            emit(ScanJobProcessingEvent.NewPage(
-                ScanProtocolScannedPage(
-                    newPage.contentType!!,
-                    newPage.data
+            emit(
+                ScanJobProcessingEvent.NewPage(
+                    ScanProtocolScannedPage(
+                        newPage.contentType!!,
+                        newPage.data
+                    )
                 )
-            ))
+            )
         }
     }
 }

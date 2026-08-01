@@ -15,10 +15,7 @@ suspend fun ScannerHandle.scannerCapabilities(settings: ScannerConnectionSetting
     return protocol.capabilitiesFor(this, settings)
 }
 
-data class UrlScannerHandle(
-    override val protocol: ScanningProtocol,
-    val url: Url
-) : ScannerHandle {
+data class UrlScannerHandle(override val protocol: ScanningProtocol, val url: Url) : ScannerHandle {
     override val stringRepresentation: String
         get() = url.toString()
 }

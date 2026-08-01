@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.InjectedParam
 
-
 @OptIn(ExperimentalAtomicApi::class)
 class WsdScannerDiscoveryBackend(
     val multicastLockHandler: MulticastLockHandler,
@@ -27,10 +26,10 @@ class WsdScannerDiscoveryBackend(
     @InjectedParam
     val coroutineScope: CoroutineScope
 ) : ScannerDiscoveryBackend {
-    private val _logger = loggerFactory.withClass(this::class)
+    private val logger = loggerFactory.withClass(this::class)
 
     fun discoveryDebugLog(message: String) {
-        _logger.debug { message }
+        logger.debug { message }
     }
 
     val wsScannerServiceDiscovery: WsScannerServiceDiscovery = WsScannerServiceDiscovery(

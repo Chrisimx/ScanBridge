@@ -78,7 +78,7 @@ class ScanSettingsComposableStateHolder(
     @InjectedParam
     private val coroutineScope: CoroutineScope,
     private val localeProvider: LocaleProvider,
-    private val paperFormatProvider: PaperFormatProvider,
+    private val paperFormatProvider: PaperFormatProvider
 ) {
 
     private val _uiState = MutableStateFlow(initialScanSettingsData)
@@ -119,10 +119,7 @@ class ScanSettingsComposableStateHolder(
         capabilities.value.inputSources.first()
     )
 
-    private fun validateDimensionValue(
-        valueString: String,
-        getDimension: (Area) -> LengthUnit
-    ): NumberValidationResult {
+    private fun validateDimensionValue(valueString: String, getDimension: (Area) -> LengthUnit): NumberValidationResult {
         if (valueString.isBlank()) {
             return NumberValidationResult.NotANumber
         }
@@ -211,9 +208,12 @@ class ScanSettingsComposableStateHolder(
             }
         }.onEach { (height, width) ->
             updateSettings {
-                this.set(ScannerConcept.ScanRegion, ScanRegionValue(
-                    Area(height.value, width.value)
-                ))
+                this.set(
+                    ScannerConcept.ScanRegion,
+                    ScanRegionValue(
+                        Area(height.value, width.value)
+                    )
+                )
             }
         }.launchIn(coroutineScope)
 
@@ -245,7 +245,7 @@ class ScanSettingsComposableStateHolder(
         val newInputSource = if (duplex) {
             CommonInputSourceType.ADF_DUPLEX
         } else {
-             CommonInputSourceType.ADF_SIMPLEX
+            CommonInputSourceType.ADF_SIMPLEX
         }
 
         coroutineScope.launch {

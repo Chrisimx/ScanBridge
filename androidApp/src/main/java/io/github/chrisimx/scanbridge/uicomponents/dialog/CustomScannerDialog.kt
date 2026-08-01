@@ -195,7 +195,6 @@ fun CustomScannerDialog(
     }
 }
 
-
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
 @Composable

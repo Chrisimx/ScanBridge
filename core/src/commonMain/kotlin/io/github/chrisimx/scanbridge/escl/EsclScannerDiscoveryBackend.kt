@@ -46,20 +46,23 @@ class EsclScannerDiscoveryBackend(
     @InjectedParam
     val coroutineScope: CoroutineScope
 ) : ScannerDiscoveryBackend {
-    private val _logger = loggerFactory.withClass(this::class)
+    private val logger = loggerFactory.withClass(this::class)
 
-    private val SECURE_SCANNER_DISCOVER_TYPE = "_uscans._tcp"
-    private val INSECURE_SCANNER_DISCOVER_TYPE = "_uscan._tcp"
+    companion object {
+        private const val SECURE_SCANNER_DISCOVER_TYPE = "_uscans._tcp"
+        private const val INSECURE_SCANNER_DISCOVER_TYPE = "_uscan._tcp"
+    }
 
     private val isScannerReachableMap = mutableMapOf<String, Optional<ScannerCapabilitiesResult>>()
     private val isScannerReachableMapMutex = Mutex()
 
     private val capabilityFetchDispatcher = Dispatchers.IO.limitedParallelism(8)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private val _scanners: StateFlow<List<DiscoveredScanner>> =
         combine(
             mdnsDiscoveryInsecureEscl.foundServices,
-            mdnsDiscoverySecureEscl.foundServices,
+            mdnsDiscoverySecureEscl.foundServices
         ) { insecure, secure ->
             insecure.values + secure.values
         }
@@ -69,12 +72,11 @@ class EsclScannerDiscoveryBackend(
             .stateIn(
                 scope = coroutineScope,
                 started = SharingStarted.Eagerly,
-                initialValue = emptyList(),
+                initialValue = emptyList()
             )
 
     override val scanners: StateFlow<List<DiscoveredScanner>>
         get() = _scanners
-
 
     init {
         check(mdnsDiscoverySecureEscl !== mdnsDiscoveryInsecureEscl) {
@@ -93,10 +95,8 @@ class EsclScannerDiscoveryBackend(
         }
     }
 
-    private fun mdnsServicesToDiscoveredScanners(
-        mdnsServices: List<MdnsService>,
-    ): List<DiscoveredScanner> {
-        return mdnsServices.flatMap { mdnsService ->
+    private fun mdnsServicesToDiscoveredScanners(mdnsServices: List<MdnsService>): List<DiscoveredScanner> =
+        mdnsServices.flatMap { mdnsService ->
             val scannerName = mdnsService.serviceName
             var rs = mdnsService.txtAttributes["rs"]?.decodeToString() ?: "/"
             val iconUrlString = mdnsService.txtAttributes["representation"]?.decodeToString()
@@ -123,21 +123,16 @@ class EsclScannerDiscoveryBackend(
                     scannerName,
                     scannerHandle,
                     null,
-                    iconUrlWithResolvedIp,
+                    iconUrlWithResolvedIp
                 )
             }
         }
-    }
 
-    private fun String.toNullableUrl(): Url? {
-        return runCatching {
-            Url(this)
-        }.getOrNull()
-    }
+    private fun String.toNullableUrl(): Url? = runCatching {
+        Url(this)
+    }.getOrNull()
 
-    private fun discoveredScannersFlow(
-        mdnsServices: List<MdnsService>,
-    ): Flow<List<DiscoveredScanner>> = channelFlow {
+    private fun discoveredScannersFlow(mdnsServices: List<MdnsService>): Flow<List<DiscoveredScanner>> = channelFlow {
         val discoveredScanners = mdnsServicesToDiscoveredScanners(mdnsServices)
             .distinctBy { it.handle.stringRepresentation }
 
@@ -145,10 +140,9 @@ class EsclScannerDiscoveryBackend(
 
         discoveredScanners.forEach { scanner ->
             launch(capabilityFetchDispatcher) {
-                _logger.debug {
+                logger.debug {
                     "Checking reachability of ${scanner.handle.stringRepresentation}"
                 }
-
 
                 val cachedReachability = isScannerReachableMapMutex.withLock {
                     isScannerReachableMap[scanner.handle.stringRepresentation]
@@ -168,7 +162,7 @@ class EsclScannerDiscoveryBackend(
                 val scannerCapabilitiesResult = checkReachabilityAndGetScannerCaps(
                     scanner = scanner,
                     connectionTimeoutSeconds = 20u,
-                    totalTimeoutSeconds = 20u,
+                    totalTimeoutSeconds = 20u
                 )
 
                 isScannerReachableMapMutex.withLock {
@@ -193,26 +187,26 @@ class EsclScannerDiscoveryBackend(
     private suspend fun checkReachabilityAndGetScannerCaps(
         scanner: DiscoveredScanner,
         connectionTimeoutSeconds: ULong,
-        totalTimeoutSeconds: ULong,
+        totalTimeoutSeconds: ULong
     ): ScannerCapabilitiesResult? {
         val settings = ScannerConnectionSettings(
             connectionTimeoutInSeconds = connectionTimeoutSeconds,
             totalTimeoutInSeconds = totalTimeoutSeconds,
             debugLogging = true,
-            allowSelfSignedCertificates = true,
+            allowSelfSignedCertificates = true
         )
 
         val result = measureTimedValue {
             esclScanningProtocol.capabilitiesFor(scanner.handle, settings)
         }
-        _logger.debug {
+        logger.debug {
             "Scanner capabilities for ${scanner.handle.stringRepresentation} took ${result.duration}"
         }
 
         return when (result.value) {
             is ScannerCapabilitiesResult.Failure,
             is ScannerCapabilitiesResult.InvalidScannerHandle -> {
-                _logger.debug { "Scanner ${scanner.handle.stringRepresentation} is not reachable. Result ${result.value}" }
+                logger.debug { "Scanner ${scanner.handle.stringRepresentation} is not reachable. Result ${result.value}" }
                 null
             }
 
@@ -222,7 +216,7 @@ class EsclScannerDiscoveryBackend(
 
     private fun tryParseScannerUrl(address: IpAddress, serviceInfo: MdnsService, rs: String): Url? {
         if (address.isLinkLocal()) {
-            _logger.debug { "Ignoring link local address: ${address.text}, url text rep: ${address.urlHost}" }
+            logger.debug { "Ignoring link local address: ${address.text}, url text rep: ${address.urlHost}" }
             return null
         }
 
@@ -238,11 +232,10 @@ class EsclScannerDiscoveryBackend(
             Url(result.toString()) // Try to parse it to confirm that no invalid URLs will be shown
             result
         } catch (e: Exception) {
-            _logger.error { "Couldn't built address from: ${address.urlHost} Exception: $e" }
+            logger.error { "Couldn't built address from: ${address.urlHost} Exception: $e" }
             null
         }
     }
-
 
     override fun close() {
         mdnsDiscoverySecureEscl.close()

@@ -15,14 +15,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class AndroidMdnsDiscoverService(
-    val appContext: Context,
-    val loggerFactory: ScanBridgeLoggerFactory
-) : MdnsDiscoverService {
+class AndroidMdnsDiscoverService(val appContext: Context, val loggerFactory: ScanBridgeLoggerFactory) : MdnsDiscoverService {
     private val logger = loggerFactory.withClass(this::class)
 
-    private val _registeredListeners = mutableListOf<NsdManager.DiscoveryListener>()
-    private val _serviceInfoCallbacks =
+    private val registeredListeners = mutableListOf<NsdManager.DiscoveryListener>()
+    private val serviceInfoCallbacks =
         mutableListOf<NsdManager.ServiceInfoCallback>()
 
     override val foundServices: StateFlow<Map<String, MdnsService>>
@@ -34,12 +31,12 @@ class AndroidMdnsDiscoverService(
 
     private val started = AtomicBoolean(false)
 
+    private var _serviceType: String? = null
+
     override val serviceType: String?
         get() = _serviceType
 
-    var _serviceType: String? = null
-
-    //private val callbackExecutor = Executors.newSingleThreadExecutor()
+    // private val callbackExecutor = Executors.newSingleThreadExecutor()
 
     override fun start(serviceType: String) {
         if (started.getAndSet(true)) {
@@ -70,22 +67,22 @@ class AndroidMdnsDiscoverService(
 
         _serviceType = null
 
-        for (listener in _registeredListeners) {
+        for (listener in registeredListeners) {
             nsdManager.stopServiceDiscovery(listener)
         }
 
-        for (callback in _serviceInfoCallbacks) {
+        for (callback in serviceInfoCallbacks) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.TIRAMISU) >= 7) {
                 nsdManager.unregisterServiceInfoCallback(callback)
             }
         }
 
-        _serviceInfoCallbacks.clear()
-        _registeredListeners.clear()
+        serviceInfoCallbacks.clear()
+        registeredListeners.clear()
     }
 
     private fun createDiscoveryListener(): NsdManager.DiscoveryListener {
-        val discoveryListener =  object : NsdManager.DiscoveryListener {
+        val discoveryListener = object : NsdManager.DiscoveryListener {
             override fun onDiscoveryStarted(serviceType: String) {
                 logger.info { "Service discovery started: $serviceType" }
             }
@@ -102,7 +99,9 @@ class AndroidMdnsDiscoverService(
 
                 logger.info { "Service with name ${serviceInfo.serviceName} and type ${serviceInfo.serviceType} found" }
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.TIRAMISU) >= 7) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                    SdkExtensions.getExtensionVersion(Build.VERSION_CODES.TIRAMISU) >= 7
+                ) {
                     val serviceInfoCallback = createServiceInfoCallback(serviceInfo)
                     nsdManager.registerServiceInfoCallback(serviceInfo, ForkJoinPool(1), serviceInfoCallback)
                 } else {
@@ -136,7 +135,7 @@ class AndroidMdnsDiscoverService(
                 nsdManager.stopServiceDiscovery(this)
             }
         }
-        _registeredListeners.add(discoveryListener)
+        registeredListeners.add(discoveryListener)
         return discoveryListener
     }
 
@@ -163,16 +162,13 @@ class AndroidMdnsDiscoverService(
         }
     }
 
-    private fun nsdServiceInfoToMdnsService(serviceInfo: NsdServiceInfo): MdnsService {
-
-        return MdnsService(
-            serviceInfo.serviceName,
-            serviceInfo.serviceType,
-            serviceInfo.port,
-            getAddressesOfNsdService(serviceInfo),
-            serviceInfo.attributes
-        )
-    }
+    private fun nsdServiceInfoToMdnsService(serviceInfo: NsdServiceInfo): MdnsService = MdnsService(
+        serviceInfo.serviceName,
+        serviceInfo.serviceType,
+        serviceInfo.port,
+        getAddressesOfNsdService(serviceInfo),
+        serviceInfo.attributes
+    )
 
     private fun getAddressesOfNsdService(serviceInfo: NsdServiceInfo): List<IpAddress> {
         val inetAddresses = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -184,13 +180,11 @@ class AndroidMdnsDiscoverService(
         return inetAddresses.map { it.toMultiplatformIpAddress() }
     }
 
-    private fun getServiceUniqueIdentifier(serviceInfo: NsdServiceInfo): String {
-        return "${serviceInfo.serviceName}.${serviceInfo.serviceType}"
-    }
+    private fun getServiceUniqueIdentifier(serviceInfo: NsdServiceInfo): String = "${serviceInfo.serviceName}.${serviceInfo.serviceType}"
 
     @RequiresExtension(extension = Build.VERSION_CODES.TIRAMISU, version = 7)
     private fun createServiceInfoCallback(originalServiceInfo: NsdServiceInfo): NsdManager.ServiceInfoCallback {
-        val serviceInfoCallback =  object : NsdManager.ServiceInfoCallback {
+        val serviceInfoCallback = object : NsdManager.ServiceInfoCallback {
             override fun onServiceInfoCallbackRegistrationFailed(errorCode: Int) {
                 logger.error { "ServiceInfoCallback (${this.hashCode()}) registration failed: $errorCode" }
             }
@@ -202,7 +196,7 @@ class AndroidMdnsDiscoverService(
             override fun onServiceLost() {
                 val serviceIdentifier = getServiceUniqueIdentifier(originalServiceInfo)
 
-                _serviceInfoCallbacks.remove(this)
+                serviceInfoCallbacks.remove(this)
                 nsdManager.unregisterServiceInfoCallback(this)
                 _foundServices.update {
                     val updateMap = it.toMutableMap()
@@ -222,14 +216,11 @@ class AndroidMdnsDiscoverService(
                 updateServiceStore(serviceIdentifier, mdnsService)
             }
         }
-        _serviceInfoCallbacks.add(serviceInfoCallback)
+        serviceInfoCallbacks.add(serviceInfoCallback)
         return serviceInfoCallback
     }
 
-    private fun updateServiceStore(
-        serviceIdentifier: String,
-        mdnsService: MdnsService
-    ) {
+    private fun updateServiceStore(serviceIdentifier: String, mdnsService: MdnsService) {
         _foundServices.update {
             it + (serviceIdentifier to mdnsService)
         }
@@ -237,6 +228,6 @@ class AndroidMdnsDiscoverService(
 
     override fun close() {
         stop()
-        //callbackExecutor.shutdown()
+        // callbackExecutor.shutdown()
     }
 }

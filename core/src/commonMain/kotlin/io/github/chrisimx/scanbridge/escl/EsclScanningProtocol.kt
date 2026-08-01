@@ -3,12 +3,12 @@ package io.github.chrisimx.scanbridge.escl
 import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.anyscan.CommonScannerCapabilities
 import io.github.chrisimx.esclkt.ESCLRequestClient
-import io.github.chrisimx.safektor.ESCLHttpCallResult
 import io.github.chrisimx.esclkt.JobState
 import io.github.chrisimx.esclkt.ScanJob
 import io.github.chrisimx.esclkt.anyscancompat.CommonAbstractionConversionResult
 import io.github.chrisimx.esclkt.anyscancompat.toCommonAbstraction
 import io.github.chrisimx.esclkt.anyscancompat.toESCLScanSettings
+import io.github.chrisimx.safektor.ESCLHttpCallResult
 import io.github.chrisimx.scanbridge.model.ScanProtocolScannedPage
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.ScanningError
@@ -35,7 +35,7 @@ class EsclScanningProtocol(
     private val loggerFactory: ScanBridgeLoggerFactory,
     private val httpClientFactory: HttpClientFactory
 ) : ScanningProtocol {
-    private val _logger = loggerFactory.withClass(this::class)
+    private val logger = loggerFactory.withClass(this::class)
 
     override val protocolIdentifier: String
         get() = "eSCL"
@@ -51,7 +51,6 @@ class EsclScanningProtocol(
     }
 
     override fun createScannerHandle(scannerIdentifier: String): ScannerHandle? {
-
         val url = runCatching { Url(scannerIdentifier) }.getOrNull()
 
         return url?.let {
@@ -71,12 +70,13 @@ class EsclScanningProtocol(
             coroutineScope
         )
 
-    private fun Url.addTrailingSlash(): Url = Url(if (this.toString().endsWith("/")) {
-        this.toString()
-    } else {
-        "$this/"
-    })
-
+    private fun Url.addTrailingSlash(): Url = Url(
+        if (this.toString().endsWith("/")) {
+            this.toString()
+        } else {
+            "$this/"
+        }
+    )
 
     override suspend fun capabilitiesFor(scanner: ScannerHandle, settings: ScannerConnectionSettings): ScannerCapabilitiesResult {
         val scannerUrlHandle =
@@ -95,15 +95,21 @@ class EsclScanningProtocol(
         }
 
         when (scannerCapsResult) {
-            is ESCLRequestClient.ScannerCapabilitiesResult.InternalBug -> return ScannerCapabilitiesResult.InternalBug(scannerCapsResult.exception)
+            is ESCLRequestClient.ScannerCapabilitiesResult.InternalBug -> return ScannerCapabilitiesResult.InternalBug(
+                scannerCapsResult.exception
+            )
+
             is ESCLRequestClient.ScannerCapabilitiesResult.RequestFailure -> return when (val error = scannerCapsResult.error) {
                 is ESCLHttpCallResult.Error.UntrustedCertificate -> ScannerCapabilitiesResult.UntrustedCertificate(error.cause)
                 else -> ScannerCapabilitiesResult.Failure(error)
             }
-            is ESCLRequestClient.ScannerCapabilitiesResult.ScannerCapabilitiesMalformed -> return ScannerCapabilitiesResult.ScannerCapsFormatInvalid(
-                scannerCapsResult.exception,
-                scannerCapsResult.content
-            )
+
+            is ESCLRequestClient.ScannerCapabilitiesResult.ScannerCapabilitiesMalformed ->
+                return ScannerCapabilitiesResult.ScannerCapsFormatInvalid(
+                    scannerCapsResult.exception,
+                    scannerCapsResult.content
+                )
+
             is ESCLRequestClient.ScannerCapabilitiesResult.Success -> {}
         }
 
@@ -113,6 +119,7 @@ class EsclScanningProtocol(
                 Exception("Could not convert eSCL scanner capabilities to CommonAbstraction"),
                 scannerCapsResult.scannerCapabilities.toString()
             )
+
             is CommonAbstractionConversionResult.Success<CommonScannerCapabilities> -> ScannerCapabilitiesResult.Success(
                 conversionResult.value
             )
@@ -143,28 +150,30 @@ class EsclScanningProtocol(
 
             val imagesToTransfer = status?.imagesToTransfer
 
-            _logger.debug {
+            logger.debug {
                 "Polling job status. Retry: $retries Result: $status imagesToTransfer: $imagesToTransfer isRunning: $isRunning"
             }
 
             if (!isRunning) {
-                _logger.debug { "Job is reported to be not running anymore. jobRunning = false" }
+                logger.debug { "Job is reported to be not running anymore. jobRunning = false" }
 
                 val deleteResult = jobResult.cancel()
-                _logger.debug { "Cancelling job after (a likely) failure: $deleteResult" }
+                logger.debug { "Cancelling job after (a likely) failure: $deleteResult" }
 
                 if (status?.jobState != JobState.Completed) {
-                    _logger.warn { "Job info doesn't indicate completion: ${status?.jobState}" }
-                    emit(ScanJobProcessingEvent.Failure(
-                        ScanningError.JobCompletedInFailedState(status.toString())
-                    ))
+                    logger.warn { "Job info doesn't indicate completion: ${status?.jobState}" }
+                    emit(
+                        ScanJobProcessingEvent.Failure(
+                            ScanningError.JobCompletedInFailedState(status.toString())
+                        )
+                    )
                 }
 
                 return PollResult.JobFinished
             }
 
             if (imagesToTransfer != null && imagesToTransfer > 0u) {
-                _logger.debug { "There seem to be images to transfer. Breaking out of polling loop" }
+                logger.debug { "There seem to be images to transfer. Breaking out of polling loop" }
                 return PollResult.ImagesReady
             }
 
@@ -184,9 +193,11 @@ class EsclScanningProtocol(
             handle as? UrlScannerHandle
 
         if (scannerUrlHandle == null) {
-            emit(ScanJobProcessingEvent.Failure(
+            emit(
+                ScanJobProcessingEvent.Failure(
                     ScanningError.InvalidScanHandle(handle)
-            ))
+                )
+            )
             return@flow
         }
 
@@ -195,10 +206,11 @@ class EsclScanningProtocol(
 
         val esclRequestClient = ESCLRequestClient(
             scannerUrlHandle.url.addTrailingSlash(),
-            httpClient)
+            httpClient
+        )
 
         suspend fun abortIfCancelling(scanJob: io.github.chrisimx.esclkt.ScanJob? = null): Boolean = if (cancelled.value) {
-            _logger.debug { "Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob" }
+            logger.debug { "Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob" }
             scanJob?.cancel()
 
             emit(ScanJobProcessingEvent.Cancelled)
@@ -210,13 +222,13 @@ class EsclScanningProtocol(
         if (abortIfCancelling()) return@flow
 
         val esclScanSettings = jobScanSettings.toESCLScanSettings()
-        _logger.debug { "Creating scan job. Common scan settings: $jobScanSettings eSCL scan settings: $esclScanSettings" }
+        logger.debug { "Creating scan job. Common scan settings: $jobScanSettings eSCL scan settings: $esclScanSettings" }
 
         val job = esclRequestClient.createJob(esclScanSettings)
 
-        _logger.debug { "Creation request done. Result: $job" }
+        logger.debug { "Creation request done. Result: $job" }
         if (job !is ESCLRequestClient.ScannerCreateJobResult.Success) {
-            _logger.error { "Job creation failed. Result: $job" }
+            logger.error { "Job creation failed. Result: $job" }
 
             emit(
                 ScanJobProcessingEvent.Failure(ScanningError.JobCreationFailed(job.toString()))
@@ -250,61 +262,69 @@ class EsclScanningProtocol(
 
             if (abortIfCancelling(jobResult)) return@flow
 
-            _logger.debug { "Retrieving next page" }
+            logger.debug { "Retrieving next page" }
             val nextPage = jobResult.retrieveNextPage()
-            _logger.debug { "Next page result: $nextPage" }
+            logger.debug { "Next page result: $nextPage" }
             val status = jobResult.getJobStatus()
-            _logger.debug { "Retrieved job info: $status" }
+            logger.debug { "Retrieved job info: $status" }
             // val jobStateString = status?.jobState.toJobStateString(application)
             when (nextPage) {
                 is ESCLRequestClient.ScannerNextPageResult.NoFurtherPages -> {
-                    _logger.debug { "Next page result is seen as no further pages. jobRunning = false" }
+                    logger.debug { "Next page result is seen as no further pages. jobRunning = false" }
 
                     if (status?.jobState != JobState.Completed) {
-                        _logger.warn { "Job info doesn't indicate completion: $status" }
+                        logger.warn { "Job info doesn't indicate completion: $status" }
 
-                        emit(ScanJobProcessingEvent.Failure(
-                            ScanningError.NextPageRetrievalError(nextPage.toString(), status.toString())
-                        ))
+                        emit(
+                            ScanJobProcessingEvent.Failure(
+                                ScanningError.NextPageRetrievalError(nextPage.toString(), status.toString())
+                            )
+                        )
                     }
                     val deletionResult = jobResult.cancel()
-                    _logger.debug { "Cancelling job after no further pages is reported: $deletionResult" }
+                    logger.debug { "Cancelling job after no further pages is reported: $deletionResult" }
                     return@flow
                 }
 
                 is ESCLRequestClient.ScannerNextPageResult.RequestFailure -> {
                     if (nextPage.exception !is ESCLHttpCallResult.Error.HttpError) {
-                        _logger.error { "Error while retrieving next page: $nextPage" }
-                        emit(ScanJobProcessingEvent.Failure(
-                            ScanningError.NextPageRetrievalError(nextPage.toString(), status.toString())
-                        ))
+                        logger.error { "Error while retrieving next page: $nextPage" }
+                        emit(
+                            ScanJobProcessingEvent.Failure(
+                                ScanningError.NextPageRetrievalError(nextPage.toString(), status.toString())
+                            )
+                        )
                         return@flow
                     }
                     val error = nextPage.exception as ESCLHttpCallResult.Error.HttpError
 
                     if (status?.jobState == JobState.Completed) {
-                        _logger.debug { "Job info indicates completion but response was not 404: $status" }
+                        logger.debug { "Job info indicates completion but response was not 404: $status" }
 
-                        emit(ScanJobProcessingEvent.Failure(
-                            ScanningError.NextPageRetrievalError(nextPage.toString(), status.toString())
-                        ))
+                        emit(
+                            ScanJobProcessingEvent.Failure(
+                                ScanningError.NextPageRetrievalError(nextPage.toString(), status.toString())
+                            )
+                        )
 
                         val deletionResult = jobResult.cancel()
-                        _logger.debug { "Cancelling job after non-standard completion: $deletionResult" }
+                        logger.debug { "Cancelling job after non-standard completion: $deletionResult" }
                         return@flow
                     } else {
-                        _logger.error { "Not successful code while retrieving next page: $nextPage" }
+                        logger.error { "Not successful code while retrieving next page: $nextPage" }
                         if (error.code == 503) {
                             // Retry with polling
-                            _logger.debug { "503 error received. Retrying with polling" }
+                            logger.debug { "503 error received. Retrying with polling" }
                             polling = true
                             continue
                         } else {
-                            emit(ScanJobProcessingEvent.Failure(
-                                ScanningError.NextPageRetrievalError(nextPage.toString(), status.toString())
-                            ))
+                            emit(
+                                ScanJobProcessingEvent.Failure(
+                                    ScanningError.NextPageRetrievalError(nextPage.toString(), status.toString())
+                                )
+                            )
                             val deletionResult = jobResult.cancel()
-                            _logger.debug {
+                            logger.debug {
                                 "Cancelling job after not successful response while trying to retrieve page: $deletionResult"
                             }
                             return@flow
@@ -313,7 +333,7 @@ class EsclScanningProtocol(
                 }
 
                 is ESCLRequestClient.ScannerNextPageResult.Success -> {
-                    _logger.debug { "Received page." }
+                    logger.debug { "Received page." }
 
                     val esclScannedPage = nextPage.page
                     val correspondingScannedPage = ScanProtocolScannedPage(
@@ -326,13 +346,14 @@ class EsclScanningProtocol(
 
                 else -> {
                     jobResult.cancel()
-                    emit(ScanJobProcessingEvent.Failure(
-                        ScanningError.NextPageRetrievalError(nextPage.toString(), status.toString())
-                    ))
+                    emit(
+                        ScanJobProcessingEvent.Failure(
+                            ScanningError.NextPageRetrievalError(nextPage.toString(), status.toString())
+                        )
+                    )
                     return@flow
                 }
             }
-
         }
     }
 }

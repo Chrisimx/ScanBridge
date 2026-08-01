@@ -1,6 +1,5 @@
 package io.github.chrisimx.scanbridge.model
 
-import io.github.chrisimx.anyscan.CommonScannerCapabilities
 import io.github.chrisimx.esclkt.ScannerCapabilities
 import io.github.chrisimx.scanbridge.PaperFormat
 import io.github.chrisimx.scanbridge.loadDefaultFormats
@@ -22,7 +21,6 @@ data class ScanSettingsEnterableDataV0(
         maximumSize = maximumSize
     )
 }
-
 
 @Serializable
 data class ScanSettingsEnterableDataV1(

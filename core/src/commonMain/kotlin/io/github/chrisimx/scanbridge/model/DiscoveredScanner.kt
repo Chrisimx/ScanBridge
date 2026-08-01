@@ -7,5 +7,5 @@ data class DiscoveredScanner(
     val name: String,
     val handle: ScannerHandle,
     val scannerCaps: ScannerCapabilitiesResult? = null,
-    val iconUrl: Url? = null,
+    val iconUrl: Url? = null
 )

@@ -32,7 +32,7 @@ val Context.appSettingsStore: DataStore<ScanBridgeSettings> by dataStore(
                     chunkSizePdfExport = UInt32Value.of(sharedPrefs.getInt("chunk_size_pdf_export", 50))
                     rememberScanSettings = BoolValue.of(sharedPrefs.getBoolean("remember_scan_settings", true))
                 }.build()
-            },
+            }
         )
     }
 )

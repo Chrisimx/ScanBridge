@@ -10,6 +10,6 @@ interface StartScanUseCase {
         ownerSessionId: Uuid,
         scannerHandle: ScannerHandle,
         scanSettings: CommonScanSettings,
-        connectionSettings: ScannerConnectionSettings,
+        connectionSettings: ScannerConnectionSettings
     )
 }

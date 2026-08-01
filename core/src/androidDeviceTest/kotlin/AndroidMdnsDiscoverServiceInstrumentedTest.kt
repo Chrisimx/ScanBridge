@@ -117,10 +117,7 @@ class AndroidMdnsDiscoverServiceInstrumentedTest {
                     continuation.resume(this)
                 }
 
-                override fun onRegistrationFailed(
-                    serviceInfo: NsdServiceInfo,
-                    errorCode: Int
-                ) {
+                override fun onRegistrationFailed(serviceInfo: NsdServiceInfo, errorCode: Int) {
                     continuation.resumeWithException(
                         AssertionError("NSD registration failed: $errorCode")
                     )
@@ -128,10 +125,7 @@ class AndroidMdnsDiscoverServiceInstrumentedTest {
 
                 override fun onServiceUnregistered(serviceInfo: NsdServiceInfo) = Unit
 
-                override fun onUnregistrationFailed(
-                    serviceInfo: NsdServiceInfo,
-                    errorCode: Int
-                ) = Unit
+                override fun onUnregistrationFailed(serviceInfo: NsdServiceInfo, errorCode: Int) = Unit
             }
 
             nsdManager.registerService(
@@ -148,9 +142,7 @@ class AndroidMdnsDiscoverServiceInstrumentedTest {
         }
     }
 
-    private fun unregisterTestService(
-        listener: NsdManager.RegistrationListener
-    ) {
+    private fun unregisterTestService(listener: NsdManager.RegistrationListener) {
         runCatching {
             nsdManager.unregisterService(listener)
         }

@@ -175,11 +175,13 @@ class ScanJobForegroundService : Service() {
         scanningFlow.collect { processingEvent ->
             when (processingEvent) {
                 ScanJobProcessingEvent.Cancelled -> scanJobs.setCancel(false)
+
                 is ScanJobProcessingEvent.Failure -> {
                     failed = true
                     scanJobs.notifyFailed(scanJob, processingEvent.error)
                     return@collect
                 }
+
                 is ScanJobProcessingEvent.NewPage -> {
                     val pageData = processingEvent.scannedPage
 
@@ -199,6 +201,7 @@ class ScanJobForegroundService : Service() {
                                 "scan-${pageCounter.toString().padStart(4, '0')}.jpg"
                             )
                         }
+
                         "application/pdf" -> {
                             val extractedImages = extractPdfImages(
                                 scanPageFile.absolutePath,
@@ -209,6 +212,7 @@ class ScanJobForegroundService : Service() {
                                 addScan(scanJob.ownerSessionId, it, scanJob.scanSettings, ScanRelativeRotation.Original)
                             }
                         }
+
                         else -> {
                             failed = true
                             scanJobs.notifyFailed(scanJob, ScanningError.UnsupportedContentType(pageData.contentType))
@@ -226,7 +230,13 @@ class ScanJobForegroundService : Service() {
         scanJobs.notifyCompleted(scanJob)
     }
 
-    suspend fun addScan(sessionID: Uuid, path: String, settings: CommonScanSettings, rotation: ScanRelativeRotation, fileName: String? = null) {
+    suspend fun addScan(
+        sessionID: Uuid,
+        path: String,
+        settings: CommonScanSettings,
+        rotation: ScanRelativeRotation,
+        fileName: String? = null
+    ) {
         Timber.d("Adding scan: $path, $rotation")
         db.useWriterConnection {
             it.immediateTransaction {

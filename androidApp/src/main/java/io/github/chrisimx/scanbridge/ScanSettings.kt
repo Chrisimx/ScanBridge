@@ -108,19 +108,23 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
 
             when (parameter) {
                 is ScanSettingParam.ScanSettingBoolParam -> TODO()
+
                 is ScanSettingParam.ScanSettingChoiceParam<*> -> {
                     ChoiceParameterDisplay(scannerConceptLocalizedName, parameter, scanSettingsStateHolder, scannerConcept, scanSettings)
                 }
 
                 is ScanSettingParam.ScanSettingDoubleParam -> TODO()
+
                 is ScanSettingParam.ScanSettingFloatParam -> TODO()
+
                 is ScanSettingParam.ScanSettingIntParam -> TODO()
+
                 is ScanSettingParam.ScanSettingRegionParam -> {
                     RegionParameterDisplay(
                         scannerConceptLocalizedName,
                         scanSettingsStateHolder,
                         scanSettings,
-                        userUnitString,
+                        userUnitString
                     )
                 }
             }
@@ -133,7 +137,7 @@ private fun RegionParameterDisplay(
     scannerConceptLocalizedName: String,
     scanSettingsStateHolder: ScanSettingsComposableStateHolder,
     scanSettings: CommonScanSettings,
-    userUnitString: String,
+    userUnitString: String
 ) {
     val vmData by scanSettingsStateHolder.uiState.collectAsState()
     val availablePaperFormats by scanSettingsStateHolder.availablePaperFormats.collectAsState()
@@ -175,7 +179,7 @@ private fun RegionParameterDisplay(
                     },
                     label = { Text(stringResource(R.string.maximum_size)) },
                     selected =
-                    vmData.maximumSize && !vmData.customMenuEnabled
+                        vmData.maximumSize && !vmData.customMenuEnabled
                 )
                 InputChip(
                     selected = vmData.customMenuEnabled,
@@ -213,8 +217,7 @@ private fun RegionParameterDisplay(
     }
 }
 
-private fun LengthUnit.equalsLength(other: LengthUnit): Boolean =
-    this.toMillimeters().value == other.toMillimeters().value
+private fun LengthUnit.equalsLength(other: LengthUnit): Boolean = this.toMillimeters().value == other.toMillimeters().value
 
 @Composable
 private fun ChoiceParameterDisplay(
@@ -288,4 +291,3 @@ private fun InputSourceSelection(
         ) { Text(stringResource(R.string.setting_duplex)) }
     }
 }
-

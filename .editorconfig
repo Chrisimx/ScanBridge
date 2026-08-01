@@ -21,3 +21,9 @@ ktlint_ignore_back_ticked_identifier = false
 ktlint_standard_no-unused-imports = enabled
 max_line_length = 140
 ktlint_standard_no-wildcard-imports = disabled
+
+[**/generated/**/*.kt]
+ktlint = disabled
+
+[**/build/kspCaches/**/*.kt]
+ktlint = disabled

@@ -12,13 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 
 @Composable
-fun <T> SelectionButtonRow(
-    title: String,
-    options: List<T>,
-    onSet: (T?) -> Unit,
-    stringify: @Composable T.() -> String,
-    value: T?,
-) {
+fun <T> SelectionButtonRow(title: String, options: List<T>, onSet: (T?) -> Unit, stringify: @Composable T.() -> String, value: T?) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             title,

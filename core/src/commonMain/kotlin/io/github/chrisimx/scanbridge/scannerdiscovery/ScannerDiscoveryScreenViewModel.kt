@@ -12,10 +12,7 @@ import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 
-data class ProtocolWithExampleHandleString(
-    val protocolIdentifier: String,
-    val exampleScannerIdentifierString: String
-)
+data class ProtocolWithExampleHandleString(val protocolIdentifier: String, val exampleScannerIdentifierString: String)
 
 class ScannerDiscoveryScreenViewModel(
     val customScannerRepo: CustomScannerRepository,

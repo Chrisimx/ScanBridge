@@ -4,12 +4,9 @@ import android.net.wifi.WifiManager
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.ports.multicast.MulticastLockHandler
 
-class AndroidMulticastLockHandler(
-    val application: Application,
-    private val loggerFactory: ScanBridgeLoggerFactory
-) : MulticastLockHandler {
+class AndroidMulticastLockHandler(val application: Application, private val loggerFactory: ScanBridgeLoggerFactory) : MulticastLockHandler {
 
-    private val _logger = loggerFactory.withClass(this::class)
+    private val logger = loggerFactory.withClass(this::class)
     private val wifiManager =
         application.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
@@ -18,16 +15,15 @@ class AndroidMulticastLockHandler(
 
     override fun acquire() {
         if (!lock.isHeld) {
-            _logger.debug { "Acquiring multicast lock" }
+            logger.debug { "Acquiring multicast lock" }
             lock.acquire()
         }
     }
 
     override fun release() {
         if (lock.isHeld) {
-            _logger.debug { "Releasing multicast lock" }
+            logger.debug { "Releasing multicast lock" }
             lock.release()
         }
     }
-
 }

@@ -38,14 +38,11 @@ fun String.truncate(maxLength: Int): String = if (this.length <= maxLength) {
     this.take(maxLength.coerceAtLeast(1) - 1) + "…"
 }
 
-enum class SnackbarType(
-    val containerColor: Color,
-    val contentColor: Color = Color.White,
-) {
+enum class SnackbarType(val containerColor: Color, val contentColor: Color = Color.White) {
     SUCCESS(containerColor = Color(0xFF4CAF50)),
     ERROR(containerColor = Color(0xFFF44336)),
     WARNING(containerColor = Color(0xFFFF9800)),
-    DEFAULT(containerColor = Color.DarkGray);
+    DEFAULT(containerColor = Color.DarkGray)
 }
 
 data class CustomSnackbarVisuals(
@@ -53,7 +50,7 @@ data class CustomSnackbarVisuals(
     override val actionLabel: String? = null,
     override val duration: SnackbarDuration = SnackbarDuration.Short,
     override val withDismissAction: Boolean = false,
-    val type: SnackbarType = SnackbarType.DEFAULT,
+    val type: SnackbarType = SnackbarType.DEFAULT
 ) : SnackbarVisuals
 
 fun snackbarErrorRetrievingPage(
@@ -78,18 +75,16 @@ suspend fun SnackbarHostState.showCustomSnackbar(
     type: SnackbarType = SnackbarType.DEFAULT,
     actionLabel: String? = null,
     duration: SnackbarDuration = SnackbarDuration.Short,
-    withDismissAction: Boolean = false,
-): SnackbarResult {
-    return showSnackbar(
-        CustomSnackbarVisuals(
-            message = message,
-            actionLabel = actionLabel,
-            duration = duration,
-            withDismissAction = withDismissAction,
-            type = type
-        )
+    withDismissAction: Boolean = false
+): SnackbarResult = showSnackbar(
+    CustomSnackbarVisuals(
+        message = message,
+        actionLabel = actionLabel,
+        duration = duration,
+        withDismissAction = withDismissAction,
+        type = type
     )
-}
+)
 
 fun snackBarError(
     error: String,

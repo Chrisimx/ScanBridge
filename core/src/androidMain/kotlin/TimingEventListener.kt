@@ -54,7 +54,7 @@ class TimingEventListener : EventListener() {
     }
 
     override fun responseBodyEnd(call: Call, byteCount: Long) {
-        log("responseBodyEnd ${byteCount} bytes")
+        log("responseBodyEnd $byteCount bytes")
     }
 
     override fun callFailed(call: Call, ioe: IOException) {

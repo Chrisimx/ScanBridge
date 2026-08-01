@@ -4,8 +4,8 @@ import io.github.chrisimx.anyscan.LengthUnit
 import io.github.chrisimx.anyscan.millimeters
 import io.github.chrisimx.esclkt.BinaryRendering
 import io.github.chrisimx.esclkt.CcdChannelEnumOrRaw
-import io.github.chrisimx.esclkt.EsclColorModeEnumOrRaw
 import io.github.chrisimx.esclkt.ContentTypeEnumOrRaw
+import io.github.chrisimx.esclkt.EsclColorModeEnumOrRaw
 import io.github.chrisimx.esclkt.EsclScanIntentEnumOrRaw
 import io.github.chrisimx.esclkt.FeedDirection
 import io.github.chrisimx.esclkt.InputSource

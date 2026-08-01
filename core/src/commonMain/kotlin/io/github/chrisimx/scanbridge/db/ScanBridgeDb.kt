@@ -54,7 +54,7 @@ import io.github.chrisimx.scanbridge.db.typeconverters.UuidTypeConverter
     CommonScanSettingsTypeConverter::class,
     ScanSettingsUiDataTypeConverterV0::class,
     ScanSettingsUiDataTypeConverterV1::class,
-    CommonScanSettingsTypeConverter::class,
+    CommonScanSettingsTypeConverter::class
 )
 abstract class ScanBridgeDb : RoomDatabase() {
     abstract fun customScannerDao(): CustomScannerDao

@@ -57,10 +57,10 @@ import io.github.chrisimx.scanbridge.model.toggleRotation
 import io.github.chrisimx.scanbridge.ports.InitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
 import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
-import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
 import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
+import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import io.github.chrisimx.scanbridge.util.getEditedImageName
 import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.saveAsJPEG
@@ -416,7 +416,7 @@ class ScanningScreenViewModel(
                 ownerSessionId = sessionID,
                 scannerHandle = scannerHandle,
                 scanSettings = currentSettings,
-                connectionSettings = scannerConnectionSettings(),
+                connectionSettings = scannerConnectionSettings()
             )
         }
     }
@@ -519,8 +519,8 @@ class ScanningScreenViewModel(
                             val fallbackInputSourceCaps = scannerCaps.inputSources.first()
 
                             val fallbackResolution = fallbackInputSourceCaps
-                                    .furtherOptions[ScannerConcept.ScanResolution]!!
-                                    .defaultValue
+                                .furtherOptions[ScannerConcept.ScanResolution]!!
+                                .defaultValue
 
                             val originalSettingsMap = scan.originalScanSettings.setting
 

@@ -8,12 +8,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 
-class DiscoveryUsecase(
-    private val scanningProtocolManager: ScanningProtocolManager
-) {
+class DiscoveryUsecase(private val scanningProtocolManager: ScanningProtocolManager) {
     fun discoveredScanners(
         coroutineScope: CoroutineScope,
-        connectionSettings: ScannerConnectionSettings = ScannerConnectionSettings(),
+        connectionSettings: ScannerConnectionSettings = ScannerConnectionSettings()
     ): Flow<List<DiscoveredScanner>> {
         val discoveryBackends = scanningProtocolManager.getDiscoveryBackends(coroutineScope, connectionSettings)
         if (discoveryBackends.isEmpty()) {

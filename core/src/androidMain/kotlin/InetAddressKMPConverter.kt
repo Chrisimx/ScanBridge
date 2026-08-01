@@ -6,7 +6,7 @@ fun InetAddress.toMultiplatformIpAddress(): IpAddress {
 
     return when (raw.size) {
         4 -> IpAddress.V4(
-            bytes = raw,
+            bytes = raw
         )
 
         16 -> IpAddress.V6(

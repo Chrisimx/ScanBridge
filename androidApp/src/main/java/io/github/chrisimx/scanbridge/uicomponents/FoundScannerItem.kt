@@ -58,10 +58,7 @@ import org.koin.core.qualifier.named
 import timber.log.Timber
 
 @Composable
-fun tintedPainterResource(
-    id: Int,
-    tint: Color,
-): Painter {
+fun tintedPainterResource(id: Int, tint: Color): Painter {
     val basePainter = painterResource(id)
 
     return remember(basePainter, tint) {
@@ -98,11 +95,13 @@ fun FoundScannerItem(
             .padding(10.dp),
         onClick = {
             val sessionID = Uuid.random()
-            navController.navigate(route = ScannerRoute(
-                name,
-                scannerHandleString,
-                protocolIdentifier,
-                sessionID.toString())
+            navController.navigate(
+                route = ScannerRoute(
+                    name,
+                    scannerHandleString,
+                    protocolIdentifier,
+                    sessionID.toString()
+                )
             )
         }
     ) {
@@ -162,7 +161,7 @@ fun FoundScannerItem(
                     )
                 }
                 Text(
-                    "$scannerHandleString (${protocolIdentifier})",
+                    "$scannerHandleString ($protocolIdentifier)",
                     style = MaterialTheme.typography.labelLarge
                 )
             }

@@ -20,7 +20,7 @@ val STARTUP_TABS = listOf(
                 innerPadding,
                 navController,
                 showCustomDialog,
-                setShowCustomDialog,
+                setShowCustomDialog
             )
         }
     ),
@@ -30,7 +30,7 @@ val STARTUP_TABS = listOf(
         Icons.Filled.Settings,
         Icons.Outlined.Settings,
         false,
-        { innerPadding, _, _, _, ->
+        { innerPadding, _, _, _ ->
             AppSettingsScreen(innerPadding)
         }
     )

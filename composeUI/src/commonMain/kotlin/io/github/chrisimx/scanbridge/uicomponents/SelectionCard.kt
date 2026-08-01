@@ -66,4 +66,3 @@ fun <T> SelectionCard(
         }
     }
 }
-

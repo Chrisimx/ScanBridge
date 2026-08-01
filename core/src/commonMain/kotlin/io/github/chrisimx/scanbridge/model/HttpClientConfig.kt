@@ -15,5 +15,5 @@ fun ScannerConnectionSettings.toHttpClientConfig(): HttpClientConfig = HttpClien
     this.debugLogging,
     this.connectionTimeoutInSeconds,
     this.connectionTimeoutInSeconds,
-    this.totalTimeoutInSeconds,
+    this.totalTimeoutInSeconds
 )

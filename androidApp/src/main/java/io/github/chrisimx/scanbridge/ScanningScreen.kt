@@ -332,8 +332,10 @@ fun ScanningScreen(
         scanningViewModel.scanJobRepo.events.collect { event ->
             when (event) {
                 is ScanJobEvent.Completed -> scope.launch { pagerState.animateScrollToPage(scannedPages.size - 1) }
+
                 // TODO: Localize this
                 is ScanJobEvent.Failed -> snackbarErrorRetrievingPage(event.error.unlocalizedMessage, scope, context, snackbarHostState)
+
                 is ScanJobEvent.Started -> scope.launch { pagerState.animateScrollToPage(scannedPages.size) }
             }
         }

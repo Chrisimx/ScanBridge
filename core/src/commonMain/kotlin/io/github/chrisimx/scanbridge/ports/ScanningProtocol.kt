@@ -13,7 +13,7 @@ data class ScannerConnectionSettings(
     val connectionTimeoutInSeconds: ULong = 10uL,
     val totalTimeoutInSeconds: ULong = 10uL,
     val allowSelfSignedCertificates: Boolean = false,
-    val debugLogging: Boolean = false,
+    val debugLogging: Boolean = false
 )
 
 sealed class ScannerCapabilitiesResult {
@@ -79,9 +79,10 @@ interface ScanningProtocol {
      * Each process update is provided as a [ScanJobProcessingEvent]. This also provides
      * the scanned pages if the scanning job succeeds.
      */
-    fun executeScanJob(handle: ScannerHandle,
-                       settings: ScannerConnectionSettings,
-                       jobScanSettings: CommonScanSettings,
-                       cancelled: StateFlow<Boolean>
+    fun executeScanJob(
+        handle: ScannerHandle,
+        settings: ScannerConnectionSettings,
+        jobScanSettings: CommonScanSettings,
+        cancelled: StateFlow<Boolean>
     ): Flow<ScanJobProcessingEvent>
 }

@@ -159,7 +159,7 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
                 timeout,
                 debug,
                 certValidationDisabled,
-                Uuid.parse(scannerRoute.sessionID),
+                Uuid.parse(scannerRoute.sessionID)
             )
         }
     }

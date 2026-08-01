@@ -1,11 +1,7 @@
 package io.github.chrisimx.scanbridge.model
 
-data class ScanProtocolScannedPage(
-    val contentType: String,
-    val data: ByteArray,
-) {
-    override fun toString(): String =
-        "ScannedPage(contentType='$contentType', data.size=${data.size})"
+data class ScanProtocolScannedPage(val contentType: String, val data: ByteArray) {
+    override fun toString(): String = "ScannedPage(contentType='$contentType', data.size=${data.size})"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -10,14 +10,11 @@ import io.github.chrisimx.scanbridge.androidservice.ScanJobForegroundService
 import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
-import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
+import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import kotlin.uuid.Uuid
 
-class AndroidStartScanUseCase(
-    val scanJobRepo: ScanJobRepository,
-    val application: Application,
-) : StartScanUseCase {
+class AndroidStartScanUseCase(val scanJobRepo: ScanJobRepository, val application: Application) : StartScanUseCase {
     override fun startScan(
         ownerSessionId: Uuid,
         scannerHandle: ScannerHandle,

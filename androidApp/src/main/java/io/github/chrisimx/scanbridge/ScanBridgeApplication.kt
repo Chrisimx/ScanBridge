@@ -31,7 +31,6 @@ import io.github.chrisimx.scanbridge.ports.LocaleProvider
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager
-import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import io.github.chrisimx.scanbridge.ports.multicast.MulticastLockHandler
 import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
 import io.github.chrisimx.scanbridge.proto.ShownMessages
@@ -45,6 +44,7 @@ import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
 import io.github.chrisimx.scanbridge.services.DebugLogService
 import io.github.chrisimx.scanbridge.services.FileDebugLogService
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
+import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -73,7 +73,7 @@ fun createScannerIconImageLoader(factory: HttpClientFactory, context: Context): 
             debugLogging = false,
             requestTimeoutInSeconds = 2u,
             connectTimeoutInSeconds = 2u,
-            socketTimeoutInSeconds = 2u,
+            socketTimeoutInSeconds = 2u
         )
     )
     return ImageLoader.Builder(context)
