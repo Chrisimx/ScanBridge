@@ -495,7 +495,8 @@ class ScanningScreenViewModel(
                     certificateValidationDisabled,
                     withDebugInterceptor,
                     timeout.toULong()
-                )
+                ),
+                scanningScreenData.capabilities?.makeAndModel
             )
             scanJobRepo.enqueue(scanJob)
             ScanJobForegroundService.startService(application)

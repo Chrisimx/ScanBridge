@@ -191,6 +191,11 @@ class ScanJobForegroundService : Service() {
         }
         val jobResult = job.scanJob
 
+        if (scanJob.scannerMakeAndModel == "RICOH") {
+            val status = esclRequestClient.getScannerStatus()
+            Timber.d("Scanner status after job creation: $status")
+        }
+
         if (abortIfCancelling(jobResult)) return
 
         var polling = false

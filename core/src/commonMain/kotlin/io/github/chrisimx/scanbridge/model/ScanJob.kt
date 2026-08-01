@@ -9,5 +9,6 @@ data class ScanJob(
     val ownerSessionId: Uuid,
     val scanSettings: ScanSettings,
     val scannerBaseUrl: Url,
-    val httpClientConfig: HttpClientConfig
+    val httpClientConfig: HttpClientConfig,
+    val scannerMakeAndModel: String?
 )
