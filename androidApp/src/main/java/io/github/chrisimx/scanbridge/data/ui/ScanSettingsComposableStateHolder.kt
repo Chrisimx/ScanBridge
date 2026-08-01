@@ -256,15 +256,18 @@ class ScanSettingsComposableStateHolder(
     }
 
     fun setInputSource(inputSource: UIInputSourceType) {
-        Timber.d("Input Source being set to $inputSource. Validating existing settings.")
-
-        val newInputSource = when (inputSource) {
-            UIInputSourceType.PLATEN -> CommonInputSourceType.PLATEN
-            UIInputSourceType.ADF -> CommonInputSourceType.ADF_SIMPLEX
-        }
+        Timber.d("Input Source being set to $inputSource")
 
         coroutineScope.launch {
             updateSettings {
+                val newInputSource = when (inputSource) {
+                    UIInputSourceType.PLATEN -> CommonInputSourceType.PLATEN
+                    UIInputSourceType.ADF -> if (this.inputSource == CommonInputSourceType.ADF_DUPLEX) {
+                        CommonInputSourceType.ADF_DUPLEX
+                    } else {
+                        CommonInputSourceType.ADF_SIMPLEX
+                    }
+                }
                 setInputSource(inputSource = newInputSource)
             }
         }
