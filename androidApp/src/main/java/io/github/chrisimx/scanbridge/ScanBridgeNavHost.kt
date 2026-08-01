@@ -74,25 +74,18 @@ data class ErrorRoute(val error: String) : BaseRoute
 fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
     Timber.d("Route changed to: ${destination.route}")
     return when (destination.route) {
-        "StartUpScreenRoute" -> StartUpScreenRoute
+        "StartUpScreenRoute" -> this.toRoute<StartUpScreenRoute>()
 
         "CropImageRoute/{scanId}/{pageIdx}/{returnRoute}" -> {
-            val scanId = arguments?.getString("scanId") ?: return null
-            val returnRouteString = arguments?.getString("returnRoute") ?: return null
-            CropImageRoute(scanId, returnRouteString)
+            this.toRoute<CropImageRoute>()
         }
 
-        "ScannerRoute/{scannerName}/{scannerHandleString}/{protocolId}/{sessionID}" -> {
-            val scannerName = arguments?.getString("scannerName") ?: return null
-            val scannerHandling = arguments?.getString("scannerHandleString") ?: return null
-            val protocolId = arguments?.getString("protocolId") ?: return null
-            val sessionID = arguments?.getString("sessionID") ?: return null
-            ScannerRoute(scannerName, scannerHandling, protocolId, sessionID)
+        "ScannerRoute/{scannerName}/{scannerHandleString}/{sessionID}?protocolId={protocolId}" -> {
+            this.toRoute<ScannerRoute>()
         }
 
         "ErrorRoute/{error}" -> {
-            val error = arguments?.getString("error") ?: return null
-            ErrorRoute(error)
+            this.toRoute<ErrorRoute>()
         }
 
         else -> null
