@@ -74,7 +74,7 @@ fun CustomScannerDialog(
 
         try {
             return Url(urlText)
-        } catch (_: IllegalArgumentException) {
+        } catch (_: Exception) {
             urlErrorState = context.getString(R.string.invalid_url)
             return null
         }
