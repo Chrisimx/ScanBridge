@@ -1,22 +1,14 @@
 package io.github.chrisimx.scanbridge.db.typeconverters
 
-import androidx.room.TypeConverter
-import io.github.chrisimx.scanbridge.ScanSettingsJson
-import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableData
+import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV0
+import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 
-class ScanSettingsUiDataTypeConverter {
+class ScanSettingsUiDataTypeConverterV0 :
+    JsonSerializationTypeConverter<ScanSettingsEnterableDataV0>(
+        ScanSettingsEnterableDataV0.serializer()
+    )
 
-    @TypeConverter
-    fun fromScanSettingsString(scanSettings: String): ScanSettingsEnterableData? = if (scanSettings == "null") {
-        null
-    } else {
-        ScanSettingsJson.json.decodeFromString<ScanSettingsEnterableData>(scanSettings)
-    }
-
-    @TypeConverter
-    fun toScanSettingsString(scanSettings: ScanSettingsEnterableData?): String = if (scanSettings == null) {
-        "null"
-    } else {
-        ScanSettingsJson.json.encodeToString(scanSettings)
-    }
-}
+class ScanSettingsUiDataTypeConverterV1 :
+    JsonSerializationTypeConverter<ScanSettingsEnterableDataV1>(
+        ScanSettingsEnterableDataV1.serializer()
+    )

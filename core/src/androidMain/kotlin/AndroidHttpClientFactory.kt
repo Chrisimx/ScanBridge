@@ -12,9 +12,9 @@ class AndroidHttpClientFactory(loggerFactory: ScanBridgeLoggerFactory) : HttpCli
 
     override fun create(config: HttpClientConfig): HttpClient = HttpClient(OkHttp) {
         install(HttpTimeout) {
-            requestTimeoutMillis = config.timeoutInSeconds.toLong() * 1000
-            connectTimeoutMillis = config.timeoutInSeconds.toLong() * 1000
-            socketTimeoutMillis = config.timeoutInSeconds.toLong() * 1000
+            requestTimeoutMillis = config.requestTimeoutInSeconds.toLong() * 1000
+            connectTimeoutMillis = config.connectTimeoutInSeconds.toLong() * 1000
+            socketTimeoutMillis = config.socketTimeoutInSeconds.toLong() * 1000
         }
         if (config.debugLogging) {
             install(Logging) {

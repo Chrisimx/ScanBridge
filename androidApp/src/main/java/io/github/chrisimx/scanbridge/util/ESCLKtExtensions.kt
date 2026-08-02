@@ -21,19 +21,9 @@ package io.github.chrisimx.scanbridge.util
 
 import android.content.Context
 import android.icu.text.DecimalFormat
-import app.cash.paraphrase.getString
-import io.github.chrisimx.esclkt.ColorMode
-import io.github.chrisimx.esclkt.ColorModeEnumOrRaw
-import io.github.chrisimx.esclkt.DiscreteResolution
-import io.github.chrisimx.esclkt.EnumOrRaw
-import io.github.chrisimx.esclkt.InputSource
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import io.github.chrisimx.esclkt.JobState
-import io.github.chrisimx.esclkt.ScanSettings
-import io.github.chrisimx.esclkt.ScannerCapabilities
-import io.github.chrisimx.esclkt.getInputSourceCaps
-import io.github.chrisimx.esclkt.getInputSourceOptions
-import io.github.chrisimx.esclkt.scanRegion
-import io.github.chrisimx.scanbridge.FormattedResources
 import io.github.chrisimx.scanbridge.R
 
 fun JobState?.toJobStateString(context: Context): String = when (this) {
@@ -45,70 +35,30 @@ fun JobState?.toJobStateString(context: Context): String = when (this) {
     null -> context.getString(R.string.job_state_cannot_be_retrieved)
 }
 
-fun String.toDoubleLocalized(): Double = DecimalFormat.getInstance().parse(this).toDouble()
+fun String.toDoubleLocalized(): Double? = runCatching {
+    DecimalFormat.getInstance().parse(this).toDouble()
+}.getOrNull()
 
 fun Double.toStringLocalized(): String = DecimalFormat.getInstance().format(this)
 
-fun InputSource.toReadableString(context: Context): String = when (this) {
-    InputSource.Platen -> context.getString(R.string.platen)
-    InputSource.Feeder -> context.getString(R.string.adf)
-    InputSource.Camera -> context.getString(R.string.camera)
+@Composable
+fun UIInputSourceType.toReadableString(): String = when (this) {
+    UIInputSourceType.PLATEN ->
+        stringResource(R.string.platen)
+
+    UIInputSourceType.ADF -> stringResource(R.string.adf)
 }
 
-fun ColorModeEnumOrRaw.localizedString(context: Context): String = when (this) {
-    is EnumOrRaw.Known<ColorMode> -> when (this.value) {
-        ColorMode.BlackAndWhite1 -> context.getString(R.string.black_and_white)
-        ColorMode.RGB24 -> context.getString(FormattedResources.color_scan("24"))
-        ColorMode.RGB48 -> context.getString(FormattedResources.color_scan("48"))
-        ColorMode.AutoColorDetection -> context.getString(R.string.auto_detect)
-        ColorMode.Grayscale8 -> context.getString(FormattedResources.grayscale("8"))
-        ColorMode.Grayscale16 -> context.getString(FormattedResources.grayscale("16"))
-    }
-
-    is EnumOrRaw.Unknown<ColorMode> -> this.asString()
-}
-
-fun ScannerCapabilities.getMaxResolution(inputSource: InputSource): DiscreteResolution {
-    val inputCaps = this.getInputSourceCaps(inputSource)
-    val maxResolution = inputCaps
-        .settingProfiles.first()
-        .supportedResolutions.discreteResolutions.maxBy { it.xResolution * it.yResolution }
-
-    return maxResolution
-}
-
-fun ScannerCapabilities.getBestColorMode(inputSource: InputSource): ColorModeEnumOrRaw? {
-    val inputCaps = this.getInputSourceCaps(inputSource)
-    val chosenColorMode = inputCaps.settingProfiles.elementAtOrNull(0)?.colorModes?.maxByOrNull {
-        when (it) {
-            is EnumOrRaw.Known -> it.value.ordinal
-            is EnumOrRaw.Unknown -> 0
-        }
-    }
-    return chosenColorMode
-}
-
-fun ScannerCapabilities.calculateDefaultESCLScanSettingsState(): ScanSettings {
-    val inputSource = this.getInputSourceOptions().firstOrNull() ?: InputSource.Platen
-
-    val maxResolution = getMaxResolution(inputSource)
-
-    val inputSourceCaps = this.getInputSourceCaps(inputSource, false)
-
-    val maxScanRegion = scanRegion(inputSourceCaps) {
-        maxHeight()
-        maxWidth()
-    }
-
-    val bestColorMode = getBestColorMode(inputSource)
-
-    return ScanSettings(
-        version = this.interfaceVersion,
-        inputSource = inputSource,
-        scanRegions = maxScanRegion,
-        xResolution = maxResolution.xResolution,
-        yResolution = maxResolution.yResolution,
-        colorMode = bestColorMode,
-        documentFormatExt = "image/jpeg"
-    )
+/**
+ * Returns the caller object if it is contained in the provided list; otherwise, returns the first
+ * element of the list or null if the list is empty.
+ *
+ * @param list The list to search for the caller object.
+ * @return The caller object if it is contained in the list, the first element of the list if not contained,
+ *         or null if the list is empty.
+ */
+fun <T> T.takeIfContainedElseFirstOrNull(list: List<T>): T? = if (list.contains(this)) {
+    this
+} else {
+    list.firstOrNull()
 }

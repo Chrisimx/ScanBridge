@@ -21,11 +21,11 @@ package io.github.chrisimx.scanbridge.stores
 
 import android.content.Context
 import com.google.protobuf.StringValue
-import io.github.chrisimx.esclkt.ScanSettings
+import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.scanbridge.ScanSettingsJson
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.datastore.updateSettings
-import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableData
+import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 import io.github.chrisimx.scanbridge.proto.lastUsedScanSettingsOrNull
 import io.github.chrisimx.scanbridge.proto.lastUsedScanSettingsUiStateOrNull
 import io.github.chrisimx.scanbridge.proto.rememberScanSettingsOrNull
@@ -38,7 +38,7 @@ object DefaultScanSettingsStore {
         return appPreferences.rememberScanSettingsOrNull?.value ?: true
     }
 
-    suspend fun save(context: Context, scanSettings: ScanSettings, uiStateData: ScanSettingsEnterableData?) {
+    suspend fun save(context: Context, scanSettings: CommonScanSettings, uiStateData: ScanSettingsEnterableDataV1?) {
         if (!isRememberSettingsEnabled(context)) {
             Timber.d("Scan settings persistence is disabled, skipping save")
             return
@@ -61,7 +61,7 @@ object DefaultScanSettingsStore {
         }
     }
 
-    suspend fun load(context: Context): Pair<ScanSettings?, ScanSettingsEnterableData?> {
+    suspend fun load(context: Context): Pair<CommonScanSettings?, ScanSettingsEnterableDataV1?> {
         if (!isRememberSettingsEnabled(context)) {
             Timber.d("Scan settings persistence is disabled, returning null")
             return null to null
@@ -78,9 +78,9 @@ object DefaultScanSettingsStore {
 
         try {
             val json = ScanSettingsJson.json
-            val lastUsedScanSettingsDecoded = json.decodeFromString<ScanSettings>(lastUsedScanSettings)
+            val lastUsedScanSettingsDecoded = json.decodeFromString<CommonScanSettings>(lastUsedScanSettings)
             val lastUsedScanSettingsUIStateDecoded = lastUsedScanSettingsUiState?.let {
-                json.decodeFromString<ScanSettingsEnterableData>(it)
+                json.decodeFromString<ScanSettingsEnterableDataV1>(it)
             }
             Timber.d("Loaded default scan settings $lastUsedScanSettings, $lastUsedScanSettingsUIStateDecoded")
             return lastUsedScanSettingsDecoded to lastUsedScanSettingsUIStateDecoded

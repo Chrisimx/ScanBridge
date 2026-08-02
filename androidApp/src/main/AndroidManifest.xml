@@ -9,6 +9,9 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!--  For finding WSD scanners via WS-Discovery, we need multicast capability  -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+
 
     <application
         android:name=".ScanBridgeApplication"

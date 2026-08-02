@@ -23,7 +23,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import io.github.chrisimx.esclkt.ScannerCapabilities
+import io.github.chrisimx.anyscan.CommonScannerCapabilities
 import java.io.File
 import kotlin.uuid.Uuid
 
@@ -35,7 +35,7 @@ data class ScanningScreenData(
     val confirmPageDeleteDialogShown: MutableState<Boolean> = mutableStateOf(false),
     val error: MutableState<ErrorDescription?> = mutableStateOf(null),
     val scanSettingsVM: MutableState<ScanSettingsComposableStateHolder?> = mutableStateOf(null),
-    val capabilities: MutableState<ScannerCapabilities?> = mutableStateOf(null),
+    val capabilities: MutableState<CommonScannerCapabilities?> = mutableStateOf(null),
     val scanSettingsMenuOpen: MutableState<Boolean> = mutableStateOf(false),
     val showExportOptions: MutableState<Boolean> = mutableStateOf(false),
     val showSaveOptions: MutableState<Boolean> = mutableStateOf(false),
@@ -69,7 +69,7 @@ data class ImmutableScanningScreenData(
     private val confirmPageDeleteDialogShownState: State<Boolean>,
     private val errorState: State<ErrorDescription?>,
     private val scanSettingsVMState: State<ScanSettingsComposableStateHolder?>,
-    private val capabilitiesState: State<ScannerCapabilities?>,
+    private val capabilitiesState: State<CommonScannerCapabilities?>,
     private val scanSettingsMenuOpenState: State<Boolean>,
     private val showExportOptionsState: State<Boolean>,
     private val showSaveOptionsState: State<Boolean>,

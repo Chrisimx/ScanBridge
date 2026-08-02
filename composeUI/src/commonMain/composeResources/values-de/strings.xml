@@ -117,11 +117,20 @@
     <string name="scanned_pages_received_in_bg">Gescannte Seiten werden im Hintergrund abgerufen.</string>
     <string name="color_mode">Farbmodus:</string>
     <string name="black_and_white">Schwarz-Weiß</string>
-    <string name="color_scan">Farbe ({bitdepth} bit)</string>
+    <string name="color_scan_24">Farbe (24 bit)</string>
+    <string name="color_scan_48">Farbe (48 bit)</string>
     <string name="auto_detect">Automatische Erkennung</string>
-    <string name="grayscale">Graustufen ({bitdepth} bit)</string>
+    <string name="grayscale_8">Graustufen (8 bit)</string>
+    <string name="grayscale_16">Graustufen (16 bit)</string>
     <string name="save">Speichern</string>
     <string name="edit_custom_scanner">Benutzerdefinierten Scanner bearbeiten</string>
     <string name="custom_scanner_deletion_confirmation">Willst du den benutzerdefinierten Scanner wirklich löschen? Dieser Vorgang ist unwiderruflich.</string>
     <string name="custom_scanner_deletion">Benutzerdefinierten Scanner löschen</string>
+    <string name="scan_intent_document">Dokument</string>
+    <string name="scan_intent_text_and_graphic"><![CDATA[Text & Grafiken]]></string>
+    <string name="scan_intent_photo">Foto</string>
+    <string name="scan_intent_preview">Vorschau</string>
+    <string name="scan_intent_object">3D-Objekt</string>
+    <string name="scan_intent_business_card">Visitenkarte</string>
+    <string name="scanning_protocol">Protokoll</string>
 </resources>

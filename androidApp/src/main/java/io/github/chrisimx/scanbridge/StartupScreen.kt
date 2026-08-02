@@ -34,24 +34,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import io.github.chrisimx.scanbridge.data.model.EditedCustomScanner
-import io.github.chrisimx.scanbridge.model.DiscoveredScanner
-import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,9 +65,7 @@ data class StartupScreen(
         innerPadding: PaddingValues,
         navController: NavController,
         showCustomDialog: EditedCustomScanner?,
-        setShowCustomDialog: (EditedCustomScanner?) -> Unit,
-        statefulScannerMap: SnapshotStateMap<String, DiscoveredScanner>,
-        statefulScannerMapSecure: SnapshotStateMap<String, DiscoveredScanner>
+        setShowCustomDialog: (EditedCustomScanner?) -> Unit
     ) -> Unit
 )
 
@@ -85,31 +77,6 @@ val StartupScreenSaver = Saver<IndexedValue<StartupScreen>, Int>(save = { it.ind
 fun StartupScreen(navController: NavController) {
     var selectedScreen by rememberSaveable(stateSaver = StartupScreenSaver) { mutableStateOf(INDEXED_TABS.first()) }
     val unindexedSelectedScreen = selectedScreen.value
-
-    val context = LocalContext.current
-
-    val statefulScannerMap = remember { mutableStateMapOf<String, DiscoveredScanner>() }
-    val statefulScannerMapSecure = remember { mutableStateMapOf<String, DiscoveredScanner>() }
-
-    DisposableEffect(Unit) {
-        val discoveryPairOptional = startScannerDiscovery(context, statefulScannerMap, statefulScannerMapSecure)
-
-        if (discoveryPairOptional.isEmpty) {
-            return@DisposableEffect onDispose {
-                Timber.e("Couldn't start discovery")
-            }
-        }
-
-        val discoveryPair = discoveryPairOptional.get()
-
-        onDispose {
-            Timber.i("Discovery stopped")
-            for (d in discoveryPair.second) {
-                Timber.i("Stopping discovery for ${d.statefulScannerMap}")
-                discoveryPair.first.stopServiceDiscovery(d)
-            }
-        }
-    }
 
     var showCustomDialog: EditedCustomScanner? by remember { mutableStateOf(null) }
 
@@ -159,9 +126,7 @@ fun StartupScreen(navController: NavController) {
                 innerPadding,
                 navController,
                 showCustomDialog,
-                { showCustomDialog = it },
-                statefulScannerMap,
-                statefulScannerMapSecure
+                { showCustomDialog = it }
             )
         }
     }

@@ -41,8 +41,8 @@ android {
         applicationId = "io.github.chrisimx.scanbridge"
         minSdk = 28
         targetSdk = 36
-        versionCode = 2_001_004 // format is MAJ_MIN_PAT with always 3 digits
-        versionName = "2.1.4"
+        versionCode = 2_001_005 // we just count up for each build
+        versionName = "2.2.0-alpha1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments["escl_server_url"] =
@@ -76,8 +76,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         compose = true
@@ -87,7 +87,7 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_17
+        jvmTarget = JvmTarget.JVM_21
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
         freeCompilerArgs.add("-Xnon-local-break-continue")
     }
@@ -113,6 +113,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":composeUI"))
     implementation(libs.androidx.concurrent.futures)
+    implementation(libs.coil.fetcher.ktor)
 
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)

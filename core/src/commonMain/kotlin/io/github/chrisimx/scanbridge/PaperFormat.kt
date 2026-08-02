@@ -1,12 +1,17 @@
 package io.github.chrisimx.scanbridge
 
-import io.github.chrisimx.esclkt.LengthUnit
-import io.github.chrisimx.esclkt.Millimeters
-import io.github.chrisimx.esclkt.millimeters
+import io.github.chrisimx.anyscan.Area
+import io.github.chrisimx.anyscan.LengthUnit
+import io.github.chrisimx.anyscan.Millimeters
+import io.github.chrisimx.anyscan.millimeters
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
-data class PaperFormat(val name: String, val width: LengthUnit, val height: LengthUnit)
+data class PaperFormat(val name: String, val width: LengthUnit, val height: LengthUnit) {
+    @Transient
+    val area = Area(height, width)
+}
 
 fun loadDefaultFormats(): List<PaperFormat> {
     val defaultPaperFormats: MutableList<PaperFormat> = mutableListOf()

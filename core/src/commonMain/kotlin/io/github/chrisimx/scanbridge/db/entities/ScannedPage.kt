@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import io.github.chrisimx.esclkt.ScanSettings
+import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
 import kotlin.uuid.Uuid
 
@@ -31,7 +31,8 @@ data class ScannedPage(
     val scanId: Uuid,
     val ownerSessionId: Uuid,
     val filePath: String,
-    val originalScanSettings: ScanSettings,
+    val originalScanSettings: CommonScanSettings,
     val rotation: ScanRelativeRotation = ScanRelativeRotation.Original,
-    val orderIndex: Int
+    val orderIndex: Int,
+    val outputName: String? = null
 )

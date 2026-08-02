@@ -66,7 +66,7 @@
     <string name="rotating_page">Wird gedreht…</string>
     <string name="custom_scanner_desc">Auf einen benutzdefinierten Scanner zugreifen</string>
     <string name="connect">Verbinden</string>
-    <string name="url_escl_resource">URL (eSCL-Ressource)</string>
+    <string name="custom_scanner_url">URL</string>
     <string name="new_custom_scanner_dialog_title">Verbinden mit benutzerdefinierten Scanner</string>
     <string name="invalid_url">Ungültige URL</string>
     <string name="error_state_please_enter_an_url">Gib bitte eine URL ein</string>
@@ -117,9 +117,11 @@
     <string name="scanned_pages_received_in_bg">Gescannte Seiten werden im Hintergrund abgerufen.</string>
     <string name="color_mode">Farbmodus:</string>
     <string name="black_and_white">Schwarz-Weiß</string>
-    <string name="color_scan">Farbe ({bitdepth} bit)</string>
+    <string name="color_scan_24">Farbe (24 bit)</string>
+    <string name="color_scan_48">Farbe (48 bit)</string>
     <string name="auto_detect">Automatische Erkennung</string>
-    <string name="grayscale">Graustufen ({bitdepth} bit)</string>
+    <string name="grayscale_8">Graustufen (8 bit)</string>
+    <string name="grayscale_16">Graustufen (16 bit)</string>
     <string name="save">Speichern</string>
     <string name="edit_custom_scanner">Benutzerdefinierten Scanner bearbeiten</string>
     <string name="custom_scanner_deletion_confirmation">Willst du den benutzerdefinierten Scanner wirklich löschen? Dieser Vorgang ist unwiderruflich.</string>

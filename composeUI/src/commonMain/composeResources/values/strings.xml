@@ -119,11 +119,20 @@
     <string name="scan_job_running">Scan job running…</string>
     <string name="color_mode">Color Mode:</string>
     <string name="black_and_white"><![CDATA[Black & White]]></string>
-    <string name="color_scan">Color ({bitdepth} bit)</string>
+    <string name="color_scan_24">Color (24 bit)</string>
+    <string name="color_scan_48">Color (48 bit)</string>
     <string name="auto_detect">Automatic detection</string>
-    <string name="grayscale">Grayscale ({bitdepth} bit)</string>
+    <string name="grayscale_8">Grayscale (8 bit)</string>
+    <string name="grayscale_16">Grayscale (16 bit)</string>
     <string name="save">Save</string>
     <string name="edit_custom_scanner">Edit custom scanner</string>
     <string name="custom_scanner_deletion_confirmation">Do you really want to delete this custom scanner? This action cannot be undone.</string>
     <string name="custom_scanner_deletion">Delete custom scanner</string>
+    <string name="scan_intent_document">Document</string>
+    <string name="scan_intent_text_and_graphic"><![CDATA[Text & Graphics]]></string>
+    <string name="scan_intent_photo">Photo</string>
+    <string name="scan_intent_preview">Preview</string>
+    <string name="scan_intent_object">3D Object</string>
+    <string name="scan_intent_business_card">Business Card</string>
+    <string name="scanning_protocol">Protocol</string>
 </resources>

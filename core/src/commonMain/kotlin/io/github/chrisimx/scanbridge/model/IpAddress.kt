@@ -8,9 +8,9 @@ sealed interface IpAddress {
     val urlHost: String
         get() = text
 
-    class V4(
-        override val bytes: ByteArray,
-    ) : IpAddress {
+    fun isLinkLocal(): Boolean = false // TODO: Implement link local detection
+
+    class V4(override val bytes: ByteArray) : IpAddress {
         init {
             require(bytes.size == 4) {
                 "A IPv4 address needs to be 4 bytes long"
@@ -21,10 +21,7 @@ sealed interface IpAddress {
             get() = bytes.joinToString(".") { it.toUByte().toString() }
     }
 
-    class V6(
-        override val bytes: ByteArray,
-        val scopeId: String? = null
-    ) : IpAddress {
+    class V6(override val bytes: ByteArray, val scopeId: String? = null) : IpAddress {
         init {
             require(bytes.size == 16) {
                 "A IPv6 address needs to be 16 bytes long"

@@ -116,11 +116,13 @@
     <string name="scanned_pages_received_in_bg">Le pagine scansionate vengono recuperate in background.</string>
     <string name="color_mode">Modalità colore:</string>
     <string name="black_and_white">Bianco e nero</string>
-    <string name="color_scan">Colore ({bitdepth} bit)</string>
+    <string name="color_scan_48">Colore (48 bit)</string>
     <string name="auto_detect">Rilevamento automatico</string>
-    <string name="grayscale">Scala di grigi ({bitdepth} bit)</string>
+    <string name="grayscale_16">Scala di grigi (16 bit)</string>
     <string name="save">Salva</string>
     <string name="edit_custom_scanner">Modifica scanner personalizzato</string>
     <string name="custom_scanner_deletion_confirmation">Vuoi davvero eliminare lo scanner personalizzato? Questa operazione è irreversibile.</string>
     <string name="custom_scanner_deletion">Elimina scanner personalizzato</string>
+    <string name="color_scan_24">Colore (24 bit)</string>
+    <string name="grayscale_8">Scala di grigi (8 bit)</string>
 </resources>

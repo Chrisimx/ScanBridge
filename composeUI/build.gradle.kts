@@ -11,7 +11,7 @@ plugins {
 
 kotlin {
     jvm {
-        compilerOptions { jvmTarget = JvmTarget.JVM_17 }
+        compilerOptions { jvmTarget = JvmTarget.JVM_21 }
     }
 
     android {
@@ -22,7 +22,7 @@ kotlin {
 
         compilerOptions {
             jvmTarget.set(
-                org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+                org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
             )
         }
     }
@@ -35,6 +35,9 @@ kotlin {
             api(libs.compose.resources)
             api(libs.compose.ui.tooling.preview)
             api(libs.compose.material3)
+
+            api(libs.anyscanCore)
+            api(project(":core"))
         }
 
         commonTest.dependencies {

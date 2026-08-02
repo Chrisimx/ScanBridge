@@ -20,7 +20,6 @@
 package io.github.chrisimx.scanbridge
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -55,16 +54,18 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -93,6 +94,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
+import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.services.ScanJobEvent
 import io.github.chrisimx.scanbridge.uicomponents.ExportSettingsPopup
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
@@ -100,11 +102,13 @@ import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen
 import io.github.chrisimx.scanbridge.uicomponents.dialog.ConfirmCloseDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.DeletionDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
+import io.github.chrisimx.scanbridge.util.CustomSnackbarVisuals
+import io.github.chrisimx.scanbridge.util.SnackbarType
 import io.github.chrisimx.scanbridge.util.clearAndNavigateTo
 import io.github.chrisimx.scanbridge.util.snackBarError
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.toReadableString
-import io.ktor.http.Url
+import io.github.chrisimx.scanbridge.util.toUIInputSourceType
 import java.io.File
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
@@ -278,16 +282,15 @@ fun saveFile(context: Context, sourceFile: File, destUri: Uri) {
 @Composable
 fun ScanningScreen(
     scannerName: String,
-    scannerAddress: Url,
+    scannerHandle: ScannerHandle,
     navController: NavHostController,
     timeout: UInt,
     withDebug: Boolean,
     certificateValidationDisabled: Boolean,
     sessionID: Uuid,
-    application: Application,
     scanningViewModel: ScanningScreenViewModel = koinViewModel {
         parametersOf(
-            scannerAddress,
+            scannerHandle,
             timeout,
             withDebug,
             certificateValidationDisabled,
@@ -329,7 +332,10 @@ fun ScanningScreen(
         scanningViewModel.scanJobRepo.events.collect { event ->
             when (event) {
                 is ScanJobEvent.Completed -> scope.launch { pagerState.animateScrollToPage(scannedPages.size - 1) }
-                is ScanJobEvent.Failed -> snackbarErrorRetrievingPage(event.reason, scope, context, snackbarHostState)
+
+                // TODO: Localize this
+                is ScanJobEvent.Failed -> snackbarErrorRetrievingPage(event.error.unlocalizedMessage, scope, context, snackbarHostState)
+
                 is ScanJobEvent.Started -> scope.launch { pagerState.animateScrollToPage(scannedPages.size) }
             }
         }
@@ -388,19 +394,44 @@ fun ScanningScreen(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = {
             SnackbarHost(snackbarHostState) { data ->
+                val visuals = data.visuals as? CustomSnackbarVisuals
+                val type = visuals?.type ?: SnackbarType.DEFAULT
+
                 Snackbar(
                     modifier = Modifier.padding(20.dp),
-                    containerColor = if (data.visuals.message.contains("Error")) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        SnackbarDefaults.color
-                    },
+                    containerColor = type.containerColor,
+                    contentColor = type.contentColor,
+                    shape = RoundedCornerShape(16.dp),
                     action = {
-                        IconButton(
-                            onClick = { data.dismiss() },
-                            modifier = Modifier.testTag("snackbar_dismiss")
-                        ) {
-                            Icon(Icons.Default.Close, contentDescription = "Dismiss")
+                        Row {
+                            val actionLabel = visuals?.actionLabel
+                            if (actionLabel != null) {
+                                Button(
+                                    onClick = { data.performAction() },
+                                    colors = ButtonColors(
+                                        type.containerColor,
+                                        type.contentColor,
+                                        type.containerColor,
+                                        type.contentColor
+                                    ),
+                                    modifier = Modifier.testTag("snackbar_perform_action")
+                                ) {
+                                    Text(actionLabel)
+                                }
+                            }
+
+                            IconButton(
+                                onClick = { data.dismiss() },
+                                colors = IconButtonColors(
+                                    type.containerColor,
+                                    type.contentColor,
+                                    type.containerColor,
+                                    type.contentColor
+                                ),
+                                modifier = Modifier.testTag("snackbar_dismiss")
+                            ) {
+                                Icon(Icons.Default.Close, contentDescription = "Dismiss")
+                            }
                         }
                     }
                 ) {
@@ -643,9 +674,7 @@ fun ScanContent(
 
             if (currentPages.size > pagerState.currentPage) {
                 Text(
-                    currentPage?.originalScanSettings?.inputSource?.toReadableString(
-                        context
-                    ).toString()
+                    currentPage?.originalScanSettings?.inputSource?.toUIInputSourceType()?.toReadableString().toString()
                 )
             }
         }

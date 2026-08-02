@@ -1,18 +1,18 @@
 package io.github.chrisimx.scanbridge.data.model
 
+import io.github.chrisimx.anyscan.LengthUnit
+import io.github.chrisimx.anyscan.millimeters
 import io.github.chrisimx.esclkt.BinaryRendering
 import io.github.chrisimx.esclkt.CcdChannelEnumOrRaw
-import io.github.chrisimx.esclkt.ColorModeEnumOrRaw
 import io.github.chrisimx.esclkt.ContentTypeEnumOrRaw
+import io.github.chrisimx.esclkt.EsclColorModeEnumOrRaw
+import io.github.chrisimx.esclkt.EsclScanIntentEnumOrRaw
 import io.github.chrisimx.esclkt.FeedDirection
 import io.github.chrisimx.esclkt.InputSource
 import io.github.chrisimx.esclkt.InputSourceCaps
-import io.github.chrisimx.esclkt.LengthUnit
-import io.github.chrisimx.esclkt.ScanIntentEnumOrRaw
 import io.github.chrisimx.esclkt.ScanRegion
 import io.github.chrisimx.esclkt.ScanRegions
 import io.github.chrisimx.esclkt.ScanSettings
-import io.github.chrisimx.esclkt.millimeters
 import io.github.chrisimx.scanbridge.util.toDoubleLocalized
 import kotlinx.serialization.Serializable
 
@@ -28,18 +28,18 @@ data class StatelessImmutableScanRegion(
     fun toESCLScanRegion(selectedInputSourceCaps: InputSourceCaps): ScanRegion {
         val height: LengthUnit = when (height) {
             "max" -> selectedInputSourceCaps.maxHeight
-            else -> height.toDoubleLocalized().millimeters()
+            else -> height.toDoubleLocalized()!!.millimeters()
         }
         val width: LengthUnit = when (width) {
             "max" -> selectedInputSourceCaps.maxWidth
-            else -> width.toDoubleLocalized().millimeters()
+            else -> width.toDoubleLocalized()!!.millimeters()
         }
 
         return ScanRegion(
             height.toThreeHundredthsOfInch(),
             width.toThreeHundredthsOfInch(),
-            xOffset.toDoubleLocalized().millimeters().toThreeHundredthsOfInch(),
-            yOffset.toDoubleLocalized().millimeters().toThreeHundredthsOfInch()
+            xOffset.toDoubleLocalized()!!.millimeters().toThreeHundredthsOfInch(),
+            yOffset.toDoubleLocalized()!!.millimeters().toThreeHundredthsOfInch()
         )
     }
 }
@@ -47,14 +47,14 @@ data class StatelessImmutableScanRegion(
 @Serializable
 data class StatelessImmutableESCLScanSettingsState(
     val version: String,
-    val intent: ScanIntentEnumOrRaw?,
+    val intent: EsclScanIntentEnumOrRaw?,
     val scanRegions: StatelessImmutableScanRegion?,
     val documentFormatExt: String?,
     val contentType: ContentTypeEnumOrRaw?,
     val inputSource: InputSource?,
     val xResolution: UInt,
     val yResolution: UInt,
-    val colorMode: ColorModeEnumOrRaw?,
+    val colorMode: EsclColorModeEnumOrRaw?,
     val colorSpace: String?,
     val mediaType: String?,
     val ccdChannel: CcdChannelEnumOrRaw?,

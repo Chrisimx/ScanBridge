@@ -1,6 +1,7 @@
 package io.github.chrisimx.scanbridge.services
 
 import io.github.chrisimx.scanbridge.model.ScanJob
+import io.github.chrisimx.scanbridge.model.ScanningError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
@@ -17,7 +18,7 @@ import timber.log.Timber
 
 sealed class ScanJobEvent {
     data class Completed(val job: ScanJob) : ScanJobEvent()
-    data class Failed(val job: ScanJob, val reason: String) : ScanJobEvent()
+    data class Failed(val job: ScanJob, val error: ScanningError) : ScanJobEvent()
     data class Started(val job: ScanJob) : ScanJobEvent()
 }
 
@@ -89,10 +90,10 @@ class ScanJobRepository {
     /**
      * Notify that a job failed
      */
-    fun notifyFailed(job: ScanJob, reason: String) {
-        Timber.d("notifyFailed($job, $reason)")
+    fun notifyFailed(job: ScanJob, error: ScanningError) {
+        Timber.d("notifyFailed($job, $error)")
         coroutineScope.launch {
-            _events.emit(ScanJobEvent.Failed(job, reason))
+            _events.emit(ScanJobEvent.Failed(job, error))
         }
     }
 

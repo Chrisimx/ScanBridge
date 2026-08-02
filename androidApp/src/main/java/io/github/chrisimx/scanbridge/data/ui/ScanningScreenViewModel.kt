@@ -37,41 +37,35 @@ import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Image
-import io.github.chrisimx.esclkt.ESCLRequestClient
-import io.github.chrisimx.esclkt.InputSource
-import io.github.chrisimx.esclkt.ScanRegion
-import io.github.chrisimx.esclkt.ScanSettings
-import io.github.chrisimx.esclkt.ScannerCapabilities
-import io.github.chrisimx.esclkt.getInputSourceCaps
-import io.github.chrisimx.esclkt.getInputSourceOptions
-import io.github.chrisimx.esclkt.inches
-import io.github.chrisimx.esclkt.millimeters
-import io.github.chrisimx.esclkt.scanRegion
-import io.github.chrisimx.esclkt.threeHundredthsOfInch
+import io.github.chrisimx.anyscan.CommonScanSettings
+import io.github.chrisimx.anyscan.CommonScanSettingsEditor
+import io.github.chrisimx.anyscan.CommonScannerCapabilities
+import io.github.chrisimx.anyscan.ScanSettingsMap
+import io.github.chrisimx.anyscan.ScannerConcept
+import io.github.chrisimx.anyscan.inches
 import io.github.chrisimx.scanbridge.R
-import io.github.chrisimx.scanbridge.androidservice.ScanJobForegroundService
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
-import io.github.chrisimx.scanbridge.model.HttpClientConfig
-import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
-import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableData
+import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
+import io.github.chrisimx.scanbridge.model.ScannerHandle
+import io.github.chrisimx.scanbridge.model.scannerCapabilities
 import io.github.chrisimx.scanbridge.model.toggleRotation
-import io.github.chrisimx.scanbridge.ports.HttpClientFactory
+import io.github.chrisimx.scanbridge.ports.InitialScanSettingsProvider
+import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
+import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
 import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
 import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
-import io.github.chrisimx.scanbridge.util.calculateDefaultESCLScanSettingsState
+import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import io.github.chrisimx.scanbridge.util.getEditedImageName
-import io.github.chrisimx.scanbridge.util.getMaxResolution
 import io.github.chrisimx.scanbridge.util.rotateBy90
 import io.github.chrisimx.scanbridge.util.saveAsJPEG
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.util.zipFiles
-import io.ktor.http.Url
 import java.io.File
 import java.nio.file.Files
 import java.time.LocalDateTime
@@ -80,8 +74,10 @@ import kotlin.io.path.Path
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -104,7 +100,7 @@ enum class ScanningScreenEvent {
 
 class ScanningScreenViewModel(
     @InjectedParam
-    val address: Url,
+    val scannerHandle: ScannerHandle,
     @InjectedParam
     val timeout: UInt,
     @InjectedParam
@@ -116,7 +112,8 @@ class ScanningScreenViewModel(
     val db: ScanBridgeDb,
     application: Application,
     val scanJobRepo: ScanJobRepository,
-    val httpClientFactory: HttpClientFactory
+    val initialScanSettingsProvider: InitialScanSettingsProvider,
+    val startScanUseCase: StartScanUseCase
 ) : AndroidViewModel(application) {
     private val _scanningScreenData =
         ScanningScreenData(
@@ -283,40 +280,57 @@ class ScanningScreenViewModel(
         }
     }
 
-    suspend fun saveUpdatedScanSettingsUiData(newData: ScanSettingsEnterableData?) {
+    suspend fun saveUpdatedScanSettingsUiData(newData: ScanSettingsEnterableDataV1?) {
         Timber.d("Settings ui data updated $newData")
         sessionDao.updateScanSettingsUiData(sessionID, newData)
     }
 
-    suspend fun setScannerCapabilities(caps: ScannerCapabilities) {
+    suspend fun setScannerCapabilities(caps: CommonScannerCapabilities) {
         _scanningScreenData.capabilities.value = caps
         val storedSession = sessionDao.getSessionById(sessionID)
 
         Timber.d("Stored session: $storedSession")
 
-        val updateSettings: suspend (ScanSettings.() -> ScanSettings) -> Unit = { lambda ->
+        val updateSettings: suspend (CommonScanSettingsEditor.() -> Unit) -> Unit = { edit ->
             db.useWriterConnection {
                 it.immediateTransaction {
-                    val oldSession = sessionDao.getSessionById(sessionID) ?: return@immediateTransaction
-                    val newSession = oldSession.copy(
-                        currentScanSettings = oldSession.currentScanSettings?.lambda()
+                    val oldSession = sessionDao.getSessionById(sessionID)
+                        ?: return@immediateTransaction
+
+                    val oldSettings = oldSession.currentScanSettings
+                        ?: CommonScanSettings(
+                            setting = ScanSettingsMap.empty()
+                        )
+
+                    val editor = CommonScanSettingsEditor(
+                        capabilities = _scanningScreenData.capabilities.value!!,
+                        initial = oldSettings
                     )
-                    Timber.d("Settings updated ${newSession.currentScanSettings}")
+
+                    editor.edit()
+
+                    val newSettings = editor.build()
+
+                    val newSession = oldSession.copy(
+                        currentScanSettings = newSettings
+                    )
+
+                    Timber.d("Settings updated $newSettings")
+
                     sessionDao.update(newSession)
                 }
             }
         }
 
-        val defaultScanSettingsUIData = ScanSettingsEnterableData(
-            caps
-        )
+        val defaultScanSettingsUIData = ScanSettingsEnterableDataV1()
 
         if (storedSession != null) {
             _scanningScreenData.scanSettingsVM.value = getKoin().get {
                 parametersOf(
+                    MutableStateFlow(caps).asStateFlow(),
                     session.map { it?.currentScanSettings ?: storedSession.currentScanSettings }
                         .stateIn(viewModelScope, SharingStarted.Lazily, storedSession.currentScanSettings),
-                    storedSession.currentSettingsUIData?.copy(capabilities = caps) ?: defaultScanSettingsUIData,
+                    storedSession.currentSettingsUIData?.copy() ?: defaultScanSettingsUIData,
                     updateSettings,
                     viewModelScope
                 )
@@ -326,118 +340,30 @@ class ScanningScreenViewModel(
             val savedSettingsPair = DefaultScanSettingsStore.load(application.applicationContext)
             val (savedSettings, savedSettingsUiState) = savedSettingsPair
             val initialSettings = if (savedSettings != null) {
-                try {
-                    // Validate that the saved input source is still supported
-                    val supportedInputSources = caps.getInputSourceOptions()
-                    val validatedInputSource = if (savedSettings.inputSource != null &&
-                        !supportedInputSources.contains(savedSettings.inputSource)
-                    ) {
-                        val fallbackInputSource = supportedInputSources.firstOrNull() ?: InputSource.Platen
-                        Timber.w(
-                            "Saved input source ${savedSettings.inputSource} not supported by current scanner," +
-                                " falling back to default $fallbackInputSource"
-                        )
-                        fallbackInputSource
-                    } else {
-                        savedSettings.inputSource
-                    }
-
-                    // Validate duplex setting - only allow if ADF supports duplex
-                    val duplex = if (savedSettings.duplex == true &&
-                        (savedSettings.inputSource != InputSource.Feeder || caps.adf?.duplexCaps == null)
-                    ) {
-                        Timber.w("Duplex not supported with current input source, disabling duplex")
-                        false
-                    } else {
-                        savedSettings.duplex
-                    }
-
-                    val selectedInputSourceCaps = caps.getInputSourceCaps(
-                        validatedInputSource ?: caps.getInputSourceOptions().first(),
-                        duplex ?: false
-                    )
-
-                    val intent = if (savedSettings.intent != null &&
-                        !selectedInputSourceCaps.supportedIntents.contains(savedSettings.intent)
-                    ) {
-                        val firstSupportedIntent = selectedInputSourceCaps.supportedIntents.first()
-                        Timber.w(
-                            "Intent not supported with current input source," +
-                                " using first supported intent: $firstSupportedIntent"
-                        )
-                        firstSupportedIntent
-                    } else {
-                        savedSettings.intent
-                    }
-
-                    val savedScanRegion = savedSettings.scanRegions?.regions?.firstOrNull()
-                    val scanRegion = if (savedScanRegion != null) {
-                        Timber.d("There is a saved scan region: $savedScanRegion")
-                        val storedWidthThreeHOfInch = savedScanRegion.width.value
-                        val storedHeightThreeHOfInch = savedScanRegion.height.value
-
-                        // Calculate max/min lengths with tolerances
-                        val tolerance = 3
-
-                        val realMaxWidth = selectedInputSourceCaps.maxWidth.toThreeHundredthsOfInch().value.toInt()
-                        val realMinWidth = selectedInputSourceCaps.minWidth.toThreeHundredthsOfInch().value.toInt()
-                        val realMaxHeight = selectedInputSourceCaps.maxHeight.toThreeHundredthsOfInch().value.toInt()
-                        val realMinHeight = selectedInputSourceCaps.minHeight.toThreeHundredthsOfInch().value.toInt()
-
-                        val minWidth = (realMinWidth - tolerance).coerceAtLeast(0)
-                        val maxWidth = realMaxWidth + tolerance
-
-                        val minHeight = (realMinHeight - tolerance).coerceAtLeast(0)
-                        val maxHeight = realMaxHeight + tolerance
-
-                        val width = storedWidthThreeHOfInch.toInt()
-                            .coerceIn(minWidth..maxWidth)
-                            .toUInt()
-
-                        val height = storedHeightThreeHOfInch.toInt()
-                            .coerceIn(minHeight..maxHeight)
-                            .toUInt()
-
-                        val xOffset = savedScanRegion.xOffset
-                        val yOffset = savedScanRegion.yOffset
-                        val coercedScanRegion = scanRegion(selectedInputSourceCaps) {
-                            this.width = width.threeHundredthsOfInch()
-                            this.height = height.threeHundredthsOfInch()
-                            this.xOffset = xOffset
-                            this.yOffset = yOffset
-                        }
-                        Timber.d(
-                            "After coercing we have the scan region: $coercedScanRegion " +
-                                "(maxWidth: $maxWidth, minWidth: $minWidth, maxHeight: $maxHeight, minHeight: $minHeight)"
-                        )
-                        coercedScanRegion
-                    } else {
-                        null
-                    }
-
-                    val validatedSettings = savedSettings.copy(
-                        inputSource = validatedInputSource,
-                        duplex = duplex,
-                        intent = intent,
-                        scanRegions = scanRegion
-                    )
-
-                    validatedSettings
-                } catch (e: Exception) {
-                    Timber.e(e, "Error applying saved settings, using defaults")
-                    caps.calculateDefaultESCLScanSettingsState()
-                }
+                val editor = CommonScanSettingsEditor(
+                    caps,
+                    savedSettings
+                )
+                editor.build()
             } else {
-                caps.calculateDefaultESCLScanSettingsState()
+                val editor = CommonScanSettingsEditor(
+                    caps,
+                    CommonScanSettings(setting = ScanSettingsMap.empty())
+                )
+                initialScanSettingsProvider.applyDefaults(editor, caps)
+                editor.build()
             }
+
+            val savedSettingsUiStateWithCaps = savedSettingsUiState?.copy()
 
             sessionDao.insertAll(Session(sessionID, initialSettings, savedSettingsUiState))
 
             _scanningScreenData.scanSettingsVM.value = getKoin().get {
                 parametersOf(
+                    MutableStateFlow(caps).asStateFlow(),
                     session.map { it?.currentScanSettings ?: initialSettings }
                         .stateIn(viewModelScope, SharingStarted.Lazily, initialSettings),
-                    savedSettingsUiState ?: defaultScanSettingsUIData,
+                    savedSettingsUiStateWithCaps ?: defaultScanSettingsUIData,
                     updateSettings,
                     viewModelScope
                 )
@@ -470,7 +396,7 @@ class ScanningScreenViewModel(
             val currentSettings = session.value?.currentScanSettings
 
             if (currentSettings == null) {
-                Timber.e("Could not start scan job. Current scan setttings null")
+                Timber.e("Could not start scan job. Current scan settings null")
                 return@launch
             }
 
@@ -486,20 +412,12 @@ class ScanningScreenViewModel(
                 return@launch
             }
 
-            val scanJob = ScanJob(
-                Uuid.generateV4(),
-                sessionID,
-                currentSettings,
-                address,
-                HttpClientConfig(
-                    certificateValidationDisabled,
-                    withDebugInterceptor,
-                    timeout.toULong()
-                ),
-                scanningScreenData.capabilities?.makeAndModel
+            startScanUseCase.startScan(
+                ownerSessionId = sessionID,
+                scannerHandle = scannerHandle,
+                scanSettings = currentSettings,
+                connectionSettings = scannerConnectionSettings()
             )
-            scanJobRepo.enqueue(scanJob)
-            ScanJobForegroundService.startService(application)
         }
     }
 
@@ -594,23 +512,22 @@ class ScanningScreenViewModel(
                 PdfDocument(writer).use { pdf ->
                     Document(pdf).use { document ->
                         chunk.forEachIndexed { i, scan ->
-                            val scanRegion =
-                                scan.originalScanSettings.scanRegions?.regions?.first() ?: ScanRegion(
-                                    297.millimeters().toThreeHundredthsOfInch(),
-                                    210.millimeters().toThreeHundredthsOfInch(),
-                                    0.threeHundredthsOfInch(),
-                                    0.threeHundredthsOfInch()
-                                )
-
                             val imageData = ImageDataFactory.create(scan.filePath)
 
                             val rotated = scan.rotation == ScanRelativeRotation.Rotated
 
-                            val inputSource = scan.originalScanSettings.inputSource ?: InputSource.Platen
+                            val fallbackInputSourceCaps = scannerCaps.inputSources.first()
 
-                            val fallbackResolution = scannerCaps.getMaxResolution(inputSource)
-                            val scannerXResolution = scan.originalScanSettings.xResolution ?: fallbackResolution.xResolution
-                            val scannerYResolution = scan.originalScanSettings.yResolution ?: fallbackResolution.yResolution
+                            val fallbackResolution = fallbackInputSourceCaps
+                                .furtherOptions[ScannerConcept.ScanResolution]!!
+                                .defaultValue
+
+                            val originalSettingsMap = scan.originalScanSettings.setting
+
+                            val scanResolution = originalSettingsMap[ScannerConcept.ScanResolution] ?: fallbackResolution
+
+                            val scannerXResolution = scanResolution.value.widthDPI
+                            val scannerYResolution = scanResolution.value.heightDPI
 
                             val rotationCorrectedXRes = if (rotated) scannerYResolution else scannerXResolution
                             val rotationCorrectedYRes = if (rotated) scannerXResolution else scannerYResolution
@@ -726,6 +643,7 @@ class ScanningScreenViewModel(
                 zipOutputFile,
                 {
                     counter++
+                    // TODO: This will never work correctly because extension is always empty
                     "scan-${counter.toString().padStart(digitsNeeded, '0')}.${it.extension}"
                 }
             )
@@ -753,29 +671,24 @@ class ScanningScreenViewModel(
         }
     }
 
-    fun createHttpClientConfig() = HttpClientConfig(
+    fun scannerConnectionSettings() = ScannerConnectionSettings(
+        timeout.toULong(),
+        timeout.toULong(),
         certificateValidationDisabled,
-        withDebugInterceptor,
-        timeout.toULong()
+        withDebugInterceptor
     )
 
     fun retrieveScannerCapabilities() = viewModelScope.launch {
-        val httpClient = httpClientFactory.create(
-            createHttpClientConfig()
-        )
-        val esclClient = ESCLRequestClient(
-            address,
-            httpClient
-        )
+        val connectionSettings = scannerConnectionSettings()
 
-        val scannerCapabilitiesResult = esclClient.getScannerCapabilities()
+        val scannerCapabilities = scannerHandle.scannerCapabilities(connectionSettings)
 
-        if (scannerCapabilitiesResult !is ESCLRequestClient.ScannerCapabilitiesResult.Success) {
-            Timber.e("Error while retrieving ScannerCapabilities: $scannerCapabilitiesResult")
-            setError("$scannerCapabilitiesResult")
+        if (scannerCapabilities !is ScannerCapabilitiesResult.Success) {
+            Timber.e("Error while retrieving ScannerCapabilities: $scannerCapabilities")
+            setError("$scannerCapabilities")
             return@launch
         }
 
-        setScannerCapabilities(scannerCapabilitiesResult.scannerCapabilities)
+        setScannerCapabilities(scannerCapabilities.scannerCapabilities)
     }
 }

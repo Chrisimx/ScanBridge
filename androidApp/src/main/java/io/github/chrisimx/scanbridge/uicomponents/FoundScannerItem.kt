@@ -33,24 +33,57 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil3.ImageLoader
+import coil3.compose.AsyncImage
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.ScannerRoute
 import java.util.*
 import kotlin.uuid.Uuid
+import org.koin.compose.koinInject
+import org.koin.core.qualifier.named
 import timber.log.Timber
 
 @Composable
+fun tintedPainterResource(id: Int, tint: Color): Painter {
+    val basePainter = painterResource(id)
+
+    return remember(basePainter, tint) {
+        object : Painter() {
+            override val intrinsicSize: Size
+                get() = basePainter.intrinsicSize
+
+            override fun DrawScope.onDraw() {
+                with(basePainter) {
+                    draw(
+                        size = size,
+                        colorFilter = ColorFilter.tint(tint)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun FoundScannerItem(
+    scannerHandleString: String,
+    protocolIdentifier: String,
     name: String,
-    address: String,
+    iconUrl: String?,
     navController: NavController,
     deleteScanner: (() -> Unit)? = null,
     editScanner: (() -> Unit)? = null
@@ -62,7 +95,14 @@ fun FoundScannerItem(
             .padding(10.dp),
         onClick = {
             val sessionID = Uuid.random()
-            navController.navigate(route = ScannerRoute(name, address, sessionID.toString()))
+            navController.navigate(
+                route = ScannerRoute(
+                    name,
+                    scannerHandleString,
+                    protocolIdentifier,
+                    sessionID.toString()
+                )
+            )
         }
     ) {
         Row(
@@ -71,14 +111,42 @@ fun FoundScannerItem(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(17.dp),
-                painter = painterResource(R.drawable.round_print_36),
-                tint = MaterialTheme.colorScheme.surfaceTint,
-                contentDescription = stringResource(id = R.string.print_symbol_desc)
+            val tintedPlaceholder = tintedPainterResource(
+                R.drawable.round_print_36,
+                MaterialTheme.colorScheme.surfaceTint
             )
+
+            val imageLoader: ImageLoader = koinInject(
+                qualifier = named("scannerIconImageLoader")
+            )
+
+            if (iconUrl != null) {
+                AsyncImage(
+                    model = iconUrl.toString(),
+                    contentDescription = stringResource(id = R.string.print_symbol_desc),
+                    imageLoader = imageLoader,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(17.dp),
+                    placeholder = tintedPlaceholder,
+                    error = tintedPlaceholder,
+                    onError = { result ->
+                        val throwable = result.result.throwable
+                        throwable.printStackTrace()
+
+                        println("Coil image load failed: ${throwable.message}")
+                    }
+                )
+            } else {
+                Icon(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(17.dp),
+                    painter = painterResource(R.drawable.round_print_36),
+                    tint = MaterialTheme.colorScheme.surfaceTint,
+                    contentDescription = stringResource(id = R.string.print_symbol_desc)
+                )
+            }
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -93,7 +161,7 @@ fun FoundScannerItem(
                     )
                 }
                 Text(
-                    address,
+                    "$scannerHandleString ($protocolIdentifier)",
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -102,7 +170,7 @@ fun FoundScannerItem(
                     modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
                     onClick = {
                         editScanner.invoke()
-                        Timber.i("Edit button clicked for custom scanner: $name at $address")
+                        Timber.i("Edit button clicked for custom scanner: $name at $scannerHandleString")
                     }
                 ) {
                     Icon(
@@ -115,7 +183,7 @@ fun FoundScannerItem(
                     modifier = Modifier.padding(end = 8.dp, top = 8.dp, bottom = 8.dp),
                     onClick = {
                         deleteScanner.invoke()
-                        Timber.i("Delete button clicked for custom scanner: $name at $address")
+                        Timber.i("Delete button clicked for custom scanner: $name at $scannerHandleString")
                     }
                 ) {
                     Icon(

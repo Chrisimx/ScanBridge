@@ -16,8 +16,10 @@ import io.github.chrisimx.scanbridge.db.entities.LastRoute
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
+import io.github.chrisimx.scanbridge.db.typeconverters.CommonScanSettingsTypeConverter
 import io.github.chrisimx.scanbridge.db.typeconverters.ScanSettingsTypeConverter
-import io.github.chrisimx.scanbridge.db.typeconverters.ScanSettingsUiDataTypeConverter
+import io.github.chrisimx.scanbridge.db.typeconverters.ScanSettingsUiDataTypeConverterV0
+import io.github.chrisimx.scanbridge.db.typeconverters.ScanSettingsUiDataTypeConverterV1
 import io.github.chrisimx.scanbridge.db.typeconverters.UrlTypeConverter
 import io.github.chrisimx.scanbridge.db.typeconverters.UuidTypeConverter
 
@@ -25,7 +27,7 @@ import io.github.chrisimx.scanbridge.db.typeconverters.UuidTypeConverter
     entities = [
         CustomScanner::class, ScannedPage::class, Session::class, TempFile::class, LastRoute::class, ExecutedMigrationToRoom::class
     ],
-    version = 4,
+    version = 5,
     autoMigrations = [
         AutoMigration(
             from = 1,
@@ -38,6 +40,10 @@ import io.github.chrisimx.scanbridge.db.typeconverters.UuidTypeConverter
         AutoMigration(
             from = 3,
             to = 4
+        ),
+        AutoMigration(
+            from = 4,
+            to = 5
         )
     ]
 )
@@ -45,7 +51,10 @@ import io.github.chrisimx.scanbridge.db.typeconverters.UuidTypeConverter
     UuidTypeConverter::class,
     UrlTypeConverter::class,
     ScanSettingsTypeConverter::class,
-    ScanSettingsUiDataTypeConverter::class
+    CommonScanSettingsTypeConverter::class,
+    ScanSettingsUiDataTypeConverterV0::class,
+    ScanSettingsUiDataTypeConverterV1::class,
+    CommonScanSettingsTypeConverter::class
 )
 abstract class ScanBridgeDb : RoomDatabase() {
     abstract fun customScannerDao(): CustomScannerDao
