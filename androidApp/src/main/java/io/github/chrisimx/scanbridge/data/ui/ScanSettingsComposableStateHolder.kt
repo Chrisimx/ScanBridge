@@ -262,6 +262,7 @@ class ScanSettingsComposableStateHolder(
             updateSettings {
                 val newInputSource = when (inputSource) {
                     UIInputSourceType.PLATEN -> CommonInputSourceType.PLATEN
+
                     UIInputSourceType.ADF -> if (this.inputSource == CommonInputSourceType.ADF_DUPLEX) {
                         CommonInputSourceType.ADF_DUPLEX
                     } else {

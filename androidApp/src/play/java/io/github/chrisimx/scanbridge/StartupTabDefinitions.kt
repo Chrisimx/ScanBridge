@@ -20,7 +20,7 @@ val STARTUP_TABS = listOf(
                 innerPadding,
                 navController,
                 showCustomDialog,
-                setShowCustomDialog,
+                setShowCustomDialog
             )
         }
     ),
