@@ -114,8 +114,8 @@ val appModule = module {
     factory<AndroidMdnsDiscoverService>() bind MdnsDiscoverService::class
     single<DatastoreLastRouteRepository>()
     single<RoomLastRouteRepository>() bind LastRouteRepository::class
-    single<DatastoreShownMessagesRepository> { (scope: CoroutineScope) ->
-        DatastoreShownMessagesRepository(get(named<ShownMessages>()), scope)
+    single<DatastoreShownMessagesRepository> {
+        DatastoreShownMessagesRepository(get(named<ShownMessages>()))
     } bind ShownMessagesRepository::class
     single<KoinBasedScanningProtocolManager>() bind ScanningProtocolManager::class
     single<DefaultInitialScanSettingsProvider>() bind InitialScanSettingsProvider::class

@@ -46,7 +46,6 @@ import io.github.chrisimx.scanbridge.uicomponents.CrashFileHandler
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.koin.compose.koinInject
-import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 
 @Composable
@@ -60,9 +59,7 @@ fun ScanBridgeApp() {
         val typedRoute = currentBackStackEntry?.toTypedRoute()
 
         val lastRouteRepository = koinInject<LastRouteRepository>()
-        val shownMessagesRepository = koinInject<ShownMessagesRepository> {
-            parametersOf(coroutineScope)
-        }
+        val shownMessagesRepository = koinInject<ShownMessagesRepository>()
 
         val thanksForPurchaseAlreadyShown by shownMessagesRepository
             .getWasShownFlow(UserInformationMessage.THANKS_FOR_PURCHASE)

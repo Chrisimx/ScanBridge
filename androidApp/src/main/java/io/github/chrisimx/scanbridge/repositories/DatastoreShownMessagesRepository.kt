@@ -6,16 +6,10 @@ import io.github.chrisimx.scanbridge.ShownMessagesRepository
 import io.github.chrisimx.scanbridge.UserInformationMessage
 import io.github.chrisimx.scanbridge.proto.ShownMessages
 import io.github.chrisimx.scanbridge.proto.copy
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.koin.core.annotation.InjectedParam
 
-class DatastoreShownMessagesRepository(
-    val shownMessagesDataStore: DataStore<ShownMessages>,
-    @InjectedParam
-    val coroutineScope: CoroutineScope
-) : ShownMessagesRepository {
+class DatastoreShownMessagesRepository(val shownMessagesDataStore: DataStore<ShownMessages>) : ShownMessagesRepository {
     override fun getWasShownFlow(message: UserInformationMessage): Flow<Boolean> = shownMessagesDataStore.data.map {
         (BuildConfig.FLAVOR != "play" && message.playOnly) || !when (message) {
             UserInformationMessage.THANKS_FOR_PURCHASE -> it.thankPlayOne
