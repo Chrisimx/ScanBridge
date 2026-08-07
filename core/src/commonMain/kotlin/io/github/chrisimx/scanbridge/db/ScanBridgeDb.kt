@@ -9,12 +9,14 @@ import io.github.chrisimx.scanbridge.db.daos.ExecutedMigrationsDao
 import io.github.chrisimx.scanbridge.db.daos.LastRouteDao
 import io.github.chrisimx.scanbridge.db.daos.ScannedPageDao
 import io.github.chrisimx.scanbridge.db.daos.SessionDao
+import io.github.chrisimx.scanbridge.db.daos.ShownStartupMessageDao
 import io.github.chrisimx.scanbridge.db.daos.TempFileDao
 import io.github.chrisimx.scanbridge.db.entities.CustomScanner
 import io.github.chrisimx.scanbridge.db.entities.ExecutedMigrationToRoom
 import io.github.chrisimx.scanbridge.db.entities.LastRoute
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
+import io.github.chrisimx.scanbridge.db.entities.ShownStartupMessage
 import io.github.chrisimx.scanbridge.db.entities.TempFile
 import io.github.chrisimx.scanbridge.db.typeconverters.CommonScanSettingsTypeConverter
 import io.github.chrisimx.scanbridge.db.typeconverters.ScanSettingsTypeConverter
@@ -25,9 +27,12 @@ import io.github.chrisimx.scanbridge.db.typeconverters.UuidTypeConverter
 
 @Database(
     entities = [
-        CustomScanner::class, ScannedPage::class, Session::class, TempFile::class, LastRoute::class, ExecutedMigrationToRoom::class
+        CustomScanner::class, ScannedPage::class,
+        Session::class, TempFile::class,
+        LastRoute::class, ExecutedMigrationToRoom::class,
+        ShownStartupMessage::class
     ],
-    version = 5,
+    version = 6,
     autoMigrations = [
         AutoMigration(
             from = 1,
@@ -40,10 +45,6 @@ import io.github.chrisimx.scanbridge.db.typeconverters.UuidTypeConverter
         AutoMigration(
             from = 3,
             to = 4
-        ),
-        AutoMigration(
-            from = 4,
-            to = 5
         )
     ]
 )
@@ -63,4 +64,5 @@ abstract class ScanBridgeDb : RoomDatabase() {
     abstract fun tmpFileDao(): TempFileDao
     abstract fun lastRouteDao(): LastRouteDao
     abstract fun executedMigrationsDao(): ExecutedMigrationsDao
+    abstract fun shownStartupMessageDao(): ShownStartupMessageDao
 }

@@ -7,7 +7,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.plugin.module.dsl.single
 
-val scanProtocols = module {
+val SCAN_PROTOCOLS = module {
     single<EsclScanningProtocol>() bind ScanningProtocol::class
     single<WsdScanningProtocol>() bind ScanningProtocol::class
 }

@@ -11,6 +11,7 @@ import coil3.ImageLoader
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import io.github.chrisimx.scanbridge.adapters.KoinBasedScanningProtocolManager
 import io.github.chrisimx.scanbridge.adapters.RoomBackedCustomScannerRepository
+import io.github.chrisimx.scanbridge.buildinfo.BuildInfoProvider
 import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.datastore.appSettingsStore
@@ -19,6 +20,7 @@ import io.github.chrisimx.scanbridge.db.DefaultScanBridgeDbFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbBuilderFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbFactory
+import io.github.chrisimx.scanbridge.db.migrations.ROOM_MIGRATIONS
 import io.github.chrisimx.scanbridge.infrastructure.KmLogScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.migrations.MigrationExecutor
 import io.github.chrisimx.scanbridge.migrations.RoomBackedMigrationExecutor
@@ -44,6 +46,8 @@ import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
 import io.github.chrisimx.scanbridge.services.DebugLogService
 import io.github.chrisimx.scanbridge.services.FileDebugLogService
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
+import io.github.chrisimx.scanbridge.startupmessages.RoomShownStartupMessagesRepository
+import io.github.chrisimx.scanbridge.startupmessages.ShownStartupMessagesRepository
 import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
@@ -114,9 +118,13 @@ val appModule = module {
     factory<AndroidMdnsDiscoverService>() bind MdnsDiscoverService::class
     single<DatastoreLastRouteRepository>()
     single<RoomLastRouteRepository>() bind LastRouteRepository::class
-    single<DatastoreShownMessagesRepository> {
-        DatastoreShownMessagesRepository(get(named<ShownMessages>()))
-    } bind ShownMessagesRepository::class
+    single<DatastoreShownMessagesRepository>(named("legacyDatastoreShownMessages")) {
+        DatastoreShownMessagesRepository(
+            get(named<ShownMessages>()),
+            get()
+        )
+    } bind ShownStartupMessagesRepository::class
+    single<RoomShownStartupMessagesRepository>() bind ShownStartupMessagesRepository::class
     single<KoinBasedScanningProtocolManager>() bind ScanningProtocolManager::class
     single<DefaultInitialScanSettingsProvider>() bind InitialScanSettingsProvider::class
     single<DefaultPaperFormatProvider>() bind PaperFormatProvider::class
@@ -127,7 +135,10 @@ val appModule = module {
     viewModel<ScannerDiscoveryScreenViewModel>()
     single<AndroidMulticastLockHandler>() bind MulticastLockHandler::class
     single<AndroidStartScanUseCase>() bind StartScanUseCase::class
-    includes(scanProtocols)
+
+    single<AndroidBuildInfoProvider>() bind BuildInfoProvider::class
+
+    includes(SCAN_PROTOCOLS, ROOM_MIGRATIONS)
 }
 
 class ScanBridgeApplication : Application() {

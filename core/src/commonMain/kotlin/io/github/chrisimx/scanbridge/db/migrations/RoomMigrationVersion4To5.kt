@@ -6,7 +6,7 @@ import io.github.chrisimx.esclkt.anyscancompat.toCommonAbstraction
 import io.github.chrisimx.scanbridge.ScanSettingsJson
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV0
 
-val MIGRATION_4_5 = object : Migration(4, 5) {
+val ROOM_MIGRATION_4_5 = object : Migration(4, 5) {
 
     override fun migrate(connection: SQLiteConnection) {
         migrateCustomScanners(connection)

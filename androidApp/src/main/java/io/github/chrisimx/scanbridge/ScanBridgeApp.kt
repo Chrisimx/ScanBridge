@@ -41,6 +41,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import io.github.chrisimx.scanbridge.startupmessages.ShownStartupMessagesRepository
+import io.github.chrisimx.scanbridge.startupmessages.StartupMessage
 import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import io.github.chrisimx.scanbridge.uicomponents.CrashFileHandler
 import kotlinx.coroutines.launch
@@ -59,10 +61,10 @@ fun ScanBridgeApp() {
         val typedRoute = currentBackStackEntry?.toTypedRoute()
 
         val lastRouteRepository = koinInject<LastRouteRepository>()
-        val shownMessagesRepository = koinInject<ShownMessagesRepository>()
+        val shownMessagesRepository = koinInject<ShownStartupMessagesRepository>()
 
         val thanksForPurchaseAlreadyShown by shownMessagesRepository
-            .getWasShownFlow(UserInformationMessage.THANKS_FOR_PURCHASE)
+            .getWasShownFlow(StartupMessage.THANKS_FOR_PURCHASE)
             .collectAsState(true)
 
         LaunchedEffect(Unit) {
@@ -96,7 +98,7 @@ fun ScanBridgeApp() {
 
         val markThanksMessageAsRead = {
             coroutineScope.launch {
-                shownMessagesRepository.setShown(UserInformationMessage.THANKS_FOR_PURCHASE, true)
+                shownMessagesRepository.setShown(StartupMessage.THANKS_FOR_PURCHASE, true)
             }
         }
 
