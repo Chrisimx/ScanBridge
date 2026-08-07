@@ -209,6 +209,11 @@ class EsclScanningProtocol(
             httpClient
         )
 
+        val scannerCapabilities = esclRequestClient.getScannerCapabilities()
+        val statusBeforeNextDocument =
+            scannerCapabilities is ESCLRequestClient.ScannerCapabilitiesResult.Success &&
+                scannerCapabilities.scannerCapabilities.makeAndModel == "RICOH"
+
         suspend fun abortIfCancelling(scanJob: io.github.chrisimx.esclkt.ScanJob? = null): Boolean = if (cancelled.value) {
             logger.debug { "Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob" }
             scanJob?.cancel()
@@ -236,6 +241,12 @@ class EsclScanningProtocol(
             return@flow
         }
         val jobResult = job.scanJob
+
+        // Some RICOH devices keep the job pending until ScannerStatus is queried.
+        if (statusBeforeNextDocument) {
+            val status = esclRequestClient.getScannerStatus()
+            logger.debug { "Scanner status after job creation: $status" }
+        }
 
         if (abortIfCancelling(jobResult)) return@flow
 
