@@ -30,12 +30,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -43,6 +48,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
@@ -57,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -74,13 +81,23 @@ import io.github.chrisimx.scanbridge.uicomponents.settings.MoreInformationButton
 import io.github.chrisimx.scanbridge.uicomponents.settings.UIntSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
 import java.io.File
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.debug_log_explanation
+import scanbridge.composeui.generated.resources.disable_cert_checks_desc
+import scanbridge.composeui.generated.resources.initial_scan_settings
+import scanbridge.composeui.generated.resources.pdf_export_setting_info
+import scanbridge.composeui.generated.resources.preferred_initial_scan_settings_setting_desc
+import scanbridge.composeui.generated.resources.remember_scan_settings_desc
+import scanbridge.composeui.generated.resources.timeout_info
 
 @Composable
-fun DisableCertChecksSetting(onInformationRequested: (Int) -> Unit, checked: Boolean, setChecked: (Boolean) -> Unit) {
+fun DisableCertChecksSetting(onInformationRequested: (StringResource) -> Unit, checked: Boolean, setChecked: (Boolean) -> Unit) {
     CheckboxSetting(
         stringResource(R.string.disable_cert_checks),
-        R.string.disable_cert_checks_desc,
+        Res.string.disable_cert_checks_desc,
         checked,
         setChecked
     ) {
@@ -105,7 +122,7 @@ fun exportDebugLog(context: Context, debugLogService: DebugLogService, saveDebug
 }
 
 @Composable
-fun DebugOptions(debugLog: Boolean, onInformationRequested: (Int) -> Unit, setWriteDebugLog: (Boolean) -> Unit) {
+fun DebugOptions(debugLog: Boolean, onInformationRequested: (StringResource) -> Unit, setWriteDebugLog: (Boolean) -> Unit) {
     val context = LocalContext.current
     val debugLogService: DebugLogService = koinInject()
 
@@ -165,7 +182,7 @@ fun DebugOptions(debugLog: Boolean, onInformationRequested: (Int) -> Unit, setWr
                 }
         ) {
             MoreInformationButton {
-                onInformationRequested(R.string.debug_log_explanation)
+                onInformationRequested(Res.string.debug_log_explanation)
             }
         }
     }
@@ -182,21 +199,74 @@ fun DebugOptions(debugLog: Boolean, onInformationRequested: (Int) -> Unit, setWr
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InitialScanSettingsAppSetting(
+    preferredInitialScanSettingsPanelVisible: Boolean,
+    setMenuVis: (Boolean) -> Unit,
+    scanSettingsUIStateHolder: ScanSettingsComposableStateHolder,
+    setHelpText: (StringResource) -> Unit
+) {
+    Row(
+        modifier = Modifier.padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OutlinedButton(
+            modifier = Modifier
+                .padding(horizontal = 10.dp),
+            onClick = {
+                setMenuVis(true)
+            }
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit"
+                )
+                Text(
+                    text = stringResource(Res.string.initial_scan_settings)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        MoreInformationButton {
+            setHelpText(Res.string.preferred_initial_scan_settings_setting_desc)
+        }
+    }
+
+    if (preferredInitialScanSettingsPanelVisible) {
+        val screenHeight = LocalWindowInfo.current.containerDpSize.height
+        ModalBottomSheet({ setMenuVis(false) }) {
+            ScanSettingsUI(
+                Modifier.heightIn(max = screenHeight * 0.8f),
+                scanSettingsUIStateHolder
+            )
+        }
+    }
+}
+
 @ExperimentalMaterial3Api
 @Composable
 fun AppSettingsScreen(innerPadding: PaddingValues) {
     val vm = koinInject<AppSettingsViewModel>()
 
-    var information: Int? by remember {
+    var information: StringResource? by remember {
         mutableStateOf(null)
     }
-    val setInformationRequested = { it: Int -> information = it }
+    val setInformationRequested = { it: StringResource -> information = it }
 
     val scrollState = rememberScrollState()
 
     val disableCertChecks by vm.disableCertChecks.collectAsState()
     val rememberScanSettings by vm.rememberScanSettings.collectAsState()
     val writeDebugLogs by vm.writeDebugLogs.collectAsState()
+
+    val preferredInitialScanSettingsPanelVisible by vm.isPreferredInitialScanSettingsMenuVisible.collectAsState()
 
     val defaultPdfExportChunkSize = vm.getDefaultPdfExportChunkSize()
     val defaultScanningResponseTimeout = vm.getDefaultScanningResponseTimeout()
@@ -264,7 +334,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
 
                 CheckboxSetting(
                     stringResource(R.string.remember_scan_settings),
-                    R.string.remember_scan_settings_desc,
+                    Res.string.remember_scan_settings_desc,
                     rememberScanSettings,
                     vm::setRememberScanSettings
                 ) {
@@ -276,7 +346,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                     { vm.getScanningResponseTimeout() },
                     defaultScanningResponseTimeout,
                     stringResource(R.string.timeout),
-                    R.string.timeout_info,
+                    Res.string.timeout_info,
                     setInformationRequested,
                     vm::setScanningResponseTimeout
                 )
@@ -286,11 +356,19 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                     { vm.getPdfExportChunkSize() },
                     defaultPdfExportChunkSize,
                     stringResource(R.string.pdf_export_max_pages_per_pdf),
-                    R.string.pdf_export_setting_info,
+                    Res.string.pdf_export_setting_info,
                     setInformationRequested,
                     vm::setPdfExportChunkSize,
                     min = 1u,
                     max = UInt.MAX_VALUE
+                )
+
+                // Preferred initial scan settings
+                InitialScanSettingsAppSetting(
+                    preferredInitialScanSettingsPanelVisible,
+                    vm::setPreferredInitialScanSettingsMenuVisibility,
+                    vm.prefInitialScanSettingsUIStateHolder,
+                    setInformationRequested
                 )
             }
 
@@ -308,7 +386,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
         val currentInfo = information
         if (currentInfo != null) {
             SimpleTextDialog(
-                stringResource(currentInfo),
+                org.jetbrains.compose.resources.stringResource(currentInfo),
                 { information = null }
             )
         }

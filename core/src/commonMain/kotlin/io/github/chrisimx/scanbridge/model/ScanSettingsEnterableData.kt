@@ -27,5 +27,5 @@ data class ScanSettingsEnterableDataV1(
     val customMenuEnabled: Boolean = false,
     val widthString: String = "",
     val heightString: String = "",
-    val maximumSize: Boolean = true
+    val maximumSize: Boolean = false
 )

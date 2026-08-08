@@ -44,6 +44,7 @@ import io.github.chrisimx.anyscan.ScanSettingsMap
 import io.github.chrisimx.anyscan.ScannerConcept
 import io.github.chrisimx.anyscan.inches
 import io.github.chrisimx.scanbridge.R
+import io.github.chrisimx.scanbridge.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.appsettings.AppSettingsRepository
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.AppSettings
@@ -51,12 +52,12 @@ import io.github.chrisimx.scanbridge.db.entities.LastUsedScanSettings
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
+import io.github.chrisimx.scanbridge.initialscansettings.InitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.scannerCapabilities
 import io.github.chrisimx.scanbridge.model.toggleRotation
-import io.github.chrisimx.scanbridge.ports.InitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
 import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
 import io.github.chrisimx.scanbridge.savelastusedscansettings.LastUsedScanSettingsRepository
@@ -82,6 +83,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -89,8 +91,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.InjectedParam
-import org.koin.core.parameter.parametersOf
-import org.koin.mp.KoinPlatform.getKoin
+import org.koin.core.scope.Scope
 import timber.log.Timber
 
 enum class ScanningScreenEvent {
@@ -115,7 +116,8 @@ class ScanningScreenViewModel(
     val appSettingsRepository: AppSettingsRepository,
     val lastUsedScanSettingsRepo: LastUsedScanSettingsRepository,
     val initialScanSettingsProvider: InitialScanSettingsProvider,
-    val startScanUseCase: StartScanUseCase
+    val startScanUseCase: StartScanUseCase,
+    val koinScope: Scope
 ) : AndroidViewModel(application) {
     private val _scanningScreenData =
         ScanningScreenData(
@@ -331,19 +333,20 @@ class ScanningScreenViewModel(
             }
         }
 
-        val defaultScanSettingsUIData = ScanSettingsEnterableDataV1()
-
         if (storedSession != null) {
-            _scanningScreenData.scanSettingsVM.value = getKoin().get {
-                parametersOf(
-                    MutableStateFlow(caps).asStateFlow(),
-                    session.map { it?.currentScanSettings ?: storedSession.currentScanSettings }
-                        .stateIn(viewModelScope, SharingStarted.Lazily, storedSession.currentScanSettings),
-                    storedSession.currentSettingsUIData?.copy() ?: defaultScanSettingsUIData,
-                    updateSettings,
-                    viewModelScope
-                )
-            }
+            _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableStateHolder(
+                MutableStateFlow(caps).asStateFlow(),
+                session.map { it?.currentScanSettings ?: storedSession.currentScanSettings!! }
+                    .stateIn(viewModelScope, SharingStarted.Lazily, storedSession.currentScanSettings!!),
+                storedSession.currentSettingsUIData?.copy(),
+                updateSettings,
+                null,
+                viewModelScope,
+                koinScope.get(),
+                koinScope.get(),
+                koinScope.get(),
+                koinScope.get()
+            )
         } else {
             // Try to load saved scan settings first, fallback to defaults if none exist
             val savedSettings = lastUsedScanSettingsRepo.getLastUsedScanSettings()
@@ -374,16 +377,19 @@ class ScanningScreenViewModel(
                 )
             )
 
-            _scanningScreenData.scanSettingsVM.value = getKoin().get {
-                parametersOf(
-                    MutableStateFlow(caps).asStateFlow(),
-                    session.map { it?.currentScanSettings ?: initialSettings }
-                        .stateIn(viewModelScope, SharingStarted.Lazily, initialSettings),
-                    lastUsedScanSettingsEnterable ?: defaultScanSettingsUIData,
-                    updateSettings,
-                    viewModelScope
-                )
-            }
+            _scanningScreenData.scanSettingsVM.value = ScanSettingsComposableStateHolder(
+                MutableStateFlow(caps).asStateFlow(),
+                session.map { it?.currentScanSettings ?: initialSettings }
+                    .stateIn(viewModelScope, SharingStarted.Lazily, initialSettings),
+                lastUsedScanSettingsEnterable,
+                updateSettings,
+                { initialSettings },
+                viewModelScope,
+                koinScope.get(),
+                koinScope.get(),
+                koinScope.get(),
+                koinScope.get()
+            )
         }
 
         // Subscribe to scan settings ui data changes so that we can save them to the database

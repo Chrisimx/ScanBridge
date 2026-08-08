@@ -24,6 +24,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import io.github.chrisimx.anyscan.CommonScannerCapabilities
+import io.github.chrisimx.scanbridge.ScanSettingsComposableStateHolder
 import java.io.File
 import kotlin.uuid.Uuid
 

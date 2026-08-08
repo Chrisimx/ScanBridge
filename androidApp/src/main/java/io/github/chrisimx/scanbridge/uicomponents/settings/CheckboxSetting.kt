@@ -8,21 +8,20 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import org.jetbrains.compose.resources.StringResource
 
 @Composable
 fun CheckboxSetting(
     settingsText: String,
-    helpText: Int,
+    helpText: StringResource,
     checked: Boolean,
     setChecked: (Boolean) -> Unit,
-    onInformationRequested: (Int) -> Unit
+    onInformationRequested: (StringResource) -> Unit
 ) {
     ConstraintLayout(
         Modifier

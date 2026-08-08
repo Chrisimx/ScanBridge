@@ -50,26 +50,22 @@ import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.anyscan.LengthUnit
 import io.github.chrisimx.anyscan.ScanSettingParam
 import io.github.chrisimx.anyscan.ScannerConcept
-import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
-import io.github.chrisimx.scanbridge.data.ui.ScanSettingsLengthUnit
+import io.github.chrisimx.scanbridge.model.UIInputSourceType
 import io.github.chrisimx.scanbridge.uicomponents.SelectionButtonRow
 import io.github.chrisimx.scanbridge.uicomponents.SelectionCard
 import io.github.chrisimx.scanbridge.uicomponents.SizeBasedConditionalView
 import io.github.chrisimx.scanbridge.uicomponents.ValidatedDimensionsTextEdit
-import io.github.chrisimx.scanbridge.util.UIInputSourceType
 import io.github.chrisimx.scanbridge.util.toLocalizedName
 import io.github.chrisimx.scanbridge.util.toReadableString
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComposableStateHolder) {
-    val vmData by scanSettingsStateHolder.uiState.collectAsState()
-
     val duplexCurrentlyAvailable by scanSettingsStateHolder.duplexSettingAvailable.collectAsState()
 
     val inputSourceOptions by scanSettingsStateHolder.inputSourceOptions.collectAsState()
 
-    val userUnitEnum by scanSettingsStateHolder.lengthUnit.collectAsState(ScanSettingsLengthUnit.MILLIMETER)
+    val userUnitEnum by scanSettingsStateHolder.userLengthUnit.collectAsState(ScanSettingsLengthUnit.MILLIMETER)
 
     val userUnitString = when (userUnitEnum) {
         ScanSettingsLengthUnit.INCH -> stringResource(R.string.inches)
@@ -146,6 +142,8 @@ private fun RegionParameterDisplay(
     val widthValidationResult by scanSettingsStateHolder.validationResultWidth.collectAsState()
     val heightValidationResult by scanSettingsStateHolder.validationResultHeight.collectAsState()
 
+    val currentVmData = vmData ?: return
+
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -168,7 +166,7 @@ private fun RegionParameterDisplay(
                             scanSettingsStateHolder.setFormat(paperFormat)
                         },
                         label = { Text(paperFormat.name) },
-                        selected = !vmData.customMenuEnabled && !vmData.maximumSize &&
+                        selected = !currentVmData.customMenuEnabled && !currentVmData.maximumSize &&
                             currentScanRegion?.value?.width?.equalsLength(paperFormat.width) == true &&
                             currentScanRegion?.value?.height?.equalsLength(paperFormat.height) == true
                     )
@@ -179,18 +177,18 @@ private fun RegionParameterDisplay(
                     },
                     label = { Text(stringResource(R.string.maximum_size)) },
                     selected =
-                        vmData.maximumSize && !vmData.customMenuEnabled
+                        currentVmData.maximumSize && !currentVmData.customMenuEnabled
                 )
                 InputChip(
-                    selected = vmData.customMenuEnabled,
+                    selected = currentVmData.customMenuEnabled,
                     onClick = { scanSettingsStateHolder.setCustomMenuEnabled(true) },
                     label = { Text(stringResource(R.string.custom)) }
                 )
             }
-            AnimatedVisibility(vmData.customMenuEnabled) {
+            AnimatedVisibility(currentVmData.customMenuEnabled) {
                 Row(horizontalArrangement = Arrangement.SpaceEvenly) {
                     ValidatedDimensionsTextEdit(
-                        vmData.widthString,
+                        currentVmData.widthString,
                         modifier = Modifier
                             .weight(1f)
                             .padding(end = 10.dp),
@@ -203,7 +201,7 @@ private fun RegionParameterDisplay(
                         widthValidationResult
                     )
                     ValidatedDimensionsTextEdit(
-                        vmData.heightString,
+                        currentVmData.heightString,
                         modifier = Modifier
                             .weight(1f)
                             .padding(start = 10.dp),

@@ -30,7 +30,7 @@ kotlin {
 
         compilerOptions {
             jvmTarget.set(
-                org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+                JvmTarget.JVM_17
             )
         }
 
@@ -74,6 +74,13 @@ kotlin {
         androidMain.dependencies {
             api(libs.ktor.client.okhttp)
         }
+
+        val jvmAndAndroid by creating {
+            dependsOn(commonMain.get())
+        }
+
+        androidMain.get().dependsOn(jvmAndAndroid)
+        jvmMain.get().dependsOn(jvmAndAndroid)
 
         getByName("androidDeviceTest") {
             dependencies {

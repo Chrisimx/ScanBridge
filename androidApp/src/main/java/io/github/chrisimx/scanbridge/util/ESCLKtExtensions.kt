@@ -20,11 +20,11 @@
 package io.github.chrisimx.scanbridge.util
 
 import android.content.Context
-import android.icu.text.DecimalFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import io.github.chrisimx.esclkt.JobState
 import io.github.chrisimx.scanbridge.R
+import io.github.chrisimx.scanbridge.model.UIInputSourceType
 
 fun JobState?.toJobStateString(context: Context): String = when (this) {
     JobState.Canceled -> context.getString(R.string.job_canceled)
@@ -34,12 +34,6 @@ fun JobState?.toJobStateString(context: Context): String = when (this) {
     JobState.Processing -> context.getString(R.string.job_pages_still_processed)
     null -> context.getString(R.string.job_state_cannot_be_retrieved)
 }
-
-fun String.toDoubleLocalized(): Double? = runCatching {
-    DecimalFormat.getInstance().parse(this).toDouble()
-}.getOrNull()
-
-fun Double.toStringLocalized(): String = DecimalFormat.getInstance().format(this)
 
 @Composable
 fun UIInputSourceType.toReadableString(): String = when (this) {

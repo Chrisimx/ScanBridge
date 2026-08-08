@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.StringResource
 import timber.log.Timber
 
 @Composable
@@ -45,8 +46,8 @@ fun UIntSettingBase(
     initialTimeout: suspend () -> UInt,
     settingName: String,
     placeholder: String,
-    help: Int,
-    onHelpRequested: (Int) -> Unit,
+    help: StringResource,
+    onHelpRequested: (StringResource) -> Unit,
     changeSetting: (UInt) -> Unit,
     min: UInt,
     max: UInt
@@ -123,8 +124,8 @@ fun UIntSetting(
     initialTimeout: suspend () -> UInt,
     default: UInt,
     settingName: String,
-    help: Int,
-    onHelpRequested: (Int) -> Unit,
+    help: StringResource,
+    onHelpRequested: (StringResource) -> Unit,
     setSetting: (UInt) -> Unit,
     min: UInt = 0u,
     max: UInt = UInt.MAX_VALUE

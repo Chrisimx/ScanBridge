@@ -8,13 +8,13 @@ import android.app.Application
 import android.content.Context
 import coil3.ImageLoader
 import coil3.network.ktor3.KtorNetworkFetcherFactory
+import io.github.chrisimx.localization.JvmNumberFormatter
 import io.github.chrisimx.scanbridge.adapters.KoinBasedScanningProtocolManager
 import io.github.chrisimx.scanbridge.adapters.RoomBackedCustomScannerRepository
 import io.github.chrisimx.scanbridge.appsettings.AppSettingsRepository
 import io.github.chrisimx.scanbridge.appsettings.AppSettingsViewModel
 import io.github.chrisimx.scanbridge.appsettings.RoomAppSettingsRepository
 import io.github.chrisimx.scanbridge.buildinfo.BuildInfoProvider
-import io.github.chrisimx.scanbridge.data.ui.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.db.DefaultScanBridgeDbFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
@@ -22,6 +22,9 @@ import io.github.chrisimx.scanbridge.db.ScanBridgeDbBuilderFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbFactory
 import io.github.chrisimx.scanbridge.db.migrations.ROOM_MIGRATIONS
 import io.github.chrisimx.scanbridge.infrastructure.KmLogScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.initialscansettings.DefaultInitialScanSettingsProvider
+import io.github.chrisimx.scanbridge.initialscansettings.InitialScanSettingsProvider
+import io.github.chrisimx.scanbridge.localization.NumberFormatter
 import io.github.chrisimx.scanbridge.migrations.MigrationExecutor
 import io.github.chrisimx.scanbridge.migrations.RoomBackedMigrationExecutor
 import io.github.chrisimx.scanbridge.migrations.ds2room.DATASTORE_TO_ROOM_MIGRATION_DATA_SOURCES
@@ -29,7 +32,6 @@ import io.github.chrisimx.scanbridge.migrations.migrationsModule
 import io.github.chrisimx.scanbridge.model.HttpClientConfig
 import io.github.chrisimx.scanbridge.ports.CustomScannerRepository
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
-import io.github.chrisimx.scanbridge.ports.InitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.ports.LocaleProvider
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
@@ -132,6 +134,8 @@ val appModule = module {
     single<AndroidBuildInfoProvider>() bind BuildInfoProvider::class
 
     viewModel<AppSettingsViewModel>()
+
+    single<JvmNumberFormatter>() bind NumberFormatter::class
 
     includes(SCAN_PROTOCOLS, ROOM_MIGRATIONS, DATASTORE_TO_ROOM_MIGRATION_DATA_SOURCES)
 }

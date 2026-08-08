@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge.util
+package io.github.chrisimx.scanbridge.model
 
 import io.github.chrisimx.anyscan.CommonInputSourceType
 

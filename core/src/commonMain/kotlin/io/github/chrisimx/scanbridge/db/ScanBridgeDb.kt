@@ -37,7 +37,7 @@ import io.github.chrisimx.scanbridge.db.typeconverters.UuidTypeConverter
         ShownStartupMessage::class, AppSettings::class,
         LastUsedScanSettings::class
     ],
-    version = 7,
+    version = 8,
     autoMigrations = [
         AutoMigration(
             from = 1,

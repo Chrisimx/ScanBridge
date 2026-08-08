@@ -135,4 +135,6 @@
     <string name="scan_intent_object">3D Object</string>
     <string name="scan_intent_business_card">Business Card</string>
     <string name="scanning_protocol">Protocol</string>
+    <string name="initial_scan_settings">Initial scan settings</string>
+    <string name="preferred_initial_scan_settings_setting_desc">This setting determines the initial scan settings used when starting a new scan session.\n\nIn the panel that opens, you can set the options you prefer. When your choice is supported by the scanner, it will be used. Else the closest supported settings will be used.\n\nThis setting can be overriden by the last used scan settings when the "Remeber scan settings" option is on.</string>
 </resources>

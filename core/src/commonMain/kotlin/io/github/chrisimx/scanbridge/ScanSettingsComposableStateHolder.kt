@@ -17,9 +17,8 @@
  *     SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package io.github.chrisimx.scanbridge.data.ui
+package io.github.chrisimx.scanbridge
 
-import com.google.protobuf.LazyStringArrayList.emptyList
 import io.github.chrisimx.anyscan.Area
 import io.github.chrisimx.anyscan.CommonInputSourceCaps
 import io.github.chrisimx.anyscan.CommonInputSourceType
@@ -33,16 +32,18 @@ import io.github.chrisimx.anyscan.ScannerConcept
 import io.github.chrisimx.anyscan.SettingValue
 import io.github.chrisimx.anyscan.inches
 import io.github.chrisimx.anyscan.millimeters
-import io.github.chrisimx.scanbridge.PaperFormat
-import io.github.chrisimx.scanbridge.PaperFormatProvider
+import io.github.chrisimx.anyscan.minus
+import io.github.chrisimx.anyscan.plus
+import io.github.chrisimx.scanbridge.localization.NumberFormatter
+import io.github.chrisimx.scanbridge.localization.parseDouble
 import io.github.chrisimx.scanbridge.model.Locale
 import io.github.chrisimx.scanbridge.model.NumberValidationResult
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
+import io.github.chrisimx.scanbridge.model.UIInputSourceType
+import io.github.chrisimx.scanbridge.model.toUIInputSourceType
 import io.github.chrisimx.scanbridge.ports.LocaleProvider
-import io.github.chrisimx.scanbridge.util.UIInputSourceType
+import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.util.derived
-import io.github.chrisimx.scanbridge.util.toDoubleLocalized
-import io.github.chrisimx.scanbridge.util.toUIInputSourceType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -59,7 +60,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.InjectedParam
-import timber.log.Timber
 
 enum class ScanSettingsLengthUnit {
     INCH,
@@ -72,17 +72,27 @@ class ScanSettingsComposableStateHolder(
     @InjectedParam
     val scanSettings: StateFlow<CommonScanSettings>,
     @InjectedParam
-    private val initialScanSettingsData: ScanSettingsEnterableDataV1,
+    private val initialEnterableData: ScanSettingsEnterableDataV1?,
     @InjectedParam
     private val updateSettings: suspend (CommonScanSettingsEditor.() -> Unit) -> Unit,
     @InjectedParam
+    private val getInitialSettingsAfterCoercing: (suspend () -> CommonScanSettings)?,
+    @InjectedParam
     private val coroutineScope: CoroutineScope,
     private val localeProvider: LocaleProvider,
-    private val paperFormatProvider: PaperFormatProvider
+    private val paperFormatProvider: PaperFormatProvider,
+    private val numberFormatter: NumberFormatter,
+    loggerFactory: ScanBridgeLoggerFactory
 ) {
 
-    private val _uiState = MutableStateFlow(initialScanSettingsData)
-    val uiState: StateFlow<ScanSettingsEnterableDataV1> = _uiState.asStateFlow()
+    private val logger = loggerFactory.withClass(this::class)
+
+    val userLengthUnit = localeProvider.locale.derived(coroutineScope) {
+        unitByLocale(it)
+    }
+
+    private val _uiState = MutableStateFlow(initialEnterableData)
+    val uiState: StateFlow<ScanSettingsEnterableDataV1?> = _uiState.asStateFlow()
 
     val inputSourceOptions: StateFlow<List<UIInputSourceType>> = capabilities.derived(coroutineScope) { caps ->
         caps.inputSources.map {
@@ -119,18 +129,68 @@ class ScanSettingsComposableStateHolder(
         capabilities.value.inputSources.first()
     )
 
+    private suspend fun inferInitialScanSettingsData(): ScanSettingsEnterableDataV1 {
+        val currentScanSettings = getInitialSettingsAfterCoercing?.invoke() ?: return ScanSettingsEnterableDataV1()
+        val paperFormats = paperFormatProvider.formats.value
+
+        val selectedScanArea = currentScanSettings.setting[ScannerConcept.ScanRegion]?.value
+            ?: return ScanSettingsEnterableDataV1(
+                customMenuEnabled = false,
+                maximumSize = false
+            )
+
+        // Is the selected scan area a known paper format?
+        val isKnownPaperFormat =
+            paperFormats
+                .any {
+                    it.area.equalsArea(selectedScanArea)
+                }
+
+        if (isKnownPaperFormat) {
+            return ScanSettingsEnterableDataV1(
+                customMenuEnabled = false,
+                maximumSize = false
+            )
+        }
+
+        // Is the selected scan area the maximum scan area?
+        val caps = capabilities.value
+        val inputCaps = caps.getInputSourceCaps(currentScanSettings.inputSource!!)
+        val scanRegionParam = inputCaps?.furtherOptions[ScannerConcept.ScanRegion] as ScanSettingParam.ScanSettingRegionParam?
+        val maxScanRegion = scanRegionParam?.maxArea?.value
+
+        if (maxScanRegion != null && maxScanRegion in selectedScanArea) {
+            return ScanSettingsEnterableDataV1(
+                customMenuEnabled = false,
+                maximumSize = true
+            )
+        }
+
+        // If it is not a known paper format, and the selected scan area is not the maximum scan area,
+        // we assume it is a custom scan area.
+        val heightInUserUnit = toUserUnit(selectedScanArea.height)
+        val widthInUserUnit = toUserUnit(selectedScanArea.width)
+
+        return ScanSettingsEnterableDataV1(
+            heightString = numberFormatter.formatDouble(heightInUserUnit),
+            widthString = numberFormatter.formatDouble(widthInUserUnit),
+            customMenuEnabled = true,
+            maximumSize = false
+        )
+    }
+
     private fun validateDimensionValue(valueString: String, getDimension: (Area) -> LengthUnit): NumberValidationResult {
         if (valueString.isBlank()) {
             return NumberValidationResult.NotANumber
         }
 
-        val dimension = valueString.toDoubleLocalized() ?: return NumberValidationResult.NotANumber
+        val dimension = valueString.parseDouble(numberFormatter) ?: return NumberValidationResult.NotANumber
 
         val regionParam = capabilities.value.inputSources.firstOrNull {
             it.inputSourceType == scanSettings.value.inputSource
         }?.furtherOptions?.get(ScannerConcept.ScanRegion) as? ScanSettingParam.ScanSettingRegionParam
 
-        val lengthInUnit = when (lengthUnit.value) {
+        val lengthInUnit = when (userLengthUnit.value) {
             ScanSettingsLengthUnit.INCH -> dimension.inches()
             ScanSettingsLengthUnit.MILLIMETER -> dimension.millimeters()
         }
@@ -139,8 +199,8 @@ class ScanSettingsComposableStateHolder(
             return NumberValidationResult.Success(lengthInUnit)
         }
 
-        val maxDimension = toUserUnit(lengthUnit.value, getDimension(regionParam.maxArea.value))
-        val minDimension = toUserUnit(lengthUnit.value, getDimension(regionParam.minArea.value))
+        val maxDimension = toUserUnit(getDimension(regionParam.maxArea.value) + 0.1.millimeters())
+        val minDimension = toUserUnit(getDimension(regionParam.minArea.value) - 0.1.millimeters())
 
         if (dimension !in minDimension..maxDimension) {
             return NumberValidationResult.OutOfRange(minDimension, maxDimension)
@@ -150,12 +210,16 @@ class ScanSettingsComposableStateHolder(
     }
 
     val validationResultHeight: StateFlow<NumberValidationResult> = combine(uiState, capabilities) { settings, caps ->
-        validateDimensionValue(settings.heightString) { it.height }
-    }.stateIn(coroutineScope, SharingStarted.Lazily, NumberValidationResult.NotANumber)
+        settings to caps
+    }.filter { (settings, caps) -> settings != null }
+        .map { (settings, caps) -> validateDimensionValue(settings!!.heightString) { it.height } }
+        .stateIn(coroutineScope, SharingStarted.Lazily, NumberValidationResult.NotANumber)
 
     val validationResultWidth: StateFlow<NumberValidationResult> = combine(uiState, capabilities) { settings, caps ->
-        validateDimensionValue(settings.widthString) { it.width }
-    }.stateIn(coroutineScope, SharingStarted.Lazily, NumberValidationResult.NotANumber)
+        settings to caps
+    }.filter { (settings, caps) -> settings != null }
+        .map { (settings, caps) -> validateDimensionValue(settings!!.widthString) { it.width } }
+        .stateIn(coroutineScope, SharingStarted.Lazily, NumberValidationResult.NotANumber)
 
     val availableParameters = selectedInputSourceCaps.derived(coroutineScope) {
         it.furtherOptions
@@ -182,48 +246,53 @@ class ScanSettingsComposableStateHolder(
         }
     }.stateIn(coroutineScope, SharingStarted.Lazily, emptyList<PaperFormat>())
 
-    val lengthUnit = localeProvider.locale.derived(coroutineScope) {
-        unitByLocale(it)
-    }
-
     private fun unitByLocale(locale: Locale): ScanSettingsLengthUnit = if (locale.country in setOf("US", "LR", "MM")) {
         ScanSettingsLengthUnit.INCH
     } else {
         ScanSettingsLengthUnit.MILLIMETER
     }
 
-    private fun toUserUnit(unit: ScanSettingsLengthUnit, length: LengthUnit): Double = when (unit) {
+    private fun toUserUnit(length: LengthUnit): Double = when (userLengthUnit.value) {
         ScanSettingsLengthUnit.INCH -> length.toInches().value
         ScanSettingsLengthUnit.MILLIMETER -> length.toMillimeters().value
     }
 
     init {
+        if (initialEnterableData == null) {
+            coroutineScope.launch {
+                _uiState.value = inferInitialScanSettingsData()
+            }
+        }
+
         combine(validationResultHeight, validationResultWidth, _uiState) { height, width, ui ->
-            Triple(height, width, ui.customMenuEnabled)
-        }.mapNotNull { (height, width, customMenuEnabled) ->
-            if (customMenuEnabled && height is NumberValidationResult.Success && width is NumberValidationResult.Success) {
-                height to width
-            } else {
-                null
-            }
-        }.onEach { (height, width) ->
-            updateSettings {
-                this.set(
-                    ScannerConcept.ScanRegion,
-                    ScanRegionValue(
-                        Area(height.value, width.value)
+            Triple(height, width, ui?.customMenuEnabled)
+        }.filter { (_, _, customMenuEnabled) -> customMenuEnabled != null }
+            .mapNotNull { (height, width, customMenuEnabled) ->
+                if (customMenuEnabled!! && height is NumberValidationResult.Success && width is NumberValidationResult.Success) {
+                    height to width
+                } else {
+                    null
+                }
+            }.onEach { (height, width) ->
+                updateSettings {
+                    this.set(
+                        ScannerConcept.ScanRegion,
+                        ScanRegionValue(
+                            Area(height.value, width.value)
+                        )
                     )
-                )
-            }
-        }.launchIn(coroutineScope)
+                }
+            }.launchIn(coroutineScope)
 
         _uiState
-            .map { it.maximumSize }
+            .mapNotNull { it?.maximumSize }
             .distinctUntilChanged()
             .combine(selectedInputSourceCaps) { maxSize, inputSourceCaps -> Pair(maxSize, inputSourceCaps) }
             .filter { it.first }
             .onEach { (maxSize, inputSourceCaps) ->
-                Timber.d("Maximum size flag set to $maxSize: This means we should set scanRegion to maximum")
+                logger.debug {
+                    "Maximum size flag set to $maxSize: This means we should set scanRegion to maximum"
+                }
                 val regionParam = inputSourceCaps
                     .furtherOptions[ScannerConcept.ScanRegion] as ScanSettingParam.ScanSettingRegionParam?
                 regionParam?.maxArea?.let { maxArea ->
@@ -238,7 +307,9 @@ class ScanSettingsComposableStateHolder(
         val duplexCurrentlyActive = duplexSettingAvailable.value
 
         if (duplex && !duplexCurrentlyActive) {
-            Timber.d("Duplex can not be turned on because it is not available. Current duplex state: $duplexCurrentlyActive")
+            logger.debug {
+                "Duplex can not be turned on because it is not available. Current duplex state: $duplexCurrentlyActive"
+            }
             return
         }
 
@@ -256,7 +327,9 @@ class ScanSettingsComposableStateHolder(
     }
 
     fun setInputSource(inputSource: UIInputSourceType) {
-        Timber.d("Input Source being set to $inputSource")
+        logger.debug {
+            "Input Source being set to $inputSource"
+        }
 
         coroutineScope.launch {
             updateSettings {
@@ -288,7 +361,7 @@ class ScanSettingsComposableStateHolder(
     }
 
     fun setCustomMenuEnabled(enabled: Boolean) {
-        _uiState.update { it.copy(customMenuEnabled = enabled) }
+        _uiState.update { it?.copy(customMenuEnabled = enabled) }
     }
 
     fun setFormat(paperFormat: PaperFormat) {
@@ -296,7 +369,7 @@ class ScanSettingsComposableStateHolder(
             height = paperFormat.height,
             width = paperFormat.width
         )
-        _uiState.update { it.copy(maximumSize = false, customMenuEnabled = false) }
+        _uiState.update { it?.copy(maximumSize = false, customMenuEnabled = false) }
 
         coroutineScope.launch {
             updateSettings {
@@ -307,19 +380,19 @@ class ScanSettingsComposableStateHolder(
 
     fun setCustomWidthTextFieldContent(content: String) {
         _uiState.update {
-            it.copy(widthString = content)
+            it?.copy(widthString = content)
         }
     }
 
     fun setCustomHeightTextFieldContent(content: String) {
         _uiState.update {
-            it.copy(heightString = content)
+            it?.copy(heightString = content)
         }
     }
 
     fun selectMaxRegion() {
         _uiState.update {
-            it.copy(maximumSize = true, customMenuEnabled = false)
+            it?.copy(maximumSize = true, customMenuEnabled = false)
         }
     }
 }
