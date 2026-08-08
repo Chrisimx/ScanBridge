@@ -14,15 +14,11 @@ import androidx.test.rule.GrantPermissionRule
 import io.github.chrisimx.esclmockserver.EsclMockServer
 import io.github.chrisimx.scanbridge.BuildConfig
 import io.github.chrisimx.scanbridge.MainActivity
-import io.github.chrisimx.scanbridge.datastore.appSettingsStore
-import io.github.chrisimx.scanbridge.datastore.lastRouteStore
-import io.github.chrisimx.scanbridge.datastore.shownMessagesStore
-import io.github.chrisimx.scanbridge.datastore.updateSettings
-import io.github.chrisimx.scanbridge.proto.copy
-import kotlinx.coroutines.runBlocking
+import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.koin.mp.KoinPlatform.getKoin
 import tools.fastlane.screengrab.Screengrab
 import tools.fastlane.screengrab.locale.LocaleTestRule
 
@@ -56,22 +52,8 @@ class ScanBridgeScreenshotTest {
 
     @Before
     fun cleanupForTest() {
-        runBlocking {
-            composeTestRule.activity.shownMessagesStore.updateData {
-                it.copy {
-                    thankPlayOne = true
-                }
-            }
-            composeTestRule.activity.lastRouteStore.updateData {
-                it.copy {
-                    clearLastRoute()
-                }
-            }
-            composeTestRule.activity.appSettingsStore.updateSettings {
-                clearLastUsedScanSettings()
-                autoCleanup = true
-            }
-        }
+        val scanBridgeDb: ScanBridgeDb = getKoin().get()
+        scanBridgeDb.clearAllTables()
     }
 
     @Test

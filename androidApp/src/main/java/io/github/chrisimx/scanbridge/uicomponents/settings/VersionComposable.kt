@@ -30,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -38,15 +37,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.chrisimx.scanbridge.BuildConfig
 import io.github.chrisimx.scanbridge.R
+import io.github.chrisimx.scanbridge.buildinfo.ScanBridgeEdition
 import io.github.chrisimx.scanbridge.theme.Poppins
 import io.github.chrisimx.scanbridge.theme.gradientBrush
 
 @Composable
-fun VersionComposable() {
-    val context = LocalContext.current
+fun ScanBridgeEdition.toLocalizedString(): String = when (this) {
+    ScanBridgeEdition.FDROID -> stringResource(R.string.f_droid)
+    ScanBridgeEdition.PLAYSTORE -> stringResource(R.string.google_play)
+    ScanBridgeEdition.IOS -> stringResource(R.string.ios)
+}
 
+@Composable
+fun VersionComposable(versionName: String, versionCode: Int, gitCommitHash: String, edition: ScanBridgeEdition, debugBuild: Boolean) {
     Image(
         modifier = Modifier
             .size(200.dp)
@@ -67,20 +71,16 @@ fun VersionComposable() {
     )
 
     Text(
-        "${BuildConfig.VERSION_NAME.removeSuffix("-play")} (${BuildConfig.VERSION_CODE}, ${BuildConfig.GIT_COMMIT_HASH})",
+        "${versionName.removeSuffix("-play")} ($versionCode, $gitCommitHash)",
         fontStyle = FontStyle.Normal,
         fontFamily = Poppins()
     )
 
     val editionNotice = mutableListOf<String>()
 
-    if (BuildConfig.FLAVOR == "fdroid") {
-        editionNotice.add(stringResource(R.string.f_droid))
-    } else {
-        editionNotice.add(stringResource(R.string.google_play))
-    }
+    editionNotice.add(edition.toLocalizedString())
 
-    if (BuildConfig.DEBUG) {
+    if (debugBuild) {
         editionNotice.add(stringResource(R.string.debug_build))
     }
 
@@ -99,6 +99,12 @@ fun VersionComposablePreview() {
             .width(300.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        VersionComposable()
+        VersionComposable(
+            "2.1.0",
+            2100,
+            "abdfefg",
+            ScanBridgeEdition.FDROID,
+            true
+        )
     }
 }

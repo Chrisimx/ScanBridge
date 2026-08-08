@@ -44,8 +44,10 @@ import io.github.chrisimx.anyscan.ScanSettingsMap
 import io.github.chrisimx.anyscan.ScannerConcept
 import io.github.chrisimx.anyscan.inches
 import io.github.chrisimx.scanbridge.R
-import io.github.chrisimx.scanbridge.datastore.appSettingsStore
+import io.github.chrisimx.scanbridge.appsettings.AppSettingsRepository
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
+import io.github.chrisimx.scanbridge.db.entities.AppSettings
+import io.github.chrisimx.scanbridge.db.entities.LastUsedScanSettings
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
@@ -57,9 +59,8 @@ import io.github.chrisimx.scanbridge.model.toggleRotation
 import io.github.chrisimx.scanbridge.ports.InitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
 import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
-import io.github.chrisimx.scanbridge.proto.chunkSizePdfExportOrNull
+import io.github.chrisimx.scanbridge.savelastusedscansettings.LastUsedScanSettingsRepository
 import io.github.chrisimx.scanbridge.services.ScanJobRepository
-import io.github.chrisimx.scanbridge.stores.DefaultScanSettingsStore
 import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import io.github.chrisimx.scanbridge.util.getEditedImageName
 import io.github.chrisimx.scanbridge.util.rotateBy90
@@ -81,7 +82,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -112,6 +112,8 @@ class ScanningScreenViewModel(
     val db: ScanBridgeDb,
     application: Application,
     val scanJobRepo: ScanJobRepository,
+    val appSettingsRepository: AppSettingsRepository,
+    val lastUsedScanSettingsRepo: LastUsedScanSettingsRepository,
     val initialScanSettingsProvider: InitialScanSettingsProvider,
     val startScanUseCase: StartScanUseCase
 ) : AndroidViewModel(application) {
@@ -161,11 +163,18 @@ class ScanningScreenViewModel(
 
     init {
         session
-            .map { it?.currentScanSettings to it?.currentSettingsUIData }
+            .filter { it?.currentScanSettings != null && it.currentSettingsUIData != null }
+            .map {
+                LastUsedScanSettings(
+                    lastUsedScanSettings = it!!.currentScanSettings!!,
+                    lastUsedScanSettingsEnterable = it.currentSettingsUIData!!
+                )
+            }
             .distinctUntilChanged()
-            .filter { it.first != null }
-            .onEach { (scanSettings, settingsUiState) ->
-                DefaultScanSettingsStore.save(application, scanSettings!!, settingsUiState)
+            .onEach { newLastUsedScanSettings ->
+                lastUsedScanSettingsRepo.setLastUsedScanSettings(
+                    newLastUsedScanSettings
+                )
             }
             .launchIn(viewModelScope)
     }
@@ -337,12 +346,15 @@ class ScanningScreenViewModel(
             }
         } else {
             // Try to load saved scan settings first, fallback to defaults if none exist
-            val savedSettingsPair = DefaultScanSettingsStore.load(application.applicationContext)
-            val (savedSettings, savedSettingsUiState) = savedSettingsPair
-            val initialSettings = if (savedSettings != null) {
+            val savedSettings = lastUsedScanSettingsRepo.getLastUsedScanSettings()
+
+            val lastUsedScanSettings = savedSettings?.lastUsedScanSettings
+            val lastUsedScanSettingsEnterable = savedSettings?.lastUsedScanSettingsEnterable
+
+            val initialSettings = if (lastUsedScanSettings != null) {
                 val editor = CommonScanSettingsEditor(
                     caps,
-                    savedSettings
+                    lastUsedScanSettings
                 )
                 editor.build()
             } else {
@@ -354,16 +366,20 @@ class ScanningScreenViewModel(
                 editor.build()
             }
 
-            val savedSettingsUiStateWithCaps = savedSettingsUiState?.copy()
-
-            sessionDao.insertAll(Session(sessionID, initialSettings, savedSettingsUiState))
+            sessionDao.insertAll(
+                Session(
+                    sessionID,
+                    initialSettings,
+                    lastUsedScanSettingsEnterable
+                )
+            )
 
             _scanningScreenData.scanSettingsVM.value = getKoin().get {
                 parametersOf(
                     MutableStateFlow(caps).asStateFlow(),
                     session.map { it?.currentScanSettings ?: initialSettings }
                         .stateIn(viewModelScope, SharingStarted.Lazily, initialSettings),
-                    savedSettingsUiStateWithCaps ?: defaultScanSettingsUIData,
+                    lastUsedScanSettingsEnterable ?: defaultScanSettingsUIData,
                     updateSettings,
                     viewModelScope
                 )
@@ -495,10 +511,10 @@ class ScanningScreenViewModel(
         var pageCounter = 0
 
         val chunkSize = try {
-            application.appSettingsStore.data.first().chunkSizePdfExportOrNull?.value ?: 50
+            appSettingsRepository.getAppSettings().chunkSizeForPDFExport
         } catch (exception: Exception) {
             Timber.e("doPdfExport couldn't access app settings. Returning default value: $exception")
-            50
+            AppSettings().chunkSizeForPDFExport
         }
 
         val chunks = currentScans.chunked(chunkSize)

@@ -4,5 +4,6 @@ import org.koin.dsl.module
 import org.koin.plugin.module.dsl.single
 
 val ROOM_MIGRATIONS = module {
-    single<RoomMigrationV5To6>()
+    single<RoomMigrationVersion5To6>()
+    single<RoomMigrationVersion6To7>()
 }

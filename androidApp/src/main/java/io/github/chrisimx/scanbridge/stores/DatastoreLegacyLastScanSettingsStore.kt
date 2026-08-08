@@ -32,12 +32,13 @@ import io.github.chrisimx.scanbridge.proto.rememberScanSettingsOrNull
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
-object DefaultScanSettingsStore {
+object DatastoreLegacyLastScanSettingsStore {
     private suspend fun isRememberSettingsEnabled(context: Context): Boolean {
         val appPreferences = context.appSettingsStore.data.first()
         return appPreferences.rememberScanSettingsOrNull?.value ?: true
     }
 
+    @Deprecated("Use LastUsedScanSettingsRepository instead")
     suspend fun save(context: Context, scanSettings: CommonScanSettings, uiStateData: ScanSettingsEnterableDataV1?) {
         if (!isRememberSettingsEnabled(context)) {
             Timber.d("Scan settings persistence is disabled, skipping save")
@@ -61,6 +62,7 @@ object DefaultScanSettingsStore {
         }
     }
 
+    @Deprecated("Use LastUsedScanSettingsRepository instead")
     suspend fun load(context: Context): Pair<CommonScanSettings?, ScanSettingsEnterableDataV1?> {
         if (!isRememberSettingsEnabled(context)) {
             Timber.d("Scan settings persistence is disabled, returning null")

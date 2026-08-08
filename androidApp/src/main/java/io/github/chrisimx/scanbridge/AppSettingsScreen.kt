@@ -51,22 +51,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.core.net.toUri
+import io.github.chrisimx.scanbridge.appsettings.AppSettingsViewModel
+import io.github.chrisimx.scanbridge.buildinfo.ScanBridgeEdition
 import io.github.chrisimx.scanbridge.datastore.*
-import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
-import io.github.chrisimx.scanbridge.proto.rememberScanSettingsOrNull
 import io.github.chrisimx.scanbridge.services.DebugLogService
 import io.github.chrisimx.scanbridge.uicomponents.TitledCard
 import io.github.chrisimx.scanbridge.uicomponents.dialog.SimpleTextDialog
@@ -75,8 +74,6 @@ import io.github.chrisimx.scanbridge.uicomponents.settings.MoreInformationButton
 import io.github.chrisimx.scanbridge.uicomponents.settings.UIntSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
 import java.io.File
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
@@ -159,7 +156,6 @@ fun DebugOptions(debugLog: Boolean, onInformationRequested: (Int) -> Unit, setWr
                 },
             style = MaterialTheme.typography.bodyMedium
         )
-        val context = LocalContext.current
         Box(
             modifier = Modifier
                 .constrainAs(informationButton) {
@@ -189,19 +185,23 @@ fun DebugOptions(debugLog: Boolean, onInformationRequested: (Int) -> Unit, setWr
 @ExperimentalMaterial3Api
 @Composable
 fun AppSettingsScreen(innerPadding: PaddingValues) {
-    val context = LocalContext.current
+    val vm = koinInject<AppSettingsViewModel>()
 
-    val appSettingsStore = context.appSettingsStore
-    val appSettings by appSettingsStore.data.collectAsState(
-        ScanBridgeSettings.getDefaultInstance()
-    )
     var information: Int? by remember {
         mutableStateOf(null)
     }
     val setInformationRequested = { it: Int -> information = it }
 
     val scrollState = rememberScrollState()
-    val coroutineScope = rememberCoroutineScope()
+
+    val disableCertChecks by vm.disableCertChecks.collectAsState()
+    val rememberScanSettings by vm.rememberScanSettings.collectAsState()
+    val writeDebugLogs by vm.writeDebugLogs.collectAsState()
+
+    val defaultPdfExportChunkSize = vm.getDefaultPdfExportChunkSize()
+    val defaultScanningResponseTimeout = vm.getDefaultScanningResponseTimeout()
+
+    val uriHandler = LocalUriHandler.current
 
     Column(
         modifier = Modifier
@@ -210,9 +210,15 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        VersionComposable()
+        VersionComposable(
+            vm.versionName,
+            vm.versionCode,
+            vm.gitCommitHash,
+            vm.edition,
+            vm.isDebugBuild
+        )
 
-        val isFdroidVariant = BuildConfig.FLAVOR == "fdroid"
+        val isFdroidVariant = vm.edition == ScanBridgeEdition.FDROID
         val padding = if (isFdroidVariant) 16.dp else 10.dp
         FlowRow(
             modifier = Modifier.padding(vertical = padding),
@@ -222,8 +228,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
             if (isFdroidVariant) {
                 Button(
                     onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, "https://github.com/sponsors/Chrisimx".toUri())
-                        context.startActivity(intent)
+                        uriHandler.openUri("https://github.com/sponsors/Chrisimx")
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFFF6F61),
@@ -233,14 +238,13 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                     Icon(
                         modifier = Modifier.padding(end = 8.dp),
                         painter = painterResource(R.drawable.favorite_24px),
-                        contentDescription = stringResource(R.string.donate)
+                        contentDescription = null
                     )
                     Text(stringResource(R.string.donate))
                 }
             }
             OutlinedIconButton(onClick = {
-                val intent = Intent(Intent.ACTION_VIEW, "https://github.com/Chrisimx/ScanBridge".toUri())
-                context.startActivity(intent)
+                uriHandler.openUri("https://github.com/Chrisimx/ScanBridge")
             }) {
                 Icon(painterResource(R.drawable.github_mark), contentDescription = stringResource(R.string.source_code))
             }
@@ -254,41 +258,37 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
             ) {
                 DisableCertChecksSetting(
                     setInformationRequested,
-                    appSettings.disableCertChecks,
-                    { coroutineScope.launch { appSettingsStore.setDisableCertCheck(it) } }
+                    disableCertChecks,
+                    vm::setDisableCertValidation
                 )
 
                 CheckboxSetting(
                     stringResource(R.string.remember_scan_settings),
                     R.string.remember_scan_settings_desc,
-                    appSettings.rememberScanSettingsOrNull?.value ?: true,
-                    { coroutineScope.launch { appSettingsStore.setRememberScanSettings(it) } }
+                    rememberScanSettings,
+                    vm::setRememberScanSettings
                 ) {
                     information = it
                 }
 
                 // Timeout setting
                 UIntSetting(
-                    {
-                        appSettingsStore.data.firstOrNull()?.scanningResponseTimeout?.value?.toUInt() ?: 25u
-                    },
-                    25u,
+                    { vm.getScanningResponseTimeout() },
+                    defaultScanningResponseTimeout,
                     stringResource(R.string.timeout),
                     R.string.timeout_info,
                     setInformationRequested,
-                    { coroutineScope.launch { appSettingsStore.setTimeoutSetting(it) } }
+                    vm::setScanningResponseTimeout
                 )
 
                 // PDF chunk size setting
                 UIntSetting(
-                    {
-                        appSettingsStore.data.firstOrNull()?.chunkSizePdfExport?.value?.toUInt() ?: 50u
-                    },
-                    50u,
+                    { vm.getPdfExportChunkSize() },
+                    defaultPdfExportChunkSize,
                     stringResource(R.string.pdf_export_max_pages_per_pdf),
                     R.string.pdf_export_setting_info,
                     setInformationRequested,
-                    { coroutineScope.launch { appSettingsStore.setChunkSize(it) } },
+                    vm::setPdfExportChunkSize,
                     min = 1u,
                     max = UInt.MAX_VALUE
                 )
@@ -298,9 +298,9 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 title = stringResource(R.string.advanced)
             ) {
                 DebugOptions(
-                    appSettings.writeDebug,
+                    writeDebugLogs,
                     setInformationRequested,
-                    { coroutineScope.launch { appSettingsStore.setWriteDebugLog(it) } }
+                    vm::setWriteDebugLogs
                 )
             }
         }

@@ -122,7 +122,7 @@ fun FoundScannerItem(
 
             if (iconUrl != null) {
                 AsyncImage(
-                    model = iconUrl.toString(),
+                    model = iconUrl,
                     contentDescription = stringResource(id = R.string.print_symbol_desc),
                     imageLoader = imageLoader,
                     modifier = Modifier

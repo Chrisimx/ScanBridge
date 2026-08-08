@@ -28,14 +28,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import io.github.chrisimx.scanbridge.datastore.appSettingsStore
+import io.github.chrisimx.scanbridge.appsettings.AppSettingsRepository
 import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager
-import io.github.chrisimx.scanbridge.proto.scanningResponseTimeoutOrNull
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
 import io.github.chrisimx.scanbridge.util.doTempFilesExist
 import kotlin.uuid.Uuid
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
@@ -95,8 +93,8 @@ fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
 @Composable
 fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
     val context = LocalContext.current
-    val appSettings = context.appSettingsStore.data
     val protocolManager = koinInject<ScanningProtocolManager>()
+    val appSettingsRepo = koinInject<AppSettingsRepository>()
 
     NavHost(
         modifier = Modifier.testTag("root_node"),
@@ -129,10 +127,10 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
         }
         composable<ScannerRoute> { backStackEntry ->
             val scannerRoute: ScannerRoute = backStackEntry.toRoute()
-            val appSettingsCurrent = runBlocking { appSettings.first() }
-            val debug = appSettingsCurrent.writeDebug
-            val certValidationDisabled = appSettingsCurrent.disableCertChecks
-            val timeout = appSettingsCurrent.scanningResponseTimeoutOrNull?.value?.toUInt() ?: 25u
+            val appSettingsCurrent = runBlocking { appSettingsRepo.getAppSettings() }
+            val debug = appSettingsCurrent.writeDebugLogs
+            val certValidationDisabled = appSettingsCurrent.disableCertValidation
+            val timeout = appSettingsCurrent.scanningResponseTimeoutInS
             val scannerHandle = protocolManager.getScannerHandle(
                 scannerRoute.protocolId,
                 scannerRoute.scannerHandleString
@@ -149,7 +147,7 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
                 scannerRoute.scannerName,
                 scannerHandle,
                 navController,
-                timeout,
+                timeout.toUInt(),
                 debug,
                 certValidationDisabled,
                 Uuid.parse(scannerRoute.sessionID)

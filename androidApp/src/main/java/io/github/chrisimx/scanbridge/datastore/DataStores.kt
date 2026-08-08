@@ -11,6 +11,7 @@ import io.github.chrisimx.scanbridge.proto.LastRoute
 import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
 import io.github.chrisimx.scanbridge.proto.ShownMessages
 
+@Deprecated("Use the corresponding repository instead")
 val Context.appSettingsStore: DataStore<ScanBridgeSettings> by dataStore(
     fileName = "settings.pb",
     serializer = ScanBridgeSettingsSerializer,
@@ -37,6 +38,7 @@ val Context.appSettingsStore: DataStore<ScanBridgeSettings> by dataStore(
     }
 )
 
+@Deprecated("Use the corresponding repository instead")
 val Context.lastRouteStore: DataStore<LastRoute> by dataStore(
     fileName = "route_store.pb",
     serializer = LastRouteStoreSerializer,
@@ -57,6 +59,7 @@ val Context.lastRouteStore: DataStore<LastRoute> by dataStore(
     }
 )
 
+@Deprecated("Use the corresponding repository instead")
 val Context.shownMessagesStore: DataStore<ShownMessages> by dataStore(
     fileName = "shown_messages.pb",
     serializer = ShownMessagesSerializer

@@ -2,29 +2,26 @@ package io.github.chrisimx.scanbridge.services
 
 import android.app.Application
 import android.net.Uri
-import androidx.datastore.core.DataStore
 import io.github.chrisimx.scanbridge.BuildConfig
+import io.github.chrisimx.scanbridge.appsettings.AppSettingsRepository
 import io.github.chrisimx.scanbridge.logs.FileLogger
-import io.github.chrisimx.scanbridge.proto.ScanBridgeSettings
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 
-class FileDebugLogService(appSettings: DataStore<ScanBridgeSettings>, val application: Application) : DebugLogService {
+class FileDebugLogService(appSettings: AppSettingsRepository, val application: Application) : DebugLogService {
 
     val scope = CoroutineScope(Dispatchers.Main)
 
     private var debugWriter: BufferedWriter? = null
     private var tree: Timber.Tree? = null
 
-    private val debugLogActive = appSettings.data.map { it.writeDebug }.distinctUntilChanged()
+    private val debugLogActive = appSettings.getWriteDebugLogsFlow()
 
     init {
         debugLogActive.onEach {

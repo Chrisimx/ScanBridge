@@ -13,7 +13,7 @@ import kotlinx.coroutines.runBlocking
 import org.koin.core.qualifier.named
 import org.koin.core.scope.Scope
 
-class RoomMigrationV5To6(val buildInfoProvider: BuildInfoProvider, val koinScope: Scope, val loggerFactory: ScanBridgeLoggerFactory) :
+class RoomMigrationVersion5To6(val buildInfoProvider: BuildInfoProvider, val koinScope: Scope, val loggerFactory: ScanBridgeLoggerFactory) :
     Migration(5, 6) {
 
     private val logger = loggerFactory.withClass(this::class)
