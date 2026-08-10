@@ -35,6 +35,11 @@ kotlin {
             api(libs.compose.resources)
             api(libs.compose.ui.tooling.preview)
             api(libs.compose.material3)
+            api(libs.compose.material.icons.extended)
+            api(libs.navigation.compose)
+            api(libs.koin.compose)
+            api(libs.koin.compose.viewmodel)
+            api(libs.koin.core)
 
             api(libs.anyscanCore)
             api(project(":core"))

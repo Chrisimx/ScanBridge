@@ -43,7 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import io.github.chrisimx.scanbridge.data.model.EditedCustomScanner
+import io.github.chrisimx.scanbridge.model.EditedCustomScanner
 import io.github.chrisimx.scanbridge.db.entities.CustomScanner
 import io.github.chrisimx.scanbridge.model.DiscoveredScanner
 import io.github.chrisimx.scanbridge.scannerdiscovery.ScannerDiscoveryScreenViewModel

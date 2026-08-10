@@ -137,6 +137,10 @@ val appModule = module {
 
     single<JvmNumberFormatter>() bind NumberFormatter::class
 
+    single<StartupTabsProvider> {
+        STARTUP_TABS_PROVIDER
+    }
+
     includes(SCAN_PROTOCOLS, ROOM_MIGRATIONS, DATASTORE_TO_ROOM_MIGRATION_DATA_SOURCES)
 }
 

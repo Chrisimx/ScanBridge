@@ -24,6 +24,7 @@ kotlinxCoroutines = "1.10.2"
 lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
 composeBom = "2026.03.01"
+navigationComposeVersion = "2.9.2"
 retrofit = "3.0.0"
 room = "2.8.4"
 timber = "5.0.1"
@@ -31,6 +32,7 @@ zoomable = "0.18.0"
 material3 = "1.11.0-alpha05"
 androidx-material3 = "1.5.0-alpha16"
 materialIcons = "1.7.8"
+composeMultiplatformMateriaIcons = "1.7.3"
 navigationCompose = "2.9.5"
 versionsPlugin = "0.53.0"
 screengrab = "2.1.1"
@@ -65,6 +67,7 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite" }
 
+navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
 retrofit-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
@@ -93,6 +96,7 @@ androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constr
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core" , version.ref = "materialIcons"}
+compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "composeMultiplatformMateriaIcons" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-fetcher-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }

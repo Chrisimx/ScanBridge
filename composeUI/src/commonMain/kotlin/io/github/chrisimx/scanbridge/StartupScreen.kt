@@ -20,7 +20,6 @@
 package io.github.chrisimx.scanbridge
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
@@ -41,11 +40,13 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import io.github.chrisimx.scanbridge.data.model.EditedCustomScanner
+import io.github.chrisimx.scanbridge.model.EditedCustomScanner
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.custom_scanner_desc
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,27 +56,22 @@ fun ScannerDiscoveryTopBar(header: String) {
     )
 }
 
-data class StartupScreen(
-    val nameResource: Int,
-    val titleResource: Int,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector,
-    val fabActivated: Boolean,
-    val screenComposable: @Composable (
-        innerPadding: PaddingValues,
-        navController: NavController,
-        showCustomDialog: EditedCustomScanner?,
-        setShowCustomDialog: (EditedCustomScanner?) -> Unit
-    ) -> Unit
-)
-
-val INDEXED_TABS = STARTUP_TABS.withIndex()
-val StartupScreenSaver = Saver<IndexedValue<StartupScreen>, Int>(save = { it.index }, restore = { IndexedValue(it, STARTUP_TABS[it]) })
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StartupScreen(navController: NavController) {
-    var selectedScreen by rememberSaveable(stateSaver = StartupScreenSaver) { mutableStateOf(INDEXED_TABS.first()) }
+fun StartupScreen(
+    navController: NavController,
+    startupTabsProvider: StartupTabsProvider = koinInject()
+) {
+    val startupTabs = startupTabsProvider
+        .getStartupTabs()
+
+    val indexedStartupTabs = startupTabs.withIndex()
+
+    val startupScreenSaver = Saver<IndexedValue<StartupTabDefinition>, Int>(save = { it.index }, restore = {
+        IndexedValue(it, startupTabs[it])
+    })
+
+    var selectedScreen by rememberSaveable(stateSaver = startupScreenSaver) { mutableStateOf(indexedStartupTabs.first()) }
     val unindexedSelectedScreen = selectedScreen.value
 
     var showCustomDialog: EditedCustomScanner? by remember { mutableStateOf(null) }
@@ -85,7 +81,7 @@ fun StartupScreen(navController: NavController) {
         topBar = @Composable { ScannerDiscoveryTopBar(stringResource(unindexedSelectedScreen.titleResource)) },
         bottomBar = @Composable {
             NavigationBar {
-                STARTUP_TABS.forEachIndexed { idx, screen ->
+                startupTabs.forEachIndexed { idx, screen ->
                     NavigationBarItem(
                         modifier = Modifier.testTag("bottombutton$idx"),
                         icon = {
@@ -111,7 +107,7 @@ fun StartupScreen(navController: NavController) {
                 ) {
                     Icon(
                         Icons.Filled.Create,
-                        contentDescription = stringResource(R.string.custom_scanner_desc)
+                        contentDescription = stringResource(Res.string.custom_scanner_desc)
                     )
                 }
             }
