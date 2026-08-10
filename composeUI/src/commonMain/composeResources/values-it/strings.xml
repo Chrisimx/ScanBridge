@@ -125,4 +125,12 @@
     <string name="custom_scanner_deletion">Elimina scanner personalizzato</string>
     <string name="color_scan_24">Colore (24 bit)</string>
     <string name="grayscale_8">Scala di grigi (8 bit)</string>
+    <string name="scan_intent_document">Documento</string>
+    <string name="scan_intent_text_and_graphic"><![CDATA[Testo e grafica]]></string>
+    <string name="scan_intent_photo">Foto</string>
+    <string name="scan_intent_preview">Anteprima</string>
+    <string name="scan_intent_object">Oggetto 3D</string>
+    <string name="scan_intent_business_card">Biglietto da visita</string>
+    <string name="initial_scan_settings">Impostazioni di scansione iniziali</string>
+    <string name="preferred_initial_scan_settings_setting_desc">Questa impostazione definisce le impostazioni di scansione iniziali preferite che vengono utilizzate quando si avvia una nuova sessione di scansione.\n\nNel menu puoi impostare le opzioni desiderate. Se la tua selezione è supportata dallo scanner, verrà utilizzata direttamente. In caso contrario, le impostazioni verranno adattate in modo da essere supportate dallo scanner e il più possibile vicine alla tua selezione.\n\nSe l'opzione „Ricorda le impostazioni di scansione“ è attivata, verranno invece utilizzate le impostazioni di scansione utilizzate più recentemente, se disponibili.</string>
 </resources>

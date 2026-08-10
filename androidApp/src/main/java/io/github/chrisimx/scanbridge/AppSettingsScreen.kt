@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -208,11 +207,14 @@ fun InitialScanSettingsAppSetting(
     setHelpText: (StringResource) -> Unit
 ) {
     Row(
-        modifier = Modifier.padding(vertical = 10.dp),
+        modifier = Modifier
+            .padding(vertical = 10.dp)
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedButton(
             modifier = Modifier
+                .weight(1f, fill = false)
                 .padding(horizontal = 10.dp),
             onClick = {
                 setMenuVis(true)
@@ -231,8 +233,6 @@ fun InitialScanSettingsAppSetting(
                 )
             }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
 
         MoreInformationButton {
             setHelpText(Res.string.preferred_initial_scan_settings_setting_desc)
