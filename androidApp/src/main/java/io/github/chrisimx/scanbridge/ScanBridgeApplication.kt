@@ -55,7 +55,7 @@ import io.github.chrisimx.scanbridge.scannerdiscovery.ScannerDiscoveryScreenView
 import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
 import io.github.chrisimx.scanbridge.services.DebugLogService
 import io.github.chrisimx.scanbridge.services.FileDebugLogService
-import io.github.chrisimx.scanbridge.services.ScanJobRepository
+import io.github.chrisimx.scanbridge.repositories.ScanJobRepository
 import io.github.chrisimx.scanbridge.startupmessages.RoomShownStartupMessagesRepository
 import io.github.chrisimx.scanbridge.startupmessages.ShownStartupMessagesRepository
 import io.github.chrisimx.scanbridge.usecases.StartScanUseCase

@@ -1,9 +1,11 @@
-package io.github.chrisimx.scanbridge.services
+package io.github.chrisimx.scanbridge.repositories
 
 import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScanningError
+import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -14,7 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 sealed class ScanJobEvent {
     data class Completed(val job: ScanJob) : ScanJobEvent()
@@ -22,7 +23,11 @@ sealed class ScanJobEvent {
     data class Started(val job: ScanJob) : ScanJobEvent()
 }
 
-class ScanJobRepository {
+class ScanJobRepository(
+    val loggerFactory: ScanBridgeLoggerFactory
+) {
+    val logger = loggerFactory.withClass(this::class)
+    
     // Channel acts as an async queue
     private val jobChannel = Channel<ScanJob>(capacity = Channel.UNLIMITED)
 
@@ -49,19 +54,19 @@ class ScanJobRepository {
     fun enqueue(job: ScanJob) {
         coroutineScope.launch {
             jobChannel.send(job)
-            Timber.d("Enqueued job: $job")
+            logger.debug { "Enqueued job: $job" }
         }
     }
 
     fun setJobRunning(value: Boolean) {
-        Timber.d("setJobRunning($value)")
+        logger.debug { "setJobRunning($value)" }
         _isJobRunning.update {
             value
         }
     }
 
     fun setCancel(value: Boolean) {
-        Timber.d("setCancel($value)")
+        logger.debug { "setCancel($value)" }
         _shouldCancel.update {
             value
         }
@@ -71,7 +76,7 @@ class ScanJobRepository {
      * Notify that a job was completed
      */
     fun notifyCompleted(job: ScanJob) {
-        Timber.d("notifyCompleted($job)")
+        logger.debug { "notifyCompleted($job)" }
         coroutineScope.launch {
             _events.emit(ScanJobEvent.Completed(job))
         }
@@ -81,7 +86,7 @@ class ScanJobRepository {
      * Notify that a job was started
      */
     fun notifyStarted(job: ScanJob) {
-        Timber.d("notifyStarted($job)")
+        logger.debug { "notifyStarted($job)" }
         coroutineScope.launch {
             _events.emit(ScanJobEvent.Started(job))
         }
@@ -91,12 +96,11 @@ class ScanJobRepository {
      * Notify that a job failed
      */
     fun notifyFailed(job: ScanJob, error: ScanningError) {
-        Timber.d("notifyFailed($job, $error)")
+        logger.debug { "notifyFailed($job, $error)" }
         coroutineScope.launch {
             _events.emit(ScanJobEvent.Failed(job, error))
         }
     }
-
     /**
      * Consume the next job
      */

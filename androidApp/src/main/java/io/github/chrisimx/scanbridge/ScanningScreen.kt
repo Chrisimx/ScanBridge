@@ -94,7 +94,7 @@ import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.toUIInputSourceType
-import io.github.chrisimx.scanbridge.services.ScanJobEvent
+import io.github.chrisimx.scanbridge.repositories.ScanJobEvent
 import io.github.chrisimx.scanbridge.uicomponents.ExportSettingsPopup
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen

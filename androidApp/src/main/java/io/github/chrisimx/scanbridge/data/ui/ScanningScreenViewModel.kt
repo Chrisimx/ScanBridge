@@ -62,7 +62,7 @@ import io.github.chrisimx.scanbridge.model.toggleRotation
 import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
 import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
 import io.github.chrisimx.scanbridge.savelastusedscansettings.LastUsedScanSettingsRepository
-import io.github.chrisimx.scanbridge.services.ScanJobRepository
+import io.github.chrisimx.scanbridge.repositories.ScanJobRepository
 import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import io.github.chrisimx.scanbridge.util.getEditedImageName
 import io.github.chrisimx.scanbridge.util.rotateBy90
