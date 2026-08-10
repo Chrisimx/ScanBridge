@@ -86,8 +86,6 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -117,10 +115,35 @@ import kotlinx.serialization.json.Json
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.baseline_rotate_right_24
+import scanbridge.composeui.generated.resources.cancel_scan
+import scanbridge.composeui.generated.resources.cancelling_scan
+import scanbridge.composeui.generated.resources.crop
+import scanbridge.composeui.generated.resources.delete_current_page
+import scanbridge.composeui.generated.resources.desc_scanned_page
+import scanbridge.composeui.generated.resources.export
+import scanbridge.composeui.generated.resources.no_scans_yet
+import scanbridge.composeui.generated.resources.outline_crop_24
+import scanbridge.composeui.generated.resources.outline_file_save_24
+import scanbridge.composeui.generated.resources.outline_scan_24
+import scanbridge.composeui.generated.resources.page_deletion_confirmation
+import scanbridge.composeui.generated.resources.page_x_of_y
+import scanbridge.composeui.generated.resources.retrieving_page
+import scanbridge.composeui.generated.resources.rotate_right
+import scanbridge.composeui.generated.resources.rounded_document_scanner_24
+import scanbridge.composeui.generated.resources.save_to_file
+import scanbridge.composeui.generated.resources.scan
+import scanbridge.composeui.generated.resources.scannercapabilities_retrieve_error
+import scanbridge.composeui.generated.resources.settings
+import scanbridge.composeui.generated.resources.swap_with_next_page
+import scanbridge.composeui.generated.resources.swap_with_previous_page
 import scanbridge.composeui.generated.resources.trying_to_retrieve_scannercapabilities
+import scanbridge.composeui.generated.resources.twotone_wifi_find_24
 import timber.log.Timber
 
 private const val TAG = "ScanningScreen"
@@ -143,7 +166,7 @@ fun ScanningScreenBottomBar(
                     )
                 }
             ) {
-                Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
+                Icon(Icons.Filled.Settings, contentDescription = stringResource(Res.string.settings))
             }
             IconButton(
                 onClick = {
@@ -160,8 +183,8 @@ fun ScanningScreenBottomBar(
                 }
             ) {
                 Icon(
-                    painterResource(R.drawable.outline_file_save_24),
-                    contentDescription = stringResource(R.string.save_to_file)
+                    painterResource(Res.drawable.outline_file_save_24),
+                    contentDescription = stringResource(Res.string.save_to_file)
                 )
             }
             IconButton(
@@ -180,7 +203,7 @@ fun ScanningScreenBottomBar(
             ) {
                 Icon(
                     Icons.Filled.Share,
-                    contentDescription = stringResource(R.string.export)
+                    contentDescription = stringResource(Res.string.export)
                 )
             }
         },
@@ -220,11 +243,11 @@ fun ScanningScreenBottomBar(
                         contentColor = contentColor,
                         icon = {
                             Icon(
-                                painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
+                                Icons.Default.Close,
                                 contentDescription = if (isCancelling) {
-                                    stringResource(R.string.cancelling_scan)
+                                    stringResource(Res.string.cancelling_scan)
                                 } else {
-                                    stringResource(R.string.cancel_scan)
+                                    stringResource(Res.string.cancel_scan)
                                 }
                             )
                         },
@@ -237,9 +260,9 @@ fun ScanningScreenBottomBar(
                             ) { targetCancelling ->
                                 Text(
                                     text = if (targetCancelling) {
-                                        stringResource(R.string.cancelling_scan)
+                                        stringResource(Res.string.cancelling_scan)
                                     } else {
-                                        stringResource(R.string.cancel_scan)
+                                        stringResource(Res.string.cancel_scan)
                                     }
                                 )
                             }
@@ -257,11 +280,11 @@ fun ScanningScreenBottomBar(
                         modifier = Modifier.testTag("scanbtn"),
                         icon = {
                             Icon(
-                                painter = painterResource(R.drawable.outline_scan_24),
-                                contentDescription = stringResource(R.string.scan)
+                                painter = painterResource(Res.drawable.outline_scan_24),
+                                contentDescription = stringResource(Res.string.scan)
                             )
                         },
-                        text = { Text(stringResource(R.string.scan)) }
+                        text = { Text(stringResource(Res.string.scan)) }
                     )
                 }
             }
@@ -373,9 +396,9 @@ fun ScanningScreen(
             ) {
                 val errorDescription = scanningViewModel.scanningScreenData.error
                 FullScreenError(
-                    errorDescription?.icon ?: R.drawable.twotone_wifi_find_24,
+                    errorDescription?.icon ?: Res.drawable.twotone_wifi_find_24,
                     stringResource(
-                        errorDescription?.pretext ?: R.string.scannercapabilities_retrieve_error,
+                        errorDescription?.pretext ?: Res.string.scannercapabilities_retrieve_error,
                         errorDescription?.text ?: "Error text not found"
                     ),
                     copyButton = true
@@ -607,8 +630,8 @@ fun ScanningScreen(
 
         if (scanningViewModel.scanningScreenData.confirmPageDeleteDialogShown) {
             DeletionDialog(
-                R.string.delete_current_page,
-                R.string.page_deletion_confirmation,
+                Res.string.delete_current_page,
+                Res.string.page_deletion_confirmation,
                 onDismiss = { scanningViewModel.setDeletePageDialogShown(false) },
                 onConfirmed = {
                     Timber.d("Deleting page")
@@ -665,7 +688,7 @@ fun ScanContent(
             Text(modifier = Modifier.padding(horizontal = 5.dp), text = scannerName, textAlign = TextAlign.Center)
             Text(
                 stringResource(
-                    R.string.page_x_of_y,
+                    Res.string.page_x_of_y,
                     pagerState.currentPage + 1,
                     currentPages.size +
                         if (scanJobRunning) 1 else 0
@@ -689,8 +712,8 @@ fun ScanContent(
                     DownloadingPageFullscreen(innerPadding)
                 } else {
                     FullScreenError(
-                        R.drawable.rounded_document_scanner_24,
-                        stringResource(R.string.no_scans_yet)
+                        Res.drawable.rounded_document_scanner_24,
+                        stringResource(Res.string.no_scans_yet)
                     )
                 }
                 return@HorizontalPager
@@ -707,7 +730,7 @@ fun ScanContent(
                     val imagePath = currentPages.getOrNull(page)?.filePath
                     AsyncImage(
                         model = imagePath,
-                        contentDescription = stringResource(R.string.desc_scanned_page),
+                        contentDescription = stringResource(Res.string.desc_scanned_page),
                         modifier = Modifier
                             .testTag("scan_page")
                     )
@@ -741,7 +764,7 @@ fun ScanContent(
                         Icon(
                             Icons.Outlined.Delete,
                             contentDescription = stringResource(
-                                R.string.delete_current_page
+                                Res.string.delete_current_page
                             )
                         )
                     }
@@ -763,7 +786,7 @@ fun ScanContent(
                         Icon(
                             Icons.AutoMirrored.Outlined.ArrowBack,
                             contentDescription = stringResource(
-                                R.string.swap_with_previous_page
+                                Res.string.swap_with_previous_page
                             )
                         )
                     }
@@ -780,9 +803,9 @@ fun ScanContent(
                         }
                     }) {
                         Icon(
-                            painterResource(R.drawable.outline_crop_24),
+                            painterResource(Res.drawable.outline_crop_24),
                             contentDescription = stringResource(
-                                R.string.crop
+                                Res.string.crop
                             )
                         )
                     }
@@ -804,7 +827,7 @@ fun ScanContent(
                         Icon(
                             Icons.AutoMirrored.Outlined.ArrowForward,
                             contentDescription = stringResource(
-                                R.string.swap_with_next_page
+                                Res.string.swap_with_next_page
                             )
                         )
                     }
@@ -814,9 +837,9 @@ fun ScanContent(
                         }
                     }) {
                         Icon(
-                            painterResource(R.drawable.baseline_rotate_right_24),
+                            painterResource(Res.drawable.baseline_rotate_right_24),
                             contentDescription = stringResource(
-                                R.string.rotate_right
+                                Res.string.rotate_right
                             )
                         )
                     }
@@ -836,6 +859,6 @@ private fun DownloadingPageFullscreen(innerPadding: PaddingValues) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CircularProgressIndicator()
-        Text(modifier = Modifier.padding(vertical = 15.dp), text = stringResource(R.string.retrieving_page))
+        Text(modifier = Modifier.padding(vertical = 15.dp), text = stringResource(Res.string.retrieving_page))
     }
 }

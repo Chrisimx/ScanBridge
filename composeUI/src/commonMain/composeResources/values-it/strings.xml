@@ -176,4 +176,5 @@
     <string name="google_licensing_server_invalid_response">I server delle licenze Google hanno fornito dati non validi.</string>
     <string name="licensing_unknown_server_response_code">I server delle licenze Google hanno restituito un codice di risposta sconosciuto. Ti preghiamo di segnalare questo problema a support@fireamp.eu</string>
     <string name="e_mail">E-mail</string>
+    <string name="custom_scanner_url">URL</string>
 </resources>

@@ -19,8 +19,6 @@
 
 package io.github.chrisimx.scanbridge.uicomponents
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,24 +34,32 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.chrisimx.scanbridge.R
+import io.github.chrisimx.scanbridge.clipboard.toClipEntry
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.copy
+import scanbridge.composeui.generated.resources.warning_desc
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = false, fontSize: TextUnit = 18.sp, title: String? = null) {
-    val context = LocalContext.current
+fun FullScreenError(errorIcon: DrawableResource, errorMessage: String, copyButton: Boolean = false, fontSize: TextUnit = 18.sp, title: String? = null) {
     val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -65,7 +71,7 @@ fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = 
     ) {
         Icon(
             painter = painterResource(errorIcon),
-            contentDescription = stringResource(R.string.warning_desc),
+            contentDescription = stringResource(Res.string.warning_desc),
             modifier = Modifier.size(64.dp),
             tint = MaterialTheme.colorScheme.primary
         )
@@ -93,14 +99,17 @@ fun FullScreenError(errorIcon: Int, errorMessage: String, copyButton: Boolean = 
             )
         }
 
+        val localClipboard = LocalClipboard.current
+
         if (copyButton) {
             OutlinedButton(onClick = {
-                val clipboardManager = context.getSystemService(ClipboardManager::class.java)
-                val clipData =
-                    ClipData.newPlainText(context.getString(R.string.error), errorMessage)
-                clipboardManager.setPrimaryClip(clipData)
+                coroutineScope.launch {
+                    localClipboard.setClipEntry(
+                        errorMessage.toClipEntry()
+                    )
+                }
             }) {
-                Text(stringResource(R.string.copy))
+                Text(stringResource(Res.string.copy))
             }
         }
     }

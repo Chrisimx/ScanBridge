@@ -9,8 +9,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
+import org.jetbrains.compose.resources.stringResource
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.internet_connection_needed
+import scanbridge.composeui.generated.resources.twotone_wifi_find_24
 
 enum class SupportScreenStates {
     SetupScreen,
@@ -26,8 +29,8 @@ fun SupportScreen(innerPadding: PaddingValues) {
     AnimatedContent(isInternetConnected) {
         if (!it) {
             FullScreenError(
-                R.drawable.twotone_wifi_find_24,
-                stringResource(R.string.internet_connection_needed)
+                Res.drawable.twotone_wifi_find_24,
+                stringResource(Res.string.internet_connection_needed)
             )
             return@AnimatedContent
         } else {

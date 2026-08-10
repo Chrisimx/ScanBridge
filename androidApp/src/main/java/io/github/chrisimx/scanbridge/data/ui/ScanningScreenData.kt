@@ -27,8 +27,10 @@ import io.github.chrisimx.anyscan.CommonScannerCapabilities
 import io.github.chrisimx.scanbridge.ScanSettingsComposableStateHolder
 import java.io.File
 import kotlin.uuid.Uuid
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 
-data class ErrorDescription(val pretext: Int?, val icon: Int?, val text: String?)
+data class ErrorDescription(val pretext: StringResource?, val icon: DrawableResource?, val text: String?)
 
 data class ScanningScreenData(
     val sessionID: Uuid,

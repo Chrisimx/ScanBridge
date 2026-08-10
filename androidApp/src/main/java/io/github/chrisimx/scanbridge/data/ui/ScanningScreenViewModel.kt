@@ -90,6 +90,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.scope.Scope
 import timber.log.Timber
@@ -223,7 +225,7 @@ class ScanningScreenViewModel(
         _scanningScreenData.confirmPageDeleteDialogShown.value = value
     }
 
-    fun setError(error: String?, titleResource: Int? = null, errorIcon: Int? = null) {
+    fun setError(error: String?, titleResource: StringResource? = null, errorIcon: DrawableResource? = null) {
         _scanningScreenData.error.value = ErrorDescription(
             titleResource,
             errorIcon,

@@ -106,14 +106,13 @@ dependencies {
     implementation(libs.koin.androix.navigation)
     implementation(libs.zoomable)
     implementation(libs.kotlin.reflect)
-    implementation(libs.coil.compose)
     implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(project(":core"))
     implementation(project(":composeUI"))
     implementation(libs.androidx.concurrent.futures)
-    implementation(libs.coil.fetcher.ktor)
+
 
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)

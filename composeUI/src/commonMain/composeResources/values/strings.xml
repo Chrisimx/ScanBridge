@@ -65,6 +65,7 @@
     <string name="rotate_right">Rotate right</string>
     <string name="rotating_page">Rotating…</string>
     <string name="custom_scanner_desc">Access custom scanner</string>
+    <string name="custom_scanner_url">URL</string>
     <string name="connect">Just connect</string>
     <string name="url_escl_resource">URL (eSCL resource)</string>
     <string name="new_custom_scanner_dialog_title">Connect to a custom scanner</string>

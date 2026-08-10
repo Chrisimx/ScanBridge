@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,60 +34,11 @@ import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
 import io.github.chrisimx.scanbridge.util.doTempFilesExist
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonNames
 import org.koin.compose.koinInject
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.outline_error_24
 import timber.log.Timber
-
-@Serializable
-sealed interface BaseRoute
-
-@Serializable
-@SerialName("StartUpScreenRoute")
-object StartUpScreenRoute : BaseRoute
-
-@Serializable
-@SerialName("ScannerRoute")
-@OptIn(ExperimentalSerializationApi::class)
-data class ScannerRoute(
-    val scannerName: String,
-    @JsonNames("scannerHandle", "scannerURL")
-    val scannerHandleString: String,
-    val protocolId: String = "eSCL",
-    val sessionID: String
-) : BaseRoute
-
-@Serializable
-@SerialName("CropImageRoute")
-data class CropImageRoute(val scanId: String, val returnRoute: String) : BaseRoute
-
-@Serializable
-@SerialName("ErrorRoute")
-data class ErrorRoute(val error: String) : BaseRoute
-
-fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
-    Timber.d("Route changed to: ${destination.route}")
-    return when (destination.route) {
-        "StartUpScreenRoute" -> this.toRoute<StartUpScreenRoute>()
-
-        "CropImageRoute/{scanId}/{pageIdx}/{returnRoute}" -> {
-            this.toRoute<CropImageRoute>()
-        }
-
-        "ScannerRoute/{scannerName}/{scannerHandleString}/{sessionID}?protocolId={protocolId}" -> {
-            this.toRoute<ScannerRoute>()
-        }
-
-        "ErrorRoute/{error}" -> {
-            this.toRoute<ErrorRoute>()
-        }
-
-        else -> null
-    }
-}
 
 @Composable
 fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
@@ -105,7 +55,7 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
             val errorRoute: ErrorRoute = backStackEntry.toRoute()
             val errorMessage = errorRoute.error
 
-            FullScreenError(R.drawable.outline_error_24, errorMessage, true)
+            FullScreenError(Res.drawable.outline_error_24, errorMessage, true)
         }
         composable<StartUpScreenRoute> {
             StartupScreen(navController)

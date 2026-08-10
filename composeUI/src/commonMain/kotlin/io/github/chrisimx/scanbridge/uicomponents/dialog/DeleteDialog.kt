@@ -19,7 +19,6 @@
 
 package io.github.chrisimx.scanbridge.uicomponents.dialog
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
@@ -31,16 +30,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import io.github.chrisimx.scanbridge.R
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.cancel_text
+import scanbridge.composeui.generated.resources.delete
 
 @Composable
 fun DeletionDialog(
-    @StringRes
-    titleRes: Int,
-    @StringRes
-    confirmationQuestionRes: Int,
+    titleRes: StringResource,
+    confirmationQuestionRes: StringResource,
     onDismiss: () -> Unit,
     onConfirmed: () -> Unit
 ) {
@@ -68,7 +68,7 @@ fun DeletionDialog(
                     onDismiss()
                 }
             ) {
-                Text(stringResource(R.string.cancel_text))
+                Text(stringResource(Res.string.cancel_text))
             }
         },
         confirmButton = {
@@ -80,7 +80,7 @@ fun DeletionDialog(
                     onConfirmed()
                 }
             ) {
-                Text(stringResource(R.string.delete))
+                Text(stringResource(Res.string.delete))
             }
         }
     )

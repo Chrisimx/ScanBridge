@@ -178,4 +178,5 @@
     <string name="explanation_support">In diesem Bereich kannst du einen priorisierten Supportaccount erstellen. Registriere dich und erhalte eine E-Mail, um dein Passwort zu setzen. Danach kannst du deine registrierte E-Mail verwenden um support@fireamp.eu zu kontaktieren oder wahlweise dich auf https://support.fireamp.eu anmelden, um priorisierten Support zu erhalten.</string>
     <string name="created_successfully">Account erfolgreich erstellt</string>
     <string name="e_mail">E-Mail</string>
+    <string name="custom_scanner_url">URL</string>
 </resources>

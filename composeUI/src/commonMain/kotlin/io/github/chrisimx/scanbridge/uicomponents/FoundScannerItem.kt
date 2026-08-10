@@ -41,25 +41,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
-import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.ScannerRoute
-import java.util.*
+import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
-import timber.log.Timber
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.delete
+import scanbridge.composeui.generated.resources.edit_custom_scanner
+import scanbridge.composeui.generated.resources.outline_edit_24
+import scanbridge.composeui.generated.resources.print_symbol_desc
+import scanbridge.composeui.generated.resources.round_print_36
 
 @Composable
-fun tintedPainterResource(id: Int, tint: Color): Painter {
-    val basePainter = painterResource(id)
+fun tintedPainterResource(drawableResource: DrawableResource, tint: Color): Painter {
+    val basePainter = painterResource(drawableResource)
 
     return remember(basePainter, tint) {
         object : Painter() {
@@ -78,6 +84,7 @@ fun tintedPainterResource(id: Int, tint: Color): Painter {
     }
 }
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 fun FoundScannerItem(
     scannerHandleString: String,
@@ -86,8 +93,11 @@ fun FoundScannerItem(
     iconUrl: String?,
     navController: NavController,
     deleteScanner: (() -> Unit)? = null,
-    editScanner: (() -> Unit)? = null
+    editScanner: (() -> Unit)? = null,
+    loggerFactory: ScanBridgeLoggerFactory? = koinInject()
 ) {
+    val logger = loggerFactory?.withTag("FoundScannerItem")
+
     ElevatedCard(
         modifier = Modifier
             .defaultMinSize(minHeight = 60.dp)
@@ -112,7 +122,7 @@ fun FoundScannerItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val tintedPlaceholder = tintedPainterResource(
-                R.drawable.round_print_36,
+                Res.drawable.round_print_36,
                 MaterialTheme.colorScheme.surfaceTint
             )
 
@@ -123,7 +133,7 @@ fun FoundScannerItem(
             if (iconUrl != null) {
                 AsyncImage(
                     model = iconUrl,
-                    contentDescription = stringResource(id = R.string.print_symbol_desc),
+                    contentDescription = stringResource(Res.string.print_symbol_desc),
                     imageLoader = imageLoader,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
@@ -142,9 +152,9 @@ fun FoundScannerItem(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .padding(17.dp),
-                    painter = painterResource(R.drawable.round_print_36),
+                    painter = painterResource(Res.drawable.round_print_36),
                     tint = MaterialTheme.colorScheme.surfaceTint,
-                    contentDescription = stringResource(id = R.string.print_symbol_desc)
+                    contentDescription = stringResource(Res.string.print_symbol_desc)
                 )
             }
             Column(
@@ -170,26 +180,26 @@ fun FoundScannerItem(
                     modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
                     onClick = {
                         editScanner.invoke()
-                        Timber.i("Edit button clicked for custom scanner: $name at $scannerHandleString")
+                        logger?.info { "Edit button clicked for custom scanner: $name at $scannerHandleString" }
                     }
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.outline_edit_24),
+                        painter = painterResource(Res.drawable.outline_edit_24),
                         tint = MaterialTheme.colorScheme.surfaceTint,
-                        contentDescription = stringResource(id = R.string.edit_custom_scanner)
+                        contentDescription = stringResource(Res.string.edit_custom_scanner)
                     )
                 }
                 IconButton(
                     modifier = Modifier.padding(end = 8.dp, top = 8.dp, bottom = 8.dp),
                     onClick = {
                         deleteScanner.invoke()
-                        Timber.i("Delete button clicked for custom scanner: $name at $scannerHandleString")
+                        logger?.info { "Delete button clicked for custom scanner: $name at $scannerHandleString" }
                     }
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Delete,
                         tint = MaterialTheme.colorScheme.error,
-                        contentDescription = stringResource(id = R.string.delete)
+                        contentDescription = stringResource(Res.string.delete)
                     )
                 }
             }

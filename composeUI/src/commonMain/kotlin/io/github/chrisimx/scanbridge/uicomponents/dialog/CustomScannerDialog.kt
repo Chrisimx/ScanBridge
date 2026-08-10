@@ -20,31 +20,47 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.model.EditedCustomScanner
+import io.github.chrisimx.scanbridge.model.UrlValidationResult
 import io.github.chrisimx.scanbridge.scannerdiscovery.ProtocolWithExampleHandleString
 import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import io.github.chrisimx.scanbridge.uicomponents.SelectionButtonRow
 import io.ktor.http.Url
 import org.jetbrains.compose.resources.stringResource
 import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.connect
+import scanbridge.composeui.generated.resources.connect_and_save
+import scanbridge.composeui.generated.resources.custom_scanner_url
+import scanbridge.composeui.generated.resources.edit_custom_scanner
+import scanbridge.composeui.generated.resources.error_state_please_enter_an_url
+import scanbridge.composeui.generated.resources.invalid_url
+import scanbridge.composeui.generated.resources.name
+import scanbridge.composeui.generated.resources.new_custom_scanner_dialog_title
+import scanbridge.composeui.generated.resources.save
+import scanbridge.composeui.generated.resources.scanner_name_placeholder
 import scanbridge.composeui.generated.resources.scanning_protocol
+
+@Composable
+fun UrlValidationResult.toLocalizedString(): String = when (this) {
+    UrlValidationResult.Empty -> stringResource(Res.string.error_state_please_enter_an_url)
+    UrlValidationResult.InvalidUrl -> stringResource(Res.string.invalid_url)
+    is UrlValidationResult.NoError -> ""
+}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CustomScannerDialog(
     protocolsWithExampleHandle: List<ProtocolWithExampleHandleString>,
     onDismiss: () -> Unit,
-    onConnectClicked: (name: String, url: Url, protocol: String, save: Boolean, navigate: Boolean) -> Unit,
-    editingType: EditedCustomScanner
+    onConnectClicked: (name: String, url: String, protocol: String, save: Boolean, navigate: Boolean) -> Unit,
+    editingType: EditedCustomScanner,
+    validateUrl: (String) -> UrlValidationResult
 ) {
-    var urlErrorState: String? by remember { mutableStateOf(null) }
     val initializeWith = when (editingType) {
         is EditedCustomScanner.EditingOld -> editingType.scanner
         EditedCustomScanner.New -> null
@@ -57,28 +73,13 @@ fun CustomScannerDialog(
     }
     var nameText: String by remember { mutableStateOf(initializeWith?.name ?: "") }
 
+    var urlValidationResult: UrlValidationResult by remember { mutableStateOf(validateUrl(urlText)) }
+
     var selectedProtocol by remember {
         mutableStateOf(originalIdentifier ?: protocolsWithExampleHandle.first())
     }
 
-    val context = LocalContext.current
-
     val isNewScanner = editingType is EditedCustomScanner.New
-
-    // TODO: Move validation to view model
-    val validateUrl = fun(): Url? {
-        if (urlText.isEmpty()) {
-            urlErrorState = context.getString(R.string.error_state_please_enter_an_url)
-            return null
-        }
-
-        try {
-            return Url(urlText)
-        } catch (_: Exception) {
-            urlErrorState = context.getString(R.string.invalid_url)
-            return null
-        }
-    }
 
     Dialog(
         onDismissRequest = { onDismiss() }
@@ -95,9 +96,9 @@ fun CustomScannerDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val title = if (isNewScanner) {
-                    R.string.new_custom_scanner_dialog_title
+                    Res.string.new_custom_scanner_dialog_title
                 } else {
-                    R.string.edit_custom_scanner
+                    Res.string.edit_custom_scanner
                 }
 
                 Text(
@@ -111,26 +112,24 @@ fun CustomScannerDialog(
                     onValueChange = {
                         nameText = it
                     },
-                    label = { Text(stringResource(R.string.name)) },
-                    placeholder = { Text(stringResource(R.string.scanner_name_placeholder)) }
+                    label = { Text(stringResource(Res.string.name)) },
+                    placeholder = { Text(stringResource(Res.string.scanner_name_placeholder)) }
                 )
                 OutlinedTextField(
                     modifier = Modifier.testTag("url_input").padding(top = 16.dp),
                     value = urlText,
                     onValueChange = {
-                        urlErrorState = null
+                        urlValidationResult = validateUrl(it)
                         urlText = it
                     },
-                    label = { Text(stringResource(R.string.custom_scanner_url)) },
+                    label = { Text(stringResource(Res.string.custom_scanner_url)) },
                     placeholder = { Text(selectedProtocol.exampleScannerIdentifierString) },
                     supportingText = {
-                        urlErrorState?.let {
-                            Text(
-                                it,
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
+                        Text(
+                            urlValidationResult.toLocalizedString(),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.labelMedium
+                        )
                     }
                 )
 
@@ -145,10 +144,9 @@ fun CustomScannerDialog(
                 if (isNewScanner) {
                     Button(
                         onClick = {
-                            val url = validateUrl() ?: return@Button
                             onConnectClicked(
                                 nameText,
-                                url,
+                                urlText,
                                 selectedProtocol.protocolIdentifier,
                                 true,
                                 true
@@ -156,14 +154,13 @@ fun CustomScannerDialog(
                         },
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
-                        Text(stringResource(R.string.connect_and_save))
+                        Text(stringResource(Res.string.connect_and_save))
                     }
                     Button(
                         onClick = {
-                            val url = validateUrl() ?: return@Button
                             onConnectClicked(
                                 nameText,
-                                url,
+                                urlText,
                                 selectedProtocol.protocolIdentifier,
                                 false,
                                 true
@@ -171,15 +168,14 @@ fun CustomScannerDialog(
                         },
                         modifier = Modifier.padding(top = 8.dp).testTag("justconnect")
                     ) {
-                        Text(stringResource(R.string.connect))
+                        Text(stringResource(Res.string.connect))
                     }
                 } else {
                     Button(
                         onClick = {
-                            val url = validateUrl() ?: return@Button
                             onConnectClicked(
                                 nameText,
-                                url,
+                                urlText,
                                 selectedProtocol.protocolIdentifier,
                                 true,
                                 false
@@ -187,7 +183,7 @@ fun CustomScannerDialog(
                         },
                         modifier = Modifier.padding(top = 16.dp).testTag("editcustomscanner")
                     ) {
-                        Text(stringResource(R.string.save))
+                        Text(stringResource(Res.string.save))
                     }
                 }
             }
@@ -195,7 +191,8 @@ fun CustomScannerDialog(
     }
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+
+@Suppress("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
 @Composable
 fun PreviewCustomScannerDialog() {
@@ -207,8 +204,10 @@ fun PreviewCustomScannerDialog() {
                 ),
                 {},
                 { _, _, _, _, _ -> Unit },
-                EditedCustomScanner.New
-
+                EditedCustomScanner.New,
+                { urlString ->
+                     UrlValidationResult.NoError(Url(urlString))
+                }
             )
         }
     }
