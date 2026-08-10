@@ -40,7 +40,6 @@ class AndroidStartScanUseCase(val scanJobRepo: ScanJobRepository, val applicatio
      * @return Modified scan settings with the correct file format selected
      */
     private fun CommonScanSettings.applyFileFormat(): CommonScanSettings {
-        // TODO: Should also be in the scan use case. Not here
         val isBlackAndWhite = this.setting[ScannerConcept.ColorMode]
             ?.value == ColorMode.BlackAndWhite1.toString()
 
