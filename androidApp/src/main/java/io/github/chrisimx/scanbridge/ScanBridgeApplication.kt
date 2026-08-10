@@ -38,7 +38,7 @@ import io.github.chrisimx.scanbridge.migrations.migrationsModule
 import io.github.chrisimx.scanbridge.model.HttpClientConfig
 import io.github.chrisimx.scanbridge.ports.CustomScannerRepository
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
-import io.github.chrisimx.scanbridge.ports.LocaleProvider
+import io.github.chrisimx.scanbridge.localization.LocaleProvider
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager

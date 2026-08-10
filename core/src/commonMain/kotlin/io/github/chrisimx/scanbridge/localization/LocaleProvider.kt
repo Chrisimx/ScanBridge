@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge.ports
+package io.github.chrisimx.scanbridge.localization
 
 import io.github.chrisimx.scanbridge.model.Locale
 import kotlinx.coroutines.flow.StateFlow
