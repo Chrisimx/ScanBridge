@@ -1,6 +1,5 @@
 package io.github.chrisimx.scanbridge.uicomponents
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -28,9 +27,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
@@ -38,13 +35,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
+import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.CachePolicy
-import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import kotlin.math.max
 import kotlin.math.min
-import timber.log.Timber
+import org.jetbrains.compose.resources.painterResource
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.icon_about_dialog
 
 val IntSizeSaver = Saver<IntSize, List<Int>>(
     save = { listOf(it.width, it.height) },
@@ -301,13 +300,13 @@ fun CroppableAsyncImage(
     onPan: (Offset) -> Unit,
     imageLoader: ImageLoader? = null
 ) {
-    val context = LocalContext.current
     val density = LocalDensity.current
     val additionalTouchAreaAroundInPx = with(density) {
         additionalTouchAreaAround.toPx().toInt()
     }
 
-    val selectedImageLoader = imageLoader ?: ImageLoader.Builder(context)
+    val platformContext = LocalPlatformContext.current
+    val selectedImageLoader = imageLoader ?: ImageLoader.Builder(platformContext)
         .memoryCachePolicy(CachePolicy.DISABLED)
         .diskCachePolicy(CachePolicy.DISABLED)
         .build()
@@ -362,11 +361,9 @@ fun CroppableAsyncImage(
     )
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
 @Composable
 fun PreviewCropOverlay() {
-    Timber.plant(Timber.DebugTree())
 
     Scaffold { innerPadding ->
         ScanBridgeTheme {
@@ -380,7 +377,7 @@ fun PreviewCropOverlay() {
                 mainContent = {
                     Image(
                         modifier = Modifier.fillMaxWidth(),
-                        painter = painterResource(R.drawable.icon_about_dialog),
+                        painter = painterResource(Res.drawable.icon_about_dialog),
                         contentDescription = "Hallo"
                     )
                 }

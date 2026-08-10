@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge.util.localizationhelper
+package io.github.chrisimx.scanbridge.localizationhelper
 
 import androidx.compose.runtime.Composable
 import io.github.chrisimx.anyscan.ScannerConcept

@@ -104,7 +104,6 @@ dependencies {
     implementation(libs.koin.annotations)
     implementation(libs.koin.compose.viewmodel)
     implementation(libs.koin.androix.navigation)
-    implementation(libs.zoomable)
     implementation(libs.kotlin.reflect)
     implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
@@ -112,7 +111,6 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":composeUI"))
     implementation(libs.androidx.concurrent.futures)
-
 
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)

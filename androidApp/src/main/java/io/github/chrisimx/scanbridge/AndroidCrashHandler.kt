@@ -27,7 +27,7 @@ import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
-class CrashHandler(val context: Context, val lastRouteRepository: LastRouteRepository) : Thread.UncaughtExceptionHandler {
+class AndroidCrashHandler(val context: Context, val lastRouteRepository: LastRouteRepository) : Thread.UncaughtExceptionHandler {
 
     private val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
 

@@ -11,22 +11,6 @@ fun Bitmap.rotateBy90(): Bitmap {
     return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
 }
 
-fun Bitmap.cropWithRect(cropRect: Rect): Bitmap {
-    val startX = cropRect.left * this.width
-    val startY = cropRect.top * this.height
-
-    val width = (cropRect.right - cropRect.left) * this.width
-    val height = (cropRect.bottom - cropRect.top) * this.height
-
-    return Bitmap.createBitmap(
-        this,
-        startX.roundToInt(),
-        startY.roundToInt(),
-        width.roundToInt(),
-        height.roundToInt()
-    )
-}
-
 fun Bitmap.saveAsJPEG(file: File) {
     file.outputStream().use {
         this.compress(Bitmap.CompressFormat.JPEG, 100, it)

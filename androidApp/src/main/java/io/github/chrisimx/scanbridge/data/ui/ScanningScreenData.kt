@@ -44,7 +44,7 @@ data class ScanningScreenData(
     val showSaveOptions: MutableState<Boolean> = mutableStateOf(false),
     val exportOptionsPopupPosition: MutableState<Triple<Int, Int, Int>?> = mutableStateOf(null),
     val savePopupPosition: MutableState<Triple<Int, Int, Int>?> = mutableStateOf(null),
-    val stateProgressStringRes: MutableState<Int?> = mutableStateOf(null),
+    val stateProgressStringRes: MutableState<StringResource?> = mutableStateOf(null),
     val sourceFileToSave: MutableState<File?> = mutableStateOf(null),
     val isRotating: MutableState<Boolean> = mutableStateOf(false)
 ) {
@@ -78,7 +78,7 @@ data class ImmutableScanningScreenData(
     private val showSaveOptionsState: State<Boolean>,
     private val exportOptionsPopupPositionState: State<Triple<Int, Int, Int>?>,
     private val saveOptionsPopupPositionState: State<Triple<Int, Int, Int>?>,
-    private val progressStringResState: State<Int?>,
+    private val progressStringResState: State<StringResource?>,
     private val sourceFileToSaveState: State<File?>,
     private val isRotatingState: State<Boolean>
 ) {

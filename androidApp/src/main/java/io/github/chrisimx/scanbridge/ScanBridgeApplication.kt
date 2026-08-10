@@ -8,6 +8,7 @@ import android.app.Application
 import android.content.Context
 import coil3.ImageLoader
 import coil3.network.ktor3.KtorNetworkFetcherFactory
+import cropfeature.AndroidImageCropService
 import io.github.chrisimx.localization.JvmNumberFormatter
 import io.github.chrisimx.scanbridge.adapters.KoinBasedScanningProtocolManager
 import io.github.chrisimx.scanbridge.adapters.RoomBackedCustomScannerRepository
@@ -15,12 +16,17 @@ import io.github.chrisimx.scanbridge.appsettings.AppSettingsRepository
 import io.github.chrisimx.scanbridge.appsettings.AppSettingsViewModel
 import io.github.chrisimx.scanbridge.appsettings.RoomAppSettingsRepository
 import io.github.chrisimx.scanbridge.buildinfo.BuildInfoProvider
+import io.github.chrisimx.scanbridge.cropfeature.CropScreenViewModel
+import io.github.chrisimx.scanbridge.cropfeature.FinishCropUseCase
+import io.github.chrisimx.scanbridge.cropfeature.ImageCropService
 import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.db.DefaultScanBridgeDbFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbBuilderFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbFactory
 import io.github.chrisimx.scanbridge.db.migrations.ROOM_MIGRATIONS
+import io.github.chrisimx.scanbridge.filesystem.FileSystem
+import io.github.chrisimx.scanbridge.filesystem.KotlinIOFileSystem
 import io.github.chrisimx.scanbridge.infrastructure.KmLogScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.initialscansettings.DefaultInitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.initialscansettings.InitialScanSettingsProvider
@@ -92,7 +98,7 @@ fun createScannerIconImageLoader(factory: HttpClientFactory, context: Context): 
         .build()
 }
 val appModule = module {
-    single<CrashHandler>() bind Thread.UncaughtExceptionHandler::class
+    single<AndroidCrashHandler>() bind Thread.UncaughtExceptionHandler::class
     single<AndroidLocaleProvider>() bind LocaleProvider::class
     single<RoomAppSettingsRepository>() bind AppSettingsRepository::class
     single<FileDebugLogService>() bind DebugLogService::class
@@ -140,6 +146,11 @@ val appModule = module {
     single<StartupTabsProvider> {
         STARTUP_TABS_PROVIDER
     }
+
+    viewModel<CropScreenViewModel>()
+    single<AndroidImageCropService>() bind ImageCropService::class
+    single<FinishCropUseCase>()
+    single<KotlinIOFileSystem>() bind FileSystem::class
 
     includes(SCAN_PROTOCOLS, ROOM_MIGRATIONS, DATASTORE_TO_ROOM_MIGRATION_DATA_SOURCES)
 }

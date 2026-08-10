@@ -37,62 +37,9 @@ class CrashActivity : ComponentActivity() {
         Timber.plant(Timber.DebugTree())
 
         setContent {
-            ScanBridgeTheme {
-                Scaffold(
-                    floatingActionButton = {
-                        FloatingActionButton({
-                            try {
-                                val clipboard = getSystemService(ClipboardManager::class.java)
-                                val clip = ClipData.newPlainText("Crash log", error)
-                                clipboard.setPrimaryClip(clip)
-                            } catch (e: Exception) {
-                                Timber.e("Error in CrashActivity while trying to copy crash to clipboard: $e")
-                            }
-                        }) {
-                            Row(horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    painterResource(R.drawable.rounded_content_copy_24),
-                                    contentDescription = stringResource(R.string.copy),
-                                    Modifier.padding(start = 10.dp, top = 10.dp, bottom = 10.dp, end = 5.dp)
-                                )
-                                Text(
-                                    stringResource(R.string.copy),
-                                    Modifier.padding(start = 5.dp, top = 10.dp, bottom = 10.dp, end = 10.dp)
-                                )
-                            }
-                        }
-                    }
-                )
-                { innerPadding ->
-                    val scrollState = rememberScrollState()
-
-                    Column(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .padding(horizontal = 20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.outline_error_24),
-                            stringResource(R.string.crash),
-                            Modifier.padding(20.dp).size(64.dp)
-                        )
-
-                        Column(modifier = Modifier.verticalScroll(scrollState)) {
-                            Text(
-                                stringResource(R.string.crash_occurred),
-                                modifier = Modifier.padding(bottom = 14.dp),
-                                style = MaterialTheme.typography.bodySmallEmphasized
-                            )
-                            Text(
-                                error,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier
-                            )
-                        }
-                    }
-                }
-            }
+            CrashDisplay(
+                error
+            )
         }
     }
 }

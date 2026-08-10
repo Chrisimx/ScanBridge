@@ -28,6 +28,9 @@ interface ScannedPageDao {
     fun getByScanIdFlow(id: Uuid): Flow<ScannedPage>
 
     @Query("SELECT * FROM scannedpages WHERE scanId = :id")
+    fun getByScanIdFlowNullable(id: Uuid): Flow<ScannedPage?>
+
+    @Query("SELECT * FROM scannedpages WHERE scanId = :id")
     suspend fun getByScanId(id: Uuid): ScannedPage?
 
     @Query("SELECT MAX(orderIndex) FROM scannedpages WHERE ownerSessionId = :session")

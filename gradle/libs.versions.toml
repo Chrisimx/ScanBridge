@@ -28,6 +28,7 @@ composeBom = "2026.03.01"
 navigationComposeVersion = "2.9.2"
 retrofit = "3.0.0"
 room = "2.8.4"
+skiko = "0.150.1"
 timber = "5.0.1"
 zoomable = "0.18.0"
 material3 = "1.11.0-alpha05"
@@ -103,6 +104,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-fetcher-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 esclkt = { module = "io.github.chrisimx:esclkt", version.ref = "anyscankt" }
+skiko = { module = "org.jetbrains.skiko:skiko", version.ref = "skiko" }
 wsdkt = { module = "io.github.chrisimx:wsdkt", version.ref = "anyscankt" }
 anyscanCore = { module = "io.github.chrisimx:anyscankt-core", version.ref = "anyscankt" }
 nonThrowingKtor = { module = "io.github.chrisimx:nonthrowingktor", version.ref = "anyscankt" }

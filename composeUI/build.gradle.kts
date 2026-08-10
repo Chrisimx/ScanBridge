@@ -45,6 +45,7 @@ kotlin {
             api(libs.koin.compose.viewmodel)
             api(libs.koin.core)
             api(libs.constraintlayout.compose.multiplatform)
+            api(libs.zoomable)
 
             api(libs.coil.compose)
             api(libs.coil.fetcher.ktor)

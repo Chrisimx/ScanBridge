@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge.util.localizationhelper
+package io.github.chrisimx.scanbridge.localizationhelper
 
 import io.github.chrisimx.esclkt.JobState
 import org.jetbrains.compose.resources.getString

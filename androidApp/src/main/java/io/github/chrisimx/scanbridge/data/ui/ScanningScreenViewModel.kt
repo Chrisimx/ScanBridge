@@ -53,6 +53,7 @@ import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
 import io.github.chrisimx.scanbridge.initialscansettings.InitialScanSettingsProvider
+import io.github.chrisimx.scanbridge.model.ScanBridgeFile
 import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 import io.github.chrisimx.scanbridge.model.ScannerHandle
@@ -83,7 +84,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -94,6 +94,9 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.scope.Scope
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.exporting
+import scanbridge.composeui.generated.resources.rotating_page
 import timber.log.Timber
 
 enum class ScanningScreenEvent {
@@ -209,7 +212,7 @@ class ScanningScreenViewModel(
         _scanningScreenData.savePopupPosition.value = Triple(x, y, height)
     }
 
-    fun setLoadingText(stringRes: Int?) {
+    fun setLoadingText(stringRes: StringResource?) {
         _scanningScreenData.stateProgressStringRes.value = stringRes
     }
 
@@ -245,11 +248,11 @@ class ScanningScreenViewModel(
             return
         }
         _scanningScreenData.isRotating.value = true
-        setLoadingText(R.string.rotating_page)
+        setLoadingText(Res.string.rotating_page)
         try {
             val pagePath =
                 scannedPage.filePath
-            val pageFile = File(pagePath)
+            val pageScanBridgeFile = ScanBridgeFile(kotlinx.io.files.Path(pagePath))
 
             Timber.d("Decoding $pagePath")
             val originalBitmap = withContext(Dispatchers.IO) { BitmapFactory.decodeFile(pagePath) }
@@ -263,7 +266,7 @@ class ScanningScreenViewModel(
             val rotatedBitmap = withContext(Dispatchers.IO) { originalBitmap.rotateBy90() }
             originalBitmap.recycle()
 
-            val editedImageName = pageFile.getEditedImageName()
+            val editedImageName = pageScanBridgeFile.getEditedImageName()
             val newFile = File(application.filesDir, editedImageName)
 
             Timber.d("Saving rotated $pagePath")
@@ -504,7 +507,7 @@ class ScanningScreenViewModel(
             return
         }
 
-        setLoadingText(R.string.exporting)
+        setLoadingText(Res.string.exporting)
 
         val parentDir = File(application.filesDir, "exports")
         if (!parentDir.exists()) {
@@ -645,7 +648,7 @@ class ScanningScreenViewModel(
             return
         }
 
-        setLoadingText(R.string.exporting)
+        setLoadingText(Res.string.exporting)
 
         val parentDir = File(application.filesDir, "exports")
         if (!parentDir.exists()) {
@@ -667,7 +670,7 @@ class ScanningScreenViewModel(
                 zipOutputFile,
                 {
                     counter++
-                    // TODO: This will never work correctly because extension is always empty
+                    // TODO: This will never work correctly because extension is always empty. Use outputName instead
                     "scan-${counter.toString().padStart(digitsNeeded, '0')}.${it.extension}"
                 }
             )

@@ -55,8 +55,8 @@ import io.github.chrisimx.scanbridge.uicomponents.SelectionButtonRow
 import io.github.chrisimx.scanbridge.uicomponents.SelectionCard
 import io.github.chrisimx.scanbridge.uicomponents.SizeBasedConditionalView
 import io.github.chrisimx.scanbridge.uicomponents.ValidatedDimensionsTextEdit
-import io.github.chrisimx.scanbridge.util.localizationhelper.toLocalizedName
-import io.github.chrisimx.scanbridge.util.localizationhelper.toReadableString
+import io.github.chrisimx.scanbridge.localizationhelper.toLocalizedName
+import io.github.chrisimx.scanbridge.localizationhelper.toReadableString
 import org.jetbrains.compose.resources.stringResource
 import scanbridge.composeui.generated.resources.Res
 import scanbridge.composeui.generated.resources.custom
