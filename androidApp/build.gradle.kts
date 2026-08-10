@@ -31,7 +31,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
 
 android {
     namespace = "io.github.chrisimx.scanbridge"
-    compileSdk = 36
+    compileSdk = 37
 
     androidResources {
         generateLocaleConfig = true
@@ -40,7 +40,7 @@ android {
     defaultConfig {
         applicationId = "io.github.chrisimx.scanbridge"
         minSdk = 28
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 2_001_005 // we just count up for each build
         versionName = "2.2.0-alpha1"
 
@@ -131,7 +131,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.core)
-    implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.itext7.core)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.logging)

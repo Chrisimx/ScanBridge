@@ -30,23 +30,30 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.buildinfo.ScanBridgeEdition
 import io.github.chrisimx.scanbridge.theme.Poppins
 import io.github.chrisimx.scanbridge.theme.gradientBrush
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.app_icon_desc
+import scanbridge.composeui.generated.resources.app_name
+import scanbridge.composeui.generated.resources.debug_build
+import scanbridge.composeui.generated.resources.f_droid
+import scanbridge.composeui.generated.resources.google_play
+import scanbridge.composeui.generated.resources.icon_about_dialog
+import scanbridge.composeui.generated.resources.ios
 
 @Composable
 fun ScanBridgeEdition.toLocalizedString(): String = when (this) {
-    ScanBridgeEdition.FDROID -> stringResource(R.string.f_droid)
-    ScanBridgeEdition.PLAYSTORE -> stringResource(R.string.google_play)
-    ScanBridgeEdition.IOS -> stringResource(R.string.ios)
+    ScanBridgeEdition.FDROID -> stringResource(Res.string.f_droid)
+    ScanBridgeEdition.PLAYSTORE -> stringResource(Res.string.google_play)
+    ScanBridgeEdition.IOS -> stringResource(Res.string.ios)
 }
 
 @Composable
@@ -55,12 +62,12 @@ fun VersionComposable(versionName: String, versionCode: Int, gitCommitHash: Stri
         modifier = Modifier
             .size(200.dp)
             .padding(16.dp),
-        painter = painterResource(R.drawable.icon_about_dialog),
-        contentDescription = stringResource(id = R.string.app_icon_desc)
+        painter = painterResource(Res.drawable.icon_about_dialog),
+        contentDescription = stringResource(Res.string.app_icon_desc)
     )
 
     Text(
-        stringResource(R.string.app_name),
+        stringResource(Res.string.app_name),
         modifier = Modifier.padding(PaddingValues(4.dp)),
         fontFamily = Poppins(),
         fontSize = 24.sp,
@@ -81,7 +88,7 @@ fun VersionComposable(versionName: String, versionCode: Int, gitCommitHash: Stri
     editionNotice.add(edition.toLocalizedString())
 
     if (debugBuild) {
-        editionNotice.add(stringResource(R.string.debug_build))
+        editionNotice.add(stringResource(Res.string.debug_build))
     }
 
     Text(

@@ -43,20 +43,30 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.anyscan.LengthUnit
 import io.github.chrisimx.anyscan.ScanSettingParam
 import io.github.chrisimx.anyscan.ScannerConcept
+import io.github.chrisimx.anyscan.equalsLength
 import io.github.chrisimx.scanbridge.model.UIInputSourceType
 import io.github.chrisimx.scanbridge.uicomponents.SelectionButtonRow
 import io.github.chrisimx.scanbridge.uicomponents.SelectionCard
 import io.github.chrisimx.scanbridge.uicomponents.SizeBasedConditionalView
 import io.github.chrisimx.scanbridge.uicomponents.ValidatedDimensionsTextEdit
-import io.github.chrisimx.scanbridge.util.toLocalizedName
-import io.github.chrisimx.scanbridge.util.toReadableString
+import io.github.chrisimx.scanbridge.util.localizationhelper.toLocalizedName
+import io.github.chrisimx.scanbridge.util.localizationhelper.toReadableString
+import org.jetbrains.compose.resources.stringResource
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.custom
+import scanbridge.composeui.generated.resources.height_in_unit
+import scanbridge.composeui.generated.resources.inches
+import scanbridge.composeui.generated.resources.input_source
+import scanbridge.composeui.generated.resources.maximum_size
+import scanbridge.composeui.generated.resources.millimeter_unit_abbreviation
+import scanbridge.composeui.generated.resources.setting_duplex
+import scanbridge.composeui.generated.resources.width_in_unit
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -68,8 +78,8 @@ fun ScanSettingsUI(modifier: Modifier, scanSettingsStateHolder: ScanSettingsComp
     val userUnitEnum by scanSettingsStateHolder.userLengthUnit.collectAsState(ScanSettingsLengthUnit.MILLIMETER)
 
     val userUnitString = when (userUnitEnum) {
-        ScanSettingsLengthUnit.INCH -> stringResource(R.string.inches)
-        ScanSettingsLengthUnit.MILLIMETER -> stringResource(R.string.millimeter_unit_abbreviation)
+        ScanSettingsLengthUnit.INCH -> stringResource(Res.string.inches)
+        ScanSettingsLengthUnit.MILLIMETER -> stringResource(Res.string.millimeter_unit_abbreviation)
     }
 
     val availableParameters by scanSettingsStateHolder.availableParameters.collectAsState()
@@ -175,14 +185,14 @@ private fun RegionParameterDisplay(
                     onClick = {
                         scanSettingsStateHolder.selectMaxRegion()
                     },
-                    label = { Text(stringResource(R.string.maximum_size)) },
+                    label = { Text(stringResource(Res.string.maximum_size)) },
                     selected =
                         currentVmData.maximumSize && !currentVmData.customMenuEnabled
                 )
                 InputChip(
                     selected = currentVmData.customMenuEnabled,
                     onClick = { scanSettingsStateHolder.setCustomMenuEnabled(true) },
-                    label = { Text(stringResource(R.string.custom)) }
+                    label = { Text(stringResource(Res.string.custom)) }
                 )
             }
             AnimatedVisibility(currentVmData.customMenuEnabled) {
@@ -192,7 +202,7 @@ private fun RegionParameterDisplay(
                         modifier = Modifier
                             .weight(1f)
                             .padding(end = 10.dp),
-                        stringResource(R.string.width_in_unit, userUnitString),
+                        stringResource(Res.string.width_in_unit, userUnitString),
                         { newText: String ->
                             scanSettingsStateHolder.setCustomWidthTextFieldContent(
                                 newText
@@ -205,7 +215,7 @@ private fun RegionParameterDisplay(
                         modifier = Modifier
                             .weight(1f)
                             .padding(start = 10.dp),
-                        stringResource(R.string.height_in_unit, userUnitString),
+                        stringResource(Res.string.height_in_unit, userUnitString),
                         { scanSettingsStateHolder.setCustomHeightTextFieldContent(it) },
                         heightValidationResult
                     )
@@ -260,7 +270,7 @@ private fun InputSourceSelection(
     duplexCurrentlyAvailable: Boolean,
     duplexUsed: Boolean
 ) {
-    Text(stringResource(R.string.input_source))
+    Text(stringResource(Res.string.input_source))
     FlowRow(
         Modifier
             .fillMaxWidth()
@@ -286,6 +296,6 @@ private fun InputSourceSelection(
             enabled = duplexCurrentlyAvailable,
             checked = duplexUsed,
             onCheckedChange = { scanSettingsStateHolder.setDuplex(it) }
-        ) { Text(stringResource(R.string.setting_duplex)) }
+        ) { Text(stringResource(Res.string.setting_duplex)) }
     }
 }

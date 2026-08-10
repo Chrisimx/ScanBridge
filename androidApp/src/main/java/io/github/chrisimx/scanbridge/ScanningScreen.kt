@@ -106,7 +106,7 @@ import io.github.chrisimx.scanbridge.util.SnackbarType
 import io.github.chrisimx.scanbridge.util.clearAndNavigateTo
 import io.github.chrisimx.scanbridge.util.snackBarError
 import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
-import io.github.chrisimx.scanbridge.util.toReadableString
+import io.github.chrisimx.scanbridge.util.localizationhelper.toReadableString
 import java.io.File
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope

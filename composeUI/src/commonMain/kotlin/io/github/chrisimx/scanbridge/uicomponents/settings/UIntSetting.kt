@@ -36,10 +36,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
-import timber.log.Timber
+import org.koin.compose.koinInject
 
 @Composable
 fun UIntSettingBase(
@@ -50,9 +52,11 @@ fun UIntSettingBase(
     onHelpRequested: (StringResource) -> Unit,
     changeSetting: (UInt) -> Unit,
     min: UInt,
-    max: UInt
+    max: UInt,
+    loggerFactory: ScanBridgeLoggerFactory = koinInject()
 ) {
     var timeoutValue by remember { mutableStateOf(placeholder) }
+    val logger = loggerFactory.withTag("UIntSetting")
 
     LaunchedEffect(Unit) {
         val initial = withContext(Dispatchers.IO) {
@@ -78,10 +82,10 @@ fun UIntSettingBase(
                         if (value in min..max) {
                             changeSetting(value)
                         } else {
-                            Timber.w("Value out of range: $value. Ignored")
+                            logger.warn { "Value out of range: $value. Ignored" }
                         }
                     } catch (_: NumberFormatException) {
-                        Timber.w("Invalid setting value. Ignored")
+                        logger.warn { "Invalid setting value. Ignored" }
                     }
                 }
             },

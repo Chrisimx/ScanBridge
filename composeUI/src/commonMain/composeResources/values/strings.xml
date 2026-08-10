@@ -181,4 +181,6 @@
     <string name="open_support_website">Open support website</string>
     <string name="signup_to_fireamp">Sign-up to Fireamp Support</string>
     <string name="e_mail">Email</string>
+    <string name="setting_more_information">Detailed information regarding the setting</string>
+    <string name="ios">iOS</string>
 </resources>

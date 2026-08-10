@@ -19,12 +19,6 @@
 
 package io.github.chrisimx.scanbridge
 
-import android.app.Activity.RESULT_OK
-import android.content.Context
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,42 +54,50 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import io.github.chrisimx.scanbridge.appsettings.AppSettingsViewModel
 import io.github.chrisimx.scanbridge.buildinfo.ScanBridgeEdition
-import io.github.chrisimx.scanbridge.datastore.*
-import io.github.chrisimx.scanbridge.services.DebugLogService
 import io.github.chrisimx.scanbridge.uicomponents.TitledCard
 import io.github.chrisimx.scanbridge.uicomponents.dialog.SimpleTextDialog
 import io.github.chrisimx.scanbridge.uicomponents.settings.CheckboxSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.MoreInformationButton
 import io.github.chrisimx.scanbridge.uicomponents.settings.UIntSetting
 import io.github.chrisimx.scanbridge.uicomponents.settings.VersionComposable
-import java.io.File
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.advanced
+import scanbridge.composeui.generated.resources.clear_debug_log
+import scanbridge.composeui.generated.resources.debug_log
 import scanbridge.composeui.generated.resources.debug_log_explanation
+import scanbridge.composeui.generated.resources.disable_cert_checks
 import scanbridge.composeui.generated.resources.disable_cert_checks_desc
+import scanbridge.composeui.generated.resources.donate
+import scanbridge.composeui.generated.resources.export_debug_log
+import scanbridge.composeui.generated.resources.favorite_24px
+import scanbridge.composeui.generated.resources.github_mark
 import scanbridge.composeui.generated.resources.initial_scan_settings
+import scanbridge.composeui.generated.resources.pdf_export_max_pages_per_pdf
 import scanbridge.composeui.generated.resources.pdf_export_setting_info
 import scanbridge.composeui.generated.resources.preferred_initial_scan_settings_setting_desc
+import scanbridge.composeui.generated.resources.remember_scan_settings
 import scanbridge.composeui.generated.resources.remember_scan_settings_desc
+import scanbridge.composeui.generated.resources.settings
+import scanbridge.composeui.generated.resources.source_code
+import scanbridge.composeui.generated.resources.timeout
 import scanbridge.composeui.generated.resources.timeout_info
 
 @Composable
 fun DisableCertChecksSetting(onInformationRequested: (StringResource) -> Unit, checked: Boolean, setChecked: (Boolean) -> Unit) {
     CheckboxSetting(
-        stringResource(R.string.disable_cert_checks),
+        stringResource(Res.string.disable_cert_checks),
         Res.string.disable_cert_checks_desc,
         checked,
         setChecked
@@ -104,37 +106,8 @@ fun DisableCertChecksSetting(onInformationRequested: (StringResource) -> Unit, c
     }
 }
 
-fun exportDebugLog(context: Context, debugLogService: DebugLogService, saveDebugLogLauncher: ActivityResultLauncher<Intent>) {
-    debugLogService.flush()
-
-    val debugDir = File(context.filesDir, "debug")
-    val debugFile = File(debugDir, "debug.txt")
-
-    if (debugFile.exists()) {
-        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.type = "text/plain"
-        intent.putExtra(Intent.EXTRA_TITLE, "debug_log.txt") // Suggested file name
-
-        saveDebugLogLauncher.launch(intent)
-    }
-}
-
 @Composable
 fun DebugOptions(debugLog: Boolean, onInformationRequested: (StringResource) -> Unit, setWriteDebugLog: (Boolean) -> Unit) {
-    val context = LocalContext.current
-    val debugLogService: DebugLogService = koinInject()
-
-    val debugFileSaveLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val uri = result.data?.data
-            uri?.let {
-                debugLogService.saveToFile(it)
-            }
-        }
-    }
 
     ConstraintLayout(
         Modifier
@@ -161,7 +134,7 @@ fun DebugOptions(debugLog: Boolean, onInformationRequested: (StringResource) -> 
                 }
         )
         Text(
-            text = stringResource(R.string.debug_log),
+            text = stringResource(Res.string.debug_log),
             modifier = Modifier
                 .constrainAs(content) {
                     start.linkTo(checkbox.end, 12.dp)
@@ -186,15 +159,15 @@ fun DebugOptions(debugLog: Boolean, onInformationRequested: (StringResource) -> 
         }
     }
     OutlinedButton(
-        onClick = { debugLogService.clear() }
+        onClick = { }
     ) {
-        Text(stringResource(R.string.clear_debug_log))
+        Text(stringResource(Res.string.clear_debug_log))
     }
 
     OutlinedButton(
-        onClick = { exportDebugLog(context, debugLogService, debugFileSaveLauncher) }
+        onClick = { }
     ) {
-        Text(stringResource(R.string.export_debug_log))
+        Text(stringResource(Res.string.export_debug_log))
     }
 }
 
@@ -307,16 +280,16 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 ) {
                     Icon(
                         modifier = Modifier.padding(end = 8.dp),
-                        painter = painterResource(R.drawable.favorite_24px),
+                        painter = painterResource(Res.drawable.favorite_24px),
                         contentDescription = null
                     )
-                    Text(stringResource(R.string.donate))
+                    Text(stringResource(Res.string.donate))
                 }
             }
             OutlinedIconButton(onClick = {
                 uriHandler.openUri("https://github.com/Chrisimx/ScanBridge")
             }) {
-                Icon(painterResource(R.drawable.github_mark), contentDescription = stringResource(R.string.source_code))
+                Icon(painterResource(Res.drawable.github_mark), contentDescription = stringResource(Res.string.source_code))
             }
         }
 
@@ -324,7 +297,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
 
         FlowRow {
             TitledCard(
-                title = stringResource(R.string.settings)
+                title = stringResource(Res.string.settings)
             ) {
                 DisableCertChecksSetting(
                     setInformationRequested,
@@ -333,7 +306,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 )
 
                 CheckboxSetting(
-                    stringResource(R.string.remember_scan_settings),
+                    stringResource(Res.string.remember_scan_settings),
                     Res.string.remember_scan_settings_desc,
                     rememberScanSettings,
                     vm::setRememberScanSettings
@@ -345,7 +318,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 UIntSetting(
                     { vm.getScanningResponseTimeout() },
                     defaultScanningResponseTimeout,
-                    stringResource(R.string.timeout),
+                    stringResource(Res.string.timeout),
                     Res.string.timeout_info,
                     setInformationRequested,
                     vm::setScanningResponseTimeout
@@ -355,7 +328,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
                 UIntSetting(
                     { vm.getPdfExportChunkSize() },
                     defaultPdfExportChunkSize,
-                    stringResource(R.string.pdf_export_max_pages_per_pdf),
+                    stringResource(Res.string.pdf_export_max_pages_per_pdf),
                     Res.string.pdf_export_setting_info,
                     setInformationRequested,
                     vm::setPdfExportChunkSize,
@@ -373,7 +346,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
             }
 
             TitledCard(
-                title = stringResource(R.string.advanced)
+                title = stringResource(Res.string.advanced)
             ) {
                 DebugOptions(
                     writeDebugLogs,
@@ -386,7 +359,7 @@ fun AppSettingsScreen(innerPadding: PaddingValues) {
         val currentInfo = information
         if (currentInfo != null) {
             SimpleTextDialog(
-                org.jetbrains.compose.resources.stringResource(currentInfo),
+                stringResource(currentInfo),
                 { information = null }
             )
         }

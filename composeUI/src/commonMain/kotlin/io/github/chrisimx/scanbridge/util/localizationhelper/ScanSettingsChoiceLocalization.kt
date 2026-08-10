@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge.util
+package io.github.chrisimx.scanbridge.util.localizationhelper
 
 import androidx.compose.runtime.Composable
 import io.github.chrisimx.anyscan.ColorMode
@@ -9,6 +9,7 @@ import io.github.chrisimx.anyscan.SettingValue
 import io.github.chrisimx.anyscan.StringValue
 import io.github.chrisimx.anyscan.toAnyScanEnumOrRaw
 import io.github.chrisimx.enumorrawcodegen.AnyScanEnumOrRaw
+import kotlin.jvm.JvmName
 import org.jetbrains.compose.resources.stringResource
 import scanbridge.composeui.generated.resources.*
 import scanbridge.composeui.generated.resources.Res

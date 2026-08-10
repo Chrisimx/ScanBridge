@@ -3,10 +3,11 @@
 compose-multiplatform = "1.11.1"
 androidx-activityCompose = "1.12.0"
 
-agp = "9.1.0"
+agp = "9.2.1"
 coil = "3.3.0"
 concurrentFutures = "1.2.0"
 constraintlayoutCompose = "1.1.1"
+constraintlayoutComposeMultiplatform = "0.8.1"
 converterGson = "2.9.0"
 datastore = "1.2.0"
 anyscankt = "2.1.7"
@@ -67,6 +68,7 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite" }
 
+constraintlayout-compose-multiplatform = { module = "tech.annexflow.compose:constraintlayout-compose-multiplatform", version.ref = "constraintlayoutComposeMultiplatform" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
 retrofit-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }

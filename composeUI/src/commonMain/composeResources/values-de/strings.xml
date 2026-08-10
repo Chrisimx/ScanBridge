@@ -179,4 +179,6 @@
     <string name="created_successfully">Account erfolgreich erstellt</string>
     <string name="e_mail">E-Mail</string>
     <string name="custom_scanner_url">URL</string>
+    <string name="setting_more_information">Information zur Einstellung</string>
+    <string name="ios">iOS</string>
 </resources>

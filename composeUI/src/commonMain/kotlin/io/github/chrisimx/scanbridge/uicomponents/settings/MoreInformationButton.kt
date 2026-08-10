@@ -24,8 +24,9 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
-import io.github.chrisimx.scanbridge.R
+import org.jetbrains.compose.resources.stringResource
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.setting_more_information
 
 @Composable
 fun MoreInformationButton(clicked: () -> Unit) {
@@ -34,7 +35,7 @@ fun MoreInformationButton(clicked: () -> Unit) {
     }) {
         Icon(
             Icons.Outlined.Info,
-            contentDescription = stringResource(R.string.auto_cleanup_info_desc)
+            contentDescription = stringResource(Res.string.setting_more_information)
         )
     }
 }
