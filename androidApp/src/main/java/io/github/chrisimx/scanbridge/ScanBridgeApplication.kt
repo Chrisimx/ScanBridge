@@ -53,8 +53,6 @@ import io.github.chrisimx.scanbridge.scan.AndroidStartScanUseCase
 import io.github.chrisimx.scanbridge.scannerdiscovery.DiscoveryUsecase
 import io.github.chrisimx.scanbridge.scannerdiscovery.ScannerDiscoveryScreenViewModel
 import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
-import io.github.chrisimx.scanbridge.services.DebugLogService
-import io.github.chrisimx.scanbridge.services.FileDebugLogService
 import io.github.chrisimx.scanbridge.repositories.ScanJobRepository
 import io.github.chrisimx.scanbridge.startupmessages.RoomShownStartupMessagesRepository
 import io.github.chrisimx.scanbridge.startupmessages.ShownStartupMessagesRepository
@@ -101,7 +99,6 @@ val appModule = module {
     single<AndroidCrashHandler>() bind Thread.UncaughtExceptionHandler::class
     single<AndroidLocaleProvider>() bind LocaleProvider::class
     single<RoomAppSettingsRepository>() bind AppSettingsRepository::class
-    single<FileDebugLogService>() bind DebugLogService::class
     single<AndroidHttpClientFactory>() bind HttpClientFactory::class
     single<KmLogScanBridgeLoggerFactory>() bind ScanBridgeLoggerFactory::class
     single<ScanJobRepository>()
