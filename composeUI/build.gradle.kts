@@ -46,12 +46,13 @@ kotlin {
             api(libs.koin.core)
             api(libs.constraintlayout.compose.multiplatform)
             api(libs.zoomable)
+            api(libs.filekit.dialogs.compose)
 
             api(libs.coil.compose)
             api(libs.coil.fetcher.ktor)
 
             api(libs.anyscanCore)
-            api(project(":core"))
+            implementation(project(":core"))
         }
 
         commonTest.dependencies {

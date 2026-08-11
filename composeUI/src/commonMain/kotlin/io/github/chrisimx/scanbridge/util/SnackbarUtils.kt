@@ -19,18 +19,19 @@
 
 package io.github.chrisimx.scanbridge.util
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Context.CLIPBOARD_SERVICE
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SnackbarVisuals
 import androidx.compose.ui.graphics.Color
-import io.github.chrisimx.scanbridge.R
+import androidx.compose.ui.platform.Clipboard
+import io.github.chrisimx.scanbridge.clipboard.toClipEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.copy
+import scanbridge.composeui.generated.resources.error_while_retrieving_page
 
 fun String.truncate(maxLength: Int): String = if (this.length <= maxLength) {
     this
@@ -53,21 +54,23 @@ data class CustomSnackbarVisuals(
     val type: SnackbarType = SnackbarType.DEFAULT
 ) : SnackbarVisuals
 
-fun snackbarErrorRetrievingPage(
+ fun snackbarErrorRetrievingPage(
     error: String,
     scope: CoroutineScope,
-    context: Context,
     snackbarHostState: SnackbarHostState,
-    action: Boolean = true
+    action: Boolean = true,
+    clipboard: Clipboard
 ) {
-    snackBarError(
-        context.getString(R.string.error_while_retrieving_page, error.truncate(128)),
-        scope,
-        context,
-        snackbarHostState,
-        action,
-        error
-    )
+     scope.launch {
+         snackBarError(
+             getString(Res.string.error_while_retrieving_page, error.truncate(128)),
+             scope,
+             snackbarHostState,
+             action,
+             error,
+             clipboard
+         )
+     }
 }
 
 suspend fun SnackbarHostState.showCustomSnackbar(
@@ -89,29 +92,22 @@ suspend fun SnackbarHostState.showCustomSnackbar(
 fun snackBarError(
     error: String,
     scope: CoroutineScope,
-    context: Context,
     snackbarHostState: SnackbarHostState,
     action: Boolean = true,
-    copyData: String? = null
+    copyData: String? = null,
+    clipboard: Clipboard
 ) {
     scope.launch {
         val result = snackbarHostState.showCustomSnackbar(
             error,
             SnackbarType.ERROR,
-            if (action) context.getString(R.string.copy) else null,
+            if (action) getString(Res.string.copy) else null,
             SnackbarDuration.Indefinite,
             true
         )
         when (result) {
             SnackbarResult.ActionPerformed -> {
-                val systemClipboard =
-                    context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-                systemClipboard.setPrimaryClip(
-                    ClipData.newPlainText(
-                        context.getString(R.string.error),
-                        copyData ?: error
-                    )
-                )
+                clipboard.setClipEntry((copyData ?: error).toClipEntry())
             }
 
             SnackbarResult.Dismissed -> {}

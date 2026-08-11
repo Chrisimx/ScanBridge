@@ -5,7 +5,7 @@
     <string name="no_scanners_found">No scanners found. Are you connected to a local network?</string>
     <string name="warning_desc">Warning icon</string>
     <string name="error_title">Error</string>
-    <string name="scannercapabilities_retrieve_error">An error occurred while trying to retrieve scanner capabilities:\n\n%1$s</string>
+    <string name="scannercapabilities_retrieve_error">An error occurred while trying to retrieve scanner capabilities:</string>
     <string name="okay_text">Okay</string>
     <string name="trying_to_retrieve_scannercapabilities">Trying to retrieve ScannerCapabilities</string>
     <string name="scan">Scan</string>
@@ -17,7 +17,7 @@
     <string name="job_completed_successfully">The job was completed successfully</string>
     <string name="job_still_pending">The job is still pending</string>
     <string name="job_pages_still_processed">The pages are still processed</string>
-    <string name="job_state_cannot_be_retrieved">The job state can\'t be retrieved</string>
+    <string name="job_state_cannot_be_retrieved">The job state can't be retrieved</string>
     <string name="delete_current_page">Delete current page</string>
     <string name="swap_with_previous_page">Swap with previous</string>
     <string name="swap_with_next_page">Swap with next</string>
@@ -48,7 +48,7 @@
     <string name="copy">Copy</string>
     <string name="error">Error</string>
     <string name="scans_will_be_lost_title">Scans unsaved</string>
-    <string name="scans_will_be_lost_text">Do you really want to close the scanning interface? Any scans that you didn\'t export will be lost!</string>
+    <string name="scans_will_be_lost_text">Do you really want to close the scanning interface? Any scans that you didn't export will be lost!</string>
     <string name="cancel_text">Cancel</string>
     <string name="leave_text">Leave</string>
     <string name="app_icon_desc">App icon</string>
@@ -76,7 +76,7 @@
     <string name="export_as_archive">Export as archive of JPEGs</string>
     <string name="no_further_pages">No further pages. %1$s</string>
     <string name="error_while_copying_received_image_to_file">Error while copying received image to file: %1$s</string>
-    <string name="couldn_t_decode_received_image">Couldn\'t decode received image. %1$s</string>
+    <string name="couldn_t_decode_received_image">Couldn't decode received image. %1$s</string>
     <string name="intent">Intent:</string>
     <string name="scan_region">Scan Region:</string>
     <string name="page_deletion_confirmation">Do you really want to delete the current page? This action can not be undone.</string>
@@ -95,7 +95,7 @@
     <string name="pdf_export_max_pages_per_pdf">Max. pages per PDF file</string>
     <string name="pdf_export_setting_info">As a smartphone has limited memory, it can becomes difficult to handle large PDFs. To prevent crashes, ScanBridge limits the maximum count pages stored in one PDF file when exporting scanned pages as PDF. If there are too much pages, multiple PDFs are created and stored into a ZIP archive. These PDFs can be merged afterwards, if needed.\n\nWarning: Increasing this too far can lead to crashes while exporting if a large number of pages are to be exported.</string>
     <string name="disable_cert_checks">Disable certificate checks</string>
-    <string name="disable_cert_checks_desc">This option disables all HTTPS certificate validation. Any certificate will be accepted, including self-signed, expired, or otherwise invalid ones. Do not use this option on insecure or public networks, as it makes man-in-the-middle (MitM) attacks possible.\n\nIn most cases, scanners are used on private networks or over VPN connections, where concerns about authenticity are minimal. In such environments, disabling certificate checks is unlikely to pose a real security risk. And in case confidentiality or authenticity is a concern, even HTTPS won\'t help much, as eSCL lacks client authentication altogether. Anyone with access to the network can potentially retrieve scanned pages.</string>
+    <string name="disable_cert_checks_desc">This option disables all HTTPS certificate validation. Any certificate will be accepted, including self-signed, expired, or otherwise invalid ones. Do not use this option on insecure or public networks, as it makes man-in-the-middle (MitM) attacks possible.\n\nIn most cases, scanners are used on private networks or over VPN connections, where concerns about authenticity are minimal. In such environments, disabling certificate checks is unlikely to pose a real security risk. And in case confidentiality or authenticity is a concern, even HTTPS won't help much, as eSCL lacks client authentication altogether. Anyone with access to the network can potentially retrieve scanned pages.</string>
     <string name="remember_scan_settings">Remember scan settings</string>
     <string name="remember_scan_settings_desc">When enabled, your last used scan settings (input source, duplex, etc.) will be restored when you create a new scan session.\n\nWhen disabled, each session starts with default scan settings (highest resolution, largest possible scan area).</string>
     <string name="donate">Support development</string>
@@ -111,7 +111,7 @@
     <string name="crash">ScanBridge crashed :(</string>
     <string name="crash_occurred">"We are sorry. ScanBridge has crashed. Please report this issue and attach the following stacktrace (you can copy it with the button at the bottom)"</string>
     <string name="loading_previous_session_failed">Loading previous session failed…  %1$s</string>
-    <string name="scannercapabilities_null">The scanner capabilities should be retrieved at this point, but they weren\'t.</string>
+    <string name="scannercapabilities_null">The scanner capabilities should be retrieved at this point, but they weren't.</string>
     <string name="millimeter_unit_abbreviation">mm</string>
     <string name="inches">Inches</string>
     <string name="scanned_pages_received_in_bg">Scanned pages are received in the background.</string>
@@ -140,19 +140,19 @@
     <string name="preferred_initial_scan_settings_setting_desc">This setting determines the initial scan settings used when starting a new scan session.\n\nIn the panel that opens, you can set the options you prefer. When your choice is supported by the scanner, it will be used. Else the closest supported settings will be used.\n\nThis setting can be overriden by the last used scan settings when the "Remeber scan settings" option is on.</string>
     <string name="support">Support</string>
     <string name="licensed">Your license was successfully verified.</string>
-    <string name="not_licensed">You don\'t seem to own a license to this app</string>
+    <string name="not_licensed">You don't seem to own a license to this app</string>
     <string name="licensed_package_not_on_google_play">This app could not be found on Google Play and as such your license could not be verified. This is not your fault. Please report this issue to our support at support@fireamp.eu</string>
-    <string name="google_license_server_failure">An error has occurred on Google\'s licensing server.</string>
-    <string name="google_license_server_over_quota">Google\'s licensing server refused to confirm your license because the rate limit was exceeded</string>
-    <string name="google_license_server_unreachable">There was an error contacting Google\'s licensing server.</string>
+    <string name="google_license_server_failure">An error has occurred on Google's licensing server.</string>
+    <string name="google_license_server_over_quota">Google's licensing server refused to confirm your license because the rate limit was exceeded</string>
+    <string name="google_license_server_unreachable">There was an error contacting Google's licensing server.</string>
     <string name="licensed_package_has_invalid_name">This app seems to have an invalid package name. The license cannot be checked. This is an internal error and not your fault. Please report this issue to our support using the e-mail support@fireamp.eu</string>
-    <string name="google_license_user_undetermined">Google\'s licensing server failed to determine your Google account. Your app license couldn\'t be checked because of this.</string>
-    <string name="google_play_services_not_running">It seems like you haven\'t installed Google Play Services. These services are necessary to confirm that you\'ve purchased our app.</string>
+    <string name="google_license_user_undetermined">Google's licensing server failed to determine your Google account. Your app license couldn't be checked because of this.</string>
+    <string name="google_play_services_not_running">It seems like you haven't installed Google Play Services. These services are necessary to confirm that you've purchased our app.</string>
     <string name="licensed_but_data_got_lost">Your license was confirmed, but there was an internal error and the licensing data could not be found.</string>
-    <string name="application_license_public_key_invalid">The app\'s public key used for the signature verification of the licensing is invalid. This is not your fault. Please report this to support@fireamp.eu</string>
+    <string name="application_license_public_key_invalid">The app's public key used for the signature verification of the licensing is invalid. This is not your fault. Please report this to support@fireamp.eu</string>
     <string name="application_license_check_permission_missing">The permission allowing to check your license is missing. Please report this issue to support@fireamp.eu</string>
-    <string name="google_licensing_server_invalid_response">Google\'s licesning server responded with invalid data.</string>
-    <string name="licensing_unknown_server_response_code">Google\'s licensing server responded with an unknown response code. Please report this to support@fireamp.eu.</string>
+    <string name="google_licensing_server_invalid_response">Google's licesning server responded with invalid data.</string>
+    <string name="licensing_unknown_server_response_code">Google's licensing server responded with an unknown response code. Please report this to support@fireamp.eu.</string>
     <string name="internet_connection_needed">To use the support feature, please connect your device to the internet</string>
     <string name="welcome_message_support_login">Welcome to Fireamp Support!</string>
     <string name="back">Back</string>
@@ -183,4 +183,7 @@
     <string name="e_mail">Email</string>
     <string name="setting_more_information">Detailed information regarding the setting</string>
     <string name="ios">iOS</string>
+    <string name="export_error">Error while exporting:</string>
+    <string name="scan_deletion_error">Error while deleting a scan:</string>
+    <string name="selected_export_module_not_found">The selected export module could not be found.</string>
 </resources>

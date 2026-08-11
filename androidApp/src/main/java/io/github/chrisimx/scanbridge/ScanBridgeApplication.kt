@@ -1,14 +1,10 @@
 package io.github.chrisimx.scanbridge
 
-import AndroidHttpClientFactory
-import AndroidMdnsDiscoverService
-import AndroidMulticastLockHandler
-import AndroidScanBridgeDbBuilderFactory
 import android.app.Application
 import android.content.Context
 import coil3.ImageLoader
 import coil3.network.ktor3.KtorNetworkFetcherFactory
-import cropfeature.AndroidImageCropService
+import io.github.chrisimx.scanbridge.cropfeature.AndroidImageCropService
 import io.github.chrisimx.localization.JvmNumberFormatter
 import io.github.chrisimx.scanbridge.adapters.KoinBasedScanningProtocolManager
 import io.github.chrisimx.scanbridge.adapters.RoomBackedCustomScannerRepository
@@ -19,17 +15,20 @@ import io.github.chrisimx.scanbridge.buildinfo.BuildInfoProvider
 import io.github.chrisimx.scanbridge.cropfeature.CropScreenViewModel
 import io.github.chrisimx.scanbridge.cropfeature.FinishCropUseCase
 import io.github.chrisimx.scanbridge.cropfeature.ImageCropService
-import io.github.chrisimx.scanbridge.data.ui.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.db.DefaultScanBridgeDbFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbBuilderFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbFactory
-import io.github.chrisimx.scanbridge.db.migrations.ROOM_MIGRATIONS
+import io.github.chrisimx.scanbridge.export.ExportModule
+import io.github.chrisimx.scanbridge.export.PdfNoopExportModule
 import io.github.chrisimx.scanbridge.filesystem.FileSystem
 import io.github.chrisimx.scanbridge.filesystem.KotlinIOFileSystem
+import io.github.chrisimx.scanbridge.imagerotation.AndroidImageRotationService
+import io.github.chrisimx.scanbridge.imagerotation.ImageRotationService
 import io.github.chrisimx.scanbridge.infrastructure.KmLogScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.initialscansettings.DefaultInitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.initialscansettings.InitialScanSettingsProvider
+import io.github.chrisimx.scanbridge.koin.KOIN_MODULE_COMMON
 import io.github.chrisimx.scanbridge.localization.NumberFormatter
 import io.github.chrisimx.scanbridge.migrations.MigrationExecutor
 import io.github.chrisimx.scanbridge.migrations.RoomBackedMigrationExecutor
@@ -49,14 +48,14 @@ import io.github.chrisimx.scanbridge.repositories.DatastoreShownMessagesReposito
 import io.github.chrisimx.scanbridge.repositories.RoomLastRouteRepository
 import io.github.chrisimx.scanbridge.savelastusedscansettings.LastUsedScanSettingsRepository
 import io.github.chrisimx.scanbridge.savelastusedscansettings.RoomLastUsedScanSettingsRepository
-import io.github.chrisimx.scanbridge.scan.AndroidStartScanUseCase
 import io.github.chrisimx.scanbridge.scannerdiscovery.DiscoveryUsecase
 import io.github.chrisimx.scanbridge.scannerdiscovery.ScannerDiscoveryScreenViewModel
 import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
 import io.github.chrisimx.scanbridge.repositories.ScanJobRepository
+import io.github.chrisimx.scanbridge.scan.AndroidScanExecutor
+import io.github.chrisimx.scanbridge.scanning.ScanExecutor
 import io.github.chrisimx.scanbridge.startupmessages.RoomShownStartupMessagesRepository
 import io.github.chrisimx.scanbridge.startupmessages.ShownStartupMessagesRepository
-import io.github.chrisimx.scanbridge.usecases.StartScanUseCase
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -132,7 +131,8 @@ val appModule = module {
     single<DiscoveryUsecase>()
     viewModel<ScannerDiscoveryScreenViewModel>()
     single<AndroidMulticastLockHandler>() bind MulticastLockHandler::class
-    single<AndroidStartScanUseCase>() bind StartScanUseCase::class
+    single<AndroidScanExecutor>() bind ScanExecutor::class
+    single<AndroidImageRotationService>() bind ImageRotationService::class
 
     single<AndroidBuildInfoProvider>() bind BuildInfoProvider::class
 
@@ -149,7 +149,13 @@ val appModule = module {
     single<FinishCropUseCase>()
     single<KotlinIOFileSystem>() bind FileSystem::class
 
-    includes(SCAN_PROTOCOLS, ROOM_MIGRATIONS, DATASTORE_TO_ROOM_MIGRATION_DATA_SOURCES)
+    single<PdfNoopExportModule>() bind ExportModule::class
+
+    includes(
+        KOIN_MODULE_COMMON
+    )
+
+    includes(DATASTORE_TO_ROOM_MIGRATION_DATA_SOURCES)
 }
 
 class ScanBridgeApplication : Application() {

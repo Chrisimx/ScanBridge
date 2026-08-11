@@ -1,3 +1,5 @@
+package io.github.chrisimx.scanbridge
+
 import io.github.chrisimx.scanbridge.model.IpAddress
 import java.net.InetAddress
 

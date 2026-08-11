@@ -26,13 +26,17 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -50,35 +54,67 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.vending.licensing.LicenseValidationResultCode
 import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import io.github.chrisimx.scanbridge.util.snackBarError
 import io.github.chrisimx.scanbridge.zammadapi.AccountVerificationClient
 import io.github.chrisimx.scanbridge.zammadapi.models.AccountCreationRequest
 import io.github.chrisimx.scanbridge.zammadapi.models.VIPCreationResult
+import io.github.chrisimx.scanbridge.zammadapi.models.toLocalizedString
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.getString
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.error
+import scanbridge.composeui.generated.resources.please_accept_the_privacy_policy_to_sign_up
 import timber.log.Timber
 
-class SignupViewModel(application: Application) : AndroidViewModel(application) {
-    fun signUp(name: CharSequence, email: CharSequence, snackbarHostState: SnackbarHostState, onSuccess: () -> Unit) {
+sealed class SignupError {
+    object PrivacyPolicyNotAccepted : SignupError()
+    data class AccountCreationError(val error: VIPCreationResult) : SignupError()
+    data class LicenseError(val error: LicenseValidationResultCode) : SignupError()
+    data class OtherError(val error: Throwable) : SignupError()
+}
+
+class SignupViewModel(
+    application: Application,
+    val ownershipProofService: OwnershipProofService
+) : AndroidViewModel(application) {
+    private val _errorStream = MutableSharedFlow<SignupError>()
+    val errorStream = _errorStream.asSharedFlow()
+
+    private val _privacyPolicyAccepted = MutableStateFlow(false)
+    val privacyPolicyAccepted = _privacyPolicyAccepted.asStateFlow()
+
+    fun setPrivacyPolicyAccepted(accepted: Boolean) {
+        _privacyPolicyAccepted.value = accepted
+    }
+
+    fun signUp(name: CharSequence, email: CharSequence, onSuccess: () -> Unit) {
         viewModelScope.launch {
+            if (!privacyPolicyAccepted.value) {
+                _errorStream.emit(SignupError.PrivacyPolicyNotAccepted)
+                return@launch
+            }
+
             withContext(Dispatchers.IO) {
                 try {
                     val api = AccountVerificationClient.RetrofitClient.api
                     val googleChallenge = api.getGoogleChallenge()
 
-                    val ops = OwnershipProofService(application)
-                    val ownershipProofResult = ops.requestOwnershipProof(googleChallenge.nonce)
+                    val ownershipProofResult = ownershipProofService.requestOwnershipProof(googleChallenge.nonce)
 
                     if (ownershipProofResult is LicensingRequestResult.Error) {
-                        Timber.e(ownershipProofResult.errorCode.asLocalizedString(application))
-                        snackBarError(
-                            application.getString(R.string.error) + ": " + ownershipProofResult.errorCode.asLocalizedString(application),
-                            viewModelScope,
-                            application,
-                            snackbarHostState
+                        Timber.e(ownershipProofResult.errorCode.toString())
+                        _errorStream.emit(
+                            SignupError.LicenseError(ownershipProofResult.errorCode)
                         )
+
                         return@withContext
                     } else if (ownershipProofResult is LicensingRequestResult.OwnershipProof) {
                         val rawProof = ownershipProofResult.responseData.originalResponse
@@ -102,26 +138,16 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
                             Timber.e(
                                 "%s: %s",
                                 application.getString(R.string.error),
-                                application.getString(accountCreationResult.result.message)
+                                accountCreationResult.result.toLocalizedString()
                             )
-                            snackBarError(
-                                application.getString(R.string.error) + ": " + application.getString(accountCreationResult.result.message),
-                                viewModelScope,
-                                application,
-                                snackbarHostState
-                            )
+                            _errorStream.emit(SignupError.AccountCreationError(accountCreationResult.result))
                             return@withContext
                         }
                         onSuccess()
                     }
                 } catch (error: Exception) {
                     Timber.e(error)
-                    snackBarError(
-                        application.getString(R.string.error) + ": " + error.message,
-                        viewModelScope,
-                        application,
-                        snackbarHostState
-                    )
+                    _errorStream.emit(SignupError.OtherError(error))
                 }
             }
         }
@@ -133,9 +159,12 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
 fun SignupScreen(modifier: Modifier, onBack: () -> Unit, onSuccess: () -> Unit) {
     val viewModel: SignupViewModel = viewModel()
     val snackbarHostState = remember { SnackbarHostState() }
-    var privacyPolicyAccepted by remember { mutableStateOf(false) }
+    val privacyPolicyAccepted by viewModel.privacyPolicyAccepted.collectAsState()
+
     val context = LocalContext.current
     val localTextStyle = LocalTextStyle.current
+    val coroutineScope = rememberCoroutineScope()
+    val clipboard = LocalClipboard.current
 
     val privacyPolicyLink: AnnotatedString = remember {
         buildAnnotatedString {
@@ -155,6 +184,17 @@ fun SignupScreen(modifier: Modifier, onBack: () -> Unit, onSuccess: () -> Unit) 
             }
 
             append(context.getString(R.string.last_part_privacy_accept))
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.errorStream.collect { error ->
+            snackBarError(
+                error.errorText(),
+                coroutineScope,
+                snackbarHostState,
+                clipboard = clipboard
+            )
         }
     }
 
@@ -204,30 +244,17 @@ fun SignupScreen(modifier: Modifier, onBack: () -> Unit, onSuccess: () -> Unit) 
                         .padding(horizontal = 20.dp)
                         .toggleable(
                             value = privacyPolicyAccepted,
-                            onValueChange = { privacyPolicyAccepted = it },
+                            onValueChange = viewModel::setPrivacyPolicyAccepted,
                             role = Role.Checkbox
                         )
                 ) {
-                    Checkbox(privacyPolicyAccepted, {
-                        privacyPolicyAccepted = it
-                    })
+                    Checkbox(privacyPolicyAccepted, viewModel::setPrivacyPolicyAccepted)
                     Text(privacyPolicyLink, textAlign = TextAlign.Justify)
                 }
 
                 Row {
                     Button({
-                        if (!privacyPolicyAccepted) {
-                            snackBarError(
-                                context.getString(R.string.please_accept_the_privacy_policy_to_sign_up),
-                                viewModel.viewModelScope,
-                                context,
-                                snackbarHostState,
-                                false
-                            )
-                            return@Button
-                        }
-
-                        viewModel.signUp(nameState.text, emailState.text, snackbarHostState, onSuccess)
+                        viewModel.signUp(nameState.text, emailState.text, onSuccess)
                     }, modifier = Modifier.padding(20.dp)) {
                         Text(stringResource(R.string.signup))
                     }
@@ -249,6 +276,15 @@ fun SignupScreen(modifier: Modifier, onBack: () -> Unit, onSuccess: () -> Unit) 
                 )
             }
         }
+    }
+}
+
+suspend fun SignupError.errorText(): String {
+    return when (this) {
+        is SignupError.AccountCreationError -> getString(Res.string.error) + ": " + this.error.toLocalizedString()
+        is SignupError.LicenseError -> getString(Res.string.error) + ": " + this.error.asLocalizedString()
+        is SignupError.OtherError -> getString(Res.string.error) + ": " + this.error
+        SignupError.PrivacyPolicyNotAccepted -> getString(Res.string.please_accept_the_privacy_policy_to_sign_up)
     }
 }
 

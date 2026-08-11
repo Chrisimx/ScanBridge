@@ -1,3 +1,5 @@
+package io.github.chrisimx.scanbridge
+
 import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo

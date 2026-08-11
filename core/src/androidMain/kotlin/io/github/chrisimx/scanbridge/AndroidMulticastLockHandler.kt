@@ -1,3 +1,5 @@
+package io.github.chrisimx.scanbridge
+
 import android.app.Application
 import android.content.Context
 import android.net.wifi.WifiManager

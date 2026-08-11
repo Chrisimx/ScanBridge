@@ -4,7 +4,7 @@
     <string name="no_scanners_found">Nessuno scanner disponibile. Sei connesso alla rete locale?</string>
     <string name="warning_desc">Icona di avviso</string>
     <string name="error_title">Errore</string>
-    <string name="scannercapabilities_retrieve_error">Si è verificato un errore durante il tentativo di recuperare le funzionalità dello scanner:\n\n%1$s</string>
+    <string name="scannercapabilities_retrieve_error">Si è verificato un errore durante il tentativo di recuperare le funzionalità dello scanner:</string>
     <string name="okay_text">OK</string>
     <string name="trying_to_retrieve_scannercapabilities">Tentativo di recupero delle funzionalità dello scanner</string>
     <string name="scan">Scansiona</string>
@@ -179,4 +179,7 @@
     <string name="custom_scanner_url">URL</string>
     <string name="setting_more_information">Informazioni dettagliate sull'impostazione</string>
     <string name="ios">iOS</string>
+    <string name="export_error">Esportazione non riuscita:</string>
+    <string name="scan_deletion_error">Eliminazione della scansione non riuscita:</string>
+    <string name="selected_export_module_not_found">Impossibile trovare il modulo di esportazione selezionato.</string>
 </resources>

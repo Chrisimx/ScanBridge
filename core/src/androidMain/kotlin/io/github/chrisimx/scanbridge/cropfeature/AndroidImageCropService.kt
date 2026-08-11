@@ -1,4 +1,4 @@
-package cropfeature
+package io.github.chrisimx.scanbridge.cropfeature
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -42,7 +42,10 @@ class AndroidImageCropService(
         sourceBitmap.recycle()
 
         val croppedFile = File(outputPath.path.toString())
-        croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, croppedFile.outputStream())
+        croppedFile.outputStream().use {
+            croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+        }
+
         croppedBitmap.recycle()
 
         return@withContext true

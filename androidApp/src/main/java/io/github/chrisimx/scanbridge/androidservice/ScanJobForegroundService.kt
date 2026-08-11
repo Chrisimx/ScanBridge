@@ -23,6 +23,7 @@ import io.github.chrisimx.scanbridge.model.ScanningError
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.ports.ScanJobProcessingEvent
 import io.github.chrisimx.scanbridge.repositories.ScanJobRepository
+import io.github.chrisimx.scanbridge.scanning.ScanExecutor
 import io.github.chrisimx.scanbridge.util.extractPdfImages
 import java.io.File
 import kotlin.jvm.java

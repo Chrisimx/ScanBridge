@@ -1,3 +1,5 @@
+package io.github.chrisimx.scanbridge
+
 import android.annotation.SuppressLint
 import java.security.SecureRandom
 import java.security.cert.X509Certificate

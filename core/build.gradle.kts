@@ -43,6 +43,8 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
+    applyDefaultHierarchyTemplate()
+
     sourceSets {
         all {
             languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
@@ -59,6 +61,7 @@ kotlin {
             api(libs.wsdkt)
             api(libs.anyscanCore)
             api(libs.nonThrowingKtor)
+            api(libs.filekit.core)
 
             // Room deps
             implementation(libs.androidx.room.runtime)
@@ -117,4 +120,8 @@ dependencies {
     add("kspJvm", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
+}
+
+koinCompiler {
+    compileSafety = true
 }

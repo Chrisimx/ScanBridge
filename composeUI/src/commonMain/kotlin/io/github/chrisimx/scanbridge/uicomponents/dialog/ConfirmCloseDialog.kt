@@ -29,9 +29,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import io.github.chrisimx.scanbridge.R
+import org.jetbrains.compose.resources.stringResource
+import scanbridge.composeui.generated.resources.Res
+import scanbridge.composeui.generated.resources.cancel_text
+import scanbridge.composeui.generated.resources.leave_text
+import scanbridge.composeui.generated.resources.scans_will_be_lost_text
+import scanbridge.composeui.generated.resources.scans_will_be_lost_title
+import scanbridge.composeui.generated.resources.warning_desc
 
 @Composable
 fun ConfirmCloseDialog(onDismiss: () -> Unit, onConfirmed: () -> Unit) {
@@ -39,15 +44,15 @@ fun ConfirmCloseDialog(onDismiss: () -> Unit, onConfirmed: () -> Unit) {
         icon = {
             Icon(
                 imageVector = Icons.Rounded.Warning,
-                contentDescription = stringResource(R.string.warning_desc),
+                contentDescription = stringResource(Res.string.warning_desc),
                 modifier = Modifier.size(48.dp)
             )
         },
         title = {
-            Text(text = stringResource(R.string.scans_will_be_lost_title))
+            Text(text = stringResource(Res.string.scans_will_be_lost_title))
         },
         text = {
-            Text(text = stringResource(R.string.scans_will_be_lost_text))
+            Text(text = stringResource(Res.string.scans_will_be_lost_text))
         },
         onDismissRequest = {
             onDismiss()
@@ -58,7 +63,7 @@ fun ConfirmCloseDialog(onDismiss: () -> Unit, onConfirmed: () -> Unit) {
                     onDismiss()
                 }
             ) {
-                Text(stringResource(R.string.cancel_text))
+                Text(stringResource(Res.string.cancel_text))
             }
         },
         confirmButton = {
@@ -68,7 +73,7 @@ fun ConfirmCloseDialog(onDismiss: () -> Unit, onConfirmed: () -> Unit) {
                     onConfirmed()
                 }
             ) {
-                Text(stringResource(R.string.leave_text))
+                Text(stringResource(Res.string.leave_text))
             }
         }
     )

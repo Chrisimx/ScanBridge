@@ -5,7 +5,7 @@
     <string name="no_scanners_found">Es wurden keine Scanner gefunden. Bist du mit einem lokalen Netzwerk verbunden?</string>
     <string name="warning_desc">Warnungssymbol</string>
     <string name="error_title">Fehler</string>
-    <string name="scannercapabilities_retrieve_error">Fehler beim Abrufen der Eigenschaften des Scanners:\n\n%1$s</string>
+    <string name="scannercapabilities_retrieve_error">Fehler beim Abrufen der Eigenschaften des Scanners:</string>
     <string name="okay_text">Okay</string>
     <string name="trying_to_retrieve_scannercapabilities">Die Eigenschaften des Scanners werden abgerufen</string>
     <string name="scan">Scannen</string>
@@ -181,4 +181,7 @@
     <string name="custom_scanner_url">URL</string>
     <string name="setting_more_information">Information zur Einstellung</string>
     <string name="ios">iOS</string>
+    <string name="export_error">Exportieren fehlgeschlagen:</string>
+    <string name="scan_deletion_error">Löschen fehlgeschlagen:</string>
+    <string name="selected_export_module_not_found">Das ausgwählte Exportmodul konnte nicht gefunden werden.</string>
 </resources>

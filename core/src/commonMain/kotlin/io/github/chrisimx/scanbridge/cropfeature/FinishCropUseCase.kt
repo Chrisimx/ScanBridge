@@ -1,19 +1,21 @@
 package io.github.chrisimx.scanbridge.cropfeature
 
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
-import io.github.chrisimx.scanbridge.db.daos.ScannedPageDao
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.filesystem.FileSystem
 import io.github.chrisimx.scanbridge.model.Rect
 import io.github.chrisimx.scanbridge.model.ScanBridgeFile
-import io.github.chrisimx.scanbridge.util.getEditedImageName
+import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.util.getEditedFile
 
 class FinishCropUseCase(
     private val imageCropService: ImageCropService,
     scanBridgeDb: ScanBridgeDb,
-    private val fileSystem: FileSystem
+    private val fileSystem: FileSystem,
+    loggerFactory: ScanBridgeLoggerFactory
 ) {
-    val scannedPageDao = scanBridgeDb.scannedPageDao()
+    private val scannedPageDao = scanBridgeDb.scannedPageDao()
+    private val logger = loggerFactory.withClass(this::class)
 
     suspend operator fun invoke(
         page: ScannedPage,
@@ -22,11 +24,12 @@ class FinishCropUseCase(
         val scanFile = ScanBridgeFile(page.filePath)
 
         // Determine an output for the cropped image
-        val editFileName = scanFile.getEditedImageName()
-        val editFile = scanFile
-            .parent()
-            ?.child(editFileName)
-            ?: return false
+        val editFile = scanFile.getEditedFile()
+
+        if (editFile == null) {
+            logger.error { "Could not determine output file name for cropped image" }
+            return false
+        }
 
         val successfulCrop = imageCropService.crop(
             sourcePath = scanFile,

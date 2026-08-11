@@ -1,3 +1,5 @@
+package io.github.chrisimx.scanbridge
+
 import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase

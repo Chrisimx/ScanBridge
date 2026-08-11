@@ -39,8 +39,8 @@ navigationCompose = "2.9.5"
 versionsPlugin = "0.53.0"
 screengrab = "2.1.1"
 ktor = "3.4.0"
-koin = "4.2.0"
-koin-plugin = "0.6.2"
+koin = "4.2.2"
+koin-plugin = "1.1.0"
 protobuf-plugin = "0.9.6"
 protobuf-kotlin-lite = "4.33.5"
 rules = "1.7.0"
@@ -48,6 +48,7 @@ paraphrase-plugin = "0.4.1"
 ksp = "2.3.6"
 protoc = "4.33.5"
 androidx-sqlite = "2.6.2"
+filekit = "0.15.0"
 
 [libraries]
 
@@ -131,6 +132,8 @@ zoomable = { module = "me.saket.telephoto:zoomable", version.ref = "zoomable" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf-kotlin-lite"}
 androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
 protoc = { module = "com.google.protobuf:protoc", version.ref = "protoc" }
+filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit"}
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit"}
 
 escl-mock-server = { module = "io.github.chrisimx:escl-mock-server", version.ref = "escl-mock-server"}
 

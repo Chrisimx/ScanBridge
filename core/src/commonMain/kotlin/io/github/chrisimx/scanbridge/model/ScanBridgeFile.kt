@@ -12,4 +12,10 @@ data class ScanBridgeFile(val path: Path) {
     fun child(fileName: String) = ScanBridgeFile(
         Path(path, fileName)
     )
+
+    val name = path.name
+
+    val nameWithoutExtension = name.substringBeforeLast('.', "")
+
+    val extension = name.substringAfterLast('.', "")
 }

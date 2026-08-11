@@ -1,3 +1,5 @@
+package io.github.chrisimx.scanbridge
+
 import io.github.chrisimx.scanbridge.model.HttpClientConfig
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
