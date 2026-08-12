@@ -21,8 +21,6 @@ import io.github.chrisimx.scanbridge.db.ScanBridgeDbBuilderFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbFactory
 import io.github.chrisimx.scanbridge.export.ExportModule
 import io.github.chrisimx.scanbridge.export.PdfNoopExportModule
-import io.github.chrisimx.scanbridge.filesystem.FileSystem
-import io.github.chrisimx.scanbridge.filesystem.KotlinIOFileSystem
 import io.github.chrisimx.scanbridge.imagerotation.AndroidImageRotationService
 import io.github.chrisimx.scanbridge.imagerotation.ImageRotationService
 import io.github.chrisimx.scanbridge.infrastructure.KmLogScanBridgeLoggerFactory
@@ -147,7 +145,6 @@ val appModule = module {
     viewModel<CropScreenViewModel>()
     single<AndroidImageCropService>() bind ImageCropService::class
     single<FinishCropUseCase>()
-    single<KotlinIOFileSystem>() bind FileSystem::class
 
     single<PdfNoopExportModule>() bind ExportModule::class
 

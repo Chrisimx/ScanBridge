@@ -1,12 +1,12 @@
 package io.github.chrisimx.scanbridge.cropfeature
 
 import io.github.chrisimx.scanbridge.model.Rect
-import io.github.chrisimx.scanbridge.model.ScanBridgeFile
+import io.github.vinceglb.filekit.PlatformFile
 
 interface ImageCropService {
     suspend fun crop(
-        sourcePath: ScanBridgeFile,
-        outputPath: ScanBridgeFile,
+        sourceFile: PlatformFile,
+        outputFile: PlatformFile,
         cropRect: Rect,
     ): Boolean
 }

@@ -1,10 +1,10 @@
 package io.github.chrisimx.scanbridge.imagerotation
 
-import io.github.chrisimx.scanbridge.model.ScanBridgeFile
+import io.github.vinceglb.filekit.PlatformFile
 
 interface ImageRotationService {
     suspend fun rotate90ToRight(
-        sourcePath: ScanBridgeFile,
-        outputPath: ScanBridgeFile,
+        sourceFile: PlatformFile,
+        outputFile: PlatformFile,
     ): Boolean
 }

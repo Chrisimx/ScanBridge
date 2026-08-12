@@ -105,6 +105,8 @@ import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
 import io.github.chrisimx.scanbridge.util.snackBarError
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.openFileSaver
+import io.github.vinceglb.filekit.extension
+import io.github.vinceglb.filekit.nameWithoutExtension
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope

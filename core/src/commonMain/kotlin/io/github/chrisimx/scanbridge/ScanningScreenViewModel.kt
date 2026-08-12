@@ -38,7 +38,6 @@ import io.github.chrisimx.scanbridge.db.entities.TempFile
 import io.github.chrisimx.scanbridge.export.ExportModuleManager
 import io.github.chrisimx.scanbridge.export.ExportModuleType
 import io.github.chrisimx.scanbridge.initialscansettings.InitialScanSettingsProvider
-import io.github.chrisimx.scanbridge.model.ScanBridgeFile
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.scannerCapabilities
@@ -56,6 +55,7 @@ import io.github.chrisimx.scanbridge.scanning.StartScanUseCase
 import io.github.chrisimx.scanbridge.scanning.SwapPagesUseCase
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.copyTo
+import io.github.vinceglb.filekit.path
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -185,8 +185,8 @@ class ScanningScreenViewModel(
 
     val exportQueue = _exportQueue.receiveAsFlow()
 
-    private suspend fun addTempFile(file: ScanBridgeFile) {
-        val tmpFile = TempFile(Uuid.generateV4(), sessionID, file.path.toString())
+    private suspend fun addTempFile(file: PlatformFile) {
+        val tmpFile = TempFile(Uuid.generateV4(), sessionID, file.path)
         tmpFileDao.insertAll(tmpFile)
     }
 
@@ -524,4 +524,4 @@ enum class FileSaveType {
     Save
 }
 
-data class ExportEvent(val exportedFile: ScanBridgeFile, val saveType: FileSaveType, val exportId: Uuid = Uuid.generateV4())
+data class ExportEvent(val exportedFile: PlatformFile, val saveType: FileSaveType, val exportId: Uuid = Uuid.generateV4())

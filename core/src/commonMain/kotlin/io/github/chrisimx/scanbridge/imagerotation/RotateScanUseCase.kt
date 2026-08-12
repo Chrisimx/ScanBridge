@@ -1,16 +1,16 @@
 package io.github.chrisimx.scanbridge.imagerotation
 
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
-import io.github.chrisimx.scanbridge.filesystem.FileSystem
-import io.github.chrisimx.scanbridge.model.ScanBridgeFile
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.util.getEditedFile
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.delete
+import io.github.vinceglb.filekit.path
 import kotlin.uuid.Uuid
 
 class RotateScanUseCase(
     scanBridgeDb: ScanBridgeDb,
     loggerFactory: ScanBridgeLoggerFactory,
-    val fileSystem: FileSystem,
     val imageRotationService: ImageRotationService
 ) {
     private val scannedPageDao = scanBridgeDb.scannedPageDao()
@@ -18,7 +18,7 @@ class RotateScanUseCase(
 
     suspend fun rotateScan(scannedPageId: Uuid) {
         val scannedPage = scannedPageDao.getByScanId(scannedPageId) ?: return
-        val scanFile = ScanBridgeFile(scannedPage.filePath)
+        val scanFile = PlatformFile(scannedPage.filePath)
         val editFile = scanFile.getEditedFile()
 
         if (editFile == null) {
@@ -34,10 +34,10 @@ class RotateScanUseCase(
 
         scannedPageDao.update(
             scannedPage.copy(
-                filePath = editFile.path.toString()
+                filePath = editFile.path
             )
         )
 
-        fileSystem.delete(scanFile)
+        scanFile.delete()
     }
 }

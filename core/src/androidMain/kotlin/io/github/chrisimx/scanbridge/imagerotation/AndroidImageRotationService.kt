@@ -3,11 +3,15 @@ package io.github.chrisimx.scanbridge.imagerotation
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import io.github.chrisimx.scanbridge.model.ScanBridgeFile
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
-import java.io.File
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.sink
+import io.github.vinceglb.filekit.source
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.io.asInputStream
+import kotlinx.io.asOutputStream
+import kotlinx.io.buffered
 
 class AndroidImageRotationService(
     loggerFactory: ScanBridgeLoggerFactory
@@ -15,11 +19,17 @@ class AndroidImageRotationService(
     val logger = loggerFactory.withClass(this::class)
 
     override suspend fun rotate90ToRight(
-        sourcePath: ScanBridgeFile,
-        outputPath: ScanBridgeFile
+        sourceFile: PlatformFile,
+        outputFile: PlatformFile
     ): Boolean = withContext(Dispatchers.IO) {
-        val pathString = sourcePath.path.toString()
-        val sourceBitmap = BitmapFactory.decodeFile(pathString)
+        val sourceFileInputStream = sourceFile
+            .source()
+            .buffered()
+            .asInputStream()
+
+        val sourceBitmap = sourceFileInputStream.use {
+            BitmapFactory.decodeStream(it)
+        }
         if (sourceBitmap == null) {
             logger.error {
                 "Could not decode source bitmap for rotating"
@@ -32,8 +42,12 @@ class AndroidImageRotationService(
 
         sourceBitmap.recycle()
 
-        val rotatedFile = File(outputPath.path.toString())
-        rotatedFile.outputStream().use {
+        val rotatedFileOutputStream = outputFile
+            .sink(append = false)
+            .buffered()
+            .asOutputStream()
+
+        rotatedFileOutputStream.use {
             rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
         }
         rotatedBitmap.recycle()

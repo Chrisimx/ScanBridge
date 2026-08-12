@@ -1,7 +1,9 @@
 package io.github.chrisimx.scanbridge.ports
 
-import io.github.chrisimx.scanbridge.model.ScanBridgeFile
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.name
+
 
 interface ZipService {
-    fun zip(files: List<ScanBridgeFile>, output: ScanBridgeFile, mapFileName: (ScanBridgeFile) -> String = { it.path.name })
+    fun zip(files: List<PlatformFile>, output: PlatformFile, mapFileName: (PlatformFile) -> String = { it.name })
 }

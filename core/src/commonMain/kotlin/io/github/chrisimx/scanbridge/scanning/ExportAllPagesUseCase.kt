@@ -3,7 +3,7 @@ package io.github.chrisimx.scanbridge.scanning
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.export.ExportModuleManager
 import io.github.chrisimx.scanbridge.export.ExportModuleType
-import io.github.chrisimx.scanbridge.model.ScanBridgeFile
+import io.github.vinceglb.filekit.PlatformFile
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CancellationException
 
@@ -32,7 +32,7 @@ class ExportAllPagesUseCase(
 }
 
 sealed class ExportAllPagesResult {
-    data class Success(val exportedFile: ScanBridgeFile) : ExportAllPagesResult()
+    data class Success(val exportedFile: PlatformFile) : ExportAllPagesResult()
     data class ExportFailed(val error: Throwable) : ExportAllPagesResult()
     object ExportModuleNotFound : ExportAllPagesResult()
 }

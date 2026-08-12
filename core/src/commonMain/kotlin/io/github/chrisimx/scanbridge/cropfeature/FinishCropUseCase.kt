@@ -2,16 +2,16 @@ package io.github.chrisimx.scanbridge.cropfeature
 
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
-import io.github.chrisimx.scanbridge.filesystem.FileSystem
 import io.github.chrisimx.scanbridge.model.Rect
-import io.github.chrisimx.scanbridge.model.ScanBridgeFile
 import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.util.getEditedFile
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.delete
+import io.github.vinceglb.filekit.path
 
 class FinishCropUseCase(
     private val imageCropService: ImageCropService,
     scanBridgeDb: ScanBridgeDb,
-    private val fileSystem: FileSystem,
     loggerFactory: ScanBridgeLoggerFactory
 ) {
     private val scannedPageDao = scanBridgeDb.scannedPageDao()
@@ -21,7 +21,7 @@ class FinishCropUseCase(
         page: ScannedPage,
         cropRect: Rect,
     ): Boolean {
-        val scanFile = ScanBridgeFile(page.filePath)
+        val scanFile = PlatformFile(page.filePath)
 
         // Determine an output for the cropped image
         val editFile = scanFile.getEditedFile()
@@ -32,8 +32,8 @@ class FinishCropUseCase(
         }
 
         val successfulCrop = imageCropService.crop(
-            sourcePath = scanFile,
-            outputPath = editFile,
+            sourceFile = scanFile,
+            outputFile = editFile,
             cropRect = cropRect,
         )
 
@@ -43,12 +43,12 @@ class FinishCropUseCase(
 
         scannedPageDao.update(
             page.copy(
-                filePath = editFile.path.toString()
+                filePath = editFile.path
             )
         )
 
         // Delete the original file
-        fileSystem.delete(scanFile)
+        scanFile.delete()
 
         return true
     }
