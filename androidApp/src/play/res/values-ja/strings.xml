@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="support">サポート</string>
+    <string name="licensed">ライセンスが正常に確認されました。</string>
+    <string name="not_licensed">このアプリのライセンスをお持ちでないようです</string>
+    <string name="licensed_package_not_on_google_play">このアプリが Google Play に見つからなかったため、ライセンスを確認できませんでした。これはご利用者様側の問題ではありません。support@fireamp.eu までこの問題をご報告ください。</string>
+    <string name="google_license_server_failure">Google ライセンスサーバーでエラーが発生しました。</string>
+    <string name="google_license_server_over_quota">リクエスト数の上限を超えたため、Google ライセンスサーバーがライセンスの確認を拒否しました。</string>
+    <string name="google_license_server_unreachable">Google ライセンスサーバーへの接続中にエラーが発生しました。</string>
+    <string name="licensed_package_has_invalid_name">ScanBridge のパッケージ名が無効なようです。ライセンスを確認できません。内部エラーのため、あなたの責任ではありません。support@fireamp.eu までご報告ください。</string>
+    <string name="google_license_user_undetermined">Google ライセンスサーバーが Google アカウントを特定できませんでした。そのためアプリのライセンスを確認できませんでした。</string>
+    <string name="google_play_services_not_running">Google Play Services がインストールされていないようです。アプリの購入を確認するために必要です。</string>
+    <string name="licensed_but_data_got_lost">ライセンスは確認されましたが、内部エラーによりライセンスデータが見つかりませんでした。</string>
+    <string name="application_license_public_key_invalid">ライセンス署名検証に使用するアプリの公開鍵が無効です。あなたの責任ではありません。support@fireamp.eu までご報告ください。</string>
+    <string name="application_license_check_permission_missing">ライセンスを確認するための権限がありません。support@fireamp.eu までご報告ください。</string>
+    <string name="google_licensing_server_invalid_response">Google ライセンスサーバーが無効なデータを返しました。</string>
+    <string name="licensing_unknown_server_response_code">Google ライセンスサーバーが不明な応答コードを返しました。support@fireamp.eu までご報告ください。</string>
+    <string name="internet_connection_needed">サポート機能を使用するには、インターネットに接続してください。</string>
+    <string name="welcome_message_support_login">Fireamp サポートへようこそ！</string>
+    <string name="back">戻る</string>
+    <string name="signup">登録</string>
+    <string name="explanation_support">ここでは優先サポートアカウントを作成できます。登録するとパスワード設定用のメールが届きます。その後、登録したメールアドレスで support@fireamp.eu に問い合わせるか、https://support.fireamp.eu にログインして優先サポートを受けられます。どちらもここから直接アクセスできます:</string>
+    <string name="created_successfully">アカウントを作成しました</string>
+    <string name="vip_creation_token_is_invalid">トークンが無効です</string>
+    <string name="vip_creation_account_unable_to_be_created">アカウントを作成できませんでした。メールアドレスと名前は正しいですか？同じメールアドレスのアカウントがすでに存在している可能性があります。</string>
+    <string name="vip_creation_google_proof_is_from_the_future">Google ライセンス証明が未来の日時になっています。これは通常ありえません。</string>
+    <string name="vip_creation_google_proof_is_not_recent_enough">Google ライセンス証明が古すぎます。インターネット接続が極端に遅い可能性があります。</string>
+    <string name="vip_creation_purchase_was_already_used">この購入はすでに優先アカウントの作成に使用されています。</string>
+    <string name="vip_creation_empty_email_or_name">メールアドレスとパスワードを入力してください。</string>
+    <string name="google_proof_has_wrong_response_code">Google ライセンス証明の応答コードが正しくありません。</string>
+    <string name="google_proof_has_wrong_package_name">Google ライセンス証明のパッケージが異なります。</string>
+    <string name="google_proof_has_wrong_nonce">Google ライセンス証明のナンスが正しくありません</string>
+    <string name="google_proof_is_invalid">Google ライセンス証明の形式が正しくありません</string>
+    <string name="vip_creation_challenge_expired">チャレンジの有効期限が切れました。もう一度お試しください。</string>
+    <string name="google_proof_signature_is_invalid">Google ライセンス証明の署名が無効です。</string>
+    <string name="account_created_successfully">優先サポートアカウントが作成されました！</string>
+    <string name="explanation_account_creation_completion">アカウントが作成されました。パスワード設定用のメールが届きますので、手順に従ってアカウントのセットアップを完了してください。その後、support@fireamp.eu へのメール、または https://support.fireamp.eu へのウェブアクセスでサポートを受けられます。以下からどちらの方法もご利用いただけます:</string>
+    <string name="by_joining_i_accept">"登録することで、"</string>
+    <string name="fireamp_privacy_policy">Fireamp プライバシーポリシー</string>
+    <string name="last_part_privacy_accept">"に同意します。"</string>
+    <string name="please_accept_the_privacy_policy_to_sign_up">登録するにはプライバシーポリシーに同意してください。</string>
+    <string name="contact_support_over_email">メールでサポートに問い合わせる</string>
+    <string name="open_support_website">サポートウェブサイトを開く</string>
+    <string name="signup_to_fireamp">Fireamp サポートに登録</string>
+    <string name="e_mail">メール</string>
+</resources>
