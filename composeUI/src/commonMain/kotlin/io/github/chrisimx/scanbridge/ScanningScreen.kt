@@ -84,7 +84,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import io.github.chrisimx.scanbridge.clipboard.toClipEntry
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.toUIInputSourceType
@@ -102,6 +101,7 @@ import io.github.chrisimx.scanbridge.localizationhelper.toReadableString
 import io.github.chrisimx.scanbridge.model.PositionAndHeight
 import io.github.chrisimx.scanbridge.platformhelper.PlatformBackHandler
 import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
+import io.github.chrisimx.scanbridge.util.platformShareFile
 import io.github.chrisimx.scanbridge.util.snackBarError
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.openFileSaver
@@ -173,39 +173,45 @@ fun ScanningScreenBottomBar(
             ) {
                 Icon(Icons.Filled.Settings, contentDescription = stringResource(Res.string.settings))
             }
-            IconButton(
-                onClick = {
-                    scanningViewModel.setShowSaveOptionsPopup(true)
-                },
-                modifier = Modifier.onGloballyPositioned {
-                    setSaveButtonPositionAndHeight(PositionAndHeight(
-                        it.positionInWindow().x.toInt(),
-                        it.positionInWindow().y.toInt(),
-                        it.size.height
-                    ))
+            if (scanningViewModel.saveSupported) {
+                IconButton(
+                    onClick = {
+                        scanningViewModel.setShowSaveOptionsPopup(true)
+                    },
+                    modifier = Modifier.onGloballyPositioned {
+                        setSaveButtonPositionAndHeight(
+                            PositionAndHeight(
+                                it.positionInWindow().x.toInt(),
+                                it.positionInWindow().y.toInt(),
+                                it.size.height
+                            )
+                        )
+                    }
+                ) {
+                    Icon(
+                        painterResource(Res.drawable.outline_file_save_24),
+                        contentDescription = stringResource(Res.string.save_to_file)
+                    )
                 }
-            ) {
-                Icon(
-                    painterResource(Res.drawable.outline_file_save_24),
-                    contentDescription = stringResource(Res.string.save_to_file)
-                )
             }
-            IconButton(
-                onClick = {
-                    scanningViewModel.setShowExportOptionsPopup(true)
-                },
-                modifier = Modifier.onGloballyPositioned {
-                    setExportButtonPositionAndHeight(PositionAndHeight(
-                        it.positionInWindow().x.toInt(),
-                        it.positionInWindow().y.toInt(),
-                        it.size.height
-                    ))
+            if (scanningViewModel.shareSupported) {
+                IconButton(
+                    onClick = {
+                        scanningViewModel.setShowExportOptionsPopup(true)
+                    },
+                    modifier = Modifier.onGloballyPositioned {
+                        setExportButtonPositionAndHeight(PositionAndHeight(
+                            it.positionInWindow().x.toInt(),
+                            it.positionInWindow().y.toInt(),
+                            it.size.height
+                        ))
+                    }
+                ) {
+                    Icon(
+                        Icons.Filled.Share,
+                        contentDescription = stringResource(Res.string.export)
+                    )
                 }
-            ) {
-                Icon(
-                    Icons.Filled.Share,
-                    contentDescription = stringResource(Res.string.export)
-                )
             }
         },
         floatingActionButton = {
@@ -384,7 +390,7 @@ fun ScanningScreen(
         scanningViewModel.errorStream.collect { error ->
             val errorText = error.errorText()
             val hasErrorText = errorText != null
-            val fullErrorText = error.errorPretext() + if (hasErrorText) "\n\n" else "" + error.errorText()
+            val fullErrorText = error.errorPretext() + if (hasErrorText) "\n\n" + error.errorText() else ""
 
             snackBarError(
                 fullErrorText,
@@ -534,13 +540,19 @@ fun ScanningScreen(
 
             LaunchedEffect(Unit) {
                 scanningViewModel.exportQueue.collect { exportEvent ->
-                    val file = FileKit.openFileSaver(
-                        suggestedName = exportEvent.exportedFile.nameWithoutExtension,
-                        defaultExtension = exportEvent.exportedFile.extension,
-                    )
-                    // TODO: Add Sharing code
 
-                    scanningViewModel.onExportFinished(exportEvent, file)
+                    when (exportEvent.saveType) {
+                        FileSaveType.Share -> {
+                            platformShareFile(exportEvent.exportedFile)
+                        }
+                        FileSaveType.Save -> {
+                            val file = FileKit.openFileSaver(
+                                suggestedName = exportEvent.exportedFile.nameWithoutExtension,
+                                defaultExtension = exportEvent.exportedFile.extension,
+                            )
+                            scanningViewModel.onSaveLocationSelected(exportEvent, file)
+                        }
+                    }
                 }
             }
 
@@ -548,7 +560,7 @@ fun ScanningScreen(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                if (exportAlpha > 0) {
+                if (exportAlpha > 0 && scanningViewModel.shareSupported) {
                     ExportSettingsPopup(
                         exportPositionAndHeight,
                         exportOptionsWidth,
@@ -565,7 +577,7 @@ fun ScanningScreen(
                     )
                 }
 
-                if (saveOptionsAlpha > 0) {
+                if (saveOptionsAlpha > 0 && scanningViewModel.saveSupported) {
                     ExportSettingsPopup(
                         saveButtonPositionAndHeight,
                         saveOptionsWidth,
@@ -823,6 +835,7 @@ private suspend fun ScanningScreenError.errorPretext(): String {
         is ScanningScreenError.ExportError -> getString(Res.string.export_error)
         ScanningScreenError.ExportModuleNotFound -> getString(Res.string.selected_export_module_not_found)
         ScanningScreenError.JobStillRunning -> getString(Res.string.job_still_running)
+        ScanningScreenError.NoPagesScannedYet -> getString(Res.string.no_scans_yet)
     }
 }
 
@@ -831,6 +844,7 @@ private fun ScanningScreenError.errorText(): String? {
         is ScanningScreenError.DeletionError -> this.error.toString()
         is ScanningScreenError.ExportError -> this.error.toString()
         ScanningScreenError.ExportModuleNotFound, ScanningScreenError.JobStillRunning -> null
+        ScanningScreenError.NoPagesScannedYet -> null
     }
 }
 

@@ -35,6 +35,7 @@ import io.github.chrisimx.scanbridge.db.entities.LastUsedScanSettings
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.db.entities.Session
 import io.github.chrisimx.scanbridge.db.entities.TempFile
+import io.github.chrisimx.scanbridge.export.ExportCapabilitiesProvider
 import io.github.chrisimx.scanbridge.export.ExportModuleManager
 import io.github.chrisimx.scanbridge.export.ExportModuleType
 import io.github.chrisimx.scanbridge.initialscansettings.InitialScanSettingsProvider
@@ -103,6 +104,7 @@ class ScanningScreenViewModel(
     val koinScope: Scope,
     val loggerFactory: ScanBridgeLoggerFactory,
     val exportModuleManager: ExportModuleManager,
+    exportCapabilitiesProvider: ExportCapabilitiesProvider,
     val deleteScanUseCase: DeleteScanUseCase,
     val deleteSessionUseCase: DeleteSessionUseCase,
     val rotatePageUseCase: RotateScanUseCase,
@@ -175,6 +177,8 @@ class ScanningScreenViewModel(
         pages.getOrNull(pageIdx)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    val saveSupported = FileSaveType.Save in exportCapabilitiesProvider.supportedFileSaveTypes
+    val shareSupported = FileSaveType.Share in exportCapabilitiesProvider.supportedFileSaveTypes
 
     private val _errorStream = MutableSharedFlow<ScanningScreenError>()
     val errorStream = _errorStream.asSharedFlow()
@@ -255,7 +259,7 @@ class ScanningScreenViewModel(
         }
     }
 
-    fun onExportFinished(exportEvent: ExportEvent, platformFile: PlatformFile?) {
+    fun onSaveLocationSelected(exportEvent: ExportEvent, platformFile: PlatformFile?) {
         if (platformFile == null) {
             return
         }
@@ -266,7 +270,7 @@ class ScanningScreenViewModel(
     }
 
     private fun copyExportToPlatformFile(exportEvent: ExportEvent, destination: PlatformFile) = viewModelScope.launch {
-        val source = PlatformFile(exportEvent.exportedFile.path)
+        val source = exportEvent.exportedFile
         withContext(Dispatchers.IO) {
             source.copyTo(destination)
         }
@@ -442,14 +446,18 @@ class ScanningScreenViewModel(
                     sendErrorToUI(ScanningScreenError.ExportModuleNotFound)
                 }
 
-                is ExportAllPagesResult.Success -> {
-                    _exportQueue.send(
-                        ExportEvent(result.exportedFile, saveType)
-                    )
+                ExportAllPagesResult.NoPages -> {
+                    sendErrorToUI(ScanningScreenError.NoPagesScannedYet)
                 }
 
                 is ExportAllPagesResult.ExportFailed -> {
                     sendErrorToUI(ScanningScreenError.ExportError(result.error))
+                }
+
+                is ExportAllPagesResult.Success -> {
+                    _exportQueue.send(
+                        ExportEvent(result.exportedFile, saveType)
+                    )
                 }
             }
         } catch (e: Exception) {
@@ -508,7 +516,9 @@ class ScanningScreenViewModel(
 sealed class ScanningScreenError {
     object JobStillRunning : ScanningScreenError()
     object ExportModuleNotFound : ScanningScreenError()
+    object NoPagesScannedYet : ScanningScreenError()
     class ExportError(val error: Throwable) : ScanningScreenError()
+
     class DeletionError(val error: Throwable) : ScanningScreenError()
 }
 

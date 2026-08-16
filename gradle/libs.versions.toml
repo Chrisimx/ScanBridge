@@ -49,6 +49,8 @@ ksp = "2.3.6"
 protoc = "4.33.5"
 androidx-sqlite = "2.6.2"
 filekit = "0.15.0"
+kmp-observable-viewmodel = "1.0.6"
+kmp-native-zip = "0.1.1"
 
 [libraries]
 
@@ -134,8 +136,11 @@ androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules
 protoc = { module = "com.google.protobuf:protoc", version.ref = "protoc" }
 filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit"}
 filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit"}
+kmp-native-zip = { module = "io.github.chrisimx:kmp-native-zip", version.ref = "kmp-native-zip"}
 
 escl-mock-server = { module = "io.github.chrisimx:escl-mock-server", version.ref = "escl-mock-server"}
+
+kmp-observable-viewmodel = { module = "com.rickclephas.kmp:kmp-observableviewmodel-core", version.ref = "kmp-observable-viewmodel"}
 
 [plugins]
 

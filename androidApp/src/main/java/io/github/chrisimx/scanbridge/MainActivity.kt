@@ -27,6 +27,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.init
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,6 +59,8 @@ class MainActivity :
         Thread.setDefaultUncaughtExceptionHandler(crashHandler)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        FileKit.init(this)
 
         localeProvider.update()
 

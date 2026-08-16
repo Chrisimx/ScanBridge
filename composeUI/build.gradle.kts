@@ -31,6 +31,8 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
+    applyDefaultHierarchyTemplate()
+
     sourceSets {
         commonMain.dependencies {
             api(libs.compose.runtime)
@@ -66,6 +68,13 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
         }
+
+        val mobileMain by creating {
+            dependsOn(commonMain.get())
+        }
+
+        androidMain.get().dependsOn(mobileMain)
+        iosMain.get().dependsOn(mobileMain)
     }
 
     targets

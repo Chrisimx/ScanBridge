@@ -199,7 +199,11 @@ class AndroidMdnsDiscoverService(val appContext: Context, val loggerFactory: Sca
                 val serviceIdentifier = getServiceUniqueIdentifier(originalServiceInfo)
 
                 serviceInfoCallbacks.remove(this)
-                nsdManager.unregisterServiceInfoCallback(this)
+                try {
+                    nsdManager.unregisterServiceInfoCallback(this)
+                } catch (e: Exception) {
+                    logger.error { "Failed to unregister ServiceInfoCallback (${this.hashCode()}): $e" }
+                }
                 _foundServices.update {
                     val updateMap = it.toMutableMap()
                     updateMap.remove(serviceIdentifier)

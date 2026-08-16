@@ -19,8 +19,7 @@ import io.github.chrisimx.scanbridge.db.DefaultScanBridgeDbFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbBuilderFactory
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbFactory
-import io.github.chrisimx.scanbridge.export.ExportModule
-import io.github.chrisimx.scanbridge.export.PdfNoopExportModule
+import io.github.chrisimx.scanbridge.export.ExportCapabilitiesProvider
 import io.github.chrisimx.scanbridge.imagerotation.AndroidImageRotationService
 import io.github.chrisimx.scanbridge.imagerotation.ImageRotationService
 import io.github.chrisimx.scanbridge.infrastructure.KmLogScanBridgeLoggerFactory
@@ -146,7 +145,7 @@ val appModule = module {
     single<AndroidImageCropService>() bind ImageCropService::class
     single<FinishCropUseCase>()
 
-    single<PdfNoopExportModule>() bind ExportModule::class
+    single<AndroidExportCapabilitiesProvider>() bind ExportCapabilitiesProvider::class
 
     includes(
         KOIN_MODULE_COMMON

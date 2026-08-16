@@ -10,5 +10,3 @@ open class NoopExportModule(
         throw NotImplementedError("No-op export module")
     }
 }
-
-class PdfNoopExportModule : NoopExportModule(ExportModuleType.PDF)

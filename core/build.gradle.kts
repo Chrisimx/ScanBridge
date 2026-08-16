@@ -67,7 +67,9 @@ kotlin {
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
 
-            api("com.rickclephas.kmp:kmp-observableviewmodel-core:1.0.3")
+            api(libs.kmp.observable.viewmodel)
+            implementation(libs.kmp.native.zip)
+
         }
 
         commonTest.dependencies {
