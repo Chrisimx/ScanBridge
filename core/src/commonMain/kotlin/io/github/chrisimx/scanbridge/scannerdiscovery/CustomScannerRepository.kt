@@ -1,8 +1,8 @@
-package io.github.chrisimx.scanbridge.ports
+package io.github.chrisimx.scanbridge.scannerdiscovery
 
 import io.github.chrisimx.scanbridge.db.entities.CustomScanner
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
+import kotlin.uuid.Uuid
 
 interface CustomScannerRepository {
     fun allFlow(): Flow<List<CustomScanner>>

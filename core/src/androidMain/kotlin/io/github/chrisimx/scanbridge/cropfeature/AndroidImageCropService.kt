@@ -3,7 +3,7 @@ package io.github.chrisimx.scanbridge.cropfeature
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import io.github.chrisimx.scanbridge.model.Rect
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.sink
 import io.github.vinceglb.filekit.source

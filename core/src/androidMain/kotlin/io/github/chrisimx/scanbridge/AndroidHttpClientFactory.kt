@@ -2,7 +2,7 @@ package io.github.chrisimx.scanbridge
 
 import io.github.chrisimx.scanbridge.model.HttpClientConfig
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout

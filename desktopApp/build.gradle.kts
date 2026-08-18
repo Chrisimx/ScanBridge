@@ -7,6 +7,7 @@ plugins {
 }
 dependencies {
     implementation(project(":composeUI"))
+    implementation(project(":core"))
 }
 
 compose.desktop {

@@ -9,7 +9,7 @@ import androidx.annotation.RequiresExtension
 import io.github.chrisimx.scanbridge.model.IpAddress
 import io.github.chrisimx.scanbridge.model.MdnsService
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.flow.MutableStateFlow

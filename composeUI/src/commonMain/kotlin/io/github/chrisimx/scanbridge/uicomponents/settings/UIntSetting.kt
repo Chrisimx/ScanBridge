@@ -36,7 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext

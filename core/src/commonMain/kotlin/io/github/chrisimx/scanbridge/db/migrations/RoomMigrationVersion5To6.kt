@@ -5,7 +5,7 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import io.github.chrisimx.scanbridge.buildinfo.BuildInfoProvider
 import io.github.chrisimx.scanbridge.model.Platform
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.startupmessages.ShownStartupMessagesRepository
 import io.github.chrisimx.scanbridge.startupmessages.StartupMessage
 import kotlinx.coroutines.flow.first

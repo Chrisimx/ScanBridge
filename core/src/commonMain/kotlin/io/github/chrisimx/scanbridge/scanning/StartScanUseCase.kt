@@ -7,8 +7,7 @@ import io.github.chrisimx.anyscan.ScannerConcept
 import io.github.chrisimx.enumorrawcodegen.asEnumOrRaw
 import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScannerHandle
-import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
-import io.github.chrisimx.scanbridge.repositories.ScanJobRepository
+import io.github.chrisimx.scanbridge.protocol.ScannerConnectionSettings
 import kotlin.uuid.Uuid
 
 class StartScanUseCase(

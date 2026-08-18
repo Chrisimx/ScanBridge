@@ -1,6 +1,5 @@
-package io.github.chrisimx.scanbridge.ports
+package io.github.chrisimx.scanbridge.logging
 
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLogger
 import kotlin.reflect.KClass
 
 interface ScanBridgeLoggerFactory {

@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge.escl
+package io.github.chrisimx.scanbridge.protocol.escl
 
 import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.anyscan.CommonScannerCapabilities
@@ -16,12 +16,12 @@ import io.github.chrisimx.scanbridge.model.UrlScannerHandle
 import io.github.chrisimx.scanbridge.model.toHttpClientConfig
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
-import io.github.chrisimx.scanbridge.ports.ScanJobProcessingEvent
-import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
-import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.protocol.ScanJobProcessingEvent
+import io.github.chrisimx.scanbridge.protocol.ScannerCapabilitiesResult
+import io.github.chrisimx.scanbridge.protocol.ScannerConnectionSettings
 import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
-import io.github.chrisimx.scanbridge.ports.ScanningProtocol
+import io.github.chrisimx.scanbridge.protocol.ScanningProtocol
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -214,7 +214,7 @@ class EsclScanningProtocol(
             scannerCapabilities is ESCLRequestClient.ScannerCapabilitiesResult.Success &&
                 scannerCapabilities.scannerCapabilities.makeAndModel == "RICOH"
 
-        suspend fun abortIfCancelling(scanJob: io.github.chrisimx.esclkt.ScanJob? = null): Boolean = if (cancelled.value) {
+        suspend fun abortIfCancelling(scanJob: ScanJob? = null): Boolean = if (cancelled.value) {
             logger.debug { "Scan job cancelling is set. Aborting, canceling job if possible. scanJob: $scanJob" }
             scanJob?.cancel()
 

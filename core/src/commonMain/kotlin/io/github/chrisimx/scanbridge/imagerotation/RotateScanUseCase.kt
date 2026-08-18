@@ -1,7 +1,7 @@
 package io.github.chrisimx.scanbridge.imagerotation
 
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.util.getEditedFile
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.delete

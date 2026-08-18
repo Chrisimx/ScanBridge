@@ -1,6 +1,5 @@
 package io.github.chrisimx.scanbridge.uicomponents.dialog
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -24,7 +23,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import io.github.chrisimx.scanbridge.R
 import io.github.chrisimx.scanbridge.model.EditedCustomScanner
 import io.github.chrisimx.scanbridge.model.UrlValidationResult
 import io.github.chrisimx.scanbridge.scannerdiscovery.ProtocolWithExampleHandleString

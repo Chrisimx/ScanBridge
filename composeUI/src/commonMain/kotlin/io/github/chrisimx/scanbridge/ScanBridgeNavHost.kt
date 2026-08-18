@@ -21,30 +21,33 @@ package io.github.chrisimx.scanbridge
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import io.github.chrisimx.scanbridge.appsettings.AppSettingsRepository
-import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.protocol.ScanningProtocolManager
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
-import io.github.chrisimx.scanbridge.uicomponents.TemporaryFileHandler
-import io.github.chrisimx.scanbridge.util.doTempFilesExist
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.koin.compose.koinInject
 import scanbridge.composeui.generated.resources.Res
 import scanbridge.composeui.generated.resources.outline_error_24
-import timber.log.Timber
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
-fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
-    val context = LocalContext.current
+fun ScanBridgeNavHost(
+    navController: NavHostController,
+    startDestination: Any,
+    loggerFactory: ScanBridgeLoggerFactory = koinInject()
+) {
     val protocolManager = koinInject<ScanningProtocolManager>()
     val appSettingsRepo = koinInject<AppSettingsRepository>()
+    val logger = loggerFactory.withTag("ScanBridgeNavHost")
 
     NavHost(
         modifier = Modifier.testTag("root_node"),
@@ -59,17 +62,13 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
         }
         composable<StartUpScreenRoute> {
             StartupScreen(navController)
-
-            if (doTempFilesExist(context.filesDir)) {
-                TemporaryFileHandler()
-            }
         }
         composable<CropImageRoute> { backStackEntry ->
             val scannerRoute: CropImageRoute = backStackEntry.toRoute()
             val returnRoute = try {
                 Json.decodeFromString<BaseRoute>(scannerRoute.returnRoute)
             } catch (e: Exception) {
-                Timber.e(e, "Failed to decode returnRoute: ${scannerRoute.returnRoute}")
+                logger.error { "Failed to decode returnRoute: ${scannerRoute.returnRoute}: $e" }
                 navController.navigate(StartUpScreenRoute)
                 return@composable
             }
@@ -85,10 +84,9 @@ fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any) {
                 scannerRoute.protocolId,
                 scannerRoute.scannerHandleString
             )
-            Timber.tag("ScanBridgeNavHost")
-                .d(
-                    "Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerHandleString}. Timeout is $timeout seconds, Debug is $debug. Disabling of cert checks is $certValidationDisabled. Session id is ${scannerRoute.sessionID}"
-                )
+            logger.debug {
+                "Navigating to scanner ${scannerRoute.scannerName} at ${scannerRoute.scannerHandleString}. Timeout is $timeout seconds, Debug is $debug. Disabling of cert checks is $certValidationDisabled. Session id is ${scannerRoute.sessionID}"
+            }
 
             check(scannerHandle != null) {
                 "Scanner handle not found for protocol ${scannerRoute.protocolId} and handle ${scannerRoute.scannerHandleString}"

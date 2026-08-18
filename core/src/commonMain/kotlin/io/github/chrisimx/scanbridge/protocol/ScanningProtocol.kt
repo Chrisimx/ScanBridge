@@ -1,10 +1,11 @@
-package io.github.chrisimx.scanbridge.ports
+package io.github.chrisimx.scanbridge.protocol
 
 import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.anyscan.CommonScannerCapabilities
 import io.github.chrisimx.scanbridge.model.ScanProtocolScannedPage
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.ScanningError
+import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -61,7 +62,7 @@ interface ScanningProtocol {
     fun createScannerHandle(scannerIdentifier: String): ScannerHandle?
 
     /**
-     * Creates a [ScannerDiscoveryBackend] that can be used to find scanners providing
+     * Creates a [io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend] that can be used to find scanners providing
      * this scanning protocol.
      *
      * If the protocol does not support automatic discovery, this can return null.

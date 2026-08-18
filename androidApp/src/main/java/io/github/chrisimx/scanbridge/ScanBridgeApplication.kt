@@ -6,8 +6,8 @@ import coil3.ImageLoader
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import io.github.chrisimx.scanbridge.cropfeature.AndroidImageCropService
 import io.github.chrisimx.localization.JvmNumberFormatter
-import io.github.chrisimx.scanbridge.adapters.KoinBasedScanningProtocolManager
-import io.github.chrisimx.scanbridge.adapters.RoomBackedCustomScannerRepository
+import io.github.chrisimx.scanbridge.protocol.KoinBasedScanningProtocolManager
+import io.github.chrisimx.scanbridge.scannerdiscovery.RoomBackedCustomScannerRepository
 import io.github.chrisimx.scanbridge.appsettings.AppSettingsRepository
 import io.github.chrisimx.scanbridge.appsettings.AppSettingsViewModel
 import io.github.chrisimx.scanbridge.appsettings.RoomAppSettingsRepository
@@ -22,7 +22,7 @@ import io.github.chrisimx.scanbridge.db.ScanBridgeDbFactory
 import io.github.chrisimx.scanbridge.export.ExportCapabilitiesProvider
 import io.github.chrisimx.scanbridge.imagerotation.AndroidImageRotationService
 import io.github.chrisimx.scanbridge.imagerotation.ImageRotationService
-import io.github.chrisimx.scanbridge.infrastructure.KmLogScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.KmLogScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.initialscansettings.DefaultInitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.initialscansettings.InitialScanSettingsProvider
 import io.github.chrisimx.scanbridge.koin.KOIN_MODULE_COMMON
@@ -32,25 +32,27 @@ import io.github.chrisimx.scanbridge.migrations.RoomBackedMigrationExecutor
 import io.github.chrisimx.scanbridge.migrations.ds2room.DATASTORE_TO_ROOM_MIGRATION_DATA_SOURCES
 import io.github.chrisimx.scanbridge.migrations.migrationsModule
 import io.github.chrisimx.scanbridge.model.HttpClientConfig
-import io.github.chrisimx.scanbridge.ports.CustomScannerRepository
+import io.github.chrisimx.scanbridge.scannerdiscovery.CustomScannerRepository
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.localization.LocaleProvider
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
-import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.protocol.ScanningProtocolManager
 import io.github.chrisimx.scanbridge.ports.multicast.MulticastLockHandler
 import io.github.chrisimx.scanbridge.proto.ShownMessages
 import io.github.chrisimx.scanbridge.repositories.DatastoreLastRouteRepository
 import io.github.chrisimx.scanbridge.repositories.DatastoreShownMessagesRepository
-import io.github.chrisimx.scanbridge.repositories.RoomLastRouteRepository
+import io.github.chrisimx.scanbridge.savelastroute.RoomLastRouteRepository
 import io.github.chrisimx.scanbridge.savelastusedscansettings.LastUsedScanSettingsRepository
 import io.github.chrisimx.scanbridge.savelastusedscansettings.RoomLastUsedScanSettingsRepository
 import io.github.chrisimx.scanbridge.scannerdiscovery.DiscoveryUsecase
 import io.github.chrisimx.scanbridge.scannerdiscovery.ScannerDiscoveryScreenViewModel
 import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
-import io.github.chrisimx.scanbridge.repositories.ScanJobRepository
+import io.github.chrisimx.scanbridge.scanning.ScanJobRepository
+import io.github.chrisimx.scanbridge.savelastroute.LastRouteRepository
 import io.github.chrisimx.scanbridge.scan.AndroidScanExecutor
 import io.github.chrisimx.scanbridge.scanning.ScanExecutor
+import io.github.chrisimx.scanbridge.scanning.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.startupmessages.RoomShownStartupMessagesRepository
 import io.github.chrisimx.scanbridge.startupmessages.ShownStartupMessagesRepository
 import io.ktor.client.HttpClient
@@ -91,7 +93,7 @@ fun createScannerIconImageLoader(factory: HttpClientFactory, context: Context): 
         }
         .build()
 }
-val appModule = module {
+val androidPlatformModule = module {
     single<AndroidCrashHandler>() bind Thread.UncaughtExceptionHandler::class
     single<AndroidLocaleProvider>() bind LocaleProvider::class
     single<RoomAppSettingsRepository>() bind AppSettingsRepository::class
@@ -110,7 +112,6 @@ val appModule = module {
     }
     factory<AndroidMdnsDiscoverService>() bind MdnsDiscoverService::class
     single<DatastoreLastRouteRepository>()
-    single<RoomLastRouteRepository>() bind LastRouteRepository::class
     single<RoomLastUsedScanSettingsRepository>() bind LastUsedScanSettingsRepository::class
     single<DatastoreShownMessagesRepository>(named("legacyDatastoreShownMessages")) {
         DatastoreShownMessagesRepository(
@@ -147,10 +148,6 @@ val appModule = module {
 
     single<AndroidExportCapabilitiesProvider>() bind ExportCapabilitiesProvider::class
 
-    includes(
-        KOIN_MODULE_COMMON
-    )
-
     includes(DATASTORE_TO_ROOM_MIGRATION_DATA_SOURCES)
 }
 
@@ -159,7 +156,7 @@ class ScanBridgeApplication : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@ScanBridgeApplication)
-            modules(appModule)
+            modules(KOIN_MODULE_COMMON, androidPlatformModule)
         }
 
         Timber.plant(Timber.DebugTree())

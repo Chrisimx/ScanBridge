@@ -67,7 +67,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -87,7 +86,7 @@ import coil3.compose.AsyncImage
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.toUIInputSourceType
-import io.github.chrisimx.scanbridge.repositories.ScanJobEvent
+import io.github.chrisimx.scanbridge.scanning.ScanJobEvent
 import io.github.chrisimx.scanbridge.uicomponents.ExportSettingsPopup
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen
@@ -100,6 +99,10 @@ import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.chrisimx.scanbridge.localizationhelper.toReadableString
 import io.github.chrisimx.scanbridge.model.PositionAndHeight
 import io.github.chrisimx.scanbridge.platformhelper.PlatformBackHandler
+import io.github.chrisimx.scanbridge.scanning.FatalScanningScreenError
+import io.github.chrisimx.scanbridge.scanning.FileSaveType
+import io.github.chrisimx.scanbridge.scanning.ScanningScreenError
+import io.github.chrisimx.scanbridge.scanning.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
 import io.github.chrisimx.scanbridge.util.platformShareFile
 import io.github.chrisimx.scanbridge.util.snackBarError
@@ -524,14 +527,13 @@ fun ScanningScreen(
                     )
                 }
             }
-            var exportOptionsWidth by remember { mutableIntStateOf(0) }
+
             val exportAlpha by animateFloatAsState(
                 targetValue = if (showExportPopup) 1f else 0f,
                 label = "alphaAnimationExportOptions",
                 animationSpec = tween(300)
             )
 
-            var saveOptionsWidth by remember { mutableIntStateOf(0) }
             val saveOptionsAlpha by animateFloatAsState(
                 targetValue = if (showSavePopup) 1f else 0f,
                 label = "alphaAnimationSaveOptions",
@@ -563,10 +565,8 @@ fun ScanningScreen(
                 if (exportAlpha > 0 && scanningViewModel.shareSupported) {
                     ExportSettingsPopup(
                         exportPositionAndHeight,
-                        exportOptionsWidth,
                         exportAlpha,
                         onDismiss = { scanningViewModel.setShowExportOptionsPopup(false) },
-                        updateWidth = { exportOptionsWidth = it },
                         availableExportModuleTypes = availableExportModules,
                         onExportModuleSelected = { selectedModule ->
                             scanningViewModel.exportAllPages(
@@ -580,10 +580,8 @@ fun ScanningScreen(
                 if (saveOptionsAlpha > 0 && scanningViewModel.saveSupported) {
                     ExportSettingsPopup(
                         saveButtonPositionAndHeight,
-                        saveOptionsWidth,
                         saveOptionsAlpha,
                         onDismiss = { scanningViewModel.setShowSaveOptionsPopup(false) },
-                        updateWidth = { exportOptionsWidth = it },
                         availableExportModuleTypes = availableExportModules,
                         onExportModuleSelected = { selectedModule ->
                             scanningViewModel.exportAllPages(

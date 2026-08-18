@@ -2,7 +2,7 @@ package io.github.chrisimx.scanbridge.repositories
 
 import android.content.Context
 import com.google.protobuf.StringValue
-import io.github.chrisimx.scanbridge.LastRouteRepository
+import io.github.chrisimx.scanbridge.savelastroute.LastRouteRepository
 import io.github.chrisimx.scanbridge.datastore.lastRouteStore
 import io.github.chrisimx.scanbridge.proto.copy
 import io.github.chrisimx.scanbridge.proto.lastRouteOrNull

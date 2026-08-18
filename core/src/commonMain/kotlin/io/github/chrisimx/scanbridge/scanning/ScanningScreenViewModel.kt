@@ -17,7 +17,7 @@
  *     SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package io.github.chrisimx.scanbridge
+package io.github.chrisimx.scanbridge.scanning
 
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
@@ -29,6 +29,7 @@ import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.anyscan.CommonScanSettingsEditor
 import io.github.chrisimx.anyscan.CommonScannerCapabilities
 import io.github.chrisimx.anyscan.ScanSettingsMap
+import io.github.chrisimx.scanbridge.ScanSettingsComposableStateHolder
 import io.github.chrisimx.scanbridge.appsettings.AppSettingsRepository
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.LastUsedScanSettings
@@ -42,18 +43,11 @@ import io.github.chrisimx.scanbridge.initialscansettings.InitialScanSettingsProv
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.scannerCapabilities
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
-import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
-import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.protocol.ScannerCapabilitiesResult
+import io.github.chrisimx.scanbridge.protocol.ScannerConnectionSettings
 import io.github.chrisimx.scanbridge.savelastusedscansettings.LastUsedScanSettingsRepository
-import io.github.chrisimx.scanbridge.repositories.ScanJobRepository
-import io.github.chrisimx.scanbridge.scanning.DeleteScanUseCase
-import io.github.chrisimx.scanbridge.scanning.DeleteSessionUseCase
-import io.github.chrisimx.scanbridge.scanning.ExportAllPagesResult
-import io.github.chrisimx.scanbridge.scanning.ExportAllPagesUseCase
 import io.github.chrisimx.scanbridge.imagerotation.RotateScanUseCase
-import io.github.chrisimx.scanbridge.scanning.StartScanUseCase
-import io.github.chrisimx.scanbridge.scanning.SwapPagesUseCase
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.copyTo
 import io.github.vinceglb.filekit.path
@@ -324,7 +318,11 @@ class ScanningScreenViewModel(
             localScanSettingsVM = ScanSettingsComposableStateHolder(
                 MutableStateFlow(caps).asStateFlow(),
                 session.map { it?.currentScanSettings ?: storedSession.currentScanSettings!! }
-                    .stateIn(viewModelScope, SharingStarted.Lazily, storedSession.currentScanSettings!!),
+                    .stateIn(
+                        viewModelScope,
+                        SharingStarted.Lazily,
+                        storedSession.currentScanSettings!!
+                    ),
                 storedSession.currentSettingsUIData?.copy(),
                 updateSettings,
                 null,

@@ -3,7 +3,7 @@ package io.github.chrisimx.scanbridge
 import android.app.Application
 import android.content.Context
 import android.net.wifi.WifiManager
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.ports.multicast.MulticastLockHandler
 
 class AndroidMulticastLockHandler(val application: Application, private val loggerFactory: ScanBridgeLoggerFactory) : MulticastLockHandler {

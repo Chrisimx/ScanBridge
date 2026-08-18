@@ -1,10 +1,7 @@
-package io.github.chrisimx.scanbridge.adapters
+package io.github.chrisimx.scanbridge.protocol
 
 import io.github.chrisimx.scanbridge.model.ScannerHandle
-import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
 import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
-import io.github.chrisimx.scanbridge.ports.ScanningProtocol
-import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.component.KoinComponent
 

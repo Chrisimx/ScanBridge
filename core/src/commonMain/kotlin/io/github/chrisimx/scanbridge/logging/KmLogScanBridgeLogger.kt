@@ -1,8 +1,7 @@
-package io.github.chrisimx.scanbridge.infrastructure
+package io.github.chrisimx.scanbridge.logging
 
 import com.diamondedge.logging.KmLog
 import com.diamondedge.logging.logging
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLogger
 
 class KmLogScanBridgeLogger(tag: String) : ScanBridgeLogger {
     private val logger: KmLog = logging(tag)

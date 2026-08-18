@@ -8,8 +8,7 @@ import org.koin.dsl.module
 import org.koin.plugin.module.dsl.single
 
 val KOIN_MODULE_EXPORT = module {
-
-
+    // TODO: Pdf export module and dependencies
 
     // ZIP export module and dependencies
     single<KmpNativeZipBasedZipService>() bind ZipService::class

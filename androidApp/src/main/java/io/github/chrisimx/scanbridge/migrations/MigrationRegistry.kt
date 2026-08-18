@@ -1,8 +1,8 @@
 package io.github.chrisimx.scanbridge.migrations
 
 import io.github.chrisimx.scanbridge.repositories.DatastoreLastRouteRepository
-import io.github.chrisimx.scanbridge.repositories.LastRouteRepoAutoMigration
-import io.github.chrisimx.scanbridge.repositories.RoomLastRouteRepository
+import io.github.chrisimx.scanbridge.savelastroute.LastRouteRepoAutoMigration
+import io.github.chrisimx.scanbridge.savelastroute.RoomLastRouteRepository
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.plugin.module.dsl.create

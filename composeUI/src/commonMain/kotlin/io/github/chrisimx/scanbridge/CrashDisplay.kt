@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.unit.dp
 import io.github.chrisimx.scanbridge.clipboard.toClipEntry
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.theme.ScanBridgeTheme
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource

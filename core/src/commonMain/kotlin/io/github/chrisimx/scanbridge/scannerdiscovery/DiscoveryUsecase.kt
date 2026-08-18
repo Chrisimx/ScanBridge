@@ -1,8 +1,8 @@
 package io.github.chrisimx.scanbridge.scannerdiscovery
 
 import io.github.chrisimx.scanbridge.model.DiscoveredScanner
-import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
-import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager
+import io.github.chrisimx.scanbridge.protocol.ScannerConnectionSettings
+import io.github.chrisimx.scanbridge.protocol.ScanningProtocolManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine

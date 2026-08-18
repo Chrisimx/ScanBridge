@@ -1,10 +1,9 @@
-package io.github.chrisimx.scanbridge.adapters
+package io.github.chrisimx.scanbridge.scannerdiscovery
 
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.CustomScanner
-import io.github.chrisimx.scanbridge.ports.CustomScannerRepository
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
+import kotlin.uuid.Uuid
 
 class RoomBackedCustomScannerRepository(appDb: ScanBridgeDb) : CustomScannerRepository {
     private val customScannerDao = appDb.customScannerDao()

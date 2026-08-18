@@ -1,7 +1,7 @@
 package io.github.chrisimx.scanbridge.model
 
 import io.github.chrisimx.anyscan.CommonScanSettings
-import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
+import io.github.chrisimx.scanbridge.protocol.ScannerConnectionSettings
 import kotlin.uuid.Uuid
 
 data class ScanJob(

@@ -1,6 +1,7 @@
-package io.github.chrisimx.scanbridge.ports
+package io.github.chrisimx.scanbridge.protocol
 
 import io.github.chrisimx.scanbridge.model.ScannerHandle
+import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
 import kotlinx.coroutines.CoroutineScope
 
 interface ScanningProtocolManager {

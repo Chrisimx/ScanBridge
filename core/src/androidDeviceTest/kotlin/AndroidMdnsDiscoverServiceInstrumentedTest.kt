@@ -5,7 +5,7 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import io.github.chrisimx.scanbridge.infrastructure.KmLogScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.KmLogScanBridgeLoggerFactory
 import java.net.ServerSocket
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException

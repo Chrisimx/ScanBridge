@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge
+package io.github.chrisimx.scanbridge.savelastroute
 
 interface LastRouteRepository {
     suspend fun getLastRoute(): String?

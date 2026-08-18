@@ -48,7 +48,7 @@ import androidx.navigation.NavController
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import io.github.chrisimx.scanbridge.ScannerRoute
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import org.jetbrains.compose.resources.DrawableResource

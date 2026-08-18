@@ -42,7 +42,7 @@ import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 import io.github.chrisimx.scanbridge.model.UIInputSourceType
 import io.github.chrisimx.scanbridge.model.toUIInputSourceType
 import io.github.chrisimx.scanbridge.localization.LocaleProvider
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.util.derived
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow

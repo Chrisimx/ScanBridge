@@ -1,6 +1,6 @@
 package io.github.chrisimx.scanbridge.model
 
-import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
+import io.github.chrisimx.scanbridge.protocol.ScannerConnectionSettings
 
 data class HttpClientConfig(
     val disableCertValidation: Boolean,

@@ -1,8 +1,8 @@
-package io.github.chrisimx.scanbridge.wsd
+package io.github.chrisimx.scanbridge.protocol.wsd
 
 import io.github.chrisimx.scanbridge.model.DiscoveredScanner
 import io.github.chrisimx.scanbridge.model.UrlScannerHandle
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
 import io.github.chrisimx.scanbridge.ports.multicast.MulticastLockHandler
 import io.github.chrisimx.wsdkt.wsdiscovery.WsScannerServiceDiscovery

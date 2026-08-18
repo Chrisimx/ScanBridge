@@ -1,8 +1,7 @@
-package io.github.chrisimx.scanbridge
+package io.github.chrisimx.scanbridge.protocol
 
-import io.github.chrisimx.scanbridge.escl.EsclScanningProtocol
-import io.github.chrisimx.scanbridge.ports.ScanningProtocol
-import io.github.chrisimx.scanbridge.wsd.WsdScanningProtocol
+import io.github.chrisimx.scanbridge.protocol.escl.EsclScanningProtocol
+import io.github.chrisimx.scanbridge.protocol.wsd.WsdScanningProtocol
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.plugin.module.dsl.single

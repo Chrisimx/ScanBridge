@@ -1,8 +1,8 @@
 package io.github.chrisimx.scanbridge.model
 
-import io.github.chrisimx.scanbridge.ports.ScannerCapabilitiesResult
-import io.github.chrisimx.scanbridge.ports.ScannerConnectionSettings
-import io.github.chrisimx.scanbridge.ports.ScanningProtocol
+import io.github.chrisimx.scanbridge.protocol.ScannerCapabilitiesResult
+import io.github.chrisimx.scanbridge.protocol.ScannerConnectionSettings
+import io.github.chrisimx.scanbridge.protocol.ScanningProtocol
 import io.ktor.http.Url
 
 sealed interface ScannerHandle {

@@ -7,9 +7,8 @@ import com.rickclephas.kmp.observableviewmodel.stateIn
 import io.github.chrisimx.scanbridge.db.entities.CustomScanner
 import io.github.chrisimx.scanbridge.model.EditedCustomScanner
 import io.github.chrisimx.scanbridge.model.UrlValidationResult
-import io.github.chrisimx.scanbridge.ports.CustomScannerRepository
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
-import io.github.chrisimx.scanbridge.ports.ScanningProtocolManager
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.protocol.ScanningProtocolManager
 import io.ktor.http.Url
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid

@@ -3,7 +3,7 @@ package io.github.chrisimx.scanbridge.imagerotation
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import io.github.chrisimx.scanbridge.ports.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.sink
 import io.github.vinceglb.filekit.source
