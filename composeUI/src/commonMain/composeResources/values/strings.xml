@@ -186,4 +186,5 @@
     <string name="export_error">Error while exporting:</string>
     <string name="scan_deletion_error">Error while deleting a scan:</string>
     <string name="selected_export_module_not_found">The selected export module could not be found.</string>
+    <string name="desktop_edition">Desktop</string>
 </resources>

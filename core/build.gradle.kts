@@ -1,3 +1,4 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
@@ -9,6 +10,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.buildkonfig)
 }
 
 kotlin {
@@ -53,6 +55,7 @@ kotlin {
             api("com.diamondedge:logging:2.1.0")
             api(libs.koin.core)
             api(libs.koin.annotations)
+            api(libs.koin.core.viewmodel)
             api(libs.kotlinx.coroutines)
             api(libs.kotlinx.serialization.json)
             api(libs.ktor.client.core)
@@ -77,11 +80,15 @@ kotlin {
         }
 
         androidMain.dependencies {
-            api(libs.ktor.client.okhttp)
         }
 
         val jvmAndAndroid by creating {
             dependsOn(commonMain.get())
+        }
+
+        jvmAndAndroid.dependencies {
+            api(libs.ktor.client.okhttp)
+            api(libs.itext7.core)
         }
 
         androidMain.get().dependsOn(jvmAndAndroid)
@@ -97,6 +104,7 @@ kotlin {
         }
 
         jvmMain.dependencies {
+            implementation(libs.jmdns)
         }
     }
 
@@ -126,4 +134,19 @@ dependencies {
 
 koinCompiler {
     compileSafety = true
+}
+
+val gitHashProvider = providers.exec {
+    commandLine("git", "rev-parse", "--short", "HEAD")
+    isIgnoreExitValue = true
+}.standardOutput.asText.map { it.trim() }
+
+buildkonfig {
+    packageName = "io.github.chrisimx.scanbridge"
+
+    defaultConfigs {
+        buildConfigField(FieldSpec.Type.STRING, "scanbridgeVersion", version.toString())
+        buildConfigField(FieldSpec.Type.INT, "scanbridgeVersionCode", providers.gradleProperty("scanbridgeVersionCode").get())
+        buildConfigField(FieldSpec.Type.STRING, "gitCommitHash", gitHashProvider.get())
+    }
 }

@@ -1,8 +1,8 @@
 package io.github.chrisimx.scanbridge.model
 
 import io.github.chrisimx.esclkt.ScannerCapabilities
-import io.github.chrisimx.scanbridge.PaperFormat
-import io.github.chrisimx.scanbridge.loadDefaultFormats
+import io.github.chrisimx.scanbridge.paperformat.PaperFormat
+import io.github.chrisimx.scanbridge.paperformat.loadDefaultFormats
 import kotlinx.serialization.Serializable
 
 @Serializable

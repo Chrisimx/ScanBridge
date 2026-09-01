@@ -6,5 +6,4 @@ import org.koin.plugin.module.dsl.single
 
 val KOIN_MODULE_LOGGING = module {
     single<KmLogScanBridgeLoggerFactory>() bind ScanBridgeLoggerFactory::class
-    single<KmLogScanBridgeLogger>() bind ScanBridgeLogger::class
 }

@@ -43,6 +43,8 @@ import io.github.chrisimx.scanbridge.model.UIInputSourceType
 import io.github.chrisimx.scanbridge.model.toUIInputSourceType
 import io.github.chrisimx.scanbridge.localization.LocaleProvider
 import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.paperformat.PaperFormat
+import io.github.chrisimx.scanbridge.paperformat.PaperFormatProvider
 import io.github.chrisimx.scanbridge.util.derived
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow

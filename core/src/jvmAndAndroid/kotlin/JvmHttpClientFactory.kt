@@ -1,16 +1,14 @@
-package io.github.chrisimx.scanbridge
-
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.model.HttpClientConfig
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
-import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 
-class AndroidHttpClientFactory(loggerFactory: ScanBridgeLoggerFactory) : HttpClientFactory {
-    val httpClientLogger = loggerFactory.withTag("AndroidHttpClient")
+class JvmHttpClientFactory(loggerFactory: ScanBridgeLoggerFactory) : HttpClientFactory {
+    val httpClientLogger = loggerFactory.withTag("JvmHttpClient")
 
     override fun create(config: HttpClientConfig): HttpClient = HttpClient(OkHttp) {
         install(HttpTimeout) {

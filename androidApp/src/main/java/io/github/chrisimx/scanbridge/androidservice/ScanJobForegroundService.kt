@@ -9,25 +9,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import androidx.room.immediateTransaction
-import androidx.room.useWriterConnection
-import io.github.chrisimx.anyscan.CommonScanSettings
 import io.github.chrisimx.scanbridge.MainActivity
 import io.github.chrisimx.scanbridge.R
-import io.github.chrisimx.scanbridge.db.ScanBridgeDb
-import io.github.chrisimx.scanbridge.db.daos.ScannedPageDao
-import io.github.chrisimx.scanbridge.db.entities.ScannedPage
-import io.github.chrisimx.scanbridge.model.ScanJob
-import io.github.chrisimx.scanbridge.model.ScanRelativeRotation
-import io.github.chrisimx.scanbridge.model.ScanningError
-import io.github.chrisimx.scanbridge.ports.HttpClientFactory
-import io.github.chrisimx.scanbridge.protocol.ScanJobProcessingEvent
+import io.github.chrisimx.scanbridge.scanning.ScanExecutor
 import io.github.chrisimx.scanbridge.scanning.ScanJobRepository
-import io.github.chrisimx.scanbridge.util.extractPdfImages
-import java.io.File
-import kotlin.jvm.java
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -54,16 +39,13 @@ class ScanJobForegroundService : Service() {
         }
     }
 
-    private val scanJobs: ScanJobRepository by inject()
-
-    private val httpClientFactory: HttpClientFactory by inject()
-
-    private val db: ScanBridgeDb by inject()
-    private val scannedPageDao: ScannedPageDao = db.scannedPageDao()
-
     @Volatile
     private var isRunning = false
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private val scanJobs: ScanJobRepository by inject()
+
+    private val scanExecutor: ScanExecutor by inject()
 
     override fun onCreate() {
         super.onCreate()
@@ -90,14 +72,8 @@ class ScanJobForegroundService : Service() {
 
         serviceScope.launch {
             try {
-                scanJobs.setJobRunning(true)
-                var job = scanJobs.nextJob()
-                while (job != null) {
-                    doScan(job)
-                    job = scanJobs.nextJob()
-                }
+                scanExecutor.executeScans()
             } finally {
-                scanJobs.setJobRunning(false)
                 stopSelf()
             }
         }
@@ -154,107 +130,5 @@ class ScanJobForegroundService : Service() {
         }
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(serviceChannel)
-    }
-
-    @OptIn(ExperimentalUuidApi::class)
-    private suspend fun doScan(scanJob: ScanJob) {
-        scanJobs.notifyStarted(scanJob)
-
-        val scanningProtocol = scanJob.scannerHandle.protocol
-        val scanningFlow = scanningProtocol.executeScanJob(
-            scanJob.scannerHandle,
-            scanJob.connectionSettings,
-            scanJob.scanSettings,
-            scanJobs.shouldCancel
-        )
-
-        var failed = false
-
-        var pageCounter = 1
-
-        scanningFlow.collect { processingEvent ->
-            when (processingEvent) {
-                ScanJobProcessingEvent.Cancelled -> scanJobs.setCancel(false)
-
-                is ScanJobProcessingEvent.Failure -> {
-                    failed = true
-                    scanJobs.notifyFailed(scanJob, processingEvent.error)
-                    return@collect
-                }
-
-                is ScanJobProcessingEvent.NewPage -> {
-                    val pageData = processingEvent.scannedPage
-
-                    val scanPageFileName = "scan-" + Uuid.random().toString()
-                    val scanPageFile = File(application.filesDir, scanPageFileName)
-
-                    scanPageFile.writeBytes(pageData.data)
-
-                    when (pageData.contentType) {
-                        // TODO: Extract this conversion to a service
-                        "image/jpeg" -> {
-                            addScan(
-                                scanJob.ownerSessionId,
-                                scanPageFile.absolutePath,
-                                scanJob.scanSettings,
-                                ScanRelativeRotation.Original,
-                                "scan-${pageCounter.toString().padStart(4, '0')}.jpg"
-                            )
-                        }
-
-                        "application/pdf" -> {
-                            val extractedImages = extractPdfImages(
-                                scanPageFile.absolutePath,
-                                File(scanPageFile.parent!!)
-                            )
-
-                            extractedImages.forEach {
-                                addScan(scanJob.ownerSessionId, it, scanJob.scanSettings, ScanRelativeRotation.Original)
-                            }
-                        }
-
-                        else -> {
-                            failed = true
-                            scanJobs.notifyFailed(scanJob, ScanningError.UnsupportedContentType(pageData.contentType))
-                            return@collect
-                        }
-                    }
-
-                    pageCounter++
-                }
-            }
-        }
-
-        if (failed) return
-
-        scanJobs.notifyCompleted(scanJob)
-    }
-
-    suspend fun addScan(
-        sessionID: Uuid,
-        path: String,
-        settings: CommonScanSettings,
-        rotation: ScanRelativeRotation,
-        fileName: String? = null
-    ) {
-        Timber.d("Adding scan: $path, $rotation")
-        db.useWriterConnection {
-            it.immediateTransaction {
-                val highestIdx = scannedPageDao.getHighestIdxForSession(sessionID) ?: -1
-
-                Timber.d("Inserting scan with index ${highestIdx + 1}")
-                scannedPageDao.insertAll(
-                    ScannedPage(
-                        Uuid.generateV4(),
-                        sessionID,
-                        path,
-                        settings,
-                        rotation,
-                        highestIdx + 1,
-                        fileName
-                    )
-                )
-            }
-        }
     }
 }

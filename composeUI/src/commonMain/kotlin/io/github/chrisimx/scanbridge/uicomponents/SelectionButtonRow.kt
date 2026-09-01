@@ -32,7 +32,7 @@ fun <T> SelectionButtonRow(title: String, options: List<T>, onSet: (T?) -> Unit,
                     },
                     selected = option == value
                 ) {
-                    Text(name)
+                    Text(name, maxLines = 1, softWrap = false)
                 }
             }
         }

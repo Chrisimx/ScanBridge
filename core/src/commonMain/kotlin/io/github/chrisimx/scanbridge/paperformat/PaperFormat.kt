@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge
+package io.github.chrisimx.scanbridge.paperformat
 
 import io.github.chrisimx.anyscan.Area
 import io.github.chrisimx.anyscan.LengthUnit

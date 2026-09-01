@@ -18,11 +18,6 @@ plugins {
     alias(libs.plugins.paraphrase)
 }
 
-val gitHashProvider = providers.exec {
-    commandLine("git", "rev-parse", "--short", "HEAD")
-    isIgnoreExitValue = true
-}.standardOutput.asText.map { it.trim() }
-
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
     compilerOptions {
         freeCompilerArgs = listOf("-Xnon-local-break-continue")
@@ -41,8 +36,8 @@ android {
         applicationId = "io.github.chrisimx.scanbridge"
         minSdk = 28
         targetSdk = 37
-        versionCode = 2_001_005 // we just count up for each build
-        versionName = "2.2.0-alpha1"
+        versionCode = providers.gradleProperty("scanbridgeVersionCode").get().toInt()
+        versionName = providers.gradleProperty("scanbridgeVersion").get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments["escl_server_url"] =
@@ -56,11 +51,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "GIT_COMMIT_HASH", "\"${gitHashProvider.get()}\"")
         }
-        debug {
-            buildConfigField("String", "GIT_COMMIT_HASH", "\"${gitHashProvider.get()}\"")
-        }
+        debug {}
     }
     flavorDimensions += "edition"
 

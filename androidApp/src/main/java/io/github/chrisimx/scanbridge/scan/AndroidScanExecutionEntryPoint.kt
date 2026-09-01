@@ -2,11 +2,11 @@ package io.github.chrisimx.scanbridge.scan
 
 import android.app.Application
 import io.github.chrisimx.scanbridge.androidservice.ScanJobForegroundService
-import io.github.chrisimx.scanbridge.scanning.ScanExecutor
+import io.github.chrisimx.scanbridge.scanning.ScanExecutionEntryPoint
 
-class AndroidScanExecutor(
+class AndroidScanExecutionEntryPoint(
     val application: Application
-) : ScanExecutor {
+) : ScanExecutionEntryPoint {
     override fun start() {
         ScanJobForegroundService.startService(application)
     }

@@ -1,5 +1,9 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
+allprojects {
+    version = providers.gradleProperty("scanbridgeVersion").get()
+}
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform).apply(false)
     alias(libs.plugins.compose.compiler).apply(false)

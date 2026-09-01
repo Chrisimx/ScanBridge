@@ -6,6 +6,7 @@ import android.net.nsd.NsdServiceInfo
 import android.os.Build
 import android.os.ext.SdkExtensions
 import androidx.annotation.RequiresExtension
+import toMultiplatformIpAddress
 import io.github.chrisimx.scanbridge.model.IpAddress
 import io.github.chrisimx.scanbridge.model.MdnsService
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService

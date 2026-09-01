@@ -17,7 +17,7 @@
  *     SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import io.github.chrisimx.scanbridge.loadDefaultFormats
+import io.github.chrisimx.scanbridge.paperformat.loadDefaultFormats
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -44,6 +44,7 @@ import scanbridge.composeui.generated.resources.Res
 import scanbridge.composeui.generated.resources.app_icon_desc
 import scanbridge.composeui.generated.resources.app_name
 import scanbridge.composeui.generated.resources.debug_build
+import scanbridge.composeui.generated.resources.desktop_edition
 import scanbridge.composeui.generated.resources.f_droid
 import scanbridge.composeui.generated.resources.google_play
 import scanbridge.composeui.generated.resources.icon_about_dialog
@@ -54,6 +55,7 @@ fun ScanBridgeEdition.toLocalizedString(): String = when (this) {
     ScanBridgeEdition.FDROID -> stringResource(Res.string.f_droid)
     ScanBridgeEdition.PLAYSTORE -> stringResource(Res.string.google_play)
     ScanBridgeEdition.IOS -> stringResource(Res.string.ios)
+    ScanBridgeEdition.DESKTOP -> stringResource(Res.string.desktop_edition)
 }
 
 @Composable

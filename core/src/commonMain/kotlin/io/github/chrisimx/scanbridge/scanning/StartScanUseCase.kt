@@ -12,7 +12,7 @@ import kotlin.uuid.Uuid
 
 class StartScanUseCase(
     val scanJobRepo: ScanJobRepository,
-    val scanExecutor: ScanExecutor
+    val scanExecutionEntryPoint: ScanExecutionEntryPoint
 ) {
     fun startScan(
         ownerSessionId: Uuid,
@@ -29,7 +29,7 @@ class StartScanUseCase(
         )
 
         scanJobRepo.enqueue(scanJob)
-        scanExecutor.start()
+        scanExecutionEntryPoint.start()
     }
 
     /**

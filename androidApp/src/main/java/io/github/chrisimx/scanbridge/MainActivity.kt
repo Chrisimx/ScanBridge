@@ -26,7 +26,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import io.github.chrisimx.scanbridge.services.AndroidLocaleProvider
+import io.github.chrisimx.localization.AndroidLocaleProvider
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.init
 import java.io.File

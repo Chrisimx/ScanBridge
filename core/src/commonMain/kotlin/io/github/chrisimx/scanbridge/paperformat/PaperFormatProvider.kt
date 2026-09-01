@@ -1,4 +1,4 @@
-package io.github.chrisimx.scanbridge
+package io.github.chrisimx.scanbridge.paperformat
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
