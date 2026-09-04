@@ -406,10 +406,6 @@ fun ScanningScreen(
         }
     }
 
-    PlatformBackHandler {
-        scanningViewModel.leaveRequested()
-    }
-
     if (confirmLeaveDialogShown) {
         ConfirmCloseDialog(
             onDismiss = { scanningViewModel.onLeaveDismissed() },
@@ -470,7 +466,11 @@ fun ScanningScreen(
                 }
             }
         },
-        topBar = { },
+        topBar = {
+            PlatformBackHandler {
+                scanningViewModel.leaveRequested()
+            }
+        },
         bottomBar = {
             if (isReadyForScans) {
                 ScanningScreenBottomBar(

@@ -49,8 +49,8 @@ class EsclScannerDiscoveryBackend(
     private val logger = loggerFactory.withClass(this::class)
 
     companion object {
-        private const val SECURE_SCANNER_DISCOVER_TYPE = "_uscans._tcp"
-        private const val INSECURE_SCANNER_DISCOVER_TYPE = "_uscan._tcp"
+        private const val SECURE_SCANNER_DISCOVER_TYPE = "_uscans._tcp.local."
+        private const val INSECURE_SCANNER_DISCOVER_TYPE = "_uscan._tcp.local."
     }
 
     private val isScannerReachableMap = mutableMapOf<String, Optional<ScannerCapabilitiesResult>>()

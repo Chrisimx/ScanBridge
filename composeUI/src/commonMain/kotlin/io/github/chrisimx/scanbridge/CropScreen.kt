@@ -64,10 +64,6 @@ fun CropScreen(
     val croppedImageFilePath by viewModel.croppedImageFilePath.collectAsState()
     val cropState by viewModel.cropState.collectAsState()
 
-    PlatformBackHandler {
-        navController.clearAndNavigateTo(returnRoute)
-    }
-
     LaunchedEffect(cropState) {
         if (cropState is CropState.Finished) {
             navController.clearAndNavigateTo(returnRoute)
@@ -76,6 +72,11 @@ fun CropScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        topBar = {
+            PlatformBackHandler {
+                navController.clearAndNavigateTo(returnRoute)
+            }
+        },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {

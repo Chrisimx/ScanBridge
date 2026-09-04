@@ -18,7 +18,7 @@ fun getTrustAllTM(): Pair<SSLSocketFactory, X509TrustManager> {
         TrustAllTM
     )
 
-    val sslContext = SSLContext.getInstance("SSL").apply {
+    val sslContext = SSLContext.getInstance("TLS").apply {
         init(null, trustAllCerts, SecureRandom())
     }
 

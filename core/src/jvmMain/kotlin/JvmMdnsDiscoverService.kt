@@ -1,3 +1,4 @@
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.model.MdnsService
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
 import java.util.concurrent.atomic.AtomicBoolean
@@ -10,7 +11,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class JvmMdnsDiscoverService : MdnsDiscoverService {
+class JvmMdnsDiscoverService(
+    loggerFactory: ScanBridgeLoggerFactory
+) : MdnsDiscoverService {
+    val logger = loggerFactory.withClass(this::class)
+
     var _serviceType: String? = null
     override val serviceType: String?
         get() = _serviceType
@@ -32,19 +37,27 @@ class JvmMdnsDiscoverService : MdnsDiscoverService {
 
     override fun start(serviceType: String) {
         if (!started.compareAndSet(false, true)) {
+            logger.debug { "JvmMdnsDiscoverService already started" }
             return
         }
+        logger.debug { "Starting JvmMdnsDiscoverService with $serviceType" }
+
+        this._serviceType = serviceType
 
         jmdns.addServiceListener(serviceType, object : ServiceListener {
-            override fun serviceAdded(event: ServiceEvent) {}
+            override fun serviceAdded(event: ServiceEvent) {
+                logger.debug { "Service added: ${event.name}" }
+            }
 
             override fun serviceRemoved(event: ServiceEvent) {
+                logger.debug { "Service removed: ${event.name}" }
                 _foundServices.update {
                     it.filterKeys { key -> key != event.name }
                 }
             }
 
             override fun serviceResolved(event: ServiceEvent) {
+                logger.debug { "Service resolved: ${event.name}" }
                 val mdnsService: MdnsService = MdnsService(
                     event.info.name,
                     event.info.type,
@@ -67,11 +80,14 @@ class JvmMdnsDiscoverService : MdnsDiscoverService {
             return
         }
 
+        logger.debug { "Stopping JvmMdnsDiscoverService" }
+
         jmdns.unregisterAllServices()
         _serviceType = null
     }
 
     override fun close() {
+        logger.debug { "Closing JvmMdnsDiscoverService" }
         jmdns.close()
     }
 }
