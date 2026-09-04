@@ -1,3 +1,4 @@
+import coil3.PlatformContext
 import io.github.chrisimx.db.JvmScanBridgeDbBuilderFactory
 import io.github.chrisimx.scanbridge.StartupTabsProvider
 import io.github.chrisimx.scanbridge.buildinfo.BuildInfoProvider
@@ -29,4 +30,8 @@ val KOIN_MODULE_JVM_PLATFORM = module {
     single<DesktopJvmExportCapabilitiesProvider>() bind ExportCapabilitiesProvider::class
 
     single<JvmImageCropService>() bind ImageCropService::class
+
+    single<PlatformContext> {
+        PlatformContext.INSTANCE
+    }
 }

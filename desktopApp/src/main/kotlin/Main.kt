@@ -4,6 +4,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import io.github.chrisimx.scanbridge.ScanBridgeApp
 import io.github.chrisimx.scanbridge.koin.KOIN_MODULE_COMMON
+import io.github.chrisimx.scanbridge.koin.KOIN_MODULE_COMPOSE_UI_COMMON
 import io.github.vinceglb.filekit.FileKit
 import java.awt.Dimension
 import org.koin.core.context.startKoin
@@ -11,7 +12,7 @@ import org.koin.core.context.startKoin
 fun main() {
     FileKit.init("io.github.chrisimx.scanbridge")
     startKoin {
-        modules(KOIN_MODULE_JVM_PLATFORM, KOIN_MODULE_JVM_AND_ANDROID_PLATFORM, KOIN_MODULE_COMMON)
+        modules(KOIN_MODULE_JVM_PLATFORM, KOIN_MODULE_JVM_AND_ANDROID_PLATFORM, KOIN_MODULE_COMMON, KOIN_MODULE_COMPOSE_UI_COMMON)
     }
 
     application {

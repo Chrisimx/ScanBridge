@@ -15,6 +15,7 @@ import io.github.chrisimx.scanbridge.export.ExportCapabilitiesProvider
 import io.github.chrisimx.scanbridge.imagerotation.AndroidImageRotationService
 import io.github.chrisimx.scanbridge.imagerotation.ImageRotationService
 import io.github.chrisimx.scanbridge.koin.KOIN_MODULE_COMMON
+import io.github.chrisimx.scanbridge.koin.KOIN_MODULE_COMPOSE_UI_COMMON
 import io.github.chrisimx.scanbridge.migrations.MigrationExecutor
 import io.github.chrisimx.scanbridge.migrations.RoomBackedMigrationExecutor
 import io.github.chrisimx.scanbridge.migrations.ds2room.DATASTORE_TO_ROOM_MIGRATION_DATA_SOURCES
@@ -45,35 +46,12 @@ import org.koin.plugin.module.dsl.single
 import org.koin.plugin.module.dsl.viewModel
 import timber.log.Timber
 
-
-fun createScannerIconImageLoader(factory: HttpClientFactory, context: Context): ImageLoader {
-    val ktorClient: HttpClient = factory.create(
-        HttpClientConfig(
-            disableCertValidation = true,
-            debugLogging = false,
-            requestTimeoutInSeconds = 2u,
-            connectTimeoutInSeconds = 2u,
-            socketTimeoutInSeconds = 2u
-        )
-    )
-    return ImageLoader.Builder(context)
-        .components {
-            add(
-                KtorNetworkFetcherFactory(
-                    httpClient = ktorClient
-                )
-            )
-        }
-        .build()
-}
 val androidPlatformModule = module {
     single<AndroidCrashHandler>() bind Thread.UncaughtExceptionHandler::class
     single<RoomBackedMigrationExecutor>() bind MigrationExecutor::class
     includes(migrationsModule)
     single<AndroidScanBridgeDbBuilderFactory>() bind ScanBridgeDbBuilderFactory::class
-    single(named("scannerIconImageLoader")) {
-        create(::createScannerIconImageLoader)
-    }
+
     factory<AndroidMdnsDiscoverService>() bind MdnsDiscoverService::class
     single<DatastoreLastRouteRepository>()
     single<DatastoreShownMessagesRepository>(named("legacyDatastoreShownMessages")) {
@@ -107,7 +85,7 @@ class ScanBridgeApplication : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@ScanBridgeApplication)
-            modules(KOIN_MODULE_COMMON, androidPlatformModule, KOIN_MODULE_JVM_AND_ANDROID_PLATFORM)
+            modules(KOIN_MODULE_COMMON, androidPlatformModule, KOIN_MODULE_JVM_AND_ANDROID_PLATFORM, KOIN_MODULE_COMPOSE_UI_COMMON)
         }
 
         Timber.plant(Timber.DebugTree())
