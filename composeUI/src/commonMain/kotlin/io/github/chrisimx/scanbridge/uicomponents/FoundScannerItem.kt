@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
@@ -137,6 +138,7 @@ fun FoundScannerItem(
                     imageLoader = imageLoader,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
+                        .size(70.dp)
                         .padding(17.dp),
                     placeholder = tintedPlaceholder,
                     error = tintedPlaceholder,
@@ -151,6 +153,7 @@ fun FoundScannerItem(
                 Icon(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
+                        .size(70.dp)
                         .padding(17.dp),
                     painter = painterResource(Res.drawable.round_print_36),
                     tint = MaterialTheme.colorScheme.surfaceTint,

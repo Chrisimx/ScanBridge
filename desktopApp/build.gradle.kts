@@ -20,6 +20,8 @@ dependencies {
     runtimeOnly(libs.logback)
 }
 
+kotlin { jvmToolchain(21) }
+
 compose.desktop {
     application {
         mainClass = "MainKt"
