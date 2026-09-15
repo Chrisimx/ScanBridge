@@ -9,9 +9,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 
-class DefaultExportFileManager(
-    val exportDirectoryProvider: ExportDirectoryProvider
-) : ExportFileManager {
+class DefaultExportFileManager(val exportDirectoryProvider: ExportDirectoryProvider) : ExportFileManager {
     override fun createFile(extension: String): PlatformFile {
         val exportDirectory = exportDirectoryProvider.exportDirectory
         val now = Clock.System.now()

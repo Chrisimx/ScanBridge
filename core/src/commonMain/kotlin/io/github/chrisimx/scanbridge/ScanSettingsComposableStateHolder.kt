@@ -34,15 +34,15 @@ import io.github.chrisimx.anyscan.inches
 import io.github.chrisimx.anyscan.millimeters
 import io.github.chrisimx.anyscan.minus
 import io.github.chrisimx.anyscan.plus
+import io.github.chrisimx.scanbridge.localization.LocaleProvider
 import io.github.chrisimx.scanbridge.localization.NumberFormatter
 import io.github.chrisimx.scanbridge.localization.parseDouble
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.model.Locale
 import io.github.chrisimx.scanbridge.model.NumberValidationResult
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 import io.github.chrisimx.scanbridge.model.UIInputSourceType
 import io.github.chrisimx.scanbridge.model.toUIInputSourceType
-import io.github.chrisimx.scanbridge.localization.LocaleProvider
-import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.paperformat.PaperFormat
 import io.github.chrisimx.scanbridge.paperformat.PaperFormatProvider
 import io.github.chrisimx.scanbridge.util.derived

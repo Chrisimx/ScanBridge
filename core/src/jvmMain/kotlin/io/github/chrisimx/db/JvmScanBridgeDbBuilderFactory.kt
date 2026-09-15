@@ -8,9 +8,7 @@ import io.github.chrisimx.scanbridge.filesystem.StandardDirectoryProvider
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
 
-class JvmScanBridgeDbBuilderFactory(
-    val standardDirProvider: StandardDirectoryProvider
-) : ScanBridgeDbBuilderFactory {
+class JvmScanBridgeDbBuilderFactory(val standardDirProvider: StandardDirectoryProvider) : ScanBridgeDbBuilderFactory {
     override fun getBuilder(): RoomDatabase.Builder<ScanBridgeDb> {
         val databasePath = PlatformFile(standardDirProvider.databaseDirectory, "scanbridge.sqlite3")
         return Room.databaseBuilder<ScanBridgeDb>(databasePath.absolutePath())

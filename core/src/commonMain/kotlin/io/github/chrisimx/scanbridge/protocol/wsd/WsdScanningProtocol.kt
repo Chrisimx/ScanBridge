@@ -1,19 +1,19 @@
 package io.github.chrisimx.scanbridge.protocol.wsd
 
 import io.github.chrisimx.anyscan.CommonScanSettings
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.model.ScanProtocolScannedPage
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.ScanningError
 import io.github.chrisimx.scanbridge.model.UrlScannerHandle
 import io.github.chrisimx.scanbridge.model.toHttpClientConfig
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
-import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
+import io.github.chrisimx.scanbridge.ports.multicast.MulticastLockHandler
 import io.github.chrisimx.scanbridge.protocol.ScanJobProcessingEvent
 import io.github.chrisimx.scanbridge.protocol.ScannerCapabilitiesResult
 import io.github.chrisimx.scanbridge.protocol.ScannerConnectionSettings
-import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
 import io.github.chrisimx.scanbridge.protocol.ScanningProtocol
-import io.github.chrisimx.scanbridge.ports.multicast.MulticastLockHandler
 import io.github.chrisimx.wsdkt.anyscancompat.toCommonAbstraction
 import io.github.chrisimx.wsdkt.anyscancompat.toWSDScanTicket
 import io.github.chrisimx.wsdkt.client.WsdScanServiceClient

@@ -84,28 +84,28 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
+import io.github.chrisimx.scanbridge.localizationhelper.toReadableString
+import io.github.chrisimx.scanbridge.model.PositionAndHeight
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.toUIInputSourceType
+import io.github.chrisimx.scanbridge.platformhelper.PlatformBackHandler
+import io.github.chrisimx.scanbridge.scanning.FatalScanningScreenError
+import io.github.chrisimx.scanbridge.scanning.FileSaveType
 import io.github.chrisimx.scanbridge.scanning.ScanJobEvent
+import io.github.chrisimx.scanbridge.scanning.ScanningScreenError
+import io.github.chrisimx.scanbridge.scanning.ScanningScreenViewModel
 import io.github.chrisimx.scanbridge.uicomponents.ExportSettingsPopup
 import io.github.chrisimx.scanbridge.uicomponents.FullScreenError
 import io.github.chrisimx.scanbridge.uicomponents.LoadingScreen
 import io.github.chrisimx.scanbridge.uicomponents.dialog.ConfirmCloseDialog
 import io.github.chrisimx.scanbridge.uicomponents.dialog.DeletionDialog
+import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
 import io.github.chrisimx.scanbridge.util.CustomSnackbarVisuals
 import io.github.chrisimx.scanbridge.util.SnackbarType
 import io.github.chrisimx.scanbridge.util.clearAndNavigateTo
-import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
-import io.github.chrisimx.scanbridge.localizationhelper.toReadableString
-import io.github.chrisimx.scanbridge.model.PositionAndHeight
-import io.github.chrisimx.scanbridge.platformhelper.PlatformBackHandler
-import io.github.chrisimx.scanbridge.scanning.FatalScanningScreenError
-import io.github.chrisimx.scanbridge.scanning.FileSaveType
-import io.github.chrisimx.scanbridge.scanning.ScanningScreenError
-import io.github.chrisimx.scanbridge.scanning.ScanningScreenViewModel
-import io.github.chrisimx.scanbridge.uicomponents.dialog.LoadingDialog
 import io.github.chrisimx.scanbridge.util.platformShareFile
 import io.github.chrisimx.scanbridge.util.snackBarError
+import io.github.chrisimx.scanbridge.util.snackbarErrorRetrievingPage
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.openFileSaver
 import io.github.vinceglb.filekit.extension
@@ -162,8 +162,8 @@ private const val TAG = "ScanningScreen"
 fun ScanningScreenBottomBar(
     scanningViewModel: ScanningScreenViewModel,
     setSaveButtonPositionAndHeight: (PositionAndHeight<Int>) -> Unit,
-    setExportButtonPositionAndHeight: (PositionAndHeight<Int>) -> Unit,
-    ) {
+    setExportButtonPositionAndHeight: (PositionAndHeight<Int>) -> Unit
+) {
     BottomAppBar(
         actions = {
             IconButton(
@@ -203,11 +203,13 @@ fun ScanningScreenBottomBar(
                         scanningViewModel.setShowExportOptionsPopup(true)
                     },
                     modifier = Modifier.onGloballyPositioned {
-                        setExportButtonPositionAndHeight(PositionAndHeight(
-                            it.positionInWindow().x.toInt(),
-                            it.positionInWindow().y.toInt(),
-                            it.size.height
-                        ))
+                        setExportButtonPositionAndHeight(
+                            PositionAndHeight(
+                                it.positionInWindow().x.toInt(),
+                                it.positionInWindow().y.toInt(),
+                                it.size.height
+                            )
+                        )
                     }
                 ) {
                     Icon(
@@ -340,10 +342,10 @@ fun ScanningScreen(
     val availableExportModules by scanningViewModel.availableExportModules.collectAsState()
 
     var saveButtonPositionAndHeight by remember {
-        mutableStateOf(PositionAndHeight(0,0,0))
+        mutableStateOf(PositionAndHeight(0, 0, 0))
     }
     var exportPositionAndHeight by remember {
-        mutableStateOf(PositionAndHeight(0,0,0))
+        mutableStateOf(PositionAndHeight(0, 0, 0))
     }
 
     val showExportPopup by scanningViewModel.showExportOptions.collectAsState()
@@ -547,10 +549,11 @@ fun ScanningScreen(
                         FileSaveType.Share -> {
                             platformShareFile(exportEvent.exportedFile)
                         }
+
                         FileSaveType.Save -> {
                             val file = FileKit.openFileSaver(
                                 suggestedName = exportEvent.exportedFile.nameWithoutExtension,
-                                defaultExtension = exportEvent.exportedFile.extension,
+                                defaultExtension = exportEvent.exportedFile.extension
                             )
                             scanningViewModel.onSaveLocationSelected(exportEvent, file)
                         }
@@ -814,36 +817,30 @@ private fun ToolbarScanContent(
 }
 
 @Composable
-private fun FatalScanningScreenError.errorIcon(): DrawableResource {
-    return when (this) {
-        FatalScanningScreenError.ScannerCapsRetrieval -> Res.drawable.twotone_wifi_find_24
-    }
+private fun FatalScanningScreenError.errorIcon(): DrawableResource = when (this) {
+    FatalScanningScreenError.ScannerCapsRetrieval -> Res.drawable.twotone_wifi_find_24
 }
 
 @Composable
-private fun FatalScanningScreenError.errorPretext(): String {
-    return stringResource(when (this) {
+private fun FatalScanningScreenError.errorPretext(): String = stringResource(
+    when (this) {
         FatalScanningScreenError.ScannerCapsRetrieval -> Res.string.scannercapabilities_retrieve_error
-    })
+    }
+)
+
+private suspend fun ScanningScreenError.errorPretext(): String = when (this) {
+    is ScanningScreenError.DeletionError -> getString(Res.string.scan_deletion_error)
+    is ScanningScreenError.ExportError -> getString(Res.string.export_error)
+    ScanningScreenError.ExportModuleNotFound -> getString(Res.string.selected_export_module_not_found)
+    ScanningScreenError.JobStillRunning -> getString(Res.string.job_still_running)
+    ScanningScreenError.NoPagesScannedYet -> getString(Res.string.no_scans_yet)
 }
 
-private suspend fun ScanningScreenError.errorPretext(): String {
-    return when (this) {
-        is ScanningScreenError.DeletionError -> getString(Res.string.scan_deletion_error)
-        is ScanningScreenError.ExportError -> getString(Res.string.export_error)
-        ScanningScreenError.ExportModuleNotFound -> getString(Res.string.selected_export_module_not_found)
-        ScanningScreenError.JobStillRunning -> getString(Res.string.job_still_running)
-        ScanningScreenError.NoPagesScannedYet -> getString(Res.string.no_scans_yet)
-    }
-}
-
-private fun ScanningScreenError.errorText(): String? {
-    return when (this) {
-        is ScanningScreenError.DeletionError -> this.error.toString()
-        is ScanningScreenError.ExportError -> this.error.toString()
-        ScanningScreenError.ExportModuleNotFound, ScanningScreenError.JobStillRunning -> null
-        ScanningScreenError.NoPagesScannedYet -> null
-    }
+private fun ScanningScreenError.errorText(): String? = when (this) {
+    is ScanningScreenError.DeletionError -> this.error.toString()
+    is ScanningScreenError.ExportError -> this.error.toString()
+    ScanningScreenError.ExportModuleNotFound, ScanningScreenError.JobStillRunning -> null
+    ScanningScreenError.NoPagesScannedYet -> null
 }
 
 @Composable

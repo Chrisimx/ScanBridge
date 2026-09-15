@@ -11,16 +11,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class JvmMdnsDiscoverService(
-    loggerFactory: ScanBridgeLoggerFactory
-) : MdnsDiscoverService {
+class JvmMdnsDiscoverService(loggerFactory: ScanBridgeLoggerFactory) : MdnsDiscoverService {
     val logger = loggerFactory.withClass(this::class)
 
-    var _serviceType: String? = null
+    private var _serviceType: String? = null
     override val serviceType: String?
         get() = _serviceType
 
-    val _foundServices = MutableStateFlow(emptyMap<String, MdnsService>())
+    private val _foundServices = MutableStateFlow(emptyMap<String, MdnsService>())
 
     override val foundServices: StateFlow<Map<String, MdnsService>> = _foundServices.asStateFlow()
     private val started = AtomicBoolean(false)
@@ -44,35 +42,38 @@ class JvmMdnsDiscoverService(
 
         this._serviceType = serviceType
 
-        jmdns.addServiceListener(serviceType, object : ServiceListener {
-            override fun serviceAdded(event: ServiceEvent) {
-                logger.debug { "Service added: ${event.name}" }
-            }
+        jmdns.addServiceListener(
+            serviceType,
+            object : ServiceListener {
+                override fun serviceAdded(event: ServiceEvent) {
+                    logger.debug { "Service added: ${event.name}" }
+                }
 
-            override fun serviceRemoved(event: ServiceEvent) {
-                logger.debug { "Service removed: ${event.name}" }
-                _foundServices.update {
-                    it.filterKeys { key -> key != event.name }
+                override fun serviceRemoved(event: ServiceEvent) {
+                    logger.debug { "Service removed: ${event.name}" }
+                    _foundServices.update {
+                        it.filterKeys { key -> key != event.name }
+                    }
+                }
+
+                override fun serviceResolved(event: ServiceEvent) {
+                    logger.debug { "Service resolved: ${event.name}" }
+                    val mdnsService: MdnsService = MdnsService(
+                        event.info.name,
+                        event.info.type,
+                        event.info.port,
+                        event.info.inetAddresses.map {
+                            it.toMultiplatformIpAddress()
+                        },
+                        event.info.getTxtRecords()
+                    )
+
+                    _foundServices.update {
+                        it + (event.name to mdnsService)
+                    }
                 }
             }
-
-            override fun serviceResolved(event: ServiceEvent) {
-                logger.debug { "Service resolved: ${event.name}" }
-                val mdnsService: MdnsService = MdnsService(
-                    event.info.name,
-                    event.info.type,
-                    event.info.port,
-                    event.info.inetAddresses.map {
-                        it.toMultiplatformIpAddress()
-                    },
-                    event.info.getTxtRecords()
-                )
-
-                _foundServices.update {
-                    it + (event.name to mdnsService)
-                }
-            }
-        })
+        )
     }
 
     override fun stop() {

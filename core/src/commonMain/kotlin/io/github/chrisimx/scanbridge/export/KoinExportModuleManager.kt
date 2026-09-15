@@ -5,9 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.scope.Scope
 
-class KoinExportModuleManager(
-    koinScope: Scope
-) : ExportModuleManager {
+class KoinExportModuleManager(koinScope: Scope) : ExportModuleManager {
     val exportModules = koinScope.getAll<ExportModule>()
     val exportModuleById = exportModules.associateBy { it.type }
 
@@ -17,7 +15,5 @@ class KoinExportModuleManager(
         return exportModuleById[type]?.let { return it }
     }
 
-    override fun getAllExportModulesFlow(): StateFlow<List<ExportModule>> {
-        return exportModulesStateFlow
-    }
+    override fun getAllExportModulesFlow(): StateFlow<List<ExportModule>> = exportModulesStateFlow
 }

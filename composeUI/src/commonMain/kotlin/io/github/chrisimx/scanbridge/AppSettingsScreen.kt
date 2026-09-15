@@ -108,7 +108,6 @@ fun DisableCertChecksSetting(onInformationRequested: (StringResource) -> Unit, c
 
 @Composable
 fun DebugOptions(debugLog: Boolean, onInformationRequested: (StringResource) -> Unit, setWriteDebugLog: (Boolean) -> Unit) {
-
     ConstraintLayout(
         Modifier
             .fillMaxWidth()

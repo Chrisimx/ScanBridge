@@ -39,15 +39,15 @@ import io.github.chrisimx.scanbridge.db.entities.TempFile
 import io.github.chrisimx.scanbridge.export.ExportCapabilitiesProvider
 import io.github.chrisimx.scanbridge.export.ExportModuleManager
 import io.github.chrisimx.scanbridge.export.ExportModuleType
+import io.github.chrisimx.scanbridge.imagerotation.RotateScanUseCase
 import io.github.chrisimx.scanbridge.initialscansettings.InitialScanSettingsProvider
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.model.ScanSettingsEnterableDataV1
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.scannerCapabilities
-import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.protocol.ScannerCapabilitiesResult
 import io.github.chrisimx.scanbridge.protocol.ScannerConnectionSettings
 import io.github.chrisimx.scanbridge.savelastusedscansettings.LastUsedScanSettingsRepository
-import io.github.chrisimx.scanbridge.imagerotation.RotateScanUseCase
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.copyTo
 import io.github.vinceglb.filekit.path
@@ -110,7 +110,7 @@ class ScanningScreenViewModel(
     private val tmpFileDao = db.tmpFileDao()
     private val scannedPageDao = db.scannedPageDao()
     private val sessionDao = db.sessionDao()
-    
+
     private val _confirmLeaveDialogShown = MutableStateFlow(false)
     val confirmLeaveDialogShown: StateFlow<Boolean> = _confirmLeaveDialogShown.asStateFlow()
 
@@ -234,7 +234,6 @@ class ScanningScreenViewModel(
         _scanSettingsMenuOpen.value = value
     }
 
-
     private fun setFatalError(errorType: FatalScanningScreenError?, error: String?) {
         _fatalError.value = FatalErrorDescription(errorType, error)
     }
@@ -305,7 +304,7 @@ class ScanningScreenViewModel(
                         currentScanSettings = newSettings
                     )
 
-                    logger.debug {"Settings updated $newSettings" }
+                    logger.debug { "Settings updated $newSettings" }
 
                     sessionDao.update(newSession)
                 }
@@ -520,9 +519,8 @@ sealed class ScanningScreenError {
     class DeletionError(val error: Throwable) : ScanningScreenError()
 }
 
-
 enum class FatalScanningScreenError {
-    ScannerCapsRetrieval,
+    ScannerCapsRetrieval
 }
 
 data class FatalErrorDescription(val errorType: FatalScanningScreenError?, val text: String?)

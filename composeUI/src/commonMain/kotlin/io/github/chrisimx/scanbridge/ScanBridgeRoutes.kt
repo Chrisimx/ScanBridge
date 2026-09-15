@@ -4,9 +4,8 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.toRoute
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.json.JsonNames
 import kotlinx.serialization.Serializable
-
+import kotlinx.serialization.json.JsonNames
 
 @Serializable
 sealed interface BaseRoute
@@ -34,22 +33,20 @@ data class CropImageRoute(val scanId: String, val returnRoute: String) : BaseRou
 @SerialName("ErrorRoute")
 data class ErrorRoute(val error: String) : BaseRoute
 
-fun NavBackStackEntry.toTypedRoute(): BaseRoute? {
-    return when (destination.route) {
-        "StartUpScreenRoute" -> this.toRoute<StartUpScreenRoute>()
+fun NavBackStackEntry.toTypedRoute(): BaseRoute? = when (destination.route) {
+    "StartUpScreenRoute" -> this.toRoute<StartUpScreenRoute>()
 
-        "CropImageRoute/{scanId}/{pageIdx}/{returnRoute}" -> {
-            this.toRoute<CropImageRoute>()
-        }
-
-        "ScannerRoute/{scannerName}/{scannerHandleString}/{sessionID}?protocolId={protocolId}" -> {
-            this.toRoute<ScannerRoute>()
-        }
-
-        "ErrorRoute/{error}" -> {
-            this.toRoute<ErrorRoute>()
-        }
-
-        else -> null
+    "CropImageRoute/{scanId}/{pageIdx}/{returnRoute}" -> {
+        this.toRoute<CropImageRoute>()
     }
+
+    "ScannerRoute/{scannerName}/{scannerHandleString}/{sessionID}?protocolId={protocolId}" -> {
+        this.toRoute<ScannerRoute>()
+    }
+
+    "ErrorRoute/{error}" -> {
+        this.toRoute<ErrorRoute>()
+    }
+
+    else -> null
 }

@@ -72,7 +72,6 @@ kotlin {
 
             api(libs.kmp.observable.viewmodel)
             implementation(libs.kmp.native.zip)
-
         }
 
         commonTest.dependencies {

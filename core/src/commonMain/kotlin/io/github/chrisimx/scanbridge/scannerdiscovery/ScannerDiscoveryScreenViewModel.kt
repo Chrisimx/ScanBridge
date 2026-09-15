@@ -5,9 +5,9 @@ import com.rickclephas.kmp.observableviewmodel.coroutineScope
 import com.rickclephas.kmp.observableviewmodel.launch
 import com.rickclephas.kmp.observableviewmodel.stateIn
 import io.github.chrisimx.scanbridge.db.entities.CustomScanner
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.model.EditedCustomScanner
 import io.github.chrisimx.scanbridge.model.UrlValidationResult
-import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.protocol.ScanningProtocolManager
 import io.ktor.http.Url
 import kotlin.uuid.ExperimentalUuidApi
@@ -59,10 +59,7 @@ class ScannerDiscoveryScreenViewModel(
         }
     }
 
-    data class ScannerCreationResult(
-        val sessionId: Uuid,
-        val customScanner: CustomScanner
-    )
+    data class ScannerCreationResult(val sessionId: Uuid, val customScanner: CustomScanner)
 
     fun onCustomScannerCreation(
         name: String,

@@ -9,11 +9,7 @@ import io.github.vinceglb.filekit.path
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CancellationException
 
-
-class ExportAllPagesUseCase(
-    val exportModuleManager: ExportModuleManager,
-    scanBridgeDb: ScanBridgeDb
-) {
+class ExportAllPagesUseCase(val exportModuleManager: ExportModuleManager, scanBridgeDb: ScanBridgeDb) {
     val scannedPageDao = scanBridgeDb.scannedPageDao()
     val tmpFileDao = scanBridgeDb.tmpFileDao()
 
@@ -30,7 +26,7 @@ class ExportAllPagesUseCase(
         return try {
             val exportFile = exportModule.export(scannedPages)
             tmpFileDao.insertAll(
-                TempFile(ownerSessionId =  sessionId, path = exportFile.path)
+                TempFile(ownerSessionId = sessionId, path = exportFile.path)
             )
             ExportAllPagesResult.Success(exportFile)
         } catch (e: CancellationException) {

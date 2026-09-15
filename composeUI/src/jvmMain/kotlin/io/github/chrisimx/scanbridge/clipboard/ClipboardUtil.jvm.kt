@@ -4,6 +4,4 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.ClipEntry
 
 @OptIn(ExperimentalComposeUiApi::class)
-actual fun String.toClipEntry(): ClipEntry {
-    return ClipEntry(java.awt.datatransfer.StringSelection(this))
-}
+actual fun String.toClipEntry(): ClipEntry = ClipEntry(java.awt.datatransfer.StringSelection(this))

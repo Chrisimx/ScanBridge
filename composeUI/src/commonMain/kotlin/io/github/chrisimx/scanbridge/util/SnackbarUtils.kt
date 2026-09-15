@@ -54,23 +54,23 @@ data class CustomSnackbarVisuals(
     val type: SnackbarType = SnackbarType.DEFAULT
 ) : SnackbarVisuals
 
- fun snackbarErrorRetrievingPage(
+fun snackbarErrorRetrievingPage(
     error: String,
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
     action: Boolean = true,
     clipboard: Clipboard
 ) {
-     scope.launch {
-         snackBarError(
-             getString(Res.string.error_while_retrieving_page, error.truncate(128)),
-             scope,
-             snackbarHostState,
-             action,
-             error,
-             clipboard
-         )
-     }
+    scope.launch {
+        snackBarError(
+            getString(Res.string.error_while_retrieving_page, error.truncate(128)),
+            scope,
+            snackbarHostState,
+            action,
+            error,
+            clipboard
+        )
+    }
 }
 
 suspend fun SnackbarHostState.showCustomSnackbar(

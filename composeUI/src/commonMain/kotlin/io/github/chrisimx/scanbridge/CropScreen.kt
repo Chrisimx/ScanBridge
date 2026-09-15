@@ -13,8 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,7 +44,6 @@ import scanbridge.composeui.generated.resources.crop_button
 import scanbridge.composeui.generated.resources.cropping
 import scanbridge.composeui.generated.resources.desc_scanned_page
 import scanbridge.composeui.generated.resources.outline_crop_24
-
 
 @OptIn(ExperimentalUuidApi::class)
 @Composable

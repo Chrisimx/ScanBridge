@@ -38,12 +38,7 @@ import scanbridge.composeui.generated.resources.cancel_text
 import scanbridge.composeui.generated.resources.delete
 
 @Composable
-fun DeletionDialog(
-    titleRes: StringResource,
-    confirmationQuestionRes: StringResource,
-    onDismiss: () -> Unit,
-    onConfirmed: () -> Unit
-) {
+fun DeletionDialog(titleRes: StringResource, confirmationQuestionRes: StringResource, onDismiss: () -> Unit, onConfirmed: () -> Unit) {
     AlertDialog(
         icon = {
             Icon(

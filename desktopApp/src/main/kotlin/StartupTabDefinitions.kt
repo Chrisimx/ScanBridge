@@ -15,36 +15,33 @@ import scanbridge.composeui.generated.resources.settings
 
 class DesktopJvmStartupTabsProvider : StartupTabsProvider {
     @OptIn(ExperimentalMaterial3Api::class)
-    override fun getStartupTabs(): List<StartupTabDefinition> =
-        listOf(
-            StartupTabDefinition(
-                Res.string.discovery,
-                Res.string.header_scannerbrowser,
-                Icons.Filled.Home,
-                Icons.Outlined.Home,
-                true,
-                { innerPadding, navController, showCustomDialog, setShowCustomDialog ->
-                    ScannerBrowser(
-                        innerPadding,
-                        navController,
-                        showCustomDialog,
-                        setShowCustomDialog
-                    )
-                }
-            ),
-            StartupTabDefinition(
-                Res.string.settings,
-                Res.string.settings,
-                Icons.Filled.Settings,
-                Icons.Outlined.Settings,
-                false,
-                { innerPadding, _, _, _ ->
-                    AppSettingsScreen(innerPadding)
-                }
-            )
+    override fun getStartupTabs(): List<StartupTabDefinition> = listOf(
+        StartupTabDefinition(
+            Res.string.discovery,
+            Res.string.header_scannerbrowser,
+            Icons.Filled.Home,
+            Icons.Outlined.Home,
+            true,
+            { innerPadding, navController, showCustomDialog, setShowCustomDialog ->
+                ScannerBrowser(
+                    innerPadding,
+                    navController,
+                    showCustomDialog,
+                    setShowCustomDialog
+                )
+            }
+        ),
+        StartupTabDefinition(
+            Res.string.settings,
+            Res.string.settings,
+            Icons.Filled.Settings,
+            Icons.Outlined.Settings,
+            false,
+            { innerPadding, _, _, _ ->
+                AppSettingsScreen(innerPadding)
+            }
         )
-
-
+    )
 }
 
 val STARTUP_TABS_PROVIDER = DesktopJvmStartupTabsProvider()

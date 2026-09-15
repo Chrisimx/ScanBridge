@@ -6,17 +6,17 @@ import android.net.nsd.NsdServiceInfo
 import android.os.Build
 import android.os.ext.SdkExtensions
 import androidx.annotation.RequiresExtension
-import toMultiplatformIpAddress
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.model.IpAddress
 import io.github.chrisimx.scanbridge.model.MdnsService
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
-import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import toMultiplatformIpAddress
 
 class AndroidMdnsDiscoverService(val appContext: Context, val loggerFactory: ScanBridgeLoggerFactory) : MdnsDiscoverService {
     private val logger = loggerFactory.withClass(this::class)

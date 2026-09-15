@@ -29,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -81,10 +80,7 @@ sealed class SignupError {
     data class OtherError(val error: Throwable) : SignupError()
 }
 
-class SignupViewModel(
-    application: Application,
-    val ownershipProofService: OwnershipProofService
-) : AndroidViewModel(application) {
+class SignupViewModel(application: Application, val ownershipProofService: OwnershipProofService) : AndroidViewModel(application) {
     private val _errorStream = MutableSharedFlow<SignupError>()
     val errorStream = _errorStream.asSharedFlow()
 
@@ -279,13 +275,11 @@ fun SignupScreen(modifier: Modifier, onBack: () -> Unit, onSuccess: () -> Unit) 
     }
 }
 
-suspend fun SignupError.errorText(): String {
-    return when (this) {
-        is SignupError.AccountCreationError -> getString(Res.string.error) + ": " + this.error.toLocalizedString()
-        is SignupError.LicenseError -> getString(Res.string.error) + ": " + this.error.asLocalizedString()
-        is SignupError.OtherError -> getString(Res.string.error) + ": " + this.error
-        SignupError.PrivacyPolicyNotAccepted -> getString(Res.string.please_accept_the_privacy_policy_to_sign_up)
-    }
+suspend fun SignupError.errorText(): String = when (this) {
+    is SignupError.AccountCreationError -> getString(Res.string.error) + ": " + this.error.toLocalizedString()
+    is SignupError.LicenseError -> getString(Res.string.error) + ": " + this.error.asLocalizedString()
+    is SignupError.OtherError -> getString(Res.string.error) + ": " + this.error
+    SignupError.PrivacyPolicyNotAccepted -> getString(Res.string.please_accept_the_privacy_policy_to_sign_up)
 }
 
 @Composable

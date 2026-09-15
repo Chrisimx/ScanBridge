@@ -1,8 +1,8 @@
 package io.github.chrisimx.scanbridge.scanning
 
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.model.ScanJob
 import io.github.chrisimx.scanbridge.model.ScanningError
-import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -23,11 +23,9 @@ sealed class ScanJobEvent {
     data class Started(val job: ScanJob) : ScanJobEvent()
 }
 
-class ScanJobRepository(
-    val loggerFactory: ScanBridgeLoggerFactory
-) {
+class ScanJobRepository(val loggerFactory: ScanBridgeLoggerFactory) {
     val logger = loggerFactory.withClass(this::class)
-    
+
     // Channel acts as an async queue
     private val jobChannel = Channel<ScanJob>(capacity = Channel.UNLIMITED)
 
@@ -101,6 +99,7 @@ class ScanJobRepository(
             _events.emit(ScanJobEvent.Failed(job, error))
         }
     }
+
     /**
      * Consume the next job
      */

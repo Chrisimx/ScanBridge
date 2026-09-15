@@ -1,7 +1,7 @@
 package io.github.chrisimx.scanbridge.buildinfo
 
-import io.github.chrisimx.scanbridge.model.Platform
 import io.github.chrisimx.scanbridge.BuildKonfig
+import io.github.chrisimx.scanbridge.model.Platform
 
 interface BuildInfoProvider {
     val versionName: String

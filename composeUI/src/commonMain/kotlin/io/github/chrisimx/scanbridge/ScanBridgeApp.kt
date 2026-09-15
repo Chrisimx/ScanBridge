@@ -35,9 +35,7 @@ import kotlinx.serialization.json.Json
 import org.koin.compose.koinInject
 
 @Composable
-fun ScanBridgeApp(
-    loggerFactory: ScanBridgeLoggerFactory = koinInject()
-) {
+fun ScanBridgeApp(loggerFactory: ScanBridgeLoggerFactory = koinInject()) {
     ScanBridgeTheme {
         val navController = rememberNavController()
         var startDestination: Any? by remember { mutableStateOf(null) }

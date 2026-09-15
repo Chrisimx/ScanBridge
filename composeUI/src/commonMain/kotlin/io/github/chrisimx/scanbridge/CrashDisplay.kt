@@ -35,10 +35,7 @@ import scanbridge.composeui.generated.resources.rounded_content_copy_24
 
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-fun CrashDisplay(
-    error: String,
-    loggerFactory: ScanBridgeLoggerFactory = koinInject()
-) {
+fun CrashDisplay(error: String, loggerFactory: ScanBridgeLoggerFactory = koinInject()) {
     val localClipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     val logger = loggerFactory.withTag("CrashDisplay")

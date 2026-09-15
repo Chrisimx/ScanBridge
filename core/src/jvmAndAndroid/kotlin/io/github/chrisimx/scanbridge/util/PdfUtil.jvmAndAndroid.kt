@@ -14,10 +14,7 @@ import kotlinx.io.Buffer
 import kotlinx.io.asInputStream
 import kotlinx.io.write
 
-actual fun extractPdfImages(
-    pdf: PlatformFile,
-    outputDir: PlatformFile
-): List<String> {
+actual fun extractPdfImages(pdf: PlatformFile, outputDir: PlatformFile): List<String> {
     val pdfDoc = PdfDocument(PdfReader(pdf.file))
     var imageCounter = 1
 

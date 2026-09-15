@@ -14,19 +14,14 @@ import io.github.vinceglb.filekit.path
 import io.github.vinceglb.filekit.source
 import kotlin.time.Clock
 import kotlin.time.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 
-class KmpNativeZipBasedZipService() : ZipService {
-    override fun zipFlat(
-        files: List<FileToBeExported>,
-        output: PlatformFile,
-        mapFileName: (PlatformFile) -> String
-    ) {
+class KmpNativeZipBasedZipService : ZipService {
+    override fun zipFlat(files: List<FileToBeExported>, output: PlatformFile, mapFileName: (PlatformFile) -> String) {
         val outputFile = Path(output.path).seekableSink()
 
         val exportTime = Clock.System.now()

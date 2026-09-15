@@ -1,14 +1,14 @@
 package io.github.chrisimx.scanbridge.protocol.escl
 
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.model.DiscoveredScanner
 import io.github.chrisimx.scanbridge.model.IpAddress
 import io.github.chrisimx.scanbridge.model.MdnsService
 import io.github.chrisimx.scanbridge.model.UrlScannerHandle
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
-import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
 import io.github.chrisimx.scanbridge.protocol.ScannerCapabilitiesResult
 import io.github.chrisimx.scanbridge.protocol.ScannerConnectionSettings
-import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url

@@ -7,9 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class JvmLocaleProvider(
-    loggerFactory: ScanBridgeLoggerFactory
-) : LocaleProvider {
+class JvmLocaleProvider(loggerFactory: ScanBridgeLoggerFactory) : LocaleProvider {
 
     private val logger = loggerFactory.withClass(this::class)
     private val _locale = MutableStateFlow(getCurrentLocale())

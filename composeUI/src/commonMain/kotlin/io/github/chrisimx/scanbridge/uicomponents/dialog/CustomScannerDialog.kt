@@ -189,7 +189,6 @@ fun CustomScannerDialog(
     }
 }
 
-
 @Suppress("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
 @Composable
@@ -204,7 +203,7 @@ fun PreviewCustomScannerDialog() {
                 { _, _, _, _, _ -> Unit },
                 EditedCustomScanner.New,
                 { urlString ->
-                     UrlValidationResult.NoError(Url(urlString))
+                    UrlValidationResult.NoError(Url(urlString))
                 }
             )
         }

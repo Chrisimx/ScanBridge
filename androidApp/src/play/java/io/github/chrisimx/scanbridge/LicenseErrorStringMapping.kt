@@ -1,6 +1,5 @@
 package io.github.chrisimx.scanbridge
 
-import android.content.Context
 import com.google.android.vending.licensing.LicenseValidationResultCode
 import org.jetbrains.compose.resources.getString
 import scanbridge.composeui.generated.resources.Res

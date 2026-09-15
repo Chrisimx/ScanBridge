@@ -364,7 +364,6 @@ fun CroppableAsyncImage(
 @Preview
 @Composable
 fun PreviewCropOverlay() {
-
     Scaffold { innerPadding ->
         ScanBridgeTheme {
             val density = LocalDensity.current

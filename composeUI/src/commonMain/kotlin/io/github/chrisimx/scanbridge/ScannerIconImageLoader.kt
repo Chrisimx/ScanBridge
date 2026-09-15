@@ -27,4 +27,3 @@ fun createScannerIconImageLoader(factory: HttpClientFactory, context: PlatformCo
         }
         .build()
 }
-

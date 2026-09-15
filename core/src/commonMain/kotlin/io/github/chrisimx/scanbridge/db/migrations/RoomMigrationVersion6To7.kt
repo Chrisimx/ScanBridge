@@ -6,8 +6,8 @@ import androidx.sqlite.execSQL
 import io.github.chrisimx.scanbridge.ScanSettingsJson
 import io.github.chrisimx.scanbridge.appsettings.D2RAppSettingsMigrationDataSource
 import io.github.chrisimx.scanbridge.buildinfo.BuildInfoProvider
-import io.github.chrisimx.scanbridge.model.Platform
 import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.model.Platform
 import io.github.chrisimx.scanbridge.savelastusedscansettings.D2RLastUsedScanSettingsMigrationSource
 import kotlinx.coroutines.runBlocking
 import org.koin.core.scope.Scope

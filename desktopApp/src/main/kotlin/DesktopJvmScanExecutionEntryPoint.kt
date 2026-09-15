@@ -5,9 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-class DesktopJvmScanExecutionEntryPoint(
-    private val scanExecutor: ScanExecutor
-) : ScanExecutionEntryPoint {
+class DesktopJvmScanExecutionEntryPoint(private val scanExecutor: ScanExecutor) : ScanExecutionEntryPoint {
     val scanExecutionScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun start() {

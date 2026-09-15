@@ -38,7 +38,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -57,7 +56,13 @@ import scanbridge.composeui.generated.resources.warning_desc
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun FullScreenError(errorIcon: DrawableResource, errorMessage: String, copyButton: Boolean = false, fontSize: TextUnit = 18.sp, title: String? = null) {
+fun FullScreenError(
+    errorIcon: DrawableResource,
+    errorMessage: String,
+    copyButton: Boolean = false,
+    fontSize: TextUnit = 18.sp,
+    title: String? = null
+) {
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
 

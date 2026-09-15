@@ -51,7 +51,6 @@ class PlayStartupTabsProvider : StartupTabsProvider {
             }
         )
     )
-
 }
 
 val STARTUP_TABS_PROVIDER = PlayStartupTabsProvider()

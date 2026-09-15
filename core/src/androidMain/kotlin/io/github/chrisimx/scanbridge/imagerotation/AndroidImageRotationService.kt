@@ -13,15 +13,10 @@ import kotlinx.io.asInputStream
 import kotlinx.io.asOutputStream
 import kotlinx.io.buffered
 
-class AndroidImageRotationService(
-    loggerFactory: ScanBridgeLoggerFactory
-) : ImageRotationService {
+class AndroidImageRotationService(loggerFactory: ScanBridgeLoggerFactory) : ImageRotationService {
     val logger = loggerFactory.withClass(this::class)
 
-    override suspend fun rotate90ToRight(
-        sourceFile: PlatformFile,
-        outputFile: PlatformFile
-    ): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun rotate90ToRight(sourceFile: PlatformFile, outputFile: PlatformFile): Boolean = withContext(Dispatchers.IO) {
         val sourceFileInputStream = sourceFile
             .source()
             .buffered()
@@ -38,7 +33,7 @@ class AndroidImageRotationService(
         }
 
         val matrix = Matrix().apply { postRotate(90F) }
-        val rotatedBitmap =  Bitmap.createBitmap(sourceBitmap, 0, 0, sourceBitmap.width, sourceBitmap.height, matrix, true)
+        val rotatedBitmap = Bitmap.createBitmap(sourceBitmap, 0, 0, sourceBitmap.width, sourceBitmap.height, matrix, true)
 
         sourceBitmap.recycle()
 
@@ -54,5 +49,4 @@ class AndroidImageRotationService(
 
         return@withContext true
     }
-
 }

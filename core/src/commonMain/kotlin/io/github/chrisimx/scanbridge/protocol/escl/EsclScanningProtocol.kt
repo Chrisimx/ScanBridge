@@ -9,6 +9,7 @@ import io.github.chrisimx.esclkt.anyscancompat.CommonAbstractionConversionResult
 import io.github.chrisimx.esclkt.anyscancompat.toCommonAbstraction
 import io.github.chrisimx.esclkt.anyscancompat.toESCLScanSettings
 import io.github.chrisimx.safektor.ESCLHttpCallResult
+import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
 import io.github.chrisimx.scanbridge.model.ScanProtocolScannedPage
 import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.model.ScanningError
@@ -16,11 +17,10 @@ import io.github.chrisimx.scanbridge.model.UrlScannerHandle
 import io.github.chrisimx.scanbridge.model.toHttpClientConfig
 import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
-import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
 import io.github.chrisimx.scanbridge.protocol.ScanJobProcessingEvent
 import io.github.chrisimx.scanbridge.protocol.ScannerCapabilitiesResult
 import io.github.chrisimx.scanbridge.protocol.ScannerConnectionSettings
-import io.github.chrisimx.scanbridge.ports.ScannerDiscoveryBackend
 import io.github.chrisimx.scanbridge.protocol.ScanningProtocol
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope

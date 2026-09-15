@@ -40,11 +40,7 @@ import scanbridge.composeui.generated.resources.outline_error_24
 
 @OptIn(ExperimentalUuidApi::class)
 @Composable
-fun ScanBridgeNavHost(
-    navController: NavHostController,
-    startDestination: Any,
-    loggerFactory: ScanBridgeLoggerFactory = koinInject()
-) {
+fun ScanBridgeNavHost(navController: NavHostController, startDestination: Any, loggerFactory: ScanBridgeLoggerFactory = koinInject()) {
     val protocolManager = koinInject<ScanningProtocolManager>()
     val appSettingsRepo = koinInject<AppSettingsRepository>()
     val logger = loggerFactory.withTag("ScanBridgeNavHost")

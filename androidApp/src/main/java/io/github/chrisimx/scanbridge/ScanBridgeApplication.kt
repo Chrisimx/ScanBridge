@@ -2,13 +2,8 @@ package io.github.chrisimx.scanbridge
 
 import KOIN_MODULE_JVM_AND_ANDROID_PLATFORM
 import android.app.Application
-import android.content.Context
-import coil3.ImageLoader
-import coil3.network.ktor3.KtorNetworkFetcherFactory
 import io.github.chrisimx.scanbridge.buildinfo.BuildInfoProvider
 import io.github.chrisimx.scanbridge.cropfeature.AndroidImageCropService
-import io.github.chrisimx.scanbridge.cropfeature.CropScreenViewModel
-import io.github.chrisimx.scanbridge.cropfeature.FinishCropUseCase
 import io.github.chrisimx.scanbridge.cropfeature.ImageCropService
 import io.github.chrisimx.scanbridge.db.ScanBridgeDbBuilderFactory
 import io.github.chrisimx.scanbridge.export.ExportCapabilitiesProvider
@@ -20,8 +15,6 @@ import io.github.chrisimx.scanbridge.migrations.MigrationExecutor
 import io.github.chrisimx.scanbridge.migrations.RoomBackedMigrationExecutor
 import io.github.chrisimx.scanbridge.migrations.ds2room.DATASTORE_TO_ROOM_MIGRATION_DATA_SOURCES
 import io.github.chrisimx.scanbridge.migrations.migrationsModule
-import io.github.chrisimx.scanbridge.model.HttpClientConfig
-import io.github.chrisimx.scanbridge.ports.HttpClientFactory
 import io.github.chrisimx.scanbridge.ports.MdnsDiscoverService
 import io.github.chrisimx.scanbridge.ports.multicast.MulticastLockHandler
 import io.github.chrisimx.scanbridge.proto.ShownMessages
@@ -30,7 +23,6 @@ import io.github.chrisimx.scanbridge.repositories.DatastoreShownMessagesReposito
 import io.github.chrisimx.scanbridge.scan.AndroidScanExecutionEntryPoint
 import io.github.chrisimx.scanbridge.scanning.ScanExecutionEntryPoint
 import io.github.chrisimx.scanbridge.startupmessages.ShownStartupMessagesRepository
-import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,10 +32,8 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.mp.KoinPlatform.getKoin
-import org.koin.plugin.module.dsl.create
 import org.koin.plugin.module.dsl.factory
 import org.koin.plugin.module.dsl.single
-import org.koin.plugin.module.dsl.viewModel
 import timber.log.Timber
 
 val androidPlatformModule = module {
@@ -67,7 +57,6 @@ val androidPlatformModule = module {
     single<AndroidImageRotationService>() bind ImageRotationService::class
 
     single<AndroidBuildInfoProvider>() bind BuildInfoProvider::class
-
 
     single<StartupTabsProvider> {
         STARTUP_TABS_PROVIDER

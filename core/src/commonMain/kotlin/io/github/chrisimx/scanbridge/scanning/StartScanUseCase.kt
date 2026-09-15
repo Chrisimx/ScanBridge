@@ -10,10 +10,7 @@ import io.github.chrisimx.scanbridge.model.ScannerHandle
 import io.github.chrisimx.scanbridge.protocol.ScannerConnectionSettings
 import kotlin.uuid.Uuid
 
-class StartScanUseCase(
-    val scanJobRepo: ScanJobRepository,
-    val scanExecutionEntryPoint: ScanExecutionEntryPoint
-) {
+class StartScanUseCase(val scanJobRepo: ScanJobRepository, val scanExecutionEntryPoint: ScanExecutionEntryPoint) {
     fun startScan(
         ownerSessionId: Uuid,
         scannerHandle: ScannerHandle,

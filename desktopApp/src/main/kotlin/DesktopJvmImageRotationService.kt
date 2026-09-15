@@ -7,16 +7,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class DesktopJvmImageRotationService(
-    loggerFactory: ScanBridgeLoggerFactory
-) : ImageRotationService {
+class DesktopJvmImageRotationService(loggerFactory: ScanBridgeLoggerFactory) : ImageRotationService {
     val logger = loggerFactory.withClass(this::class)
 
-    override suspend fun rotate90ToRight(
-        sourceFile: PlatformFile,
-        outputFile: PlatformFile
-    ): Boolean = withContext(Dispatchers.IO) {
-
+    override suspend fun rotate90ToRight(sourceFile: PlatformFile, outputFile: PlatformFile): Boolean = withContext(Dispatchers.IO) {
         try {
             val src = ImageIO.read(sourceFile.file)
 
@@ -28,7 +22,8 @@ class DesktopJvmImageRotationService(
 
             val pixels = IntArray(src.width * src.height)
             src.getRGB(
-                0, 0,
+                0,
+                0,
                 src.width,
                 src.height,
                 pixels,

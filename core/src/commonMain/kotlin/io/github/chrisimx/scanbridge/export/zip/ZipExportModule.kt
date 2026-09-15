@@ -1,7 +1,6 @@
 package io.github.chrisimx.scanbridge.export.zip
 
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
-import io.github.chrisimx.scanbridge.export.ExportDirectoryProvider
 import io.github.chrisimx.scanbridge.export.ExportFileManager
 import io.github.chrisimx.scanbridge.export.ExportModule
 import io.github.chrisimx.scanbridge.export.ExportModuleType
@@ -9,10 +8,7 @@ import io.github.chrisimx.scanbridge.model.FileToBeExported
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.name
 
-class ZipExportModule(
-    val zipService: ZipService,
-    val exportFileManager: ExportFileManager
-) : ExportModule {
+class ZipExportModule(val zipService: ZipService, val exportFileManager: ExportFileManager) : ExportModule {
     override val type: ExportModuleType = ExportModuleType.ZIP
 
     override suspend fun export(pagesToExport: List<ScannedPage>): PlatformFile {
@@ -28,5 +24,4 @@ class ZipExportModule(
         zipService.zipFlat(filesToBeExported, exportFile)
         return exportFile
     }
-
 }

@@ -10,9 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 
-class DeleteSessionUseCase(
-    val db: ScanBridgeDb
-) {
+class DeleteSessionUseCase(val db: ScanBridgeDb) {
     val sessionDao = db.sessionDao()
     val scannedPageDao = db.scannedPageDao()
     val tmpFileDao = db.tmpFileDao()

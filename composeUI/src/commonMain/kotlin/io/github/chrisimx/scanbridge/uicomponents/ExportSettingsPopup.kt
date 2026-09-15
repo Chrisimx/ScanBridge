@@ -35,7 +35,7 @@ fun ExportSettingsPopup(
     alpha: Float,
     onDismiss: () -> Unit,
     availableExportModuleTypes: List<ExportModuleType>,
-    onExportModuleSelected: (ExportModuleType) -> Unit,
+    onExportModuleSelected: (ExportModuleType) -> Unit
 ) {
     var thisOptionsWidth by remember { mutableStateOf(0) }
     val oneItemsWidth by derivedStateOf { thisOptionsWidth / availableExportModuleTypes.size }
@@ -43,7 +43,7 @@ fun ExportSettingsPopup(
     Popup(
         alignment = Alignment.TopStart,
         offset = IntOffset(
-            exportOptionsPopupPosition?.x?.minus((thisOptionsWidth - oneItemsWidth) / 2 ) ?: 0,
+            exportOptionsPopupPosition?.x?.minus((thisOptionsWidth - oneItemsWidth) / 2) ?: 0,
             exportOptionsPopupPosition?.y?.minus(exportOptionsPopupPosition.height) ?: 0
         ),
         onDismissRequest = { onDismiss() }
@@ -74,21 +74,17 @@ fun ExportSettingsPopup(
     }
 }
 
-data class ExportModuleUIInformation(
-    val name: String,
-    val icon: DrawableResource,
-)
+data class ExportModuleUIInformation(val name: String, val icon: DrawableResource)
 
 @Composable
-fun ExportModuleType.uiInformation(): ExportModuleUIInformation {
-    return when (this) {
-        ExportModuleType.PDF -> ExportModuleUIInformation(
-            name = stringResource(Res.string.export_pdf),
-            icon = Res.drawable.baseline_picture_as_pdf_24
-        )
-        ExportModuleType.ZIP -> ExportModuleUIInformation(
-            name = stringResource(Res.string.export_as_archive),
-            icon = Res.drawable.baseline_image_24
-        )
-    }
+fun ExportModuleType.uiInformation(): ExportModuleUIInformation = when (this) {
+    ExportModuleType.PDF -> ExportModuleUIInformation(
+        name = stringResource(Res.string.export_pdf),
+        icon = Res.drawable.baseline_picture_as_pdf_24
+    )
+
+    ExportModuleType.ZIP -> ExportModuleUIInformation(
+        name = stringResource(Res.string.export_as_archive),
+        icon = Res.drawable.baseline_image_24
+    )
 }

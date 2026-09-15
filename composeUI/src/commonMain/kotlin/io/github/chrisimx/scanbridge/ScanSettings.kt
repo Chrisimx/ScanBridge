@@ -50,13 +50,13 @@ import io.github.chrisimx.anyscan.LengthUnit
 import io.github.chrisimx.anyscan.ScanSettingParam
 import io.github.chrisimx.anyscan.ScannerConcept
 import io.github.chrisimx.anyscan.equalsLength
+import io.github.chrisimx.scanbridge.localizationhelper.toLocalizedName
+import io.github.chrisimx.scanbridge.localizationhelper.toReadableString
 import io.github.chrisimx.scanbridge.model.UIInputSourceType
 import io.github.chrisimx.scanbridge.uicomponents.SelectionButtonRow
 import io.github.chrisimx.scanbridge.uicomponents.SelectionCard
 import io.github.chrisimx.scanbridge.uicomponents.SizeBasedConditionalView
 import io.github.chrisimx.scanbridge.uicomponents.ValidatedDimensionsTextEdit
-import io.github.chrisimx.scanbridge.localizationhelper.toLocalizedName
-import io.github.chrisimx.scanbridge.localizationhelper.toReadableString
 import org.jetbrains.compose.resources.stringResource
 import scanbridge.composeui.generated.resources.Res
 import scanbridge.composeui.generated.resources.custom

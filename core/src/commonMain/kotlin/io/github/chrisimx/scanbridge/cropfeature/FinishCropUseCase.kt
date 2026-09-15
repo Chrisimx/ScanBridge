@@ -2,8 +2,8 @@ package io.github.chrisimx.scanbridge.cropfeature
 
 import io.github.chrisimx.scanbridge.db.ScanBridgeDb
 import io.github.chrisimx.scanbridge.db.entities.ScannedPage
-import io.github.chrisimx.scanbridge.model.Rect
 import io.github.chrisimx.scanbridge.logging.ScanBridgeLoggerFactory
+import io.github.chrisimx.scanbridge.model.Rect
 import io.github.chrisimx.scanbridge.util.getEditedFile
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.delete
@@ -17,10 +17,7 @@ class FinishCropUseCase(
     private val scannedPageDao = scanBridgeDb.scannedPageDao()
     private val logger = loggerFactory.withClass(this::class)
 
-    suspend operator fun invoke(
-        page: ScannedPage,
-        cropRect: Rect,
-    ): Boolean {
+    suspend operator fun invoke(page: ScannedPage, cropRect: Rect): Boolean {
         val scanFile = PlatformFile(page.filePath)
 
         // Determine an output for the cropped image
@@ -34,7 +31,7 @@ class FinishCropUseCase(
         val successfulCrop = imageCropService.crop(
             sourceFile = scanFile,
             outputFile = editFile,
-            cropRect = cropRect,
+            cropRect = cropRect
         )
 
         if (!successfulCrop) {
